@@ -148,7 +148,23 @@ CardStock owns its own data — users, transactions, watchlists, saved screens, 
 
 *Not verified:* whether the deployed binary matches current HEAD. Treat "what is running right now" as unknown.
 
-**How it stores things**, which shapes everything CardStock reads: history is **append-only and change-only** (ADR-0001). A row exists only when a value *changed*, so absence means "unchanged," not "missing," and a naive `WHERE month = X` returns nothing for most cards in most months. "Latest" means `max(observed_at)` per key, not the newest month. Any read layer that ignores this will compute plausible-looking wrong numbers.
+**How it stores things**, which shapes everything CardStock reads: history is **append-only and change-only** (ADR-0001). A row exists only when a value *changed*. "Latest" means `max(observed_at)` per key, not the newest month. Any read layer that ignores this will compute plausible-looking wrong numbers.
+
+**But "absence means unchanged" is not one rule across both histories, and reading it that way fabricates prices.** Corrected 2026-08-11 after reading the crawler's parser and write planner directly.
+
+| | `populations` | `price_months` |
+|---|---|---|
+| The cell | `(grader, grade)` — value observed over time | `(tier, month)` — the month **is** part of the key |
+| A cell with no row | **Was zero at every observation** (`DATA_MODEL.md:53–56`) | **The site published no point there.** A real gap |
+| Between two stored rows | Flat — that is the storage contract | Says nothing about other months; each month is its own cell |
+
+*Receipts:* `Domain/Parsing/CardDetailParser.cs:318–331` stores exactly the points the site's chart contains, with no filling or filtering. `Infrastructure/Persistence/ChangeOnlyPlanner.cs:22` compares per `(tier, month)` cell against the last stored value, with "never observed" defaulting to zero — so a first visit writes every nonzero cell the site published. `DATA_MODEL.md:176–180`: a first visit backfills the whole chart; afterwards "a typical visit adds 0–2 rows (the current month moved); closed months carry exactly one row forever."
+
+**So on the month axis, gaps are gaps.** Carrying a price forward across a month with no row invents a number the source never published. `DATA_MODEL.md:53–56`'s "history between two stored rows is flat" is written about `populations` and does not transfer.
+
+**What only the current month can do:** revise. `DATA_MODEL.md:110` — "Closed months are immutable server-side; only the current month revises between visits." That is why the PK ends in `observed_at`, and why latest-per-key still matters even though it fires rarely.
+
+*Not verified:* how sparse the month axis actually is. `price_months` holds 10,352,706 rows over 91,570 cards (D-071) — **113 per card**, against 408 for a dense six-tier backfill to Dec 2020. Either series are genuinely sparse or much of the corpus is uncrawled, and the two imply different read layers. One query settles it: `SELECT count(*) FILTER (WHERE last_visited_at IS NULL), count(*) FROM cards WHERE delisted_at IS NULL AND not_a_card_at IS NULL;`
 
 Eight `DbSet`s (`Persistence/PokemonDbContext.cs:8–22`): `sets`, `cards` — mutable catalog; `price_months`, `populations`, `sales` — append-only history; `visits`, `fingerprints`, `parse_failures` — crawler bookkeeping. The three-way grouping is descriptive shorthand for reading convenience; `DATA_MODEL.md` does not use those terms.
 
@@ -169,7 +185,7 @@ The worker hosts a minimal HTTP API in-process, and ADR-0006 was written anticip
 | Route | Semantics |
 |---|---|
 | `POST /cards/{id}/refresh-request` | Fire-and-forget. Stamps `cards.refresh_requested_at`, returns 202. Card takes the next crawl slot unless a burn-window-due card owns it. 404 unknown · 409 delisted/not-a-card |
-| `POST /cards/{id}/express-visit` | Synchronous. Runs the visit immediately, bypassing the polite gate, holds the response until commit. 200 parsed · 502 upstream · 422 refused · 504 timeout |
+| `POST /cards/{id}/express-visit` | Synchronous. Runs the visit immediately, bypassing the polite gate, holds the response until commit. 200 parsed · 404 unknown · 409 **not-a-card only** · 422 refused · 500 errored · 502 upstream. **No 504 — there is no timeout** (`IntakeApi.cs:52–74`, D-076). Delisted cards *are* visitable here, deliberately (`ExpressVisitRunner.cs:115–121`) |
 | `GET /healthz` | Liveness |
 
 **Bound to `127.0.0.1` only. No auth, no TLS** — trust comes from the bind address (`ScraperOptions.cs:65`, `Intake/IntakeApi.cs:19–30`).
@@ -178,7 +194,9 @@ The worker hosts a minimal HTTP API in-process, and ADR-0006 was written anticip
 
 **The consequence that constrains the frontend:** a browser cannot reach a loopback endpoint on the Pi. Any CardStock code that calls these endpoints must run **server-side, on that machine**. This is a live constraint on the render-mode decision — see D-013 and D-014.
 
-**The spacing floor was removed 2026-08-10 (their ADR-0008).** Express visits no longer wait on each other. What remains in the worker: **single-flight** (one outbound fetch at a time), **same-card coalescing** (concurrent requests for one card ride a single fetch), and `RecordFetchNow` (the express fetch stamps the polite gate so the scheduled lane re-spaces around it).
+**The spacing floor was removed 2026-08-10 (their ADR-0008).** Express visits no longer wait on each other. What remains in the worker: **same-card coalescing** (concurrent requests for one card ride a single fetch) and `RecordFetchNow` (the express fetch stamps the polite gate so the scheduled lane re-spaces around it).
+
+**There is no single-flight** — this file claimed one until 2026-08-11 and it was never true post-ADR-0008. `ExpressVisitRunner.cs:26`: *"in parallel with any other express visit, with no floor, no queue, and no timeout."* The only `SemaphoreSlim` in the sibling's `src/` is `PoliteGate.cs:13`, which express bypasses. **Express fetches are concurrent and unbounded** (D-076). A hung upstream returns 502 only after `HttpClient`'s 60-second cap (`Worker/Program.cs:80`), so no CardStock render may ever block on an express call.
 
 > **CardStock is now the only thing bounding express load.** ADR-0006's "worst-case extra site load is bounded to one request per spacing floor" no longer holds. Per-user rate limiting in front of any express call is **required, not optional** — see D-037 and D-062.
 

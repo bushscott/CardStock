@@ -19,6 +19,54 @@ Entries keep their ID forever and move between status sections as they settle. S
 
 ## Verified
 
+### D-076 — 🚩 The express-visit contract is wrong in three places, in `CLAUDE.md` and in D-062 itself
+Found 2026-08-11 while designing the Card page's refresh. All three errors are ADR-0006 facts that
+survived **ADR-0008**, which superseded them. Every claim below was read from source, not inferred.
+
+**1. There is no single-flight. Express visits run fully parallel.**
+
+`CLAUDE.md:151` states *"What remains in the worker: **single-flight** (one outbound fetch at a
+time)"*. D-062 goes further and cites `SemaphoreSlim(1,1)` at three specific lines.
+
+*Receipt:* `grep -rn "SemaphoreSlim" ../PokemonInvestBatch/src/` returns **exactly one hit** —
+`Application/Crawling/PoliteGate.cs:13`, the turnstile express deliberately bypasses.
+`ExpressVisitRunner.cs:42` is `private readonly Lock _sync = new()`, which guards the *in-flight
+dictionary*, not a fetch gate. `ExpressVisitRunner.cs:26` says it plainly: *"in parallel with any
+other express visit, with no floor, no queue, and no timeout."* ADR-0008's Consequences agree:
+*"neither is its single-flight promise that express 'never opens parallel connections'… express
+fetches run concurrently and unbounded."*
+
+**Consequence, and it matters:** D-062 estimates the ceiling at *"roughly 30–60 requests/minute"* on
+the strength of one-fetch-at-a-time. **That is not a ceiling.** The bound is whatever CardStock sends
+concurrently, which makes D-037's abuse-shape limit more load-bearing than either entry assumed.
+
+**2. 504 is dead.** `CLAUDE.md:145` and D-062's closing line both list a 504 timeout on
+`express-visit`. ADR-0008:37 removed `Scraper:ExpressTimeoutSeconds` and its 504 response; ADR-0008:106
+— *"504 leaves the express contract."* No timeout exists in the worker at all.
+
+**3. Express refuses not-a-card only — delisted cards ARE visitable.** `CLAUDE.md:145` lists express's
+409 as "delisted/not-a-card". `ExpressVisitRunner.cs:115–121` checks `NotACardAt` alone, with the
+comment *"Delisted and benched cards ARE visitable here: express is exactly how an operator asks 'is
+it back?'"* The delisted-409 belongs to `refresh-request` (`IntakeApi.cs:49`), not to express.
+
+**The real contract**, read from `Intake/IntakeApi.cs:52–74`:
+
+| Status | Cause |
+|---|---|
+| **200** | Parsed and committed |
+| **404** | Unknown card |
+| **409** | Not a card (**not** delisted) |
+| **422** | Page fetched and refused — parse drift, or proved not a card |
+| **500** | `ExpressErrored`, carrying a reason string |
+| **502** | Upstream site failed |
+
+**The number that constrains the frontend:** `Worker/Program.cs:80` — `http.Timeout =
+TimeSpan.FromSeconds(60)`. With the worker's own deadline gone, a hung pricecharting.com returns 502
+only after a **full 60 seconds**. Any CardStock code awaiting an express visit must therefore never
+block a render — see D-077.
+
+---
+
 ### D-001 — Per-sale and census history begin at each card's first crawler visit (late Jul 2026), not Apr 2025 / Jan 2026
 The seam is **per-card and ragged**, not a single shared date.
 
@@ -134,7 +182,7 @@ A security requirement CardStock inherits, not an optional nicety. Listing title
 ### D-024 — A loopback intake API already exists, and it was built for CardStock
 **Receipts:** `../PokemonInvestBatch/docs/adr/0006-localhost-intake-api-and-express-visits.md` (Accepted 2026-08-09), read in full; `src/PokemonInvestBatch.Worker/Intake/IntakeApi.cs:19–30` (three routes); `src/PokemonInvestBatch.Worker/ScraperOptions.cs:65` (`IntakeAddress = "127.0.0.1"`). Both read directly 2026-08-10.
 
-Routes: `POST /cards/{id}/refresh-request` (202, fire-and-forget, takes the next crawl slot unless a burn-window-due card owns it), `POST /cards/{id}/express-visit` (synchronous, bypasses the polite gate, 200/502/422/504), `GET /healthz`.
+Routes: `POST /cards/{id}/refresh-request` (202, fire-and-forget, takes the next crawl slot unless a burn-window-due card owns it), `POST /cards/{id}/express-visit` (synchronous, bypasses the polite gate, ~~200/502/422/504~~ — **corrected 2026-08-11: 200/404/409/422/500/502, no 504, see D-076**), `GET /healthz`.
 
 **The ADR names this product explicitly** — "The product this scraper feeds is a trading website. Its web application… will live on the same Raspberry Pi, read the same Postgres." The integration was designed for, not retrofitted.
 
@@ -145,7 +193,17 @@ Routes: `POST /cards/{id}/refresh-request` (202, fire-and-forget, takes the next
    **Corrected 2026-08-10.** This entry originally read "Mutations go over HTTP," which was my generalization sitting next to a real quote, not something the quote said. The intake API is **not a write channel and not a CRUD surface** — both endpoints take a card id, accept no data, and exist for two specific scenarios. Owner: "those two endpoints exist for two very specific scenarios. They do not exist for normal CRUD operations for the database at large." The originating error is recorded in `CLAUDE.md` under the verify-everything rule, as the worked example of a receipt being stretched past what it covers.
 2. **Loopback binding constrains the frontend.** A browser cannot reach `127.0.0.1` on the Pi. Any code calling these endpoints must run server-side on that machine. This bears directly on D-013 and D-014.
 
-**Corrects an earlier claim.** The initial survey flagged express-visit as "an unthrottled outbound amplifier… up to 8,640 fetches/day if scripted." That overstated it: single-flight (at most one express visit in flight, ever), a 10 s spacing floor, same-card coalescing, and `PoliteGate.RecordFetchNow()` are all in place, and the ADR bounds worst case at "one request per spacing floor." The residual concern the ADR itself names is narrower — express can still poke the site once per spacing floor *during a three-strike pause*, with a "refuse express during the pause" toggle noted as the follow-up.
+~~**Corrects an earlier claim.** The initial survey flagged express-visit as "an unthrottled outbound amplifier… up to 8,640 fetches/day if scripted." That overstated it: single-flight (at most one express visit in flight, ever), a 10 s spacing floor, same-card coalescing, and `PoliteGate.RecordFetchNow()` are all in place, and the ADR bounds worst case at "one request per spacing floor." The residual concern the ADR itself names is narrower — express can still poke the site once per spacing floor *during a three-strike pause*, with a "refuse express during the pause" toggle noted as the follow-up.~~
+
+> **⚠ Struck 2026-08-11 — the correction was itself wrong, and it corrected in the wrong direction.**
+> ADR-0008 removed **both** guardrails this paragraph rests on: the 10 s spacing floor (D-062) and
+> single-flight (D-076). Of the four mechanisms listed, only same-card coalescing and
+> `RecordFetchNow` survive, and neither bounds volume. **The original survey's "unthrottled outbound
+> amplifier" reading is the accurate one** — the worker enforces no ceiling at all, and ADR-0008 says
+> so in as many words: *"Rate limiting moves to the calling app… The worker no longer bounds express
+> volume at all."* This is the second time a reassuring number about express load turned out to be
+> unsupported; treat any such figure in this ledger as suspect until re-read from
+> `ExpressVisitRunner.cs`.
 
 ---
 
@@ -165,6 +223,78 @@ Read directly 2026-08-10, to be mirrored per D-018–D-021.
 ---
 
 ## Decided
+
+### D-077 — Stale prices are shown, never hidden. The Card page's freshness treatment, settled
+Owner, 2026-08-11, across a mockup session. Implements the call pattern D-062 already recorded: on
+card page load, if `cards.last_visited_at` is older than 24 hours, call `express-visit`.
+
+**The question was whether the page waits.** The owner's opening instinct was a skeleton loader, and
+his stated reason for it was that *making people wait for fresh data is more on brand.* Both were
+reversed by one fact about the data.
+
+**The fact.** `DATA_MODEL.md:110` — *"Closed months are immutable server-side; only the current month
+revises between visits."* And `:179` — *"a typical visit adds 0–2 rows (the current month moved);
+closed months carry exactly one row forever."* The price block renders 6 tiers × 12 months = **72
+values**. A refresh can move **at most 6** of them, and typically moves 0 to 2. A skeleton hides 72
+real values to wait on 2, and tells the visitor that eleven-twelfths of a chart which is as true as it
+will ever be should not be trusted. **That is a false statement about our own data** — the one thing
+this brand cannot make.
+
+**And "make them wait" was never the rule.** The five states disclose; they do not conceal. `LOW DATA`
+renders the number *and* names the rule it failed. A skeleton is the only treatment with no
+disclosure in it at all.
+
+**So, decided:**
+
+| | |
+|---|---|
+| Stored prices | Render **immediately, at full strength.** Never skeletoned, never dimmed |
+| The as-of date | Always shown — `cards.last_visited_at`, not "now" |
+| A refresh in flight | Never blocks the paint. The page renders, then updates in place |
+| Unknown card id | A 404 page, not a loading state |
+| Never-crawled card | Rare (the crawler front-runs new releases). Identity paints, price block empty, express fills it |
+
+**The tier strip gets a provisional marker, and this resolves a contradiction nobody had caught.**
+`card.md:107` records the invariant that each strip price equals index 11 of that tier's chart array —
+i.e. **the six strip prices are the current, unfinished month.** The chart marks that same number with
+a dashed final segment and a hollow dot (`card.md:144`). The strip marks it with nothing, and its
+tooltip calls it *"latest monthly price"* — what a finished number would say. Same value, two honesty
+treatments, one screen. Logged as **C-22** in `card.md` §8.
+
+Resolved with `◌`, which `brand.md` §4.2 already defines as *"current month provisional"* — an existing
+glyph for this exact meaning, not a new invention. It is text, so it survives colourblind mode and is
+read aloud. It carries its own tooltip explaining the symbol, separate from the cell's tooltip
+explaining the value. **It belongs to the row, not the layout** — it disappears when the month closes.
+
+**The refreshing indicator uses the logo loader** (`Cardstock Logo.dc.html:196–208`, moved into
+`CardStock Mockup/` on 2026-08-11). Owner chose the badge placement over a global nav-logo indicator,
+which was the recommendation. Consequences that follow from that choice and are binding:
+
+- **An 18 px mark** — `Logo:145` floors the mark at 16 px, so the badge is sized to the logo, not the
+  reverse.
+- **A fixed 28 px slot** that exists whether or not a badge is in it. Without it the six price boxes
+  jump a moment after paint, undoing the reason for showing real data immediately.
+- **The logo appears only while a fetch is genuinely in flight** — not on success, not on failure,
+  never as decoration.
+- **The nav logo stays static.** The mark is now on screen twice; exactly one may move.
+- **On failure the badge becomes amber `– as of 8 Aug · 3d old`** — `brand.md` §4.2's "caution,
+  directionless" en dash, in the one hue colourblind mode leaves alone. The prices do not change,
+  because they were never wrong.
+
+**What this pins down for Phase 1** (D-075), which is the whole reason it was worth settling now:
+the read layer must return the card's **`last_visited_at`** beside every price, and must tell callers
+**which month is the current, unfinished one.** Neither was obvious before the screen was drawn.
+
+**Still open:** four brand files named at `Logo:250–251` do not exist — `logo-animated.svg`,
+`logo-loader.svg` and both `-dark` variants — and `Logo:257` requires them in **SMIL, not CSS**, so
+the motion survives being embedded as an `<img>`. `Cardstock Loading States.dc.html`, linked at
+`Logo:211` for "full usage, sizes, and placement rules", does not exist either.
+
+**Spec updated:** `docs/screens/card.md` — new **§2.3.1** (the strip's provisional marker and both
+tooltips), new **§4.2.1** (the whole freshness and refresh flow, which the spec never had), and §8 rows
+**C-22** and **C-23**.
+
+---
 
 ### D-075 — The build sequence, and why it is ordered by data rather than by screen
 Owner approved 2026-08-11 (*"that sounds good"*). Recorded because it was agreed in conversation and
@@ -694,13 +824,21 @@ Owner removed the express spacing floor in `PokemonInvestBatch` on 2026-08-10, r
 
 **Why it was removed.** Express exists so a human-facing app can get a card NOW. The floor was global — not per-user, not per-card — so a visitor browsing several stale cards waited ~10s **each**. ADR-0006 introduced it as a replacement guardrail for the polite gate it skips, which was correct for the single-operator case it was designed against; it did not survive contact with a public site and ordinary browsing.
 
-**What still exists in the worker** (verified, `ExpressVisitRunner.cs`):
-- **Single-flight** — `SemaphoreSlim(1,1)`, `:44`, `:109`, `:163`. One outbound fetch at a time.
-- **Same-card coalescing** — `:48`, `:60–80`. Concurrent requests for one card ride a single fetch and all hear the answer.
-- **`gate.RecordFetchNow()`** — `:144`. The express fetch stamps the polite gate so the scheduled lane re-spaces around it.
-- The shared `CardVisitor` pipeline, so `last_visited_at` still resets (`CardPageWriter.cs:112`) — which the 24h staleness check depends on.
+> **⚠ Corrected 2026-08-11 — see D-076.** The two bullets struck through below were wrong when
+> written, and the line numbers cited for them do not contain what this entry claimed. **There is no
+> single-flight and no 504.** Read `ExpressVisitRunner.cs` directly before relying on anything in this
+> entry about the worker's guardrails.
 
-**🚩 The consequence that lands on this repo.** ADR-0006 promised *"worst-case extra site load is bounded: one request per spacing floor."* **That bound is gone.** With single-flight as the only limiter, the ceiling becomes one fetch per fetch-duration — roughly 30–60 requests/minute rather than 6.
+**What still exists in the worker** (`ExpressVisitRunner.cs`, re-read 2026-08-11):
+- ~~**Single-flight** — `SemaphoreSlim(1,1)`, `:44`, `:109`, `:163`. One outbound fetch at a time.~~
+  **False.** The only `SemaphoreSlim` in the sibling's `src/` is `PoliteGate.cs:13`, which express
+  bypasses. `:26` — *"in parallel with any other express visit, with no floor, no queue, and no
+  timeout."* Express fetches are **concurrent and unbounded**.
+- **Same-card coalescing** — `:44–47`, `:56–85`. Concurrent requests for one card ride a single fetch and all hear the answer. ✅ still true.
+- **`gate.RecordFetchNow()`** — `:134`. The express fetch stamps the polite gate so the scheduled lane re-spaces around it. ✅ still true.
+- The shared `CardVisitor` pipeline, so `last_visited_at` still resets (`CardPageWriter.cs:112`) — which the 24h staleness check depends on. ✅ still true.
+
+**🚩 The consequence that lands on this repo.** ADR-0006 promised *"worst-case extra site load is bounded: one request per spacing floor."* **That bound is gone.** ~~With single-flight as the only limiter, the ceiling becomes one fetch per fetch-duration — roughly 30–60 requests/minute rather than 6.~~ **There is no ceiling.** Nothing in the worker limits express concurrency, so the bound is exactly whatever CardStock sends at once — which strengthens the case for D-037's abuse-shape limit rather than weakening it.
 
 **So CardStock is now the sole guardrail** — but the guardrail is narrower than "rate limit users," and that distinction is the decision.
 
@@ -714,7 +852,7 @@ Owner removed the express spacing floor in `PokemonInvestBatch` on 2026-08-10, r
 
 **The intended call pattern** (owner, 2026-08-10): on card page load, read `cards.last_visited_at`; if older than 24 hours, call `express-visit`; the visit resets the field; a second viewer sees it fresh and proceeds without a call. Volume is therefore bounded by *distinct stale cards viewed*, not by page views — and same-card races coalesce for free.
 
-**Spec updates queued:** `docs/screens/card.md` (the refresh flow and the missing loading/failure states — express can still return 502/422/504, and the page must render cached data rather than an error).
+**Spec updates queued:** `docs/screens/card.md` (the refresh flow and the missing loading/failure states — express can still return 502/422/~~504~~ **500**, and the page must render cached data rather than an error). ✅ **Done 2026-08-11 — D-077.**
 
 ---
 

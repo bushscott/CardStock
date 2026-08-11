@@ -108,6 +108,34 @@ Tooltip (:398): `` `${label} latest monthly price · ${chg} over 30 days` ``.
 (`P10[11]=1486`, `G95[11]=1010`, `G9[11]=842`, `G8[11]=710`, `G7[11]=620`, `RAW[11]=455`, :297–:302).
 The strip is "latest monthly price per tier."
 
+#### 2.3.1 Corrected — the six prices are month-to-date and must say so (D-077)
+
+**Build this, not the prototype's version.** The invariant above is the finding: index 11 is the
+**current, incomplete month** (R-8), so every strip price *is* a month-to-date figure. The chart marks
+that same number with a dashed segment and a hollow dot (§2.4.1); the strip marks it with nothing and
+calls it *"latest monthly price"* — the phrasing a finished number would use. Same value, two honesty
+treatments, one screen. Logged as **C-22** in §8.
+
+**Add a `◌` to each cell's label row.** `brand.md` §4.2 already assigns `◌` the meaning *"current month
+provisional on sparklines"* — this is that meaning, not a new glyph. It is text, so it survives
+colourblind mode (which swaps hue only) and is read aloud.
+
+- Placement: label row, right-aligned against the tier name. `--mut2` grey, ~12px.
+- **It belongs to the row, not the layout.** Present only while the rendered month is the current one;
+  gone once that month closes. Never a permanent decoration.
+- **Keyboard-reachable.** A `title` on a bare `<span>` shows on mouse hover only. It needs
+  `tabindex="0"` and an `aria-label` carrying the same sentence, or keyboard users never see it.
+
+**Two tooltips, two questions.** The cell explains the value; the glyph explains the symbol.
+
+| Target | Copy |
+|---|---|
+| The cell | `{label} — {Month} month-to-date. {chg} over 30 days.` |
+| The `◌` | `Month-to-date. {Month}'s average is still forming — it firms up as the month's sales land, and finalizes when the month closes.` |
+
+**`{Month}` is computed from the rendered row, never authored.** Hard-coding it is the mistake OQ-17
+already caught once, where the prototype's tooltip says "Aug" while its axis ends at Jul '26.
+
 ### 2.4 Price chart (:110–:149)
 
 Header row (:111–:118): `display:flex; align-items:baseline; gap:14px; flex-wrap:wrap; margin-bottom:8px`.
@@ -466,6 +494,49 @@ Keys created lazily by `setState` and read with defaults: `artOpen` (:391), `pcO
 
 Tier strip: 6 cells populated. Chart: PSA 10, Grade 9, Raw visible; Grade 9.5, Grade 8, Grade 7 hidden (`DEF_OFF`, :331–:332). Y-axis `$1,486` / `$368`. No hover. Ledger: `All` chip active, 16 rows, sorted Date ▾. Watch button active (`Watching ✓`, one list). Binder inactive. Lightbox closed. Both ledger popovers closed.
 
+### 4.2.1 Freshness and refresh states (D-077) — **not in the prototype; build from here**
+
+The prototype asserts a completed refresh (*"refreshed just now"*, :253) and renders no in-flight and no
+failure state at all (C-16, OQ-19). This is that missing design.
+
+**The trigger** (D-062): on load, read `cards.last_visited_at`. Older than 24 h → call `express-visit`
+through `CardStock.Api`. Fresh → make no call, so the second viewer of a card costs the site nothing.
+
+**The paint never waits.** `express-visit` has no timeout of its own (ADR-0008); a hung upstream returns
+502 only after `HttpClient`'s 60 s cap (`Worker/Program.cs:80`, D-076). Blocking the render on it would
+put a one-minute blank screen on the path success criterion #1 is measured on.
+
+**Stored prices render immediately at full strength — never skeletoned, never dimmed.** The reason is
+arithmetic, not taste: the price block shows 6 tiers × 12 months = 72 values, and a refresh can move at
+most the 6 current-month ones, typically 0–2 (`DATA_MODEL.md:110`, `:179`). Hiding 72 real values to
+wait on 2 tells the visitor that eleven-twelfths of a chart which is as true as it will ever be should
+be distrusted.
+
+**The badge slot.** A fixed **28 px** row beneath the card title, present whether or not it holds
+anything. Without the reservation the six price cells jump a moment after paint, which undoes the point
+of showing real data immediately.
+
+| State | Slot contents | Elsewhere |
+|---|---|---|
+| **Fetching** | Neutral badge: **18 px animated logo mark** + `Checking for a newer price` | Prices at full strength; as-of shows the stored date |
+| **Landed** (200) | Empty — the slot keeps its height | Changed figures update in place; as-of reads today |
+| **Failed** (404/409/422/500/502) | Amber badge: `– as of {date} · {n}d old` | Prices unchanged. They were never wrong, only old |
+| **Fresh** (no call) | Empty | As-of reads today |
+
+**The logo loader** is `Cardstock Logo.dc.html:196–208` — `csLoop` 1600 ms + `csDotLoop` 1600 ms, cards
+static, sparkline drawing and clearing. Binding rules:
+
+- **18 px minimum in the badge.** `Logo:145` floors the mark at 16 px, so the badge is sized to the
+  logo, not the reverse. Both badge variants are 26 px tall so they swap with no movement.
+- **The logo appears only while a fetch is genuinely in flight** — not on success, not on failure,
+  never as decoration. It is the one place in the product where motion means work is happening.
+- **The nav logo stays static.** The mark is now on screen twice; exactly one may move.
+- The amber failure badge uses `brand.md` §4.2's en dash `–` ("caution, directionless") in `--warn`
+  `#8F6614`, which colourblind mode leaves unchanged.
+
+**This is separate from the `◌`** (§2.3.1), which is about the *month* being unfinished and is present
+in every state above, including when nothing is refreshing.
+
 ### 4.3 Chart states
 
 | State | Trigger | Rendering |
@@ -757,7 +828,7 @@ Registered in `componentDidMount` (:273–:280), removed in `componentWillUnmoun
 | **OQ-16** | **What is the ledger's time window and page size?** | 16 seeded sales span 2026-03-28 → 2026-08-01 with no pagination, no "load more", no date-range control, and no windowing copy anywhere (:151–:215). Unbounded is unlikely to be the intent. |
 | **OQ-17** | **Off-by-one in the seeded chart months.** | The x-axis and `MONTHS` end at `Jul ’26` (:147, :296) but the hollow-dot tooltip says "**Aug** is month-to-date" (:132), the ledger's newest sale is `2026-08-01` (:304), and the census is as of `2026-07-30`. If "today" is Aug 2026 the 12-month window should be Sep ’25–Aug ’26. Almost certainly stale seed data — but confirm the rule is "12 months ending at the current, incomplete month". |
 | **OQ-18** | **Tier-strip change window.** | Labelled `30d` (:89) and the tooltip says "over 30 days" (:398), but the underlying series is *monthly* (:112). 30 days ≠ one calendar month. Confirm which the number really is. |
-| **OQ-19** | **What does the page show while the on-demand scrape is in flight, or when it fails?** | The footer renders a completed past tense — `refreshed just now` (:253) — and **no other state exists**: no spinner, no "updating…", no error, no stale fallback. `DECISIONS.md:429` (D-025) maps this stamp to the **synchronous** `express-visit` endpoint (`CLAUDE.md:74`), which can return 502 / 422 / 504. Those three outcomes have no design. `CLAUDE.md:81` adds the hard constraint: the endpoint is loopback-bound, so whatever calls it **must run server-side on the Pi** — a live input to the render-mode decision (D-013/D-014). |
+| **OQ-19** | ✅ **RESOLVED 2026-08-11 (D-077) — see §4.2.1.** *What does the page show while the on-demand scrape is in flight, or when it fails?* | The footer rendered a completed past tense — `refreshed just now` (:253) — and **no other state existed**: no spinner, no "updating…", no error, no stale fallback. **Answer:** stored prices paint immediately at full strength; an 18 px animated logo badge in a reserved 28 px slot carries the in-flight state; failure swaps it for an amber `– as of {date} · {n}d old`; prices never change, because they were never wrong. Two corrections landed with it: the endpoint returns **500, not 504** (D-076), and it is `express-visit`'s **60 s `HttpClient` cap** that bounds the wait, which is why the paint may never block on it. `CLAUDE.md`'s loopback constraint still holds — the call is proxied through `CardStock.Api`, settled by D-063. |
 | **OQ-20** | **Design the LOCKED, UNDEFINED-window, and UNSTABLE-FIT states for this screen.** | Only LOW DATA is implemented (§4.11). Given D-001/D-033, a real card at launch has a near-empty ledger and a single census observation — so the states this prototype skips are the ones users will actually see. Specifically: what does the census pair render at `N OBS < 2`? What does the chart do with a month that has no observed sales (gap, not zero)? |
 | **OQ-21** | **Do the Card and Charts tier palettes get reconciled?** | Three of six tier colours differ between `Cardstock Card.dc.html:325` and `Cardstock Charts.dc.html:375` (C-20). Both are Tier 1, so this needs an owner ruling, not an inference — and the Card page links directly into Charts twice (:69, :117). |
 | **OQ-22** | **Does the grade vocabulary imply grader-neutrality it should not?** | `DECISIONS.md:70` (D-022) records a binding ADR consequence: *"The interface must not imply the pooled figure is company-neutral."* The ledger renders bare `Grade 9`, `Grade 9.5`, `Grade 8` labels (:203) with no grader qualification, and the tier strip does the same (:87). Whether that reads as neutral — and whether a disclosure is owed — is unresolved; `HANDOFF.md:22` already flags the related "grader-agnostic" wording as contradicted. |
@@ -787,12 +858,15 @@ Paths are relative to the repo root. `MOCK/` = `CardStock Mockup/`. All doc quot
 | **C-13** | Card-header signal chips show **only firing** signals, *"priority-ordered, cap 4, overflow '+N more' opens all"* | `MOCK/DISPLAY_VOCABULARY.md:7`, priority order at `:37`, restated `MOCK/DESIGN_NOTES.md:57` | **None of that machinery exists.** `sigChips` is a static 3-element literal (:400–:404) with no firing test, no priority sort, no cap, and **no `+N more` control**. The container merely `flex-wrap`s (:93). The three seeded chips *do* match the documented triggers exactly (`RS 94th` ← `:13`; `MACD +` ← `:16`; `● Most active · 41 sales/30d` ← `:25`), so the vocabulary is right and only the selection logic is missing. |
 | **C-14** | Watchlists are *"one row per card + tier"*; *"Charts IS the editor, the nav watch button is the save"* | `MOCK/HANDOFF.md:155`, `MOCK/DESIGN_NOTES.md:110`, `:112` | **The Card page's picker has no tier selector** (:73–:79) — it toggles card↔list membership only. The button tooltip does defer signal choice to Charts (*"you pick which signals it tracks in Charts"*, :71), consistent with :112. But if a watchlist row is keyed by card **+ tier**, this control cannot produce one unambiguously. See OQ-11. |
 | **C-15** | *"Data honesty strip — 'as of Xh ago'"*; and app-wide, *"every data surface carries a quiet 'data as of Xh ago' stamp"* | `MOCK/uploads/CARDSTOCK_UI_SPEC_v1.md:220`, `:39` (Tier 3) | **Removed.** The footer reads *"Sales & prices refreshed just now"* (:253) with a per-source split, and there is no `AsOfStamp` anywhere. Superseded by `DESIGN_NOTES.md:54` and `:84`, and by `HANDOFF.md:99`. |
-| **C-16** | On-demand card refresh *"**must be async** (politeness gate makes sync refresh a lie)"* | `MOCK/uploads/PROJECT_LOG.md:282` (Tier 3) | **The HTML asserts a synchronous, already-complete refresh** — *"refreshed **just now**"* with the tooltip *"Opening a card page triggers a fresh scrape — the ledger and prices you see include sales up to right now"* (:253). The Tier-3 objection has since been overtaken: `CLAUDE.md:74` records a **synchronous** `POST /cards/{id}/express-visit` that bypasses the polite gate, and `DECISIONS.md:429` (D-025) maps this exact stamp to it. **Build to the HTML** — but note it renders no in-flight or failure state (OQ-19). |
+| **C-16** | On-demand card refresh *"**must be async** (politeness gate makes sync refresh a lie)"* | `MOCK/uploads/PROJECT_LOG.md:282` (Tier 3) | **The HTML asserts a synchronous, already-complete refresh** — *"refreshed **just now**"* with the tooltip *"Opening a card page triggers a fresh scrape — the ledger and prices you see include sales up to right now"* (:253). The Tier-3 objection has since been overtaken: `CLAUDE.md:74` records a **synchronous** `POST /cards/{id}/express-visit` that bypasses the polite gate, and `DECISIONS.md:429` (D-025) maps this exact stamp to it. **Build to the HTML** — but note it renders no in-flight or failure state (OQ-19). **Update 2026-08-11:** that gap is now filled by §4.2.1 (D-077), and the `504` this row's chain of sources implies no longer exists (D-076). |
 | **C-17** | Census tooltip: *"Population data comes from PSA/CGC on their own publishing schedule — it can't be scraped on demand"* (:255), traced to `MOCK/DESIGN_NOTES.md:54` | HTML :255 vs the data repo | **Flagged as factually wrong about the data** by sibling analysis in this same `docs/screens/` batch: census rows come from the scraper's own visits, not a PSA/CGC publication feed. **Not verified by me against `../PokemonInvestBatch`** — recorded here as a Claim, not a finding. It does not change the layout; it may change the tooltip copy. See OQ-13. |
 | **C-18** | Per-sale ledger begins **Apr 2025** | `MOCK/HANDOFF.md` §5, now corrected in place — see `:19`, `:126`, `:134` | **Superseded.** `HANDOFF.md:126` now reads *"Each card's first visit, late Jul 2026 onward — ragged, never a shared date"*, and `DECISIONS.md:22` (D-001) rules the same, with the scraper's first deployment at 2026-07-28. `DESIGN_NOTES.md:41` (*"per-sale scraping started Jul '26"*) was right all along. **The HTML's seed contradicts the settled answer**: sales run 2026-03-28 → 2026-08-01 (:304–:319) and `SEAMS` puts per-grade seams in Mar–Jun 2026 (:321) — all before the scraper existed. Seed fiction; ignore the dates, keep the structure. |
 | **C-19** | `price_months` carries **exactly 6** price tiers (`Ungraded, Grade7, Grade8, Grade9, Grade9Half, Psa10`); the 19-value scale is legitimate only for *sales* and *holdings* | `DECISIONS.md:44`–`:57` (D-003), reinforced by `:403`–`:404` (D-012) and `CLAUDE.md:92` | **This is the reconciliation of C-1/C-4, and the HTML implements it exactly.** Six tiers wherever a **price series** is plotted (strip :395, chart :327); nineteen wherever a **sale** is described (bucket column :203, filter chips :446–:453, sort rank :354). `DECISIONS.md` overrides all doc tiers, and `:246` (D-038) independently describes the Card page as having a *"six-tier strip"*. **Settled: six.** |
 | **C-20** | Tier colours | `MOCK/Cardstock Card.dc.html:325` vs `MOCK/Cardstock Charts.dc.html:375` | **Code vs code — both Tier 1, and they disagree.** Verified by reading both lines: Card uses `Grade 9.5 #6E4DB8`, `Grade 8 #2E7F78`, `Grade 7 #B0552E`; Charts uses `#7A56C9`, `#4C8F8A`, `#A96A4A`. PSA 10 (`PAL.acc`), Grade 9 (`PAL.warn`) and Raw (`PAL.mut2`) match. Needs an owner ruling before either is built — the Card page links straight into Charts (:69, :117), so a user will see both. |
 | **C-21** | `7 OBS` / *"Census history begins Jan 2026 — 7 observations so far"* (:237); `Pop Δ` rows citing *"Census history starts Jan '26 — 7 observations"* and *"12M census history (7/12 mo)"* | HTML :237; `MOCK/DISPLAY_VOCABULARY.md:117`, `:118`, `:161`, `:164` | **The badge is structurally right and numerically fiction.** `DECISIONS.md:342`–`:350` (D-032) rules every such ratio wrong *in the direction that overstates readiness*: census starts **late Jul 2026**, so the true figure is ~**1/12**, unlocking ~Jul 2027. `DECISIONS.md:309` (D-033) adds a floor — no post-seam metric counts observations before **2026-09-01**. **Build the badge; do not build the number.** |
+
+| **C-22** | The tier strip labels its six prices *"latest monthly price"* (:398) and gives them no provisional marker, while the chart marks the identical number with a dashed segment and a hollow dot (:414, :132) | HTML :398 vs :414/:132, reconciled through the §2.3 invariant (:107) | **Resolved 2026-08-11 — D-077.** The invariant is the finding: each strip price equals index 11 of that tier's chart array, and R-8 establishes index 11 as the current, incomplete month. So the strip has been showing six month-to-date figures with finished-number phrasing. Fixed by adding `◌` — `brand.md` §4.2's existing *"current month provisional"* glyph — plus corrected tooltip copy. **See §2.3.1; build that, not :398.** Nothing in the prototype's layout changes. |
+| **C-23** | The page asserts a completed refresh (*"refreshed just now"*, :253) and implements no in-flight state and no failure state | HTML :253; C-16; OQ-19 | **Resolved 2026-08-11 — D-077.** `express-visit` returns 200/404/409/422/500/502 with **no timeout** (D-076), so a hung upstream costs 60 s before answering. The page therefore never blocks on it: stored prices paint at full strength, a badge carries the in-flight and failure states, and a reserved 28 px slot keeps the strip from jumping. **See §4.2.1.** |
 
 ### 8.1 Corroborations (doc and HTML agree — recorded so they are not re-litigated)
 

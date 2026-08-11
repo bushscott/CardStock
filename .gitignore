@@ -16,3 +16,5 @@ appsettings.Production.json
 
 # Local credential convenience copy. Never committed.
 ops/credentials.local
+
+.superpowers/
