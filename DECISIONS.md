@@ -191,6 +191,36 @@ Owner, 2026-08-10, answering the deployment question during brainstorming. Resol
 
 ---
 
+### D-036 — The Blazor app runs on the same Pi as the scraper
+Owner, 2026-08-10. Resolves the hosting half of D-016.
+
+**Consequences, all favourable:** the loopback intake API (D-024) works exactly as designed with no change to `PokemonInvestBatch`; Postgres never has to listen on a network interface, so it stays on loopback or a Unix socket and is unreachable from outside **by construction**; no `pg_hba.conf` opening, no LAN-exposed database.
+
+**The genuine cost is blast radius.** A compromised web app is adjacent to Postgres and the crawler. Accepted knowingly — owner asked directly whether it could be locked down "99%" and the answer is yes, provided the items in D-037 are done.
+
+**Note the inversion:** splitting onto two Pis would have been *worse* on the axis of concern, because it forces Postgres onto the network and forces the scraper's intake API to abandon the bind-address trust model that ADR-0006 rests on.
+
+---
+
+### D-037 — Security posture for a public, single-box deployment
+Follows from D-011 (public, open signup) and D-036 (same box). Not yet designed — this is the checklist the design must satisfy.
+
+**Non-negotiable given D-011:**
+- **Cloudflare Tunnel or equivalent.** Outbound-only. No port forwarding, no inbound firewall holes, residential IP never published.
+- **Dedicated `cardstock_app` Postgres role** — `SELECT`-only on the scraper's eight tables, full DML on CardStock's own, no DDL. This enforces D-026 **at the database** rather than by convention, making the app structurally incapable of writing scraper data. Migrations use a separate role, at deploy only.
+- **Per-user rate limiting in front of `express-visit`.** D-024's guardrails bound load on the *source site*; nothing bounds user-triggered frequency.
+- **systemd hardening on the web unit** — `NoNewPrivileges`, `ProtectSystem=strict`, `PrivateTmp`, dedicated user, and `MemoryMax` so the web tier cannot starve the crawler.
+
+**Application-level, where the real risk lives:**
+- `sales.title` XSS — D-029. Razor `@` encodes by default; ban `MarkupString` on that path and cover it with a test.
+- IDOR on binder/watchlist/saved-screen rows — every query scoped by `user_id` (the multi-tenant schema from D-034).
+
+**Ordering note — do this first:** backups (D-017) outrank all of the above. Every other item protects against recoverable damage; `sales` and `populations` cannot be rebuilt from any source and **no backup exists today**. Hardening a box whose unique data is unbacked is the wrong order.
+
+**Unverified, needs checking before launch:** `Cardstock Legal.dc.html` reportedly promises "no third-party trackers." If the existing New Relic OTLP stack touches the web tier, that promise is false on day one. Either keep New Relic off the web tier or amend the copy. I have not read that file.
+
+---
+
 ### D-034 — The auth model has been decided three different ways; today's answer settles it
 **Receipts, read directly 2026-08-10:**
 - `uploads/PROJECT_LOG.md:105` — "**Multi-user**, open **free signup**, **email + password** auth. ✅ decided"
