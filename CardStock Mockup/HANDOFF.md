@@ -23,7 +23,13 @@ Last updated 2026-08-10.
 > | §5 — "annual cycles 1 of 3" | Unverified |
 > | §6 — card imagery is placeholder slots | **Correct.** Describes the prototypes, and its licensing framing is right. Do not "fix" this |
 >
-> **Downstream consequence.** `DISPLAY_VOCABULARY.md`'s locked-row progress ratios were computed from §5's false dates and overstate readiness by roughly 15 months — "16/24 mo" where the truth is nearer 1/24. **No unlock countdown, progress bar, or LOCKED copy should be implemented until those constants are recalibrated.** Tracked as D-032 in `../DECISIONS.md`, which is the live register for all of this.
+> **Downstream consequence, and its resolution.** `DISPLAY_VOCABULARY.md`'s locked-row progress ratios were computed from §5's false dates and overstate readiness by roughly 15 months — "16/24 mo" where the truth is nearer 1/24 (D-032).
+>
+> **Resolved 2026-08-10 (D-033): a single sufficiency floor at `2026-09-01`.** No post-seam metric counts observations before that date. It is a *disclosed cutoff, not a claim about when data began* — the collector was still being stabilised through August 2026, so earlier observations are discarded rather than trusted. Because the floor sits later than every card's true first visit, it errs toward LOCKED, which is the only safe direction.
+>
+> **Rule for anyone editing this doc set:** author the **denominator** ("24 post-seam months"), never the ratio. Numerators are computed against the floor and today's date. No hand-written progress ratios or unlock dates — that is what produced this whole class of error. Unlock dates land ~Sept 2027 (census) and ~Sept 2028 (24-month liquidity); the floor simplifies the expression, it does not shorten the wait.
+>
+> `../DECISIONS.md` is the live register for all of this.
 
 ---
 

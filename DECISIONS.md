@@ -182,6 +182,25 @@ Series get labelled honestly; indicators unlock as depth accrues.
 
 ---
 
+### D-033 — Sufficiency floor: no post-seam metric counts observations before 2026-09-01
+Owner, 2026-08-10. **Resolves D-032.**
+
+**It is a floor, not a claim.** This is *not* an assertion about when data began — that is per-card and ragged (D-001). It is a deliberate, disclosed cutoff: the collector was still being stabilised through August 2026, so earlier observations are discarded rather than trusted.
+
+**Why a floor rather than the true per-card dates:** a single global constant is only safe if it sits *later* than every card's real first visit, and then it errs toward **LOCKED**. Understating maturity is always safe; overstating it is the one failure this product's brand cannot survive — which is exactly what the old hard-coded constants did (D-032).
+
+**Why 2026-09-01:** the owner expects the scraper's bugs resolved by the end of August 2026, so September 1 is the first day of data he is willing to stand behind. An earlier proposal of "August 2026" was rejected as inconsistent with that same reasoning — if August is the stabilisation month, August data is the suspect data.
+
+**Consequences:**
+- `DISPLAY_VOCABULARY.md` carries **one anchor date plus denominators**. Numerators are arithmetic against today. No authored ratios, ever again.
+- **D-015 drops out of first position.** A per-card sufficiency projection is no longer a prerequisite for drawing a locked row. The analytics tier is still needed for Screener query performance across 91k cards, but that is a different justification.
+- **It does not shorten any wait.** 24 post-seam months → ~**Sept 2028**. 12 months of census → ~**Sept 2027**. This simplifies how the constraint is expressed, not how old the data is. The v1 scope question (D-011, and whether to ship with liquidity and supply indicators dark) is untouched.
+- `Cardstock About Data.dc.html` should carry the floor **and its reason**. "We discarded our own early data because we didn't trust it" is the same posture as the rest of the design and is a stronger story than an unexplained date.
+
+**⚠ Must verify before implementing:** the floor is only safe if it is later than every card's first visit. One query settles it — whether any card still has a null `last_visited_at`, or the `max()` of per-card first observation. The survey agent's "~12.4-day corpus lap" is **unverified**; I found nothing supporting it in `DATA_MODEL.md` or `ops/README.md`. If the corpus laps in under a month, 2026-09-01 is comfortably clear.
+
+---
+
 ### D-007 — Verify everything; cost is not a consideration
 Owner, 2026-08-10: "whether it's clarifying or debugging, is verify everything. I don't care about extra tokens spent or the extra time or the redundancy."
 
@@ -196,8 +215,8 @@ No `.planning/` directory in this repo. Owner, 2026-08-10.
 
 ## Disputed
 
-### D-032 — 🚩 BLOCKING: every locked-row progress ratio in `DISPLAY_VOCABULARY.md` is wrong, and wrong in the direction that overstates readiness
-**Do not implement any unlock countdown, progress bar, or LOCKED-state copy until this is audited.**
+### D-032 — every locked-row progress ratio in `DISPLAY_VOCABULARY.md` is wrong, and wrong in the direction that overstates readiness
+**✅ Resolved 2026-08-10 by D-033** — a single disclosed floor at 2026-09-01, with denominators authored and numerators computed. The block is lifted once the recalibration below is applied; the finding is kept for the reasoning trail.
 
 The §10 Charts inventory and §9 Screener cautions hard-code progress ratios and unlock dates. The arithmetic proves they were derived from `HANDOFF.md` §5's false dates (D-001):
 
