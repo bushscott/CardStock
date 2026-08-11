@@ -184,6 +184,21 @@ View toggle (Binder:76–77, values at 480–481): labels `table` / `gallery`; t
 
 ### 3.3 Holdings — the source record
 
+> **Storage model (D-067, owner 2026-08-11): a holding is not stored. It is derived from
+> transactions.** There is no `holdings` table. The shape below remains the contract the *screen*
+> consumes — it is computed per request by aggregating that user's non-superseded transactions,
+> grouped by card and tier.
+>
+> Two consequences for the build:
+> - **The foreign key to `public.cards` attaches to `transactions.card_id`** (ADR-0001), at the
+>   point data enters, since there is no holdings row to anchor it to.
+> - **§7.4 becomes blocking rather than merely open.** A derived holding cannot compute `cost`
+>   without a stated cost-lot rule, so FIFO / average cost / specific identification must be ruled
+>   before any of this is implemented.
+>
+> There is also **one binder per user** (D-067) — no `binders` table; `user_id` sits directly on
+> transactions.
+
 Seeded shape (Binder:342–351), 8 rows. **This is the holding entity contract:**
 
 | Field | Type | Meaning |
@@ -851,6 +866,9 @@ The BUY/SELL segmented control is rendered **unconditionally** (Binder:244–247
     (Binder:184, 186, 188). This is the same convention the Card and Charts screens use.
 12. **Holdings and gallery always show the same rows in the same order** — both consume `hs`
     (Binder:452, 482, 498).
+    *Challenged and upheld, 2026-08-11.* A drag-to-arrange gallery with a saved arrangement was
+    proposed, designed, and withdrawn by the owner the same day — see **D-068** for what the
+    exploration established, so it need not be redone. **This invariant stands.**
 13. **Whole-dollar display everywhere.** `money()` rounds (Binder:413). Percentages carry exactly one
     decimal (`pcf`, `pct`, `toFixed(1)`).
 14. **Column widths have a 52px floor and no ceiling** (Binder:439).
@@ -894,12 +912,19 @@ The BUY/SELL segmented control is rendered **unconditionally** (Binder:244–247
    plus a valuation bucket (as `bucketOf`'s comment implies)?
 3. **Does the market index exist?** D-004 says there is no index table and no metrics store in the
    scraper DB, yet this screen's entire performance tab and its `EST` semantics depend on one. Blocking.
-4. **Realized P&L, win rate, and avg hold have no cost-lot model.** All three are literals here. A SELL
+4. **🚩 BLOCKING as of D-067 — realized P&L, win rate, and avg hold have no cost-lot model.** Since
+   holdings are now derived from transactions rather than stored (§3.3), *every* holding's `cost`
+   depends on this rule, not just the performance tab. It must be ruled before implementation. All
+   three are literals here. A SELL
    realizes against *which* purchase lot — FIFO, average cost, or specific identification? The
    "Avg cost" header hints at average cost; nothing states it. `HOLD` carries a single `cost` per
    card+tier, which is consistent with average cost but does not prove it.
-5. **Do corrections cascade?** Editing a historical BUY changes cost basis, therefore realized P&L,
-   the yearly summary, and the `BV` series. The prototype recomputes none of it.
+5. **✅ Resolved by D-067 — corrections cascade automatically.** Because holdings and the derived
+   figures are computed from transactions rather than stored, editing a historical BUY flows
+   through to cost basis, realized P&L, the yearly summary, and the `BV` series with nothing to
+   keep in step by hand. This was a significant reason for choosing derivation. *Original finding:*
+   editing a historical BUY changes cost basis, therefore realized P&L, the yearly summary, and the
+   `BV` series — and the prototype recomputes none of it.
 6. **Should a correction be allowed to change a transaction's kind?** It currently can (§5.8).
 7. **Should SELL-edit re-validate against holdings?** It currently accepts any qty ≥ 1 with no cap
    (§4.9 rule 3), letting a correction claim a sale larger than the position.

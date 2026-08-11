@@ -166,6 +166,115 @@ Read directly 2026-08-10, to be mirrored per D-018–D-021.
 
 ## Decided
 
+### D-065 — 🔒 Schema separation and migration ownership → **ADR-0001**
+Owner, 2026-08-11. One `pokemon` database; the scraper keeps `public`; CardStock owns a `cardstock`
+schema under `cardstock_owner`. Scraper tables are mapped in EF as **views**, never tables. Foreign
+keys into `public.cards` are real and hand-written. Each repo migrates only its own schema, by hand
+from a dev machine — nothing auto-migrates, mirroring the scraper.
+
+Full reasoning, alternatives, and consequences: **`docs/adr/0001-schema-separation-and-migration-ownership.md`**.
+
+**The receipt that decided it against a separate database** — every scraper grant is scoped
+`IN SCHEMA public` (`PokemonInvestBatch/ops/postgres-setup.sql:32,34,36`, 45-line file read in
+full), so a schema split already delivers the protection a separate database was supposed to buy,
+without losing single-statement joins.
+
+**The receipt that decided `ToView` over `ExcludeFromMigrations`** — scaffolded migrations read
+directly 2026-08-11 under EF Core 10.0.10 / Npgsql 10.0.3: the `ExcludeFromMigrations` variant emits
+`fk_holdings_cards_card_id → principalSchema: "public"`; the `ToView` variant emits one
+`CreateIndex` and nothing else; omitting the mapping emits `CreateTable(schema: "public")` in `Up()`
+and **`DropTable(schema: "public")` in `Down()`**.
+
+---
+
+### D-066 — 🔒 Identity: email + password in an HttpOnly cookie backed by a session row → **ADR-0002**
+Owner, 2026-08-11. ASP.NET Core cookie authentication (`HttpOnly`, `Secure`, `SameSite=Lax`), with
+the session held in `cardstock.sessions` via `ITicketStore` rather than as claims inside the cookie.
+Password hashing via `PasswordHasher<T>`; policy stays exactly as designed — minimum 12, no
+complexity rule (`docs/screens/account.md:139`). Verification and reset are single-use hashed tokens
+with expiries.
+
+Full reasoning: **`docs/adr/0002-identity-is-a-cookie-backed-by-a-session-row.md`**.
+
+**Why not a JWT in `localStorage`:** D-029's XSS surface (`sales.title` stored raw) makes any
+JS-readable credential exfiltrable, and a self-contained token cannot be revoked before expiry —
+which contradicts deletion actually deleting (D-069).
+
+**Owner accepted the dependency this creates:** transactional email for verification, reset, and
+email change. Verification stays in v1 rather than being deferred. This is the project's first
+dependency outside the Pi.
+
+---
+
+### D-067 — Binder data shape: one binder, corrections rather than edits, holdings derived
+Owner, 2026-08-11, three rulings taken together:
+
+- **One binder per user.** No `binders` table; `user_id` sits directly on transactions.
+- **Transactions are edited in the UI and stored as corrections.** This was already the designed
+  behaviour, not a new decision — `binder.md:292` ("the edit button is always visible on every
+  row"), `:296` ("Every edit is stored as a correction under the hood"), `:507`. The dormant VOID
+  render path found in the Class F audit is what this wires up.
+- **Holdings are derived from transactions, not stored.** No `holdings` table. Rationale: a stored
+  total can drift from the transactions behind it with no way to tell which is right, and the
+  correction model forces a recompute on every edit anyway.
+
+**Consequence:** the D-065 foreign key attaches to `transactions.card_id`, at the point data enters.
+
+**Spec updated** per the maintenance rule: `docs/screens/binder.md` §8.
+
+---
+
+### D-068 — Binder gallery rearrange: proposed, designed, rejected
+Raised by the owner 2026-08-11 as a missing feature — drag to arrange the gallery view and save the
+arrangement. Explored in full, then **withdrawn by the owner the same day**: *"Let's scrap this
+feature. I don't love any of the solutions."*
+
+Recorded so it is not rediscovered and re-argued. What the exploration established, should it
+return:
+
+- The gallery already exists as a view toggle (`binder.md:95`); what was new was *independent,
+  persisted ordering*.
+- It collides with a documented invariant — `binder.md:852`, "Holdings and gallery always show the
+  same rows in the same order." **That invariant stands, untouched.**
+- The table has six sortable columns (`binder.md:568`), so the unresolved question was what
+  dragging means while sorted by value. The proposal was a seventh "custom" order mode with drag
+  enabled only inside it; the owner did not like it, nor the physical-binder slots alternative.
+- Owner's refinement before withdrawing: both table and gallery should share one order and both be
+  reorderable.
+
+**Nothing was written.** `git status` clean at the time of withdrawal; `binder.md:852` unmodified.
+
+---
+
+### D-069 — Backups deferred by the owner, which supersedes D-053's premise
+Owner, 2026-08-11: *"Don't worry about the backup. When this is all completed, I'll worry about
+backup and load balancing, etcetera. Keep it simple, stupid."*
+
+Raised as a concern first — D-017's facts are unchanged and `sales`/`populations` remain
+unrebuildable — and the owner ruled. Recorded as a decision, not a gap.
+
+**Consequence, and it is not merely bookkeeping:** D-053 made account deletion a bounded 30-day
+window *because* off-box backups were treated as mandatory, and a deleted row survives in a dump
+until rotation. With no dumps, "immediately and permanently" becomes keepable — which is what
+`Cardstock Profile.dc.html:181` already promises. **D-053 is superseded while this holds.**
+
+**⚠️ The trap to avoid later:** if backups are added without revisiting this, the privacy promise
+becomes false the day the first dump is written, silently. Whoever adds backups must re-open D-053
+in the same change.
+
+---
+
+### D-070 — The Pi's environment, verified by direct query
+Run 2026-08-11 over ssh, `sudo -u postgres psql -d pokemon`:
+
+| Fact | Value | Consequence |
+|---|---|---|
+| `server_version` | **15.18** (Debian 12) | Pin CI to `postgres:15`, matching the scraper's. That repo's `README.md:289` claim of "16+" is **wrong** |
+| `max_connections` | **100** (default) | Three .NET processes at Npgsql's default pool of 100 each would request 300. Both CardStock roles carry an explicit `CONNECTION LIMIT`, and every connection string sets `Maximum Pool Size` |
+| Disk | **210 GB free of 235 GB**, database 2.3 GB | Storage is a non-issue; the metric-snapshot volume concern is dropped |
+
+---
+
 ### D-005 — Blazor is the frontend. Not up for debate
 Supporting processes are .NET console/worker apps. The existing Postgres in `../PokemonInvestBatch` is the data source.
 
@@ -628,6 +737,13 @@ Owner, 2026-08-10. Resolves D-3 in the contradiction register.
 ---
 
 ### D-053 — Account deletion is a bounded window matching backup rotation
+**⚠️ Superseded 2026-08-11 by D-069, conditionally.** This entry's entire load-bearing premise was
+that off-box backups are mandatory, so "immediately and permanently" could not be honoured. The
+owner has deferred backups; with no dumps, immediate deletion is keepable and
+`Cardstock Profile.dc.html:181` is correct as written. **If backups are ever added, this entry
+revives and the privacy copy must change in the same commit** — otherwise the promise becomes false
+silently. Original reasoning kept below.
+
 Owner, 2026-08-10. Resolves the C-1 Tier-1 conflict in D-043.
 
 **The `Cardstock Legal.dc.html:57` version wins** — data "removed within 30 days," with the number set to match actual backup rotation. `Cardstock Profile.dc.html:181, :191`'s "immediately and permanently… no recovery" is superseded and its copy must be rewritten.
@@ -935,6 +1051,11 @@ Coupled to D-014. Interactive Server holds a SignalR circuit per visitor and rou
 **Sharpened by D-024:** the browser also cannot reach the worker's loopback intake API. So under WebAssembly, *both* data reads and express-visit calls need a server-side component on the Pi — the browser can only talk to that component. Under Interactive Server the app is already server-side and can call `127.0.0.1` directly. This makes render mode and read-API a single decision, not two.
 
 ### D-026 — What access does CardStock have to the scraper's eight tables?
+**✅ Ruled 2026-08-11 by D-065 / ADR-0001 — read-only, enforced by grants.** Owner, presented with
+the consequence that reversing it later is a superuser statement on the Pi rather than a code
+change: *"D-026 makes sense to me as it stands."* `cardstock_app` receives `SELECT` in schema
+`public` and nothing else. The original framing is kept below for the reasoning trail.
+
 Reading is certain. Writing is **undecided and deliberately left undecided.**
 
 Owner, 2026-08-10: *"CardStock will have to interact with PokemonInvestBatch tables, but I foresee it being only read. However, that is not something to make as a rule."*
@@ -1014,6 +1135,11 @@ Owner, 2026-08-10: "a fully functional GitHub for this project with documentatio
 **Precedent to check first:** `../PokemonInvestBatch/.github/` already has workflows.
 
 ### D-021 — ADRs for CardStock
+**✅ Resolved 2026-08-11 — by adopting the split this entry itself proposed.** `docs/adr/` exists,
+Nygard format, numbered, mirroring the sibling repo, with `docs/adr/README.md` holding the index
+table. ADR-0001 and ADR-0002 are the first two. The ledger entry points at the ADR; the ADR holds
+the alternatives and consequences and is not edited after acceptance.
+
 Owner, 2026-08-10. Open: format, numbering, and where they live (`docs/adr/` to match the sibling repo is the obvious default).
 
 **Relationship to this ledger — needs a ruling.** They overlap and should not both record the same thing. Proposed split: an ADR is a *considered architectural decision with alternatives weighed and consequences stated* — D-013 through D-016 are all ADR-shaped. The ledger is the faster-moving register of facts, open questions, and small calls. When a ledger entry gets big enough to need alternatives and consequences, it graduates to an ADR and the ledger entry points at it.
