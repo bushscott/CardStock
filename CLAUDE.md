@@ -114,7 +114,9 @@ The worker hosts a minimal HTTP API in-process, and ADR-0006 was written anticip
 
 **The consequence that constrains the frontend:** a browser cannot reach a loopback endpoint on the Pi. Any CardStock code that calls these endpoints must run **server-side, on that machine**. This is a live constraint on the render-mode decision — see D-013 and D-014.
 
-Express guardrails already exist (single-flight, 10 s spacing floor, same-card coalescing, and the express fetch stamps the polite gate so the scheduled lane re-spaces around it), so worst-case extra site load is bounded to one request per spacing floor.
+**The spacing floor was removed 2026-08-10 (their ADR-0008).** Express visits no longer wait on each other. What remains in the worker: **single-flight** (one outbound fetch at a time), **same-card coalescing** (concurrent requests for one card ride a single fetch), and `RecordFetchNow` (the express fetch stamps the polite gate so the scheduled lane re-spaces around it).
+
+> **CardStock is now the only thing bounding express load.** ADR-0006's "worst-case extra site load is bounded to one request per spacing floor" no longer holds. Per-user rate limiting in front of any express call is **required, not optional** — see D-037 and D-062.
 
 Durable pointers, so this never has to be re-derived:
 

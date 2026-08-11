@@ -371,6 +371,27 @@ All lines read directly 2026-08-10. Owner asked for this to be tracked, 2026-08-
 
 ---
 
+### D-062 — Express visits have no spacing floor. Rate limiting is now CardStock's job alone
+Owner removed the express spacing floor in `PokemonInvestBatch` on 2026-08-10, recorded there as **ADR-0008 — "express visits have no spacing floor."** Verified directly in the sibling repo: `ExpressSpacingSeconds` and `_lastExpressFetch` no longer appear anywhere in `src`.
+
+**Why it was removed.** Express exists so a human-facing app can get a card NOW. The floor was global — not per-user, not per-card — so a visitor browsing several stale cards waited ~10s **each**. ADR-0006 introduced it as a replacement guardrail for the polite gate it skips, which was correct for the single-operator case it was designed against; it did not survive contact with a public site and ordinary browsing.
+
+**What still exists in the worker** (verified, `ExpressVisitRunner.cs`):
+- **Single-flight** — `SemaphoreSlim(1,1)`, `:44`, `:109`, `:163`. One outbound fetch at a time.
+- **Same-card coalescing** — `:48`, `:60–80`. Concurrent requests for one card ride a single fetch and all hear the answer.
+- **`gate.RecordFetchNow()`** — `:144`. The express fetch stamps the polite gate so the scheduled lane re-spaces around it.
+- The shared `CardVisitor` pipeline, so `last_visited_at` still resets (`CardPageWriter.cs:112`) — which the 24h staleness check depends on.
+
+**🚩 The consequence that lands on this repo.** ADR-0006 promised *"worst-case extra site load is bounded: one request per spacing floor."* **That bound is gone.** With single-flight as the only limiter, the ceiling becomes one fetch per fetch-duration — roughly 30–60 requests/minute rather than 6.
+
+**So CardStock is now the sole guardrail.** Per-user rate limiting in front of any express call moves from "should have" (D-037) to **required before launch**. The worker deliberately no longer bounds it, and D-011 means anyone can sign up.
+
+**The intended call pattern** (owner, 2026-08-10): on card page load, read `cards.last_visited_at`; if older than 24 hours, call `express-visit`; the visit resets the field; a second viewer sees it fresh and proceeds without a call. Volume is therefore bounded by *distinct stale cards viewed*, not by page views — and same-card races coalesce for free.
+
+**Spec updates queued:** `docs/screens/card.md` (the refresh flow and the missing loading/failure states — express can still return 502/422/504, and the page must render cached data rather than an error).
+
+---
+
 ### D-061 — ✅ Class B closed: false data claims corrected across marketing, Screener and Charts
 Owner, 2026-08-10. Completes the copy corrections begun in D-060. Corrected values written into `docs/screens/marketing.md`, `screener.md`, and `charts.md` under "Corrected copy / values — build this."
 
