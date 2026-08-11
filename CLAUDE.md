@@ -2,6 +2,30 @@
 
 A market-data terminal for the Pokémon card aftermarket. Design is complete; implementation has not started. Data comes from the scraper and Postgres database in the sibling repo `../PokemonInvestBatch`.
 
+## What CardStock is, and the two rules it is built on
+
+A market-data application for the Pokémon card aftermarket: price history, a screener, charts with backtesting, and a binder that treats a collection as a portfolio. Fan-made, not affiliated with Nintendo, The Pokémon Company, or Creatures Inc.
+
+The product's distinguishing commitment is **honesty about data**. Two rules follow from it, and nearly every design decision in `DECISIONS.md` traces back to one of them. Harvested from `HANDOFF.md` §1 before that file was retired (D-054); they existed nowhere else.
+
+### 1. Never smooth over a discontinuity
+
+Two data sources meet at a seam that is **per-card and ragged** — each card's per-sale history begins at its own first crawler visit. Charts draw each boundary where it actually falls; they never blend it, and never draw one shared line across all cards (D-001, D-061).
+
+The current month is an aggregation of partial data. It renders as a dashed line ending in a hollow point — **never a projection.**
+
+### 2. Never compute on insufficient data
+
+Every metric has a sufficiency floor. Below it, the metric does **not render a number**. It renders a *state*, naming the rule it failed and when it will pass:
+
+`OK` · `LOW DATA` · `LOCKED` · `UNDEFINED window` · `UNSTABLE FIT`
+
+Those five are the complete set (D-056 collapsed a sixth into `LOW DATA`). Locked controls state their unlock condition and progress. All of it is measured from the 2026-09-01 floor (D-033), and **the denominator is authored while the numerator is computed** — every hand-written ratio found in this project was wrong in the direction that overstates readiness (D-061).
+
+### The copy posture that follows
+
+Precise numbers over adjectives. No hype. No exclamation marks. Colour never carries meaning alone — every state pairs a hue with a glyph, and colourblind mode swaps hue only (`docs/brand.md` §4).
+
 ## The overriding rule: verify everything
 
 Whether clarifying, designing, or debugging — **verify.** Do not relay a claim you have not checked. Do not accept a document's assertion because the document is authoritative-looking. Do not accept a subagent's finding without opening the file yourself. Do not reason from memory of this codebase when you could run the query.
