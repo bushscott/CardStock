@@ -191,6 +191,21 @@ Owner, 2026-08-10, answering the deployment question during brainstorming. Resol
 
 ---
 
+### D-038 — v1 ships the full UI with locks visible
+Owner, 2026-08-10. Every screen ships. Locked rows render with real countdowns and progress computed against the 2026-09-01 floor (D-033). Nothing is hidden because it isn't ready.
+
+**Rationale:** a terminal that states plainly "these indicators are dark, and here is exactly when each unlocks" demonstrates rigor that most portfolio projects fake. The locks are the story, not an apology for one. This is the same posture as the two honesty rules the whole design is built on.
+
+**Consequences:**
+- **The sufficiency engine is on the critical path, not deferrable.** Every screen depends on rendering locks correctly, so sub-project D moves up. It is small now that D-033 replaced per-card derivation with one floor — but it cannot be skipped.
+- **D-032's recalibration must land before Charts or Screener ship.** Locked rows are now a shipping feature, so wrong countdowns would be a user-visible lie in the product's most load-bearing claim.
+- **`Cardstock About Data.dc.html` must carry the floor and its reason** (D-033). With locks everywhere, the explanation page stops being optional.
+- **The Card page carries the first impression.** It is the surface that works completely today — identity, six-tier strip, price history to Dec 2020, sales ledger, census bars, real images (D-010). Success criterion #1 ("a hiring manager clicks a link and is impressed in 90 seconds") should be designed around it and the landing page, not around Charts.
+
+**Unverified:** the "32 indicator rows down to roughly 12, 27 screener filters down to about 14" figures are survey-agent estimates from reading the mockups. Real counts should be established before the About Data copy quotes any number.
+
+---
+
 ### D-036 — The Blazor app runs on the same Pi as the scraper
 Owner, 2026-08-10. Resolves the hosting half of D-016.
 
