@@ -270,7 +270,7 @@ Follows from D-011 (public, open signup) and D-036 (same box). Not yet designed 
 - **Cloudflare Tunnel or equivalent** — outbound-only, no inbound holes at all. Still worth weighing even with good hardware, because it also brings DDoS absorption, a WAF, and origin-IP concealment that a home firewall does not.
 - Not yet decided. Both are defensible; the VLAN route keeps everything under the owner's control, the tunnel route offloads the classes of attack a home firewall handles worst.
 - **Dedicated `cardstock_app` Postgres role** — `SELECT`-only on the scraper's eight tables, full DML on CardStock's own, no DDL. This enforces D-026 **at the database** rather than by convention, making the app structurally incapable of writing scraper data. Migrations use a separate role, at deploy only.
-- **Per-user rate limiting in front of `express-visit`.** D-024's guardrails bound load on the *source site*; nothing bounds user-triggered frequency.
+- **An abuse-shape check in front of `express-visit`** — **not** a throttle on usage. See D-062: legitimate browsing is self-limiting via the 24h staleness gate, and browsing-driven express visits are demand-weighted crawling worth having. The limit exists only to catch scripted enumeration, and should be generous enough that a person browsing hard never meets it. As of ADR-0008 the worker has no spacing floor, so this is the **only** remaining bound.
 - **systemd hardening on the web unit** — `NoNewPrivileges`, `ProtectSystem=strict`, `PrivateTmp`, dedicated user, and `MemoryMax` so the web tier cannot starve the crawler.
 
 **Application-level, where the real risk lives:**
@@ -384,7 +384,15 @@ Owner removed the express spacing floor in `PokemonInvestBatch` on 2026-08-10, r
 
 **🚩 The consequence that lands on this repo.** ADR-0006 promised *"worst-case extra site load is bounded: one request per spacing floor."* **That bound is gone.** With single-flight as the only limiter, the ceiling becomes one fetch per fetch-duration — roughly 30–60 requests/minute rather than 6.
 
-**So CardStock is now the sole guardrail.** Per-user rate limiting in front of any express call moves from "should have" (D-037) to **required before launch**. The worker deliberately no longer bounds it, and D-011 means anyone can sign up.
+**So CardStock is now the sole guardrail** — but the guardrail is narrower than "rate limit users," and that distinction is the decision.
+
+**Legitimate load is self-limiting and must not be throttled.** Owner, 2026-08-10: *"If it's being called a bunch, that means a lot of cards are being updated, and people are using it and wanting to see those cards."* Correct. The 24h gate means a call only fires when a real person opens a genuinely stale card. A human browses 20–60 cards an hour; ten concurrent users is ~10 calls/minute. Throttling that would be the product refusing to do its job.
+
+**And browsing-driven express visits are a feature, not a cost.** They are *demand-weighted crawling* — cards people care about get fresh, cards nobody opens stay stale. That is arguably a better prioritisation signal than the scheduler's own staleness heuristic, and it costs nothing.
+
+**The guardrail is an abuse-shape check, not a throttle.** The only thing producing sustained load the 24h gate cannot absorb is scripted enumeration of card ids — no human pattern, just iteration. Target a limit generous enough that a person browsing hard never notices it (order of a few hundred express calls per account per hour) and enumeration trips it within minutes.
+
+**And the reason is self-interested, not defensive.** The harm from enumeration falls on **PriceCharting**, not on CardStock: it would send them a sustained stream at a rate the crawler on the same box deliberately never approaches. The downside is asymmetric — if they block the address, `sales` and `populations` stop accumulating and cannot be rebuilt from any source (D-017).
 
 **The intended call pattern** (owner, 2026-08-10): on card page load, read `cards.last_visited_at`; if older than 24 hours, call `express-visit`; the visit resets the field; a second viewer sees it fresh and proceeds without a call. Volume is therefore bounded by *distinct stale cards viewed*, not by page views — and same-card races coalesce for free.
 
