@@ -191,6 +191,28 @@ Owner, 2026-08-10, answering the deployment question during brainstorming. Resol
 
 ---
 
+### D-040 — Document authority: the mockups and the scraper codebase are absolute truth
+Owner, 2026-08-10: *"The mockups and Pokemon investment scraper codebase are the absolute truth."* Recorded in full in `CLAUDE.md` under "Document authority."
+
+Tier 1 — `CardStock Mockup/*.dc.html` and `../PokemonInvestBatch/`. Tier 2 — `HANDOFF.md`, `DESIGN_NOTES.md`, `DISPLAY_VOCABULARY.md`, derived but current. Tier 3 — `CARDSTOCK_UI_SPEC_v1.md`, `PROJECT_LOG.md`, `BRAND_BRIEF.md`, historical. `DECISIONS.md` overrides all three where it records an owner decision.
+
+**This resolves method, not just precedence.** Several open contradictions become settleable by opening the HTML instead of arguing between documents — D-009 (the "Apr '25 liquidity seam" in `DESIGN_NOTES.md:35`) is exactly that shape: check what the prototype actually draws.
+
+---
+
+### D-041 — No candlesticks, no news. Confirmed independently of the stale spec
+Owner, 2026-08-10: *"We can't do candlesticks with our data type. and we're not doing news."*
+
+**Why this needed confirming:** the Tier-1 permanently-impossible list lived at `CARDSTOCK_UI_SPEC_v1.md:57` and `PROJECT_LOG.md:136` — both now Tier 3 under D-040, and the owner had flagged the spec section as possibly deleted. The exclusions are now owner-confirmed and no longer depend on either document.
+
+**Candlesticks:** structurally impossible, not merely unimplemented. `price_months.price_cents` is a single monthly value (D-003 — six tiers, one integer each); OHLC needs four points per period and intraday sequencing that does not exist at the source (`DATA_MODEL.md:481` — historical sales volume and pre-observation history are "unavailable from source, permanently").
+
+**News:** scope decision, no data source, not pursued.
+
+**Applies the Tier-1 rule:** omitted from the app entirely, not rendered as disabled controls. `PROJECT_LOG.md:136` carried the rationale worth keeping — *"a disabled control that never enables is a broken promise that erodes trust in every other disabled control."* Harvested here so it survives that file.
+
+---
+
 ### D-038 — v1 ships the full UI with locks visible
 Owner, 2026-08-10. Every screen ships. Locked rows render with real countdowns and progress computed against the 2026-09-01 floor (D-033). Nothing is hidden because it isn't ready.
 

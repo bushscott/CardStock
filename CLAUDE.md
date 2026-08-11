@@ -12,6 +12,25 @@ Extra tokens, extra time, and redundant checking are all explicitly acceptable c
 
 **A receipt covers only the sentence it supports.** The most likely way to break this rule is not to invent a claim outright — it is to quote something real and then write a generalization beside it, letting the citation lend credibility to a sentence it never covered. This has already happened once in this file: an accurate quote from ADR-0006 ("sibling apps speak HTTP to the worker, never SQL to its tables") sat next to an invented rule ("anything that changes scraper state goes over HTTP"), under a heading calling it a hard architectural boundary. Corrected 2026-08-10. If a sentence is broader than its receipt, it is a **Claim**, no matter what sits next to it.
 
+## Document authority — which source wins
+
+Owner's ruling, 2026-08-10: **"The mockups and the PokemonInvestBatch scraper codebase are the absolute truth."** Everything else is derived and may be stale. When two sources disagree, the higher tier wins — do not average them, and do not pick the one that reads more confidently.
+
+**Tier 1 — authoritative. Cite these.**
+- `CardStock Mockup/*.dc.html` — the prototypes. Authoritative for layout, states, copy, and behaviour. If a document describes a screen differently from the HTML, **the HTML is right.**
+- `../PokemonInvestBatch/` — source, schema, and ADRs. Authoritative for everything about the data.
+
+**Tier 2 — current and useful, but derived.** Trustworthy about the design, verify anything they say about data (see the provenance banner in `HANDOFF.md`).
+- `HANDOFF.md`, `DESIGN_NOTES.md`, `DISPLAY_VOCABULARY.md`
+
+**Tier 3 — historical. Do not cite as current.**
+- `uploads/CARDSTOCK_UI_SPEC_v1.md` — approved 2026-08-01, superseded in parts by design work that followed. `HANDOFF.md` calls it "Stale in parts" and §4 lists the known deltas.
+- `uploads/PROJECT_LOG.md`, `BRAND_BRIEF.md` — decision history. Reasoning worth harvesting, conclusions frequently reversed.
+
+**`DECISIONS.md` overrides all three tiers** where it records an owner decision, because it is the only document being kept current deliberately.
+
+**Practical consequence:** several open contradictions are settleable by opening the HTML rather than debating documents. If `DESIGN_NOTES.md` says a screen does X and the prototype does Y, the answer is Y and the note is stale.
+
 ## Hard constraints
 
 - **Blazor.** The frontend is a Blazor application. This is a .NET portfolio piece and the framework is not up for debate. Supporting processes are .NET console/worker apps.
