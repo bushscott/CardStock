@@ -29,6 +29,8 @@ Owner's ruling, 2026-08-10: **"The mockups and the PokemonInvestBatch scraper co
 
 **`DECISIONS.md` overrides all three tiers** where it records an owner decision, because it is the only document being kept current deliberately.
 
+**When two Tier 1 sources disagree, the hierarchy cannot resolve it — escalate.** Do not pick the one that reads better, and do not average them. Log it in `DECISIONS.md` as needing an owner ruling. This is not hypothetical: `Cardstock Legal.dc.html:57` promises account data is removed within 30 days while `Cardstock Profile.dc.html:181` promises deletion is immediate and permanent (D-043).
+
 **Practical consequence:** several open contradictions are settleable by opening the HTML rather than debating documents. If `DESIGN_NOTES.md` says a screen does X and the prototype does Y, the answer is Y and the note is stale.
 
 ## Hard constraints

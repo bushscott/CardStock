@@ -1,142 +1,136 @@
-# Brand system — authoritative token & identity specification
+# Brand system — tokens, type, glyphs, theming
 
-**Status:** derived from Tier-1 sources, verified 2026-08-10.
-**Method:** every value below was read out of the prototypes or `brand/brand-tokens.css`. Markdown docs were used only to name intent, and where they disagreed with code, the code won and the disagreement is recorded in §9.
-
-Paths in this document are relative to `CardStock Mockup/` unless absolute.
+> **Authority.** Everything below is read from Tier 1 code: the `.dc.html` prototypes and `brand/brand-tokens.css`.
+> Markdown docs (`DESIGN_NOTES.md`, `DISPLAY_VOCABULARY.md`, `HANDOFF.md`, `BRAND_BRIEF.md`) are Tier 2/3 and are cited only where they add rationale — never as the value of a token. Where they disagree with the code, §9 records it.
+> Paths are relative to `CardStock Mockup/` unless absolute.
 
 ---
 
 ## 1. Identity
 
-### What this reference is
+**This is not a product screen.** `Cardstock Brand System.dc.html` is a *specimen sheet* — a static, single-column documentation page (max-width 1020px, padding `64px 40px 96px`, `Cardstock Brand System.dc.html:20`) with six numbered sections: 01 Logo · 02 Color · 03 Type · 04 Components · 05 Voice · 06 Empty states. It has no nav, no search, no theme toggle, and no app chrome. It ships with the brand package and is not routed in the Blazor app.
 
-`Cardstock Brand System.dc.html` is a **documentation surface, not a product screen.** It has no nav, no ticker, no theme toggle, no `data-screen-label`, no route. It renders the brand package as a static page: max-width `1020px`, padding `64px 40px 96px`, six numbered sections (`Cardstock Brand System.dc.html:20`, `:36`, `:98`, `:151`, `:174`, `:207`, `:225`).
+It carries three prototype props, all default `true` (`Cardstock Brand System.dc.html:255–259`): `tickerBadge` (the `CDSTK` chip), `showDonts` (the four misuse tiles), `showIllustrationSpec` (section 06).
 
-The upstream handoff says so explicitly: *"Use it as the spec reference; it isn't a product screen"* (`uploads/Brand package creation/README.md:109`).
+**What this document covers**, and what a Blazor implementation must reproduce:
 
-**Do not build a Blazor route for it.** Its content belongs in this document. If a living style guide is wanted later, that is a new product decision, not a port of this page.
+| Scope | Where it is authoritative |
+|---|---|
+| Brand accent, foil, logo teal, chart series | `brand/brand-tokens.css` + `Cardstock Brand System.dc.html` §02 |
+| App runtime palette (light / dark / CVD ×2) | the `<style>` helmet block + the `PAL` object in every app `.dc.html` |
+| Typography families, weights, scale | app helmet font links + inline styles; `Cardstock Brand System.dc.html` §03 |
+| Glyph grammar (color never alone) | `DISPLAY_VOCABULARY.md` §1–§3 + the live preview strip in `Cardstock Profile.dc.html:99–107` |
+| Theme + colorblind persistence | pre-paint script, present on 11 app pages |
+| Logo assets | `brand/*.svg`, `brand/*.png` |
 
-### What the brand covers
-
-Cardstock is a market-data terminal for the Pokémon card aftermarket — *"a data-first terminal with paper sensibility"*. The brand is deliberately **not** Pokémon trade dress: no Pokéballs, no official yellow/blue logotype vibes (`BRAND_BRIEF.md:13`; misuse panels rendered at `Cardstock Brand System.dc.html:78-92`).
-
-Voice, from `Cardstock Brand System.dc.html:210`: *"Matter-of-fact and openly nerdy. Precise numbers over adjectives. Jargon is welcome, explained once. Keyboard shortcuts are copy. No exclamation marks, no emoji; dry humor lives in empty states only."*
-
-### The two token vocabularies — read this before anything else
-
-There are **two disjoint sets of token names in this repository**, and only one of them is actually wired up.
-
-| | Brand package tokens | App tokens |
-|---|---|---|
-| Defined in | `brand/brand-tokens.css` (31 lines) | inline `<style>` in each `*.dc.html` `<helmet>` + `var(--x, <literal>)` fallbacks |
-| Names | `--brand-primary`, `--brand-primary-strong`, `--brand-logo-teal`, `--brand-foil`, `--focus-ring`, `--link`, `--link-hover`, `--series-1..6`, `--ink`, `--bg`, `--card`, `--line`, `--muted`, `--hover` | `--acc`, `--accH`, `--btn`, `--btnH`, `--ink`, `--bg`, `--card`, `--mut`, `--mut2`, `--mut3`, `--mutbg`, `--hov`, `--line`, `--line2`, `--line3`, `--line4`, `--inbg`, `--accBg`, `--accMut`, `--tooltipBg`, `--logoTeal`, `--pos`, `--pos2`, `--neg`, `--neg2`, `--neg3`, `--posBg*`, `--negBg*`, `--warn`, `--warnInk`, `--warnBg` |
-| Consumed by | **nothing** — verified: no `.dc.html` links the stylesheet, and no `--brand-*`, `--focus-ring`, `--series-*`, or `--link` reference exists in any prototype | all 11 app screens + 5 marketing pages |
-
-`brand-tokens.css` appears exactly once in the prototypes and only as prose text in a file list (`Cardstock Brand System.dc.html:245`), never as a `<link>`.
-
-**Implementation ruling for Blazor: build against the app token names.** They are what every screen actually renders. Treat `brand-tokens.css` as a colour dictionary, not as a stylesheet to ship. §9 records the naming contradiction.
+**Two token systems exist and they are not the same file.** `brand/brand-tokens.css` is the *brand package* deliverable — a standalone `:root` + `[data-theme="dark"]` sheet. **No app prototype links it.** The app pages instead inline the light values as `var(--token, #LITERAL)` fallbacks and declare only the dark/CVD overrides in a helmet `<style>`. See §7 and §9.
 
 ---
 
-## 2. Colour tokens
+## 2. Color tokens
 
-### 2.1 Chrome / neutral tokens (theme-varying, colourblind-invariant)
+### 2.1 How light theme is expressed (critical for Blazor)
 
-Light values are the literals written as `var(--x, <literal>)` fallbacks throughout the markup and restated in the JS palette at `Cardstock Home.dc.html:329`. Dark values come from the `:root[data-theme="dark"]` block at `Cardstock Home.dc.html:29` (byte-identical block present in Binder `:29`, Card `:27`, Browse `:27`, Charts `:25`, Set `:27`, Character `:27`, Screener `:26`; About Data `:21` and Legal `:21` carry a shorter subset).
+There is **no `:root { }` light block in any app prototype.** Light is the absence of `data-theme`. Every light value lives in two places, kept in sync by hand:
+
+1. **Inline CSS fallbacks** — `color: var(--mut2, #6B6B66)` etc. `DISPLAY_VOCABULARY.md:76` gives the reason: *"inline styles use var(--x, <light-standard literal>) so streaming paints light."*
+2. **The `PAL` JavaScript object**, for values computed in script (chart strokes, SVG fills). Four branches: light-standard, light-CVD, dark-standard, dark-CVD. `Cardstock Home.dc.html:323–330`, identical in `Cardstock Charts.dc.html:331–338`, `Cardstock Screener.dc.html:419–426`, `Cardstock Binder.dc.html:332–339`, `Cardstock Card.dc.html:264–271`, `Cardstock Browse.dc.html:161–168`, `Cardstock Set.dc.html:146–153`, `Cardstock Character.dc.html:134–141`.
+
+`PAL` is the single most complete statement of the palette in the codebase. A Blazor implementation should invert this: declare a real `:root` light block, and keep the same hexes.
+
+### 2.2 Chrome (theme-only; identical in standard and colorblind modes)
 
 | Token | Light | Dark | Role |
 |---|---|---|---|
-| `--bg` | `#FAFAF7` | `#161614` | Page ground ("paper") |
-| `--card` | `#FFFFFF` | `#1E1E1C` | Panel / surface / nav / sticky header |
-| `--ink` | `#1C1C1E` | `#E9E9E5` | Primary text, logo strokes |
-| `--mut` | `#5B5B57` | `#B4B4AE` | Secondary text (inactive nav, labels) |
-| `--mut2` | `#6B6B66` | `#A8A8A2` | Tertiary text (captions, sub-rows, column heads, axis labels) |
+| `--bg` | `#FAFAF7` | `#161614` | Page ground (warm off-white "cardstock") |
+| `--card` | `#FFFFFF` | `#1E1E1C` | Panel / row surface |
+| `--ink` | `#1C1C1E` | `#E9E9E5` | Primary text |
+| `--mut` | `#5B5B57` | `#B4B4AE` | Secondary text (labels, inactive nav) |
+| `--mut2` | `#6B6B66` | `#A8A8A2` | Tertiary text (captions, axis labels, footnotes) |
 | `--mut3` | `#8F8F8A` | `#9A9A94` | **Decorative strokes/handles only — never text** (see §8) |
-| `--mutbg` | `#F3F3EE` | `#2A2A27` | Muted chip fill, avatar disc |
-| `--hov` | `#F6F6F2` | `#282825` | Row / menu-item hover |
-| `--line` | `#E4E4E0` | `#33332F` | Standard hairline (1px) |
-| `--line2` | `#D9D9D4` | `#3E3E39` | Stronger divider |
-| `--line3` | `#C9C9C4` | `#4A4A44` | Resize handles, heaviest rule |
-| `--line4` | `#F0F0EC` | `#262623` | Faintest rule (table row separators) |
-| `--inbg` | `#FAFAF7` | `#262624` | Input field background (`Cardstock Profile.dc.html:216-217`) |
-| `--acc` | `#4A63D0` | `#8C9BF2` | Accent: links, active tab underline, focus outline, primary chart line |
-| `--accH` | `#3A4FB8` | `#AAB6F6` | Accent hover |
-| `--btn` | `#4A63D0` | `#4A63D0` | Primary button fill — **does not lighten in dark** |
-| `--btnH` | `#3A4FB8` | `#AAB6F6` | Primary button hover (`Cardstock Profile.dc.html:216-217`) |
+| `--mutbg` | `#F3F3EE` | `#2A2A27` | Neutral chip / avatar fill |
+| `--hov` | `#F6F6F2` | `#282825` | Row + button hover |
+| `--line` | `#E4E4E0` | `#33332F` | Standard 1px hairline |
+| `--line2` | `#D9D9D4` | `#3E3E39` | Emphasised divider |
+| `--line3` | `#C9C9C4` | `#4A4A44` | Heavy/handle rule, dashed placeholders |
+| `--line4` | `#F0F0EC` | `#262623` | Faintest rule (zebra, inner grid) |
+| `--inbg` | `#FAFAF7` | `#262624` | Input field fill |
+| `--acc` | `#4A63D0` | `#8C9BF2` | Links, active tab underline, focus outline |
+| `--accH` | `#3A4FB8` | `#AAB6F6` | Link/accent hover |
+| `--btn` | `#4A63D0` | `#4A63D0` | Primary button fill (**does not lift in dark**) |
+| `--btnH` | `#3A4FB8` | `#AAB6F6` | Primary button hover |
 | `--accBg` | `#EEF1FB` | `#252B44` | Accent-tinted surface |
-| `--accMut` | `#B9C4E8` | `#3A4570` | Muted accent (inactive accent strokes) |
-| `--tooltipBg` | `rgba(255,255,255,0.95)` | `rgba(30,30,28,0.95)` | Chart tooltip ground |
-| `--logoTeal` | `#0E8A7B` | `#3FBFAD` | **Logo sparkline only** (`Cardstock Home.dc.html:32,41`) |
+| `--accMut` | `#B9C4E8` | `#3A4570` | Accent-muted stroke |
+| `--tooltipBg` | `rgba(255,255,255,0.95)` | `rgba(30,30,28,0.95)` | Tooltip ground |
+| `--logoTeal` | `#0E8A7B` | `#3FBFAD` | Logo sparkline ONLY |
 
-`:root[data-theme="dark"]` also sets `color-scheme: dark` (`Cardstock Home.dc.html:29`), which recolours native scrollbars and form controls. Do not omit it.
+Light values: `Cardstock Home.dc.html:329` (PAL light chrome) and `Cardstock Profile.dc.html:217` (`--inbg`, `--btnH`).
+Dark values: `Cardstock Home.dc.html:29` + `:32`; PAL dark chrome `Cardstock Home.dc.html:328`.
+`--tooltipBg` light: inline fallback, e.g. `rgba(255,255,255,0.95)`; one page uses `0.96` — see §9.
 
-### 2.2 State tokens — the full 2×2 (theme × colourblind)
+### 2.3 State colors — the 2×2 matrix (theme × colorblind)
 
-This is the only axis colourblind mode touches. Authority: `Cardstock Home.dc.html:27` (light CVD), `:30` (dark standard), `:31` (dark CVD), and the four-branch JS palette at `Cardstock Home.dc.html:323-330`, cross-checked against `Cardstock Profile.dc.html:218-221`.
+The complete authority is the `PAL` branch block, `Cardstock Home.dc.html:324–327`. `--pos`/`--neg` are the *text/glyph* hues; `--pos2`/`--neg2`/`--neg3` are the *graphic* hues (chart strokes, sparklines, bar fills).
 
-| Token | Light standard | Light CVD | Dark standard | Dark CVD | Role |
-|---|---|---|---|---|---|
-| `--pos` | `#157A50` | `#0B69A8` | `#4CC08D` | `#58A9E6` | Bullish text/glyph |
-| `--pos2` | `#189E63` | `#0072B2` | `#4CC08D` | `#58A9E6` | Bullish stroke (chart lines, sparklines) |
-| `--neg` | `#C13A3A` | `#CC5F00` | `#E57B7B` | `#F5924E` | Bearish text/glyph |
-| `--neg2` | `#D64545` | `#D55E00` | `#E57B7B` | `#F5924E` | Bearish stroke, destructive menu item |
-| `--neg3` | `#A93838` | `#B34E00` | `#E57B7B` | `#E8874D` | Bearish deep (borders, error field) |
-| `--posBg(α)` | `rgba(24,158,99,α)` | `rgba(0,114,178,α)` | `rgba(24,158,99,α)` | `rgba(0,114,178,α)` | Bullish chip/area fill |
-| `--negBg(α)` | `rgba(214,69,69,α)` | `rgba(213,94,0,α)` | `rgba(214,69,69,α)` | `rgba(213,94,0,α)` | Bearish chip/area fill |
-| `--warn` / `--warnInk` | `#8F6614` | `#8F6614` (unchanged) | `#D6A54A` | `#D6A54A` (unchanged) | Amber data-caution |
-| `--warnBg` | `rgba(176,127,26,0.12)` | unchanged | `rgba(176,127,26,0.20)` | unchanged | Caution chip fill |
-
-Alpha values in use: chips `0.10`; Screener variants `0.06`, `0.07`, `0.08`, `0.25`; chart area fills `0.4`. `Cardstock Profile.dc.html:219-220` uses `0.18`/`0.20` for dark chip fills where the app screens compute alpha via `PAL.posBg(α)`.
-
-**Amber is deliberately CVD-invariant.** It is not a directional colour, so it needs no hue swap; its glyph is `–`, which is already directionless. Verified: no `:root[data-cvd="1"]` block in any screen mentions `--warn`.
-
-### 2.3 The colourblind-safe (Okabe–Ito) variant
-
-`DISPLAY_VOCABULARY.md:76`: *"CVD hues are Okabe-Ito (blue `#0072B2`, vermillion `#D55E00`) adjusted for contrast per surface."*
-
-The two pure Okabe–Ito anchors are `#0072B2` (blue) and `#D55E00` (vermillion). Everything else in the CVD column is one of those two darkened or lightened so it holds contrast on its surface:
-
-| Okabe–Ito anchor | Derived values | Where used |
-|---|---|---|
-| Blue `#0072B2` | `#0B69A8` (darkened, light text) · `#58A9E6` (lightened, dark theme) · `rgba(0,114,178,α)` (fills, both themes) | replaces every green |
-| Vermillion `#D55E00` | `#CC5F00` (light text) · `#B34E00` (light deep) · `#F5924E` (dark) · `#E8874D` (dark deep) · `rgba(213,94,0,α)` (fills) | replaces every red |
-
-**Critical implementation note: there is no canonical light-CVD block.** Each screen declares only the tokens it uses, so the nine `:root[data-cvd="1"]` blocks differ:
-
-| File:line | Declares |
-|---|---|
-| `Cardstock Home.dc.html:27` | `--pos --pos2 --neg --neg2 --posBg10 --negBg08 --negBg10` (the fullest) |
-| `Cardstock About Data.dc.html:24` | `--pos --neg` |
-| `Cardstock Card.dc.html:25` | `--pos --neg2` |
-| `Cardstock Charts.dc.html:23` | `--pos2 --neg2` |
-| `Cardstock Screener.dc.html:24` | `--neg2 --neg3 --negBg07 --negBg06 --negBg25` |
-| `Cardstock Binder.dc.html:27` · `Set:25` · `Character:25` | `--pos` |
-| `Cardstock Browse.dc.html:25` | `--neg2` |
-
-Blazor must emit **one complete CVD block** covering the union of these tokens. The per-screen fragmentation is a prototype artefact, not a design rule.
-
-### 2.4 Brand-package colours (`brand/brand-tokens.css`)
-
-Recorded for completeness. **None of these token names are consumed by any prototype** (§1).
-
-| Token | Light | Dark | Line (light / dark) | Role as documented |
+| Token | Light standard | Light CVD | Dark standard | Dark CVD |
 |---|---|---|---|---|
-| `--brand-primary` | `#4A63D0` | `#8C9BF2` | `:5` / `:21` | "Index Indigo" — same value as `--acc` |
-| `--brand-primary-strong` | `#3A4FB8` | `#AAB6F6` | `:6` / `:22` | Same value as `--accH` |
-| `--brand-logo-teal` | `#0E8A7B` | `#3FBFAD` | `:7` / `:23` | "Ledger Teal" — mark + favicon **only** |
-| `--brand-foil` | `#9A7B2D` | `#C9A84C` | `:8` / `:24` | Premium / grade accents, sparing |
-| `--focus-ring` | `0 0 0 3px rgba(74,99,208,0.22)` | `0 0 0 3px rgba(140,155,242,0.25)` | `:9` / `:25` | Focus ring (**not what the app does** — §9) |
-| `--link` | `#4A63D0` | `#8C9BF2` | `:11` / `:26` | Link colour |
-| `--link-hover` | `#3A4FB8` | `#AAB6F6` | `:12` / `:27` | Link hover |
-| `--ink` | `#1C1C1E` | — | `:17` | Restated app neutral |
-| `--bg` | `#FAFAF7` | — | `:17` | Restated app neutral |
-| `--card` | `#FFFFFF` | — | `:17` | Restated app neutral |
-| `--line` | `#E4E4E0` | — | `:18` | Restated app neutral |
-| `--muted` | `#8A8A86` | — | `:18` | **Stale — fails WCAG AA, see §8** |
-| `--hover` | `#F6F6F2` | — | `:18` | Restated app neutral |
+| `--pos` | `#157A50` | `#0B69A8` | `#4CC08D` | `#58A9E6` |
+| `--pos2` | `#189E63` | `#0072B2` | `#4CC08D` | `#58A9E6` |
+| `--neg` | `#C13A3A` | `#CC5F00` | `#E57B7B` | `#F5924E` |
+| `--neg2` | `#D64545` | `#D55E00` | `#E57B7B` | `#F5924E` |
+| `--neg3` | `#A93838` | `#B34E00` | `#E57B7B` | `#E8874D` |
+| `--warn` / `--warnInk` | `#8F6614` | `#8F6614` (unchanged) | `#D6A54A` | `#D6A54A` (unchanged) |
 
-**Chart series palette** (`brand/brand-tokens.css:14-15` light, `:28-29` dark; swatches at `Cardstock Brand System.dc.html:141-146`):
+Tint bases (alpha applied per use site; `PAL` exposes them as functions `posBg(a)` / `negBg(a)`, `Cardstock Home.dc.html:324–327`):
+
+| Tint | Standard base | CVD base |
+|---|---|---|
+| positive | `rgba(24,158,99,α)` | `rgba(0,114,178,α)` |
+| negative | `rgba(214,69,69,α)` | `rgba(213,94,0,α)` |
+| warn | `rgba(176,127,26,α)` in every mode | same |
+
+Observed α values in the prototypes: `.06 .07 .08 .10 .12 .25` light, `.18 .20` dark (`Cardstock Profile.dc.html:219–221`; `Cardstock Charts.dc.html:24`; `Cardstock Home.dc.html:27`). Named helper tokens exist where a tint is used in an inline style: `--posBg`, `--posBg10`, `--negBg`, `--negBg06`, `--negBg07`, `--negBg08`, `--negBg10`, `--negBg25`, `--warnBg`.
+
+The CVD hues are Okabe-Ito **blue `#0072B2`** and **vermillion `#D55E00`**, darkened/lightened per surface for contrast (`#0B69A8`, `#CC5F00`, `#B34E00` light; `#58A9E6`, `#F5924E`, `#E8874D` dark).
+
+### 2.4 The CSS override cascade
+
+Colorblind mode is *not* a full palette. It is a thin override that touches only `--pos*`, `--neg*` and their tints. Four selectors, in this order (`Cardstock Home.dc.html:27–32`):
+
+| Selector | What it sets |
+|---|---|
+| `:root[data-cvd="1"]` | light CVD state hues + tints |
+| `:root[data-theme="dark"]` | **all** dark chrome + `--warn` (state-neutral) |
+| `:root[data-theme="dark"]:not([data-cvd="1"])` | dark standard state hues |
+| `:root[data-theme="dark"][data-cvd="1"]` | dark CVD state hues |
+
+Pages declare only the subset of CVD tokens they actually use inline, so the `:root[data-cvd="1"]` block differs page to page — Home declares 7 tokens (`:27`), Screener 2 (`:25`), Charts 1 (`:27`), Card 5 (`:24`). The dark block is byte-identical across the 11 pages that have one. **A Blazor implementation must declare the union once, globally.**
+
+### 2.5 Brand tokens (`brand/brand-tokens.css`)
+
+Header comment: *"Cardstock brand tokens — v1.1 (Aug 2026) / Indigo primary (teal is logo-only)"* (`brand/brand-tokens.css:1–2`).
+
+| Token | Light | Dark | Role |
+|---|---|---|---|
+| `--brand-primary` | `#4A63D0` "Index Indigo" | `#8C9BF2` | Everything interactive |
+| `--brand-primary-strong` | `#3A4FB8` | `#AAB6F6` | Hover / pressed |
+| `--brand-logo-teal` | `#0E8A7B` "Ledger Teal" | `#3FBFAD` | Mark + favicon **ONLY — never text/UI chrome** |
+| `--brand-foil` | `#9A7B2D` | `#C9A84C` | Premium / grade accents, sparing |
+| `--focus-ring` | `0 0 0 3px rgba(74,99,208,0.22)` | `0 0 0 3px rgba(140,155,242,0.25)` | Focus shadow |
+| `--link` | `#4A63D0` | `#8C9BF2` | |
+| `--link-hover` | `#3A4FB8` | `#AAB6F6` | |
+| `--ink` | `#1C1C1E` | — | restated for reference |
+| `--bg` | `#FAFAF7` | — | restated |
+| `--card` | `#FFFFFF` | — | restated |
+| `--line` | `#E4E4E0` | — | restated |
+| `--muted` | `#8A8A86` | — | restated — **stale, see §8/§9** |
+| `--hover` | `#F6F6F2` | — | restated |
+
+Citations: light `brand/brand-tokens.css:5–18`, dark `:21–29`.
+
+### 2.6 Chart series (6, Okabe-Ito derived)
+
+`brand/brand-tokens.css:14–15` (light) and `:28–29` (dark); named in `Cardstock Brand System.dc.html:141–146`.
 
 | Token | Name | Light | Dark |
 |---|---|---|---|
@@ -147,253 +141,208 @@ Recorded for completeness. **None of these token names are consumed by any proto
 | `--series-5` | Sky | `#4C9FD8` | `#7BBCE8` |
 | `--series-6` | Graphite | `#71716D` | `#A5A5A0` |
 
-Rules stated on the page: *"Assign in order; grays last. Direction ▲/▼ keeps the app's green–red"* (`Cardstock Brand System.dc.html:138`), and no series line may borrow the directional green/red (`:101`).
+Rules (`Cardstock Brand System.dc.html:101`, `:138`): assign in order, greys last; **no series line may borrow the ▲/▼ green–red**; the six are tuned from Okabe-Ito.
+There is **no CVD variant of the series palette** — the series colors already are the CVD-safe set. Verified: no `--series-*` appears under any `[data-cvd]` selector anywhere.
 
-**The app does not use this palette.** Charts and Card colour series **per grade tier**, not per series index — see §2.5 and §9.
+### 2.7 Brand-specimen-only colors
 
-### 2.5 Grade-tier colours (what the charts actually use)
+These appear in `Cardstock Brand System.dc.html` and nowhere in the app. Do not implement as product tokens.
 
-`Cardstock Charts.dc.html:375` and `Cardstock Card.dc.html:325` define `TIER_COLORS`, keyed by the 19-value grade vocabulary. Two entries are token-derived (`PAL.acc`, `PAL.warn`, `PAL.mut2`); the rest are literals shared by both files:
-
-| Tier | Colour | Tier | Colour |
-|---|---|---|---|
-| `Raw` | `PAL.mut2` (`#6B6B66` / `#A8A8A2`) | `PSA 10` | `PAL.acc` (`#4A63D0` / `#8C9BF2`) |
-| `Grade 1` | `#A08D78` | `CGC 10` | `#1F8FA8` |
-| `Grade 2` | `#97906E` | `CGC 10 Prist.` | `#0F6E86` |
-| `Grade 3` | `#7F9668` | `TAG 10` | `#8646B8` |
-| `Grade 4` | `#6A9678` | `ACE 10` | `#C24B4B` |
-| `Grade 5` | `#5E9490` | `SGC 10` | `#5C6B9E` |
-| `Grade 6` | `#578AA3` | `BGS 10` | `#8A7139` |
-| `Grade 9` | `PAL.warn` (`#8F6614` / `#D6A54A`) | `BGS 10 Black` | `#2B2D42` |
-
-`Grade 7` / `Grade 8` / `Grade 9.5` differ between the two files — a genuine code-vs-code divergence:
-
-| Tier | `Cardstock Card.dc.html:325` | `Cardstock Charts.dc.html:375` |
+| Hex | Where | Use |
 |---|---|---|
-| `Grade 7` | `#B0552E` | `#A96A4A` |
-| `Grade 8` | `#2E7F78` | `#4C8F8A` |
-| `Grade 9.5` | `#6E4DB8` | `#7A56C9` |
-
-**Open item for implementation:** pick one set and use it on both surfaces. Neither prototype is more authoritative than the other; this needs an owner ruling.
-
-### 2.6 Marketing-page surfaces (landing pages only)
-
-Not part of the app token set. Recorded so the marketing shell can be reproduced (`uploads/Brand package creation/README.md:31-32,71`, `DESIGN_NOTES.md:145,147`).
-
-| Value | Role |
-|---|---|
-| `#F1F1EC` | Landing page surface (darker than app `--bg`) |
-| `#131316` | Full-bleed dark sections, dark panels |
-| `#1B1C1F` | Cards on dark sections |
-| `#0F0F11` | Footer |
-| `#2A2B2E` / `#232427` | Borders on dark |
-| `#F2F2EE` / `#B9B9B4` / `#9A9A96` / `#71716D` | Text ladder on dark |
-| `#55555A` | Secondary text on light marketing surfaces |
-| `#46C08A` ▲ / `#D0655E` ▼ | Ticker direction colours (marketing only — **not** the app's `--pos`/`--neg`) |
-
-Shadows (`uploads/Brand package creation/README.md:47`): `0 24px 48px rgba(28,28,30,0.25)` floating dark panels · `0 12px 24px rgba(28,28,30,0.2)` scattered cards · `0 16px 32px rgba(0,0,0,0.45)` cards on dark. In-app menu shadow is lighter: `0 6px 20px rgba(20,19,26,0.12)` (`Cardstock Home.dc.html:124`).
+| `#B0413E` | `:75`, `:79`, `:83`, `:87`, `:91`, `:185`, `:213` | "DON'T" label, destructive-button text on the specimen |
+| `#55555A` | `:69`, `:158`, `:170`, `:243` | Specimen body copy |
+| `#131316` | `:55`, `:57`, `:130` | Specimen dark-panel ground (the app uses `#161614`/`#1E1E1C`) |
+| `#F2F2EE` / `#9A9A96` | `:58`, `:64`, `:66`, `:132` | Specimen dark ink / dark muted |
+| `#ECECE6` | `:57`, `:61–63`; `brand/logo-mark-dark.svg` | Dark-mode logo stroke |
+| `#FFDE4D` / `#2A5CC8` | `:78` | The "official yellow/blue" anti-pattern tile |
+| `#8B5CF6` | `:82` | The gradient anti-pattern tile |
+| `#C9C9C4` | `:232`, `:236` | Schematic dashed placeholder (= app `--line3`) |
 
 ---
 
 ## 3. Typography
 
-### 3.1 Families and the division of labour
+### 3.1 Families
 
-Brand rule, verbatim (`Cardstock Brand System.dc.html:154`): *"No new fonts. The brand rule is the division of labor: Inter talks, JetBrains Mono counts."*
+Three families. Google Fonts, `display=swap`, with `preconnect` to `fonts.googleapis.com` and `fonts.gstatic.com` (`Cardstock Home.dc.html:12–14`).
 
-| Family | Role | Weights loaded (app screens) | Weights loaded (marketing + brand pages) |
+| Family | Loaded weights | Role | Fallback stack |
 |---|---|---|---|
-| **Inter** | UI, body, labels, buttons, prose | `400;500;600;700` | `400;500;600;700;800` |
-| **Inter Tight** | Section/panel headings only, always `700` | `600;700` | *not loaded* |
-| **JetBrains Mono** | Every number, ticker, timestamp, kbd hint, eyebrow, badge | `400;500;600` (Charts & Screener add `700`) | `400;500;700` |
+| **Inter** | 400, 500, 600, 700 (app) · 400–800 (brand page, landing) | UI, prose, labels, buttons | `'Inter', system-ui, sans-serif` (`Cardstock Home.dc.html:18`) |
+| **Inter Tight** | 600, 700 | Section headings on app pages (47 usages across the prototypes) | `'Inter Tight', sans-serif` |
+| **JetBrains Mono** | 400, 500, 600 (app) · 400, 500, 700 (brand page) | **Every number**, ticker, timestamp, kbd hint, eyebrow, badge | `'JetBrains Mono', monospace` |
 
-Font stacks as written: `font-family: 'Inter', system-ui, sans-serif` (`Cardstock Home.dc.html:18`), `font-family: 'Inter Tight', sans-serif`, `font-family: 'JetBrains Mono', monospace`.
+App font link (`Cardstock Home.dc.html:14`):
+`Inter:wght@400;500;600;700` + `Inter+Tight:wght@600;700` + `JetBrains+Mono:wght@400;500;600`. Charts additionally loads mono 700.
+Brand-specimen link (`Cardstock Brand System.dc.html:13`): `Inter:wght@400;500;600;700;800` + `JetBrains+Mono:wght@400;500;700` — **no Inter Tight**.
 
-Exact link tags — app screens (10 of 12): `family=Inter:wght@400;500;600;700&family=Inter+Tight:wght@600;700&family=JetBrains+Mono:wght@400;500;600&display=swap` (`Cardstock Home.dc.html:14`). Charts (`:23` region) and Screener add `;700` to JetBrains Mono. Landing, the three product landings and the Brand System page use `family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap` (`Cardstock Brand System.dc.html:13`).
+`DESIGN_NOTES.md:24` records that Space Grotesk was tried and rejected.
 
-Note the split: **Inter 800 exists only on marketing/brand pages; Inter Tight exists only on app pages.** A single Blazor `_Host` font link must load the union: `Inter:wght@400;500;600;700;800`, `Inter+Tight:wght@600;700`, `JetBrains+Mono:wght@400;500;600;700`.
+### 3.2 The mono-numbers rule
 
-### 3.2 The +15% scale, base 15px
+**Every number is JetBrains Mono — including numbers inside running prose.** The brand page states the division of labour verbatim: *"Inter talks, JetBrains Mono counts"* (`Cardstock Brand System.dc.html:154`), and enumerates the scope: *"every number, ticker, timestamp, and `/` kbd hint. Tabular by nature — columns align"* (`:162`). `DESIGN_NOTES.md:24` and `:87` lock it: *"JetBrains Mono for ALL numbers."*
 
-`HANDOFF.md:109`: *"**Typography +15% throughout**, base 15px."*
-`DESIGN_NOTES.md:24`: *"All text scaled +15% (base now 15px) across both pages."*
-`DESIGN_NOTES.md:87`: *"all text +15% (base 15px); Inter + Inter Tight + JetBrains Mono (all numbers) locked."*
+Practically, in Blazor: a numeric value in a sentence gets its own `<span class="num">`. The prototypes do exactly this — e.g. the specimen's own inline `/` key hint is a mono `<span>` nested inside an Inter paragraph (`Cardstock Brand System.dc.html:162`, `:220`), and the version stamp `v1.0 · Aug 2026` is a mono block inside an Inter header (`:33`).
 
-**Verified in code.** Every one of the 12 app screens sets `font-size: 15px` on its root `data-screen-label` element — About Data, Legal, Account, Card, Set, Browse, Character, Home, Charts, Binder, Profile, Screener. The `+15%` is historical (the scale was multiplied once, then frozen); the shipped values are the literal sizes below. **Do not re-apply a 15% multiplier.**
+Mono also carries: eyebrows/section numbers (`:37`, `:99`, `:152`, `:175`, `:208`, `:227`), all badges and chips (`:28`, `:197–200`), all column captions, and the `CDSTK` ticker chip.
 
-The `.5px` sizes are the fingerprint of that multiplication (13 × 1.15 ≈ 15, 11 × 1.15 ≈ 12.5) and must be preserved verbatim — they are not rounding noise.
+### 3.3 Scale
 
-### 3.3 Size inventory (app screens, by frequency)
+**Base is 15px and the whole app is scaled +15%** — `HANDOFF.md:109` (*"Typography +15% throughout, base 15px"*), `DESIGN_NOTES.md:24`, `:87`. The 15px base is set on each app page's root screen div, not on `body`: `Cardstock Home.dc.html:37` — `<div data-screen-label="Home" style="…font-size: 15px;">`. The +15% is historical (a one-time uplift already baked into every literal), not a runtime multiplier — implement the literals below, do not re-scale them.
 
-| Size | Uses | Typical role |
+App scale, by frequency across all prototypes:
+
+| px | Weight(s) | Typical use |
 |---|---|---|
-| `15px` | base + 95 explicit | Body, nav tabs, row primary text, menu items |
-| `14.5px` | 29 | Menu items, table cells |
-| `14px` | 62 | Buttons, mono values, secondary body |
-| `13.5px` | 61 | Dense controls |
-| `13px` | 108 | Dense labels, compact rows |
-| `12.5px` | 119 (most common) | Captions, sub-rows, column headers, mono metadata |
-| `12px` | 54 | Small mono, eyebrows |
-| `11.5px` | 35 | Chips |
-| `11px` | 44 | Smallest chips, badges |
-| `10.5px` | 24 | Mono micro-labels |
-| `10px` | 4 | Chart axis micro-labels |
+| 9 / 9.5 / 10 / 10.5 | 500–600 mono | Micro-badges, sparkline captions |
+| 11 / 11.5 | 500–600 mono | Chips, pills, table micro-labels |
+| 12 / 12.5 | 500–600 | Captions, helper text, secondary labels |
+| 13 / 13.5 | 500–600 | Dense table cells, buttons, chip text |
+| 14 / 14.5 | 500–600 | Standard controls, secondary body |
+| **15** | 400–600 | **Base — body, nav links, table body** |
+| 15.5 / 16 | 600 | Emphasised row values |
+| 17 / 17.5 / 18 / 18.5 | 600–700 (Inter Tight) | Panel/section headings |
+| 19 / 19.5 | 700 | Page sub-heads |
+| 21 / 22 | 700 | Page titles |
+| 24–30 | 700 | Hero numbers, logo wordmark (30px on the specimen) |
+| 48 / 52 | 800 | Marketing display only |
 
-Heading sizes (`Inter Tight` 700): `15px` (2 uses) · `17px` (2) · `17.5px` (9, the standard panel heading) · `18.5px` (8) · `19.5px` (5) · `27px` (3, page title). Nav wordmark is `Inter` 700 `18px` `-0.03em` (`Cardstock Home.dc.html:42`).
+Marketing scale — **landing pages only** (`Cardstock Brand System.dc.html:166–170`):
 
-### 3.4 Tracking and weight rules
+| Role | Size / weight | Detail |
+|---|---|---|
+| Display | 48 / 800 | `letter-spacing -0.03em`, `line-height 1.05` |
+| Heading | 28 / 700 | `letter-spacing -0.02em` |
+| Eyebrow | 12 / 500 mono | `letter-spacing 0.08em`, uppercase, indigo `#4A63D0` |
+| Body | 16 / 400 | `line-height 1.6`, max-width ~560px, color `#55555A` |
 
-- Tight tracking `-0.02em` to `-0.03em` above 20px; normal below (`Cardstock Brand System.dc.html:158`).
-- Wordmark and page titles: `-0.03em`. Section headings: `-0.02em`.
-- Uppercase eyebrows/column heads: mono, `letter-spacing: 0.05em`–`0.08em`, `text-transform: uppercase`, weight `500`–`600` (`Cardstock Home.dc.html:93`, `Cardstock Profile.dc.html:101`, `Cardstock Brand System.dc.html:169`).
-- Body weights: `400` prose · `500` secondary nav · `600` emphasis/labels/active nav · `700` headings and key numbers.
+The specimen states the boundary explicitly: *"landing prose only; the app keeps its 13–15px density"* (`:170`).
 
-### 3.5 THE NUMBER RULE (load-bearing)
+### 3.4 Weight and tracking
 
-`HANDOFF.md:151`: *"**Numbers are monospace** (JetBrains Mono), everywhere, including inside prose."*
-`DESIGN_NOTES.md:24`: *"JetBrains Mono for ALL numbers."*
+Observed weights across the prototypes: **600** (266×) · **500** (121×) · **700** (115×) · **650** (12×) · **400** (7×) · **800** (5×). 600 is the workhorse; 400 is rare because most app text is a label.
 
-This is not a table-alignment convention. It is absolute and it reaches inside sentences. A price, percentage, count, date, timestamp, ticker symbol, grade label, percentile or keyboard hint switches font **mid-paragraph**.
+Tracking rule (`Cardstock Brand System.dc.html:158`): *"Tight tracking (-0.02 to -0.03em) above 20 px, normal below."* Observed values: `-0.03em` (28×, wordmark + display), `-0.02em` (10×, headings), `-0.01em` (5×). Positive tracking is reserved for uppercase mono eyebrows: `0.06em` (38×), `0.05em` (20×), `0.08em` (12×), `0.07em` (5×), `0.04em` (1×).
 
-Rendering pattern from the prototypes:
+Line-height: `1.5` for helper prose, `1.6` for marketing body, `1.05` for display (`Cardstock Brand System.dc.html:158`, `:167`, `:170`).
 
-```
-Compare on the <a>Umbreon VMAX chart</a> · hover darkens to
-<span style="font-family: 'JetBrains Mono', monospace; font-size: 12px;">#3A4FB8</span> + underline
-```
-(`Cardstock Brand System.dc.html:128` — the hex is mono inside running prose.)
+Wordmark lockups:
 
-**Blazor consequence:** you cannot satisfy this with a `.mono` class applied at the block level. You need an inline component (e.g. `<Num>`) or a formatting helper that wraps every numeric run in a mono span, and every piece of copy containing a figure must route through it. Mono runs inside prose are typically set 1–2.5px smaller than the surrounding Inter to match x-height (`15px` prose → `12–14px` mono).
-
-What is mono, in full: prices · deltas and percentages · counts · dates and timestamps · ticker symbols (`CDSTK`, `UMBR`) · grade tier labels (`PSA 10`) · signal chips · keyboard hints (`/`) · eyebrow labels · column-header micro-labels · sales-ledger `source` enum values, rendered verbatim lowercase (`DISPLAY_VOCABULARY.md:61`).
-
-What stays Inter: everything else, including headings that contain no figure.
+| Context | Spec | Cite |
+|---|---|---|
+| App nav | mark 24px + wordmark Inter 700 / 18px / `-0.03em`, gap 10px | `Cardstock Home.dc.html:41–42`; `Cardstock Brand System.dc.html:53` |
+| Specimen header | mark 30px + wordmark 24px / 700 / `-0.03em`, gap 11px | `Cardstock Brand System.dc.html:24–26` |
+| Specimen hero | mark 40px + wordmark 30px / 700 / `-0.03em`, gap 13px | `:42–44` |
 
 ---
 
-## 4. Semantic rules — colour never carries meaning alone
+## 4. Semantic rules
 
 ### 4.1 The rule
 
-`DISPLAY_VOCABULARY.md:2`: *"Icon always accompanies color (▲ ▼ – ● ◌ ◆); never color alone."*
+**Color never carries meaning alone. Every state pairs a hue with a glyph.**
 
-Restated as product copy in the settings UI (`Cardstock Profile.dc.html:94`): *"Swaps green→blue and red→orange everywhere state color appears. **Glyphs ▲ ▼ – ◌ never change.**"*
+- `HANDOFF.md:150`: *"Color never carries meaning alone. Every state pairs a hue with a glyph (▲ ▼ – ● ◌ ◆). Colorblind mode swaps hue only; glyphs, labels, and grammar are identical."*
+- `DISPLAY_VOCABULARY.md:2`: *"Icon always accompanies color (▲ ▼ – ● ◌ ◆); never color alone."*
+- In the product UI itself, `Cardstock Profile.dc.html:94`: *"Swaps green→blue and red→orange everywhere state color appears. Glyphs ▲ ▼ – ◌ never change."*
 
-Every state renders `glyph + short name + evidence number`. The glyph is the meaning; the hue is reinforcement. A chip with no glyph is a bug.
+### 4.2 Glyph inventory (complete)
 
-### 4.2 The complete glyph inventory
-
-| Glyph | Name | Meaning | Colour token | Rendered in code |
+| Glyph | Name | Meaning | Paired hue (light std → light CVD) | Cite |
 |---|---|---|---|---|
-| `▲` | Up triangle | Bullish hit — a tracked signal fired in the favourable direction | `--pos` on `--posBg(0.10)` | `Cardstock Profile.dc.html:103`, `Cardstock Home.dc.html:417,418,422` |
-| `▼` | Down triangle | Bearish hit — fired adversely; also drawdown/overhang state | `--neg` on `--negBg(0.10)` | `Cardstock Profile.dc.html:104`, `Cardstock Home.dc.html:420,421` |
-| `–` (amber) | En dash, amber | **Caution** — notable but directionless. Complete band list: RSI 70–80 · RS decile exit (80–89th within 3mo of ≥90) · Pop Δ 60d ≥ +2%. No other signal has a caution band | `--warn` on `--warnBg` | `Cardstock Profile.dc.html:105`, `Cardstock Home.dc.html:419` |
-| `–` (grey) | En dash, grey | **Quiet** — signal is tracked and computable but sits between its bands | `--mut2` on `--mutbg` | `Cardstock Profile.dc.html:106` |
-| `◌` | Dotted circle | **Pending / insufficient** — not yet computable. Chip carries the unlock ETA; tooltip carries the floor rule. Also the hollow marker for a provisional current month on sparklines | `--mut2` on `--mutbg` | `Cardstock Profile.dc.html:107`, `Cardstock Home.dc.html:395` |
-| `◆` | Filled diamond | **Composite / product event** — card matched a preset or saved screen, or a sufficiency UNLOCK fired | thesis-coloured (`--pos` bullish screen, `--neg` avoid screen); amber for UNLOCK | `Cardstock Home.dc.html:423` |
-| `●` | Filled circle | **Liquidity / state, never directional** — volume, Amihud, dispersion, cross-market gap. Notable = `●` grey + value, else quiet | `--mut2` | **specified only** — `DISPLAY_VOCABULARY.md:2,25-29,50`; **zero occurrences in any prototype** |
+| `▲` | up triangle | Bullish hit / positive direction / screen ENTER on a bullish thesis | `--pos` `#157A50` → `#0B69A8` | `DISPLAY_VOCABULARY.md:9`, `:47`; `Cardstock Profile.dc.html:101` |
+| `▼` | down triangle | Bearish hit / negative direction / adverse exit / drawdown state | `--neg` `#C13A3A` → `#CC5F00` | `DISPLAY_VOCABULARY.md:9`, `:48`; `Cardstock Profile.dc.html:102` |
+| `–` | en dash (amber) | **Caution** — notable but directionless. Complete amber band list: RSI 70–80 · RS decile exit (80–89th within 3 mo of ≥90) · Pop Δ 60d ≥ +2%. No other signal has one. | `--warn` `#8F6614` (**unchanged in CVD**) | `DISPLAY_VOCABULARY.md:49`, `:53`; `Cardstock Profile.dc.html:103` |
+| `–` | en dash (grey) | **Quiet** — signal is tracked but between bands; nothing to report | `--mut2` `#6B6B66` on `--mutbg` | `DISPLAY_VOCABULARY.md:50`; `Cardstock Profile.dc.html:104` |
+| `◌` | dotted circle | **Pending / insufficient** — not yet computable; label carries an unlock ETA (`— 12d` under 60 days, `— Mar '27` beyond). Also: current month provisional on sparklines. | `--mut2` grey | `DISPLAY_VOCABULARY.md:51`, `:55`, `:71`; `Cardstock Profile.dc.html:105` |
+| `●` | filled circle | **Liquidity / descriptive state**, never directional — volume, Amihud, dispersion, cross-market gap | grey (`--mut2`) | `DISPLAY_VOCABULARY.md:34–38`, `:54` |
+| `◆` | diamond | **Composite membership** (card matches a preset/user screen) and **sufficiency UNLOCK** feed rows | thesis-colored: `--pos` bullish screen, `--neg` avoid screen; amber for unlock rows | `DISPLAY_VOCABULARY.md:43`, `:58` |
+| `✓` | check | Affirmative badge state (`WATCHING ✓`) | `--acc` indigo | `Cardstock Brand System.dc.html:200` |
+| `✕` | cross | "Don't" marker — **specimen page only**, not product UI | `#B0413E` | `Cardstock Brand System.dc.html:79`, `:83`, `:87`, `:91` |
 
-The `●` gap is real and verified: `grep` for `●` across all 17 `.dc.html` files returns 0. The four `●` signals are all liquidity metrics that are still data-locked, so no prototype had one to render. It is a specified-but-unbuilt glyph — build it, but expect no pixel reference.
+Supporting rules:
+- The five tracked-pill states are exhaustive: hit-bullish · hit-bearish · caution · quiet · pending. *"A tracked signal ALWAYS renders exactly one pill, in exactly one of five states; no other pill forms exist"* (`DISPLAY_VOCABULARY.md:45–51`).
+- Glance rule: **colored = hit, grey = nothing to report** (`DISPLAY_VOCABULARY.md:9`).
+- Direction hues are reserved. The brand may not borrow them: *"Direction chips (▲ ▼) keep the app's green/red — the brand never borrows them"* (`Cardstock Brand System.dc.html:202`), and no chart series may use them (`:101`, `:138`).
+- The logo sparkline is likewise fenced off: *"never recolor it — its teal is reserved for the logo; red/green mean market direction; UI chrome is indigo"* (`Cardstock Brand System.dc.html:71`).
 
-### 4.3 The five tracked-pill states (complete; no others exist)
+### 4.3 Confirmed from code: colorblind mode swaps hue only
 
-`DISPLAY_VOCABULARY.md:40-47` — *"A tracked signal ALWAYS renders exactly one pill, in exactly one of five states; no other pill forms exist."* The live reference rendering is the Profile preview strip, `Cardstock Profile.dc.html:103-107`:
+Verified four ways, all in Tier 1 code:
 
-| State | Render | Example |
-|---|---|---|
-| Hit bullish | green `▲` + chip text | `▲ RS 94th` |
-| Hit bearish | red `▼` + chip text | `▼ EMA 3/9` |
-| Caution | amber `–` + evidence number | `– RSI 71` |
-| Quiet | grey `–` + short name + `–` | `– MACD –` |
-| Pending | grey `◌` + short name + unlock ETA | `◌ Churn — 12d` |
+1. **The CSS override sets only state hues.** `:root[data-cvd="1"]` and `:root[data-theme="dark"][data-cvd="1"]` declare exclusively `--pos`, `--pos2`, `--neg`, `--neg2`, `--neg3` and their `rgba` tints. No chrome, no type, no radius, no content token appears under any `[data-cvd]` selector on any page (`Cardstock Home.dc.html:27`, `:31`; `Cardstock Card.dc.html:24`; `Cardstock Screener.dc.html:25`; `Cardstock Charts.dc.html:27`).
+2. **`--warn` is outside the swap.** It is declared in the `[data-theme]` block, never in a `[data-cvd]` block — so amber `#8F6614` / `#D6A54A` is identical in all four modes (`Cardstock Home.dc.html:29`; `Cardstock Profile.dc.html:221` sets `--warn` from `dark` alone, ignoring `cvd`).
+3. **`PAL`'s CVD branches change only `pos/pos2/neg/neg2/neg3/posBg/negBg`.** The chrome object `ch` is selected by `d` (dark) alone — `cvd` is not consulted (`Cardstock Home.dc.html:328–329`). Same in `Cardstock Profile.dc.html:215–217`.
+4. **Glyphs are literal text in the markup, outside any conditional.** The Profile live-preview strip hard-codes `▲ RS 94th`, `▼ EMA 3/9`, `– RSI 71`, `– MACD –`, `◌ Churn — 12d` and only the *color* comes from a token (`Cardstock Profile.dc.html:101–105`). Toggling `cvd` cannot reach them.
 
-Glance rule (`DISPLAY_VOCABULARY.md:8`): **coloured = hit, grey = nothing to report.** Pending ETA format: days under 60 (`— 12d`), month beyond (`— Mar '27`) (`DISPLAY_VOCABULARY.md:51`).
-
-Chip styling (`Cardstock Profile.dc.html:103`): `font-family: 'JetBrains Mono'; font-size: 11px; font-weight: 600; padding: 1px 6px; border-radius: 4px;`.
-
-### 4.4 Sufficiency states
-
-`DISPLAY_VOCABULARY.md:55` — every metric on every surface is in exactly one of five states, and this is the complete render set: **OK** (plain) · **LOW DATA** (amber `N OBS` badge) · **LOCKED** (control disabled + countdown copy) · **UNDEFINED window** (gaps render as gaps, never zeros) · **UNSTABLE FIT** (badge).
-
-### 4.5 Confirmed from code: colourblind mode swaps hue only
-
-The task asked for confirmation from the code. Here is the evidence, and one exception.
-
-**Confirmed — glyphs, labels and grammar are untouched:**
-
-1. All nine `:root[data-cvd="1"]` blocks declare **colour properties exclusively** — no `content`, no `::before`, no font, no text change. Verified across `Home:27`, `About Data:24`, `Card:25`, `Charts:23`, `Screener:24`, `Binder:27`, `Set:25`, `Character:25`, `Browse:25`.
-2. Glyphs are **static string literals in the data**, structurally unreachable by the CVD flag: `i: '▲'`, `i: '–'`, `i: '▼'`, `i: '◆'` at `Cardstock Home.dc.html:417-423`; `i:'◌'` at `:395`. The CVD branch in `PAL` (`Cardstock Home.dc.html:323-330`) returns **only hex strings and rgba functions** — it has no path to a glyph, a label or a sentence.
-3. The Profile preview strip (`:103-107`) renders identical glyph+text with only `var(--pos)`/`var(--neg)` resolving differently, which is the toggle demonstrating itself.
-4. The product copy states the invariant to the user (`Cardstock Profile.dc.html:94,96`).
-
-**One exception — CVD is not strictly hue-only in Charts.** It also strengthens line encoding:
-
-- `Cardstock Charts.dc.html:498-500`: with EMA on, `const cvd = localStorage.getItem('cardstock-cvd') === '1'` drives **stroke width `1 → 1.6`** and **dash patterns `none → '2.5 3.5'` (fast) / `none → '9 4'` (slow)**.
-- `Cardstock Charts.dc.html:791`: the MACD signal line takes `dash: cvd ? '4 3' : 'none'`.
-
-This is *additional* redundant encoding in exactly the place hue alone would be weakest — two overlapping trend lines — and it is fully consistent with the spirit of the rule. But it means `DISPLAY_VOCABULARY.md:76`'s *"swaps HUE only"* is literally false, and a Blazor chart layer that swaps hue and stops will lose the dash/width distinction. Recorded in §9.
+The only non-hue CVD behaviour found anywhere: in Charts, the MACD signal line becomes **dashed** when CVD is on — `dash: localStorage.getItem('cardstock-cvd') === '1' ? '4 3' : 'none'` (`Cardstock Charts.dc.html:791`). That is a *redundant encoding added* for CVD users, not a grammar change; it never removes or alters a glyph or label.
 
 ---
 
 ## 5. Spacing, borders, density
 
-### 5.1 There is no named spacing scale
+**There is no numeric spacing scale token set.** No `--space-*`, `--radius-*`, `--size-*` custom property exists in any prototype or in `brand/brand-tokens.css`. All spacing is literal px in inline styles. The values below are the de-facto scale, by observed frequency — a Blazor implementation should promote them to tokens with these exact numbers.
 
-Verified: no `--space-*`, `--radius-*` or `--size-*` token exists in `brand/brand-tokens.css` or in any prototype. Spacing is written as literals. What follows is the observed system.
+### 5.1 Spacing
 
-### 5.2 Spacing steps in use
+| Step | px | Frequency (`gap:`) |
+|---|---|---|
+| micro | 2, 3, 4, 5 | 4px 44× · 5px 12× · 2px 11× · 3px 4× |
+| tight | 6, 8, 10 | 8px 61× · 10px 59× · 6px 27× |
+| standard | 12, 14, 16 | 12px 42× · 14px 24× · 16px 17× |
+| loose | 18, 20, 22, 24 | 24px 19× · 20px 18× · 18px 8× · 22px 7× |
+| section | 28, 48 | 28px 6× · 48px 4× |
 
-`2 · 3 · 4 · 5 · 6 · 8 · 10 · 12 · 14 · 16 · 20 · 24 · 28px`. Most frequent gaps: `8px` (27) · `4px` (26) · `10px` (20) · `12px` (15) · `6px` (10) · `14px` and `16px` (6 each) · `24px` (4).
+Specimen section rhythm: `padding: 48px 0` between numbered sections, each closed by `border-bottom: 1px solid #E4E4E0` (`Cardstock Brand System.dc.html:36`, `:98`, `:151`, `:174`, `:207`, `:226`).
 
-- Page gutter: `20px` horizontal.
-- Main content: `padding: 16px 20px; gap: 16px; max-width: 1480px; margin: 0 auto` (`Cardstock Home.dc.html:83`).
-- Panel header: `padding: 10px 12px 0 12px`.
-- Table row: `padding: 7px 12px`.
-- Column header row: `padding: 6px 12px`.
-- Menu item: `padding: 6px 8px`; menu container `padding: 4px`.
-- Chip: `padding: 1px 6px`.
+### 5.2 Radii
 
-### 5.3 Radii
+| px | Frequency | Use |
+|---|---|---|
+| 2 | 21× | Focus-outline rounding (`Cardstock Home.dc.html:21`) |
+| 3 | 18× | Micro |
+| 4 | 52× | Chips, pills, kbd keys |
+| 5 | 32× | Badges (`Cardstock Brand System.dc.html:197–200`) |
+| **6** | **113×** | **Default control radius** — inputs, small panels, segmented buttons |
+| 7 | 8× | Specimen buttons/inputs (`:182–185`, `:191`) |
+| **8** | **89×** | **Default card/panel radius** |
+| 9, 10, 12 | 1× / 44× / 7× | 10px = pill toggle track (`Cardstock Profile.dc.html:96`) |
+| 99 | 8× | Full pill |
+| 50% | — | Avatar circle (`Cardstock Home.dc.html:53`) |
 
-App (from `Home`, `Screener`, `Charts`, `Binder`, `Card`): `6px` (50 uses) · `4px` (40) · `8px` (38) · `5px` (19) · `3px` (14) · `2px` (14) · `10px` (12) · `1px` (3) · `50%` (avatar, toggle knob).
+`BRAND_BRIEF.md:28` describes "6–8px radii" — the code confirms exactly that as the dominant pair.
 
-| Radius | Applied to |
-|---|---|
-| `2px` | Focus outline rounding, micro-marks |
-| `4px` | Chips, pills, badges, menu items, thumbnails |
-| `5px` | Mono ticker/badge chips |
-| `6px` | Menus, segmented controls, inset panels, small buttons |
-| `8px` | Cards and sections (the app's default panel radius) |
-| `10px` | Large panels |
-| `10px`/`50%` | Toggle track (`36×20`, radius `10px`) / knob (`16×16`) |
+### 5.3 Borders and elevation
 
-Brand-package radii, for marketing surfaces (`uploads/Brand package creation/README.md:45`): `5px` badges · `7px` buttons and inputs · `8–10px` cards · `12px` dark panels · `14–16px` large card slots. Note the app uses `6px`/`8px` buttons where the brand page shows `7px` — see §9.
+- **Hairlines are 1px, always.** `1px solid var(--line, #E4E4E0)` is the universal rule. No prototype uses a 2px border on chrome.
+- The active nav tab is a **2px** bottom border in `--acc`, with `margin-bottom: -1px` so it overlaps the nav's own hairline (`Cardstock Home.dc.html:45`).
+- Logo strokes are `stroke-width="2"` at a 32-unit viewBox (`Cardstock Home.dc.html:41`).
+- **No box-shadow elevation system.** The only shadows in the codebase are focus rings.
+- Focus, two mechanisms:
+  - App: `*:focus-visible { outline: 2px solid var(--acc, #4A63D0); outline-offset: 1px; border-radius: 2px; }` (`Cardstock Home.dc.html:21`).
+  - Brand/inputs: `box-shadow: 0 0 0 3px rgba(74,99,208,0.22)` light, `rgba(140,155,242,0.25)` dark — `--focus-ring` (`brand/brand-tokens.css:9`, `:25`; `Cardstock Brand System.dc.html:191–192`). The specimen's rule: *"Never remove focus without a ring."*
 
-### 5.4 Borders
+### 5.4 Density
 
-Hairlines are **always `1px`**. Weight is expressed by token, never by thickness: `--line4` (faintest, row separators) → `--line` (standard) → `--line2` → `--line3` (heaviest, resize handles). Active nav tab is a `2px solid var(--acc)` bottom border with `margin-bottom: -1px` to overlap the nav's own hairline (`Cardstock Home.dc.html:45`). Logo strokes are `2px` on a `32×32` viewBox.
+| Fixed chrome | Height | Cite |
+|---|---|---|
+| Nav bar | 48px, sticky, `z-index: 20` | `Cardstock Home.dc.html:39` |
+| Ticker strip | 36px | `Cardstock Home.dc.html:56` |
+| Account avatar | 28×28 circle | `Cardstock Home.dc.html:53` |
+| Segmented button | 30px | `Cardstock Profile.dc.html:85–86` |
+| Toggle switch | 36×20 track, 16px knob, `translateX(16px)` on | `Cardstock Profile.dc.html:96–97` |
 
-### 5.5 Density
+User-selectable density modes (`DISPLAY_VOCABULARY.md:184–189`):
 
-`font-size: 15px` root. Fixed chrome heights: nav `48px`, market ticker strip `36px`, segmented-control buttons `30px`, watchlist row `min-height: 66px` with a `48×66` thumbnail (5:7 card ratio), CVD toggle `36×20`, avatar disc `28×28`.
+| Surface | Modes | Meaning |
+|---|---|---|
+| Screener, Set, Character | terminal / binder | terminal = more rows, tighter type, every metric column; binder = fewer rows with card art |
+| Binder holdings | table / gallery | gallery renders the collection as card art |
 
-The nav is `position: sticky; top: 0; z-index: 20`; table column headers are `position: sticky; top: 48px; z-index: 10` — i.e. **the header offset is hard-coupled to the nav height.** Row menus sit at `z-index: 40`.
+Density persists per device via `localStorage`, like theme (`DISPLAY_VOCABULARY.md:189`; `HANDOFF.md:156`).
 
-User-facing density modes (`DISPLAY_VOCABULARY.md` §13): Screener/Set/Character offer **terminal / binder**; Binder holdings offers **table / gallery**; Charts offers resolution + range (`1Y · 3Y · 5Y · All`). *"Density and theme choices persist per device (localStorage), not per account."*
-
-Column widths on Home are user-resizable and held in state, defaults `{ card: 220, tier: 52, price: 76, chg: 52, spark: 68 }`, clamped `36–420px` (`Cardstock Home.dc.html:331,337`).
-
-### 5.6 Focus, links, motion
-
-```css
-a { color: var(--acc, #4A63D0); text-decoration: none; }
-a:hover { color: var(--accH, #3A4FB8); text-decoration: underline; }
-*:focus-visible { outline: 2px solid var(--acc, #4A63D0); outline-offset: 1px; border-radius: 2px; }
-@media (prefers-reduced-motion: reduce) { * { animation-duration: 0.01ms !important; } }
-```
-`Cardstock Home.dc.html:19-21,25`. The `focus-visible` rule is byte-identical across all 12 app screens.
-
-`DESIGN_NOTES.md:152` records the owner ruling *"too many tooltips is better than not enough"* — roughly 110 controls carry a `title` describing the control's **consequence**, not its name.
+Motion: `@media (prefers-reduced-motion: reduce) { * { animation-duration: 0.01ms !important; } }` (`Cardstock Home.dc.html:25`). Named keyframes: `peekIn`, `ticker` (`:23–24`). Toggle knob transition `0.15s` (`Cardstock Profile.dc.html:97`).
 
 ---
 
@@ -401,218 +350,278 @@ a:hover { color: var(--accH, #3A4FB8); text-decoration: underline; }
 
 ### 6.1 The mark
 
-Two cards fanned, the front one charting. Stroke-drawn at the app's hairline weight; **the sparkline is the only coloured element** (`Cardstock Brand System.dc.html:39`).
+Two cards fanned, the front one charting. *"The mark is stroke-drawn at the app's hairline weight; the sparkline is the only colored element"* (`Cardstock Brand System.dc.html:39`).
 
-Geometry — `viewBox="0 0 32 32"`, `fill="none"`, all strokes `2px` (`brand/logo-mark.svg`):
+Geometry — identical in every variant, `viewBox="0 0 32 32"`, `fill="none"` (`brand/logo-mark.svg`):
 
 | Element | Attributes |
 |---|---|
-| Back card | `<rect x="5.5" y="5.5" width="15" height="21" rx="2.5" transform="rotate(-12 13 16)">`, stroke `#1C1C1E` |
-| Front card | `<rect x="12" y="5.5" width="15" height="21" rx="2.5">`, fill `#FAFAF7`, stroke `#1C1C1E` |
-| Sparkline | `<polyline points="15,21.5 17.5,17 19.5,18.5 23.5,12.5">`, stroke `#0E8A7B`, `stroke-linecap/linejoin: round` |
-| Endpoint dot | `<circle cx="23.5" cy="12.5" r="1.7" fill="#0E8A7B">` |
+| Back card | `<rect x=5.5 y=5.5 w=15 h=21 rx=2.5 stroke-width=2 transform="rotate(-12 13 16)">` |
+| Front card | `<rect x=12 y=5.5 w=15 h=21 rx=2.5 stroke-width=2>` — filled with the page ground |
+| Sparkline | `<polyline points="15,21.5 17.5,17 19.5,18.5 23.5,12.5" stroke-width=2 linecap/linejoin=round>` |
+| End dot | `<circle cx=23.5 cy=12.5 r=1.7>` |
 
-### 6.2 Asset inventory (`CardStock Mockup/brand/`)
+### 6.2 Asset inventory (`brand/`)
 
-| File | Size | Contents |
+| File | Dimensions | Colors | Notes |
+|---|---|---|---|
+| `logo-mark.svg` | 32 viewBox | stroke `#1C1C1E`, front-card fill `#FAFAF7`, sparkline + dot `#0E8A7B` | Light variant |
+| `logo-mark-dark.svg` | 32 viewBox | stroke `#ECECE6`, front-card fill `#131316`, sparkline + dot `#3FBFAD` | Dark variant |
+| `favicon.svg` | 32 viewBox | tile `#0E8A7B` `rx=7`; single card `x=9.5 y=6.5 w=13 h=19 rx=2` + sparkline `12.5,20.5 15.5,15.5 17.5,17.5 20,11.5` + dot `r=1.6`, all `#FFFFFF` | **Filled tile — different geometry from the mark** (one card, not two) |
+| `favicon-16.png` | 16×16 | — | |
+| `favicon-32.png` | 32×32 | — | |
+| `apple-touch-icon.png` | 180×180 | — | |
+| `og-image.png` | 1200×630 | — | Social card (`Cardstock Brand System.dc.html:248`) |
+| `brand-tokens.css` | — | — | §2.5 |
+
+The specimen's own file list (`Cardstock Brand System.dc.html:245`) names exactly these eight. **There is no wordmark SVG** — the wordmark is live text (Inter 700, `-0.03em`), never an image.
+
+The app links only `favicon.svg`: `<link rel="icon" href="./brand/favicon.svg">` (`Cardstock Home.dc.html:11`). The PNG favicons, apple-touch-icon and OG image are shipped but unreferenced by any prototype — a Blazor host must wire them up itself.
+
+### 6.3 In-app rendering: theme-aware inline SVG
+
+The nav mark is **inlined, not `<img>`**, so it inherits theme tokens with no asset swap (`Cardstock Home.dc.html:41`):
+
+- card strokes → `stroke: var(--ink, #1C1C1E)`
+- front-card fill → `fill: var(--card, #FFFFFF)`
+- sparkline + dot → `stroke`/`fill: var(--logoTeal, #0E8A7B)`
+
+`--logoTeal` flips to `#3FBFAD` under `:root[data-theme="dark"]` — a dedicated one-token rule present on **all 13** themed pages including Profile and Account (`Cardstock Home.dc.html:32`; `Cardstock Profile.dc.html:23`; `Cardstock Account.dc.html:21`). Note that the in-app dark mark keeps `--ink` `#E9E9E5` and `--card` `#1E1E1C`, while the shipped `logo-mark-dark.svg` uses `#ECECE6` / `#131316`. Use the inline form in Blazor; the standalone SVGs are for external contexts.
+
+The specimen confirms one geometry only: *"dark · same geometry, no separate dark mark"* (`Cardstock Brand System.dc.html:66`) and *"strokes flip to #ECECE6 · teal lifts to #3FBFAD"* (`:64`).
+
+Since 2026-08-10 the nav lockup is an `<a>` to Home on all nav pages, with `color: inherit; text-decoration: none` inline so the global `a` rule cannot tint it (`Cardstock Home.dc.html:41`; rationale `DESIGN_NOTES.md:138`).
+
+### 6.4 Sizes and usage rules
+
+| Rule | Value | Cite |
 |---|---|---|
-| `logo-mark.svg` | 532 B | Light-background outline mark — ink `#1C1C1E` strokes, front card fill `#FAFAF7`, teal `#0E8A7B` sparkline |
-| `logo-mark-dark.svg` | 532 B | Dark-background outline mark — strokes `#ECECE6`, front-card fill `#131316`, sparkline `#3FBFAD`. **Identical geometry** |
-| `favicon.svg` | 449 B | Filled tile: `<rect width="32" height="32" rx="7" fill="#0E8A7B">`, single white card `x=9.5 y=6.5 w=13 h=19 rx=2`, white polyline `12.5,20.5 15.5,15.5 17.5,17.5 20,11.5`, white dot `r=1.6` at `(20, 11.5)` |
-| `favicon-16.png` | 358 B | 16px raster of the tile |
-| `favicon-32.png` | 668 B | 32px raster of the tile |
-| `apple-touch-icon.png` | 3.6 KB | 180px |
-| `og-image.png` | 65.8 KB | 1200×630 social card |
-| `brand-tokens.css` | 1.2 KB | Token dictionary — **not linked by anything** (§1) |
+| Mark sizes | 32 / 24 / 20 px; favicon 16px filled tile | `Cardstock Brand System.dc.html:51` |
+| Nav lockup | mark 24px + wordmark 18px, gap 10px | `:53`; matches `Cardstock Home.dc.html:41–42` |
+| Clearspace | one card-width (½ mark width) on all sides | `:70` |
+| Minimum size | never below 16px; **below 20px use the filled favicon tile** | `:70` |
+| Sparkline direction | fixed geometry, not data — never redraw falling | `:71` |
+| Sparkline color | never recolor; teal is logo-reserved | `:71` |
 
-The filled tile is a **different drawing**, not a background behind the outline mark: one card instead of two, no fan rotation, `rx=7` tile corner. Do not synthesise it by boxing the outline mark.
+The four "DON'T" tiles (`:76–93`), each a rendered anti-example: ✕ official yellow/blue vibes · ✕ gradients on the mark · ✕ falling or market-red line · ✕ on imagery — use the filled tile.
+`BRAND_BRIEF.md:13` gives the reason for the first: fan-made, not affiliated with Nintendo/TPCi, *"no Pokéballs, no official yellow/blue logotype vibes."* The specimen header carries the disclaimer *"fan-made · not affiliated with Nintendo/TPCi"* (`:33`).
 
-### 6.3 Usage rules
-
-**Size ramp** (`Cardstock Brand System.dc.html:51`): `32 / 24 / 20px` outline mark; `16px` favicon (filled tile).
-
-**Nav lockup** (`Cardstock Brand System.dc.html:53`, implemented at `Cardstock Home.dc.html:41-42`): mark `24px` + wordmark Inter `700` `18px` `-0.03em`, gap `10px`. Optional `CDSTK` mono chip (`11px`, weight `500`, `--mut`, `1px` border, radius `5px`, padding `2px 7px` — `Cardstock Brand System.dc.html:28`).
-
-**In-app the mark is inline SVG with themed strokes**, not an `<img>`: `stroke: var(--ink)` on both cards, `fill: var(--card)` on the front card, `stroke/fill: var(--logoTeal)` on the sparkline and dot (`Cardstock Home.dc.html:41`). This is why there is *"no separate dark mark"* (`Cardstock Brand System.dc.html:66`) — the same markup retints. The two standalone SVGs exist for contexts that cannot carry CSS variables.
-
-**The lockup is a link to Home on all 10 nav pages**, with inline `color: inherit; text-decoration: none` so the global `a` rule does not tint it; Account keeps a centred non-link lockup (`DESIGN_NOTES.md:138`, `Cardstock Home.dc.html:41`).
-
-**Clearspace** (`Cardstock Brand System.dc.html:70`): one card-width (½ mark width) on all sides. Never below `16px`; **below `20px` use the filled favicon tile.**
-
-**Sparkline always rises** (`Cardstock Brand System.dc.html:71`): *"The line in the mark is fixed geometry, not data. Never redraw it falling, and never recolor it — its teal is reserved for the logo; red/green mean market direction; UI chrome is indigo."*
-
-**Never** (rendered as four misuse panels, `Cardstock Brand System.dc.html:78-92`): official yellow/blue trade-dress colouring · gradients on the mark · a falling or market-red sparkline · the outline mark on imagery (use the filled tile). Add, from `uploads/Brand package creation/README.md:63`: no drop shadows, no rotation beyond the built-in fan, no Pokéball geometry.
-
-**Teal is logo-only.** `brand/brand-tokens.css:7`: *"mark + favicon ONLY — never text/UI chrome."* Verified: `#0E8A7B` and `#3FBFAD` appear in all 17 prototypes exclusively as `--logoTeal` on mark geometry.
-
-**Favicon wiring:** `<link rel="icon" href="./brand/favicon.svg">` on every app page (`Cardstock Home.dc.html:11`).
-
-### 6.4 Illustration style — schematics, not pictures
+### 6.5 Empty-state illustration style — "schematics, not illustrations"
 
 `Cardstock Brand System.dc.html:229`: *"Not illustrations — schematics. 2px ink strokes, dashed placeholders, one indigo accent, a mono caption. Drawn like chart annotations, never scenes or characters."*
 
-Two reference empty states (`:232`, `:236`): a dashed card slot (`stroke #C9C9C4`, `stroke-dasharray="5 4"`) beside an indigo `+` glyph; and a known price line (`#1C1C1E`) continuing into a dashed indigo future (`#4A63D0`, `stroke-dasharray="4 4"`). Captions are mono `12px` `--mut2`.
+Two worked examples (`:232`, `:236`), both `viewBox="0 0 96 64"`, rendered at 120px wide, with a 12px mono `--mut2` caption:
+
+| Example | Construction |
+|---|---|
+| empty binder | dashed card slot `stroke="#C9C9C4" stroke-width=2 stroke-dasharray="5 4"` + a `#4A63D0` plus sign |
+| no data yet | baseline `#C9C9C4` + known polyline `#1C1C1E` + dashed future `#4A63D0 stroke-dasharray="4 4"` |
+
+### 6.6 Voice (governs microcopy, included because it is part of the brand contract)
+
+*"Matter-of-fact and openly nerdy. Precise numbers over adjectives. Jargon is welcome, explained once. Keyboard shortcuts are copy. No exclamation marks, no emoji; dry humor lives in empty states only."* (`Cardstock Brand System.dc.html:210`)
+
+| DO | DON'T |
+|---|---|
+| No positions. Add your first card to start tracking cost basis. | Your collection is waiting for you! 🎉 |
+| 3 sales in 30d — LOW CONFIDENCE. Treat as directional. | Not enough data, check back soon! |
+| Price feed unavailable. Last good tick 14:32 UTC. | Oops! Something went wrong. |
+| Press `/` to search. Most pages are two keys away. | Welcome aboard! Let's take a quick tour. |
+
+(`Cardstock Brand System.dc.html:214–221`.)
 
 ---
 
 ## 7. Theming mechanics
 
-### 7.1 Two independent switches
+### 7.1 State model
 
-| Concern | Attribute on `<html>` | localStorage key | On-value | Default |
-|---|---|---|---|---|
-| Theme | `data-theme="dark"` | `cardstock-theme` | `'dark'` (`'light'` written explicitly when chosen) | light — absence of the attribute |
-| Colourblind palette | `data-cvd="1"` | `cardstock-cvd` | `'1'` (`'0'` written when turned off) | off |
+Two independent, orthogonal booleans on `<html>`:
 
-They are orthogonal, producing the four combinations in §2.2. The dark CSS uses `:not([data-cvd="1"])` / `[data-cvd="1"]` compound selectors to resolve the cross-product without JS (`Cardstock Home.dc.html:30-31`).
+| Attribute | Set when | Absent means |
+|---|---|---|
+| `data-theme="dark"` | user chose dark | **light** (there is no `data-theme="light"`) |
+| `data-cvd="1"` | user enabled colorblind-safe palette | standard hues |
 
-**Light is the default by omission.** There is no `:root[data-theme="light"]` block and no `prefers-color-scheme` query anywhere. Light values live as `var(--x, <literal>)` fallbacks in the markup — *"inline styles use `var(--x, <light-standard literal>)` so streaming paints light"* (`DISPLAY_VOCABULARY.md:76`). The system theme is deliberately ignored; the choice is explicit and per-device.
+Four resulting modes. Light-standard is the zero-attribute default, which is why every inline `var()` fallback is a light-standard literal.
 
-### 7.2 The pre-paint script — exactly how the flash is avoided
+### 7.2 Persistence
 
-`Cardstock Home.dc.html:35` (byte-identical in About Data `:28`, Binder `:35`, Card `:33`, Browse `:33`, Legal `:24`, Character `:33`, Charts `:31`, Screener `:32`, Set `:33`):
+`localStorage`, per device, **not per account** (`HANDOFF.md:156`; `DISPLAY_VOCABULARY.md:189`).
+
+| Key | Values | Written at |
+|---|---|---|
+| `cardstock-theme` | `'dark'` \| `'light'` | `Cardstock Profile.dc.html:234–235` |
+| `cardstock-cvd` | `'1'` \| `'0'` | `Cardstock Profile.dc.html:237` |
+
+Writers (`Cardstock Profile.dc.html:234–237`):
+
+```
+setLight:  localStorage.setItem('cardstock-theme', 'light')
+setDark:   localStorage.setItem('cardstock-theme', 'dark')
+toggleCvd: localStorage.setItem('cardstock-cvd', cvd ? '0' : '1')
+```
+
+Note the read is strict-equality on the exact strings — `'light'` and `'0'` are stored but never tested for; any value other than `'dark'`/`'1'` falls through to the default. There is no `prefers-color-scheme` media query anywhere in the codebase: the OS preference is **not** consulted, and first visit is always light-standard.
+
+### 7.3 The pre-paint script — exactly how the flash is avoided
+
+One line, verbatim and byte-identical on 11 pages (`Cardstock Home.dc.html:35`, `Cardstock Screener.dc.html:32`, `Cardstock Charts.dc.html:31`, `Cardstock Binder.dc.html:35`, `Cardstock Card.dc.html:33`, `Cardstock Browse.dc.html:33`, `Cardstock Set.dc.html:33`, `Cardstock Character.dc.html:33`, `Cardstock About Data.dc.html:28`, `Cardstock Legal.dc.html:24`):
 
 ```html
 <script>if(localStorage.getItem('cardstock-cvd')==='1')document.documentElement.setAttribute('data-cvd','1');if(localStorage.getItem('cardstock-theme')==='dark')document.documentElement.setAttribute('data-theme','dark');</script>
 ```
 
-Why it works, mechanically:
+Why there is no flash — four properties, all load-bearing:
 
-1. **It is inline and synchronous** — no `src`, no `defer`, no `async`, no `DOMContentLoaded`. HTML parsing halts at this tag, the script runs to completion, then parsing resumes. There is no interval in which the browser can paint.
-2. **It sits in the document head, after the `<style>` block that defines `:root[data-theme="dark"]` and `:root[data-cvd="1"]`, and before any body content.** The CSS rules already exist in the stylesheet when the attribute lands, so the very first style resolution of the first body element already sees dark values.
-3. **It writes to `document.documentElement`** — `<html>`, which exists as soon as parsing begins. It does not touch `<body>` (not yet parsed) and never queries the DOM.
-4. **It reads localStorage, which is synchronous.** No promise, no fetch, no round trip.
-5. **The default requires no work.** Light needs no attribute, so the untouched document is already correctly themed; the script only ever *adds*.
-6. **`color-scheme: dark` rides along inside `:root[data-theme="dark"]`** (`Cardstock Home.dc.html:29`), so native scrollbars and form controls are dark from first paint too — a common residual flash this avoids.
+1. **It is in `<head>`, after the `<style>` that defines the `[data-theme]` / `[data-cvd]` rules** (style at `Cardstock Home.dc.html:16–33`, script at `:35`). The rules already exist in the CSSOM when the attribute lands, so the attribute takes effect on the *first* style resolution.
+2. **It is synchronous and inline** — no `src`, no `async`, no `defer`, no `DOMContentLoaded`. HTML parsing blocks on it. It runs before `<body>` is parsed and therefore before any box is laid out.
+3. **`localStorage` is a synchronous API.** The read completes inside the same parser pause; nothing is deferred to a later task.
+4. **It mutates `document.documentElement`, which already exists** while `<head>` is being parsed. The attribute is set on the element the selectors are anchored to, so no re-parenting or re-render is needed.
 
-If the attribute were set after first paint (a `DOMContentLoaded` handler, a component `OnInitialized`, or a deferred bundle) the user would see a white page repaint to dark — the flash of incorrect theme.
+Consequence: the browser's first paint is already dark and/or CVD. The failure mode this prevents is the "white flash" — first paint light, then a script at the end of `<body>` (or a Blazor circuit callback) repaints dark.
 
-**Blazor consequence.** The pre-paint script must be an **inline `<script>` in `App.razor`'s `<head>`, placed after the token `<style>`/`<link>` and before `<body>`.** It cannot live in a `.js` file loaded with `defer`, cannot be a JSInterop call, and cannot run from a component lifecycle method — all of those execute after the first paint. Under Interactive Server this is doubly important: the pre-rendered HTML arrives over the wire and paints long before the circuit connects.
+**Blazor implementation note.** In Blazor Server / Interactive Server the C# circuit is established *after* first paint, so theme must not be applied from `OnAfterRenderAsync` or the flash returns. Emit this exact `<script>` inline in the `<head>` of `App.razor` / `_Host.cshtml`, after the token stylesheet link and before `blazor.web.js`. It is also `<HeadContent>`-hostile — it must be in the static host page, not injected per-component.
 
-The same constraint explains the fallback pattern `var(--acc, #4A63D0)` on every inline style — it lets streamed/pre-rendered markup paint correct light colours before any stylesheet cascade fully resolves. Reproduce the fallbacks; they are load-bearing during pre-render, not redundancy.
+### 7.4 The second mechanism — component-scoped theming on Profile and Account
 
-### 7.3 Applying and persisting a change
+`Cardstock Profile.dc.html` and `Cardstock Account.dc.html` **do not carry the pre-paint script** and **do not declare the `:root[data-theme="dark"]` chrome block.** Verified: the only `[data-theme]` selector on either page is the one-token `--logoTeal` rule (`Cardstock Profile.dc.html:23`; `Cardstock Account.dc.html:21`).
 
-`Cardstock Profile.dc.html:234-237`:
+Instead they compute the full token set in the component and apply it as an inline style object on a `display: contents` wrapper (`Cardstock Profile.dc.html:214–222`):
 
-```js
-setLight:   () => { localStorage.setItem('cardstock-theme', 'light'); this.setState({ theme: 'light' }); },
-setDark:    () => { localStorage.setItem('cardstock-theme', 'dark');  this.setState({ theme: 'dark'  }); },
-toggleCvd:  () => { localStorage.setItem('cardstock-cvd', cvd ? '0' : '1'); this.setState({ cvd: !cvd }); },
+```
+vars(dark, cvd) → Object.assign({ display: 'contents', colorScheme: dark ? 'dark' : 'light' }, ch, s, w)
 ```
 
-Write-then-render, no confirmation step, no Save button — the tooltips promise *"applies immediately and is remembered on this device"* (`Cardstock Profile.dc.html:87-88`).
+with `ch` = chrome (13 tokens, chosen by `dark` only, `:216–217`), `s` = state hues + tints (chosen by `dark` × `cvd`, `:218–220`), `w` = warn (chosen by `dark` only, `:221`). Initial state is hydrated in `componentDidMount` from the same two `localStorage` keys (`:208–212`).
 
-Read-back on mount, `Cardstock Profile.dc.html:207-212`: only `'dark'` and `'1'` are honoured; anything else falls through to the defaults.
+This exists so the Appearance panel can preview a theme change instantly without a reload. It is a **prototype artifact, not a second design system** — the token values are identical to the global ones. In Blazor, use the global attribute mechanism everywhere and re-render on toggle; a `display: contents` wrapper is not needed.
 
-### 7.4 The Profile page's local override (prototype-only)
+Two token sets differ slightly in the component path — `--accH: '#8CA4F0'` and `--btnH: '#AAB6F6'` in dark (`Cardstock Profile.dc.html:216`) versus `--accH: '#AAB6F6'` globally (`Cardstock Home.dc.html:29`). See §9.
 
-Profile and Account do **not** carry the full `:root[data-theme="dark"]` block (they declare only `--logoTeal`, at `Cardstock Profile.dc.html:23` and `Cardstock Account.dc.html:21`). Instead `vars(dark, cvd)` (`Cardstock Profile.dc.html:214-223`) returns a style object with `display: 'contents'` plus `colorScheme` and every token, applied to a wrapper element — so the settings page can re-theme itself live without a reload.
+### 7.5 Script-computed colors
 
-That is a prototype device for demonstrating the toggle in place. **In Blazor, set the attribute on `<html>` via a small JS helper and let the cascade do the work** — no wrapper, no duplicated palette.
+Anything drawn in JavaScript (chart strokes, sparkline fills, SVG markers) reads `PAL`, not CSS. `PAL` is an IIFE evaluated **once at class-definition time** from `localStorage` (`Cardstock Home.dc.html:323`), so script-drawn color does not react to a live toggle — it is correct on load only. A Blazor implementation should read the CSS custom properties (or pass the resolved palette from the server) rather than reproduce this snapshot behaviour.
 
-Beware one inconsistency in that local copy: it sets dark `--accH: '#8CA4F0'`, whereas every other screen's dark block sets `--accH: #AAB6F6` (`Cardstock Home.dc.html:29`). Use `#AAB6F6` — it is the value in 10 files and the brand-package value (`brand/brand-tokens.css:22`).
-
-### 7.5 What the settings UI looks like
-
-`Cardstock Profile.dc.html:80-111`. Panel heading "Appearance" (Inter Tight 700 `17.5px`). Theme is a two-button segmented control (`1px var(--line)` border, radius `6px`, `overflow: hidden`, buttons `30px` tall, `padding: 0 14px`, Inter `600` `14px`; the selected button fills `var(--btn)` with `#FFFFFF` text). The colourblind control is a `role="switch"` with `aria-checked`, `36×20`, radius `10px`, track `var(--btn)` when on / `var(--line)` when off, white `16×16` knob translating `16px` over `0.15s`.
-
-Below both sits a live **Preview** strip rendering all five pill states plus a `+4.2%` / `−1.8%` pair (`:100-110`) — the toggle demonstrating its own effect, which is also the canonical rendering of the pill vocabulary in §4.3.
+The Appearance panel's own copy states the intent: *"Applies across every Cardstock page"* and *"applies immediately and is remembered on this device"* (`Cardstock Profile.dc.html:83`, `:85`).
 
 ---
 
 ## 8. Known issues
 
-### 8.1 The deferred WCAG failure — `#8A8A86`
+### 8.1 The recorded, deferred failure
 
-**Token:** `--muted`
-**Value:** `#8A8A86`
-**Defined at:** `CardStock Mockup/brand/brand-tokens.css:18`
-**Also hard-coded 39× in `Cardstock Brand System.dc.html` and 3× in `Cardstock Landing.dc.html`.**
+**Token: `--muted` = `#8A8A86` in `brand/brand-tokens.css:18`.**
 
-Recorded at `DESIGN_NOTES.md:26`: *"Known issue (deferred): `#8A8A86` small text fails WCAG AA (3.2:1) — user postponed contrast pass."* Still listed as open at `DESIGN_NOTES.md:166`: *"4. Deferred: WCAG contrast pass on muted grey small text."*
+`DESIGN_NOTES.md:26` (Tier 2) records it: *"muted #5B5B57/#8A8A86 … Known issue (deferred): #8A8A86 small text fails WCAG AA (3.2:1) — user postponed contrast pass."* `DESIGN_NOTES.md:166` lists it as open todo #4.
 
-**Confirmed from the CSS, with an important correction.** Recomputing WCAG 2.x relative luminance for `#8A8A86`:
+Confirmed by computation against the tokens' own backgrounds:
 
-| Foreground | Background | Ratio | AA small text (4.5:1) | AA large/UI (3:1) |
+| Foreground | Background | Ratio | AA normal (4.5) | AA large (3.0) |
 |---|---|---|---|---|
-| `#8A8A86` | `#FAFAF7` (`--bg`) | **≈ 3.3 : 1** | ✗ FAIL | ✓ pass |
-| `#8A8A86` | `#FFFFFF` (`--card`) | **≈ 3.5 : 1** | ✗ FAIL | ✓ pass |
+| `#8A8A86` | `--bg` `#FAFAF7` | **3.31:1** | FAIL | pass |
+| `#8A8A86` | `--card` `#FFFFFF` | **3.47:1** | FAIL | pass |
 
-The documented figure of `3.2:1` is slightly conservative; the failure it reports is real either way. Since `--muted` is used almost exclusively for small text (captions, labels, mono metadata at `11–13px`), 4.5:1 is the applicable threshold.
+The doc's "3.2:1" is close but not exact — 3.31:1 on the brand background, 3.47:1 on white. The failure is real.
 
-**But the app was already fixed, and the brand package was not.**
+**But the scope in the doc is stale.** The contrast pass *was* run on 2026-08-10 (`DESIGN_NOTES.md:135–137`), moving the app's `--mut2` from `#8A8A86` to `#6B6B66`. Verified in code: **`#8A8A86` appears 0 times in all 13 app prototypes.** It survives only in `brand/brand-tokens.css:18`, in `Cardstock Brand System.dc.html` (39 occurrences — the specimen's own caption color) and in `Cardstock Landing.dc.html` (3). So:
 
-`DESIGN_NOTES.md:136` records the remediation: *"Light-theme greys darkened everywhere (dark theme already passed): mut2 `#8A8A86`→`#6B6B66` (≈4.8–5.4:1 on card/bg/mutbg), mut3 `#B0B0AB`→`#8F8F8A` for decorative strokes/handles (≥3:1), and every `color:var(--mut3,…)` TEXT usage (chart axis labels, footnotes) promoted to `var(--mut2)` — small-text grey hierarchy is now 2 levels (mut, mut2), differentiate via size/weight instead."* Warn gold was darkened in the same pass, `#B07F1A`→`#8F6614` (5.1:1), at `DESIGN_NOTES.md:137`.
+- **Product UI: fixed.** `--mut2` `#6B6B66` scores 5.36:1 on card, 5.12:1 on bg, 4.81:1 on mutbg — passes AA everywhere.
+- **Brand package + specimen page + landing: still failing.** Anyone who consumes `brand-tokens.css` literally inherits the bug.
 
-Verified by counting `#8A8A86` per file:
+The paired mitigation also landed: `--mut3` was moved from `#B0B0AB` to `#8F8F8A` and **demoted to non-text use only**, with every text usage promoted to `--mut2` (`DESIGN_NOTES.md:137`). Verified in code: `color: var(--mut3, …)` occurs **0 times** across all prototypes. `#8F8F8A` at 3.11–3.25:1 is legal for its remaining role (non-text graphics need 3:1) and illegal for text — the demotion is load-bearing, not cosmetic. `DESIGN_NOTES.md:137` states the resulting rule: *"small-text grey hierarchy is now 2 levels (mut, mut2), differentiate via size/weight instead."*
 
-| File group | Occurrences |
-|---|---|
-| All 11 app screens (Home, Screener, Charts, Binder, Card, Browse, Set, Character, About Data, Profile, Account, Legal) | **0** |
-| `Cardstock Brand System.dc.html` | 39 |
-| `Cardstock Landing.dc.html` | 3 |
-| `brand/brand-tokens.css:18` | 1 (`--muted`) |
+### 8.2 Full audit — every text token against every background it can sit on
 
-**Resolution for the Blazor build:**
-- The **app** is clean. Use `--mut #5B5B57` and `--mut2 #6B6B66`; the grey ladder for text is two levels only.
-- `--mut3 #8F8F8A` is **decorative-only** — resize handles, dashed placeholder strokes, chart gridlines. Never set text in it. This is a rule, not a preference; violating it re-introduces the failure.
-- **`#8A8A86` must not be carried into the app.** `brand/brand-tokens.css:18` is stale by four days relative to the contrast pass and should be corrected to `#6B6B66` if that file is ever adopted.
-- The **Brand System and Landing pages still carry the failing value.** They are prototypes; if either is ported, the greys need the same treatment.
+WCAG 2.x AA: 4.5:1 normal text, 3:1 for ≥18.66px bold or ≥24px, 3:1 non-text.
 
-### 8.2 Other open items
+**Light theme — additional failures found:**
 
-| Issue | Evidence | Impact |
-|---|---|---|
-| Chart series palette never adopted | `DESIGN_NOTES.md:133`: *"NOT done: chart series recolor to brand 6-series palette (TIER_COLORS in Charts keeps its per-grade hues)"* — verified: `#C98A0D`, `#B85C9E`, `#4C9FD8`, `#D98BC4`, `#7BBCE8` appear **only** in `Cardstock Brand System.dc.html` | Two competing chart palettes exist. The app's per-grade `TIER_COLORS` is the one that ships |
-| Foil unused in-app | `DESIGN_NOTES.md:131`: *"Foil `#9A7B2D` unused in app so far (candidate: LOW CONFIDENCE badges — currently warn gold)"* — verified: `#9A7B2D` absent from all 11 app screens | `--brand-foil` has no app role yet. LOW CONFIDENCE uses `--warn` |
-| `TIER_COLORS` diverge between Card and Charts | `Cardstock Card.dc.html:325` vs `Cardstock Charts.dc.html:375` — Grade 7/8/9.5 differ (§2.5) | The same grade renders two colours on two screens. Needs an owner ruling |
-| `●` glyph specified but never rendered | `DISPLAY_VOCABULARY.md:2,25-29,50` vs 0 occurrences in any prototype | No pixel reference for liquidity/state chips |
-| Light-CVD blocks are per-screen fragments | Nine differing `:root[data-cvd="1"]` blocks (§2.3) | A shared Blazor stylesheet must emit their union |
-| No responsive breakpoints | `uploads/Brand package creation/README.md:118`: *"No responsive breakpoints are specified in the prototype (desktop-first at 1080px)"*; Charts sets `min-width: 1080px`, Screener `overflow: hidden` on a `100vh` shell | Small-screen behaviour is undesigned |
-| Fonts load from Google Fonts CDN | `Cardstock Home.dc.html:12-14` | Self-hosting is a deployment decision; weights in §3.1 must be preserved either way |
+| Token | Value | on `--card` `#FFFFFF` | on `--bg` `#FAFAF7` | on `--mutbg` `#F3F3EE` | Verdict |
+|---|---|---|---|---|---|
+| `--neg` (CVD) | `#CC5F00` | **4.04** | **3.86** | **3.62** | **FAIL** — used as text 6× (`Cardstock Profile.dc.html:102`, `Cardstock Home.dc.html`, `Cardstock Account.dc.html`). This is a **new failure introduced by colorblind mode**: standard `--neg` `#C13A3A` passes at 5.34, its CVD replacement does not. |
+| `--neg2` (std) | `#D64545` | **4.38** | **4.19** | **3.93** | **FAIL (marginal)** — used as text 7× (`color: var(--neg2, #D64545)`) |
+| `--neg2` (CVD) | `#D55E00` | **3.87** | **3.70** | **3.47** | **FAIL** — `Cardstock Screener.dc.html:25`, `Cardstock Card.dc.html:24` etc. |
+| `--pos2` (std) | `#189E63` | **3.44** | **3.29** | **3.09** | **FAIL** — used as text 6× (`color: var(--pos2, #189E63)`) |
+| `--pos2` (CVD) | `#0072B2` | 5.19 | 4.96 | 4.66 | pass |
+| `--mut3` | `#8F8F8A` | 3.25 | 3.11 | 2.92 | pass **as graphic only**; 0 text usages — compliant by demotion |
+| `--brand-foil` | `#9A7B2D` | **4.00** | **3.83** | **3.60** | **FAIL** as text — used as 11px badge text (`Cardstock Brand System.dc.html:198–199`, FOIL / LOW CONFIDENCE chips) |
+| `--brand-logo-teal` | `#0E8A7B` | 4.25 | 4.07 | 3.82 | pass as graphic (logo-only rule); would fail as text — the "never text/UI chrome" rule (`brand/brand-tokens.css:7`) keeps it legal |
+| `--muted` (brand) | `#8A8A86` | **3.47** | **3.31** | 3.11 | **FAIL** — §8.1 |
+
+**Light theme — passing:**
+
+| Token | Value | on card | on bg |
+|---|---|---|---|
+| `--ink` | `#1C1C1E` | 17.01 | 16.27 |
+| `--mut` | `#5B5B57` | 6.82 | 6.52 |
+| `--mut2` | `#6B6B66` | 5.36 | 5.12 |
+| `--acc` | `#4A63D0` | 5.27 | 5.04 |
+| `--accH` | `#3A4FB8` | 7.02 | 6.72 |
+| `--warn` / `--warnInk` | `#8F6614` | 5.15 | 4.92 |
+| `--pos` (std) | `#157A50` | 5.34 | 5.11 |
+| `--pos` (CVD) | `#0B69A8` | 5.83 | 5.58 |
+| `--neg` (std) | `#C13A3A` | 5.34 | 5.11 |
+| `--neg3` (std) | `#A93838` | 6.34 | 6.07 |
+| `--neg3` (CVD) | `#B34E00` | 5.24 | 5.01 |
+| white on `--btn` `#4A63D0` | `#FFFFFF` | 5.27 | — |
+| white on `--btnH` `#3A4FB8` | `#FFFFFF` | 7.02 | — |
+
+**Dark theme — no failures.** Every text token clears AA on every dark background:
+
+| Token | Value | on `--bg` `#161614` | on `--card` `#1E1E1C` | on `--mutbg` `#2A2A27` |
+|---|---|---|---|---|
+| `--ink` `#E9E9E5` | | 14.89 | 13.72 | 11.82 |
+| `--mut` `#B4B4AE` | | 8.70 | 8.02 | 6.91 |
+| `--mut2` `#A8A8A2` | | 7.58 | 6.99 | 6.02 |
+| `--mut3` `#9A9A94` | | 6.41 | 5.90 | 5.09 |
+| `--acc` `#8C9BF2` | | 6.98 | 6.43 | 5.54 |
+| `--accH` `#AAB6F6` | | 9.26 | 8.53 | 7.36 |
+| `--warn` `#D6A54A` | | 8.06 | 7.43 | 6.40 |
+| `--pos` std `#4CC08D` | | 7.97 | 7.34 | 6.33 |
+| `--neg` std `#E57B7B` | | 6.43 | 5.92 | 5.11 |
+| `--pos` CVD `#58A9E6` | | 7.10 | 6.55 | 5.64 |
+| `--neg` CVD `#F5924E` | | 7.86 | 7.24 | 6.24 |
+| `--neg3` CVD `#E8874D` | | 6.91 | 6.36 | 5.49 |
+| `--logoTeal` `#3FBFAD` | | 8.00 | 7.37 | 6.35 |
+
+`DESIGN_NOTES.md:136` claims *"dark theme already passed"* — **confirmed**, the lowest dark text ratio found is 4.92 (`--mut3` on `--accBg`), and 5.09 on real backgrounds.
+
+### 8.3 Summary of open accessibility debt
+
+| # | Issue | Token / value | Ratio | Status |
+|---|---|---|---|---|
+| 1 | Documented, deferred | `--muted` `#8A8A86` in `brand/brand-tokens.css:18` | 3.31 / 3.47 | Fixed in app (`--mut2` → `#6B6B66`), **not fixed in the brand package** |
+| 2 | **Not documented** | `--neg` CVD `#CC5F00` used as text | 3.86 / 4.04 | Open — colorblind mode makes light-theme negative text fail |
+| 3 | **Not documented** | `--neg2` std `#D64545` used as text | 4.19 / 4.38 | Open (marginal) |
+| 4 | **Not documented** | `--neg2` CVD `#D55E00` used as text | 3.70 / 3.87 | Open |
+| 5 | **Not documented** | `--pos2` std `#189E63` used as text | 3.29 / 3.44 | Open |
+| 6 | **Not documented** | `--brand-foil` `#9A7B2D` as badge text | 3.83 / 4.00 | Open |
+| 7 | Compliant by rule, fragile | `--mut3` `#8F8F8A`, `--logoTeal` `#0E8A7B` | 3.1–4.3 | Legal only while the "no text" rule holds |
+
+Items 2–6 are the reason `--pos`/`--neg` (text) and `--pos2`/`--neg2`/`--neg3` (graphic) are split tokens. The split is not consistently honoured: `--pos2` and `--neg2` are used as `color:` in 13 places. Fixing that (route all text through `--pos`/`--neg`) resolves 3, 4 and 5 without changing any hex.
 
 ---
 
 ## 9. Contradictions found
 
-Tier-1 code wins in every row. `DESIGN_NOTES.md` and `DISPLAY_VOCABULARY.md` are Tier 2; `BRAND_BRIEF.md` and `uploads/Brand package creation/README.md` describe the brand package as delivered, which the app then partly declined to adopt.
-
 | # | Claim | Source doc:line | What the code actually does |
 |---|---|---|---|
-| 1 | *"Canonical source: `brand-tokens.css`"* | `uploads/Brand package creation/README.md:18` | **No prototype links it.** Its only appearance is prose in a file list at `Cardstock Brand System.dc.html:245`. No `--brand-*`, `--focus-ring`, `--series-*` or `--link` reference exists in any `.dc.html`. The live tokens are `--acc`/`--accH`/`--btn`/`--mut`/… declared inline per screen |
-| 2 | `--muted: #8A8A86` is a current app neutral | `brand/brand-tokens.css:18`; `BRAND_BRIEF.md:26` | Replaced app-wide by `--mut2: #6B6B66` in the contrast pass (`DESIGN_NOTES.md:136`). `#8A8A86` occurs **0 times** across all 11 app screens |
-| 3 | *"Deferred: WCAG contrast pass on muted grey small text"* — still open | `DESIGN_NOTES.md:26`, `DESIGN_NOTES.md:166` | **The pass was done**, in the same file at `DESIGN_NOTES.md:135-138` (dated 2026-08-10). Lines 26 and 166 were never updated. The app is fixed; only `brand-tokens.css`, the Brand System page and the Landing page still carry `#8A8A86` |
-| 4 | Contrast failure is `3.2:1` | `DESIGN_NOTES.md:26` | Recomputed: **≈3.3:1** on `#FAFAF7`, **≈3.5:1** on `#FFFFFF`. Both fail AA small text (4.5:1). The doc's number is conservative; the conclusion holds |
-| 5 | Chrome light→dark: *"mut2 `#8A8A86`→`#A8A8A2`"* | `DISPLAY_VOCABULARY.md:85` | Light `--mut2` is `#6B6B66`, not `#8A8A86` (`Cardstock Home.dc.html:329`). Dark `#A8A8A2` is correct |
-| 6 | *"accent `#3B5BD6`→`#7290EA` · button `#3B5BD6`→`#4A66D8`"* | `DISPLAY_VOCABULARY.md:85` | Pre-branding values. Now `--acc` `#4A63D0`→`#8C9BF2` and `--btn` `#4A63D0` in both themes (`Cardstock Home.dc.html:29,329`). The swap is itemised at `DESIGN_NOTES.md:131` but §85 was never updated |
-| 7 | Focus ring is `0 0 0 3px rgba(74,99,208,0.22)` / `rgba(140,155,242,0.25)` dark | `brand/brand-tokens.css:9,25`; `Cardstock Brand System.dc.html:192`; `uploads/Brand package creation/README.md:46` | Every app screen uses `*:focus-visible { outline: 2px solid var(--acc); outline-offset: 1px; border-radius: 2px; }` (`Cardstock Home.dc.html:21`) — a `2px` outline, not a `3px` box-shadow ring. Byte-identical across all 12 screens. The `--focus-ring` token is never referenced |
-| 8 | *"Colorblind mode swaps HUE only"* | `DISPLAY_VOCABULARY.md:76` | Hue-only for **glyphs, labels and grammar** — confirmed. But Charts also changes **line geometry**: EMA fast/slow get `stroke-width 1 → 1.6` and dashes `'2.5 3.5'` / `'9 4'` (`Cardstock Charts.dc.html:498-500`), and the MACD signal line takes `dash: '4 3'` (`:791`). Redundant encoding, consistent in spirit, but "hue only" is literally false |
-| 9 | Six-colour Okabe–Ito-tuned chart series ship with the brand | `Cardstock Brand System.dc.html:101,141-146`; `brand/brand-tokens.css:14-15,28-29`; `uploads/Brand package creation/README.md:35` | Never adopted. `#C98A0D`, `#B85C9E`, `#4C9FD8`, `#D98BC4`, `#7BBCE8` appear **only** on the Brand System page. Charts and Card use per-grade `TIER_COLORS` (`Charts:375`, `Card:325`). Acknowledged at `DESIGN_NOTES.md:133` |
-| 10 | Foil `#9A7B2D` is a support colour for *"grade premiums, PSA 10 highlights"* and LOW CONFIDENCE badges | `Cardstock Brand System.dc.html:113-114,199`; `uploads/Brand package creation/README.md:26` | Absent from all 11 app screens. LOW CONFIDENCE renders in `--warn` (`#8F6614` / `#D6A54A`). `DESIGN_NOTES.md:131` confirms: *"Foil `#9A7B2D` unused in app so far"* |
-| 11 | Inter weights are *"400/500/600/650/700/800"* | `uploads/Brand package creation/README.md:39` | `650` is not a loaded weight anywhere. App screens load `400;500;600;700`; marketing/brand pages load `400;500;600;700;800`. Inter Tight `600;700` (app only) is omitted from the README entirely |
-| 12 | Radius scale: *"5px (badges) · 7px (buttons, inputs) · 8–10px (cards)"* | `uploads/Brand package creation/README.md:45`; `Cardstock Brand System.dc.html:182,191` | `7px` never appears in the app screens. App buttons/inputs use `6px`; chips use `4px`; `5px` is for mono ticker chips. The brand-page radii are marketing-surface values |
-| 13 | *"`--bg: #F1F1EC`"* listed among app neutrals | `uploads/Brand package creation/README.md:31` (hedged as "landing page surface") | App `--bg` is `#FAFAF7`; `#F1F1EC` is the marketing surface only. `BRAND_BRIEF.md:26` correctly states `#FAFAF7` |
-| 14 | Direction colours are ▲ `#46C08A` / ▼ `#D0655E` | `uploads/Brand package creation/README.md:28,75` | Those are the **landing-page ticker** values. In-app: `--pos` `#157A50` light / `#4CC08D` dark, `--neg` `#C13A3A` light / `#E57B7B` dark (`Cardstock Home.dc.html:327,30`) |
-| 15 | Dark `--accH` is `#8CA4F0` | `Cardstock Profile.dc.html:216` | Every other screen sets `#AAB6F6` (`Cardstock Home.dc.html:29` and 9 more), matching `brand/brand-tokens.css:22`. Profile's local `vars()` copy is the outlier — use `#AAB6F6` |
-| 16 | `Grade 7` = `#B0552E`, `Grade 8` = `#2E7F78`, `Grade 9.5` = `#6E4DB8` | `Cardstock Card.dc.html:325` | `Cardstock Charts.dc.html:375` uses `#A96A4A`, `#4C8F8A`, `#7A56C9` for the same tiers. **Code vs code** — both Tier 1, needs an owner ruling |
-| 17 | *"Icon always accompanies color (▲ ▼ – ● ◌ ◆)"* — six-glyph set | `DISPLAY_VOCABULARY.md:2` | Five glyphs render. `●` has **zero occurrences** in any of the 17 prototypes. `Cardstock Profile.dc.html:94` states the invariant with only four: *"Glyphs ▲ ▼ – ◌ never change"* |
-| 18 | Brand version *"v1.0 · Aug 2026"* | `Cardstock Brand System.dc.html:33,251` | `brand/brand-tokens.css:1` declares *"v1.1 (Aug 2026)"*. The page documents v1.0 while shipping v1.1 tokens |
-
----
-
-## Source inventory
-
-| Tier | File | Role here |
-|---|---|---|
-| 1 | `CardStock Mockup/Cardstock Brand System.dc.html` | Brand reference page — logo, colour, type, components, voice, empty states |
-| 1 | `CardStock Mockup/brand/brand-tokens.css` | Brand token dictionary (v1.1) — **not wired to anything** |
-| 1 | `CardStock Mockup/brand/*.svg`, `*.png` | Logo, favicon, social assets |
-| 1 | `CardStock Mockup/Cardstock Home.dc.html` | **The canonical app token declaration** — fullest `:root` blocks, pre-paint script, four-branch `PAL` |
-| 1 | `CardStock Mockup/Cardstock Profile.dc.html` | Theme + CVD controls, persistence, the five-pill preview strip |
-| 1 | `CardStock Mockup/Cardstock Charts.dc.html`, `Cardstock Card.dc.html` | `TIER_COLORS`, CVD dash/width encoding |
-| 2 | `CardStock Mockup/DISPLAY_VOCABULARY.md` | Glyph and state vocabulary — §75-86 partly stale |
-| 2 | `CardStock Mockup/DESIGN_NOTES.md` | Branding pass, contrast pass, deferral log |
-| 2 | `CardStock Mockup/HANDOFF.md` | Type scale and the mono-numbers rule (`:109`, `:151`) |
-| 3 | `CardStock Mockup/BRAND_BRIEF.md` | Original brief — rationale only |
-| 3 | `CardStock Mockup/uploads/Brand package creation/README.md` | Brand package handoff — accurate for marketing surfaces, overstates app adoption |
+| 1 | Muted grey is `#8A8A86` and the contrast pass is deferred | `DESIGN_NOTES.md:26`, `:166` | The pass shipped on 2026-08-10. `#8A8A86` appears **0 times** in the 13 app prototypes; `--mut2` is `#6B6B66` (`Cardstock Home.dc.html:329`). The stale value survives only in `brand/brand-tokens.css:18`, the specimen page and `Cardstock Landing.dc.html`. |
+| 2 | `--muted` is `#8A8A86` | `brand/brand-tokens.css:18` (Tier 1 file, but the *brand* file) | The app's muted tokens are `--mut` `#5B5B57`, `--mut2` `#6B6B66`, `--mut3` `#8F8F8A` (`Cardstock Home.dc.html:329`). The brand file's neutral block was never re-synced after the contrast pass. It is labelled *"existing app neutrals (reference)"* (`:16`) — the reference is wrong. |
+| 3 | `mut2 #8A8A86→#A8A8A2` in the light→dark map | `DISPLAY_VOCABULARY.md:78` | Light `--mut2` is `#6B6B66`, not `#8A8A86`. The dark value `#A8A8A2` is correct. |
+| 4 | Accent is `#3B5BD6`, hover `#2E49B8` | `DESIGN_NOTES.md:26` | Superseded by the brand pass: `--acc` `#4A63D0`, `--accH` `#3A4FB8` (`Cardstock Home.dc.html:329`). `DESIGN_NOTES.md:136` documents the swap but line 26 was never updated — the same file contradicts itself. |
+| 5 | `accent #3B5BD6→#7290EA · button #3B5BD6→#4A66D8` (dark) | `DISPLAY_VOCABULARY.md:78` | Dark `--acc` is `#8C9BF2`, dark `--btn` is `#4A63D0` (`Cardstock Home.dc.html:29`). Pre-brand-pass values. |
+| 6 | "gain #189E63, loss #D64545" as the state colors | `DESIGN_NOTES.md:26` | Those are `--pos2`/`--neg2`, the **graphic** hues. The text hues are `--pos` `#157A50` / `--neg` `#C13A3A` (`Cardstock Home.dc.html:327`). |
+| 7 | Six chart-series colors ship with the brand and the app owns them | `Cardstock Brand System.dc.html:101`, `:251` | **Not implemented.** No `--series-*` token is referenced by any app prototype; Charts keeps its own per-grade `TIER_COLORS`. `DESIGN_NOTES.md:133` admits it: *"NOT done: chart series recolor to brand 6-series palette."* |
+| 8 | Foil `#9A7B2D` is a live support color for grade premiums / PSA 10 | `Cardstock Brand System.dc.html:111–114`; `brand/brand-tokens.css:8` | **Unused in the app.** `DESIGN_NOTES.md:133`: *"Foil #9A7B2D unused in app so far (candidate: LOW CONFIDENCE badges — currently warn gold)."* LOW CONFIDENCE renders in `--warn` `#8F6614`. |
+| 9 | Version is "v1.0 · Aug 2026" | `Cardstock Brand System.dc.html:33`, `:251` | `brand/brand-tokens.css:1` says **v1.1** (Aug 2026). The specimen page was not re-stamped when the tokens moved to 1.1 (the 1.1 change is teal → logo-only). |
+| 10 | Focus is a 3px ring at 22% indigo | `Cardstock Brand System.dc.html:192`; `brand/brand-tokens.css:9` | The app uses `outline: 2px solid var(--acc)` with `outline-offset: 1px` (`Cardstock Home.dc.html:21`). The 3px `box-shadow` ring appears only on the specimen's demo input. Two different focus treatments exist; the app's wins. |
+| 11 | Tokens ship as CSS custom properties with a `[data-theme="dark"]` block | `Cardstock Brand System.dc.html:245` | True of `brand-tokens.css`, but **no prototype links it.** The app declares dark/CVD in a per-page inline `<style>` and carries light values as `var()` fallbacks. There is no shared stylesheet at all. |
+| 12 | Dark `--accH` is `#AAB6F6` | `Cardstock Home.dc.html:29`; `brand/brand-tokens.css:27` | `Cardstock Profile.dc.html:216` sets dark `--accH` to **`#8CA4F0`** and dark `--btnH` to `#AAB6F6`. One page disagrees with the other twelve. Treat `#AAB6F6` as correct (12 pages + brand file). |
+| 13 | Light `--tooltipBg` is `rgba(255,255,255,0.95)` | inline fallbacks, 3 occurrences | One occurrence uses `rgba(255,255,255,0.96)`. Single-page drift; use `0.95`. |
+| 14 | Light `--line` is `#E4E4E0` | 199 occurrences | 1 occurrence falls back to `#D9D9D4` (which is `--line2`) — `Cardstock Profile.dc.html:238`, the CVD toggle's off-state track. Deliberate or not, it is the only exception. |
+| 15 | The pre-paint script is on every app page | `HANDOFF.md:88` (*"Chrome shared by every app page … pre-paint script reading localStorage"*) | 11 of 13 pages carry it. **`Cardstock Profile.dc.html` and `Cardstock Account.dc.html` do not** — they theme via an in-component `display: contents` wrapper (`Cardstock Profile.dc.html:214–222`) and would flash on load. |
+| 16 | Colorblind glyph set is `▲▼–◌◆` | `DISPLAY_VOCABULARY.md:76` | Incomplete — `●` is a sixth glyph with its own meaning (liquidity/descriptive state, `DISPLAY_VOCABULARY.md:34–38`, `:54`). `HANDOFF.md:150` lists all six correctly: `▲ ▼ – ● ◌ ◆`. The Profile UI copy lists only four (`Cardstock Profile.dc.html:94`) because `●` and `◆` do not appear in the preview strip. |
+| 17 | Colorblind mode swaps hue only | `HANDOFF.md:150`; `DISPLAY_VOCABULARY.md:76`; `Cardstock Profile.dc.html:96` | **Essentially true, with one addition:** Charts dashes the MACD signal line when CVD is on (`Cardstock Charts.dc.html:791`). That adds a redundant encoding; it does not alter any glyph, label or grammar. Worth noting because a literal reading of "hue only" would omit it. |
+| 18 | Theme follows the OS | (not claimed, but the natural assumption) | **No `prefers-color-scheme` query exists anywhere.** First visit is always light-standard regardless of OS setting. Only `prefers-reduced-motion` is honoured (`Cardstock Home.dc.html:25`). |

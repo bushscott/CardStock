@@ -1,8 +1,8 @@
 # Browse — screen specification
 
-**Authority:** extracted from `CardStock Mockup/Cardstock Browse.dc.html` (318 lines), read directly 2026-08-10. That file is Tier 1 per `CLAUDE.md:20`. Every behavioural statement below carries an `HTML:line` citation. Where a Tier‑2/3 document disagrees, the HTML wins and the disagreement is recorded in §8 — nothing is averaged.
+**Source of truth:** `CardStock Mockup/Cardstock Browse.dc.html` (318 lines), read in full 2026-08-10. Every line citation below is to that file unless another path is named. Where a markdown document disagreed with the prototype, the prototype was taken as correct and the disagreement is recorded in §8.
 
-Line references written bare (`:113`) are lines in `Cardstock Browse.dc.html`. Other files are named.
+**Runtime:** Design Composer. `<x-dc>` host (`:9`), template directives `sc-if` / `sc-for` resolved by `support.js:555-556`; `hint-placeholder-count` / `hint-placeholder-val` are design-time-only hints consumed when the bound value is unavailable (`support.js:614`, `support.js:648`) and carry **no** runtime meaning. All view data comes from one `renderVals()` return object (`:219-314`, dispatched at `support.js:1085`). The component takes **no props** (`data-props=""`, `:159`).
 
 ---
 
@@ -10,249 +10,251 @@ Line references written bare (`:113`) are lines in `Cardstock Browse.dc.html`. O
 
 | | |
 |---|---|
-| **Screen name** | Browse — `data-screen-label="Browse"` (`:35`), `<h1>Browse</h1>` (`:57`) |
-| **Route** | `/browse` — **not in the HTML.** `HANDOFF.md:75` and `CARDSTOCK_UI_SPEC_v1.md:116` both say `/browse`; they agree, so this is safe. |
-| **Nav position** | Fifth of five section links, rendered in its active form: weight 600, `--ink` text, 2px `--acc` bottom border (`:47`) vs weight 500 / `--mut` / transparent border for the other four (`:43–46`) |
-| **Props** | **None.** `data-props=""` (`:159`). No `demoMode`, no `emptyState`. Consistent with `DESIGN_NOTES.md:141`. |
-| **Purpose** | `CARDSTOCK_UI_SPEC_v1.md:198`: *"'show me what exists' — the wandering mode search can't serve."* The HTML supports this reading: two exhaustive catalogues (all sets, all species), no metrics beyond one delta per tile, no analysis controls. |
-| **Position in hierarchy** | Root of `Browse → Set → Card` (`CARDSTOCK_UI_SPEC_v1.md:127`). Renders **no breadcrumb**, correctly — it is the root. |
-
-**Chrome (identical to every app page):** 48px sticky nav, `z-index: 20` (`:37`); logo + wordmark → Home (`:39–40`); five section links (`:43–47`); flex spacer (`:49`); `<cardstock-search>` (`:50`); 28px circular account initial "O" → Profile (`:51`). Main is `max-width: 1480px`, `padding: 14px 20px 28px`, `flex-direction: column`, `gap: 18px` (`:54`). Base font-size 15px (`:35`).
-
-**Helmet (`:10–34`):** favicon; Inter / Inter Tight / JetBrains Mono from Google Fonts (`:14`); `image-slot.js` (`:15`); `cardstock-search.js` (`:32`); dark-theme token block (`:27–30`); CVD override `--neg2: #D55E00` (`:25`); pre-paint script reading `localStorage['cardstock-cvd']` and `['cardstock-theme']` (`:33`).
+| **Screen name** | Browse (`data-screen-label="Browse"`, `:35`) |
+| **Route** | `/browse` (`HANDOFF.md:75`; `uploads/CARDSTOCK_UI_SPEC_v1.md:116`. The prototype is a file — `Cardstock Browse.dc.html` — and the nav links to it by filename, `:47`.) |
+| **Nav position** | Fifth and last primary tab: Home · Screener · Charts · Binder · **Browse** (`:43-47`). Active styling on Browse: weight 600, `--ink` text, 2px `--acc` bottom border (`:47`). |
+| **Purpose** | The catalog entry point — two exhaustive lists of *everything in the corpus*, one keyed by set and one keyed by Pokémon species, each tile a link into a detail page. It is the product's one non-terminal, gallery-flavoured surface. |
+| **Outbound links** | Set tiles → `Cardstock Set.dc.html` (all 10, `:172-181`). Species tiles → `Cardstock Character.dc.html` (`:310`). Nav → Home/Screener/Charts/Binder/Profile (`:43-51`). |
+| **Page chrome** | Sticky 48px nav (`:37`), global `<cardstock-search>` web component (`:50`), profile avatar `O` (`:51`). `<main>` max-width 1480px, padding `14px 20px 28px`, column flex, gap 18px, base font-size 15px (`:35`, `:54`). |
 
 ---
 
 ## 2. Layout — the two modes
 
-One `state.mode` field, initialised to `'sets'` (`:209`), drives everything. Two derived booleans, `isSets` and `isPoke` (`:246`), gate three `<sc-if>` regions.
+Both modes confirmed present. The screen is a single page with a **binary mode switch**; there is no third mode, no sub-tab, and no per-mode sort control.
 
-### 2.1 The mode switch
+### 2.1 The switch
 
-A two-button segmented control sits inline with the `<h1>`, inside a `1px --line` border, `border-radius: 6px`, `overflow: hidden`, `background: --card` (`:58`).
+- Segmented pair of buttons in the header row beside the `<h1>Browse</h1>` (`:56-63`), inside a 1px-bordered, 6px-radius, `overflow:hidden` shell (`:58`). Buttons are 28px tall, JetBrains Mono 13px/600, lowercase labels **`by set`** (`:59`) and **`by pokémon`** (`:60`).
+- Tooltips: `by set` → "Browse by set — every release, its size, and its market value"; `by pokémon` → "Browse by Pokémon — every species and all of its printings" (`:59-60`).
+- Handlers `modeSets` / `modePoke` set `state.mode` to `'sets'` / `'poke'` (`:247`). Initial state is **`'sets'`** (`:209`).
+- Active/inactive styling is computed, not CSS: active button gets `background: --acc`, `color: --card`; inactive gets `background: --card`, `color: --mut` (`:248-249`). There is no `aria-pressed`, no `role="tablist"`, and no keyboard-arrow behaviour — they are two plain `<button>`s.
+- Mode is **not** in the URL, not persisted, and not restorable. A reload returns to `by set`.
 
-| Button | Label | Handler | Tooltip (`title`) |
-|---|---|---|---|
-| Left (`:59`) | `by set` | `modeSets` → `setState({mode:'sets'})` (`:247`) | "Browse by set — every release, its size, and its market value" |
-| Right (`:60`) | `by pokémon` | `modePoke` → `setState({mode:'poke'})` (`:247`) | "Browse by Pokémon — every species and all of its printings" |
+### 2.2 Mode A — `by set`
 
-Both are JetBrains Mono 13px/600, `height: 28px`, `padding: 0 14px`, no border, `cursor: pointer`. Selection is expressed by colour only, computed in `renderVals`:
+Gated by `sc-if value="{{ isSets }}"` (`:109`, `isSets = mode === 'sets'`, `:246`).
 
-- Selected: `background: --acc`, `color: --card` (`:248–249`)
-- Unselected: `background: --card`, `color: --mut` (`:248–249`)
+- One `<section>` containing **one flat CSS grid** — `repeat(auto-fill, minmax(230px, 1fr))`, gap 12px (`:111`). **No shelves, no era rows, no group headings, no horizontal scrollers.** The whole catalog is one alphabetical wall of tiles.
+- No filter bar, no search, no sort control, no result count in this mode. The filter row (`:65-107`) is inside `sc-if isPoke` and is therefore absent.
 
-There is no `aria-pressed`, no `role="tablist"`, and no text/shape difference between selected and unselected — **selection is conveyed by colour alone.** Flagged in §7.
+**Set tile** (`:113-126`) — an `<a>` block, `--card` background, 1px `--line` border, radius 10, padding 14, hover box-shadow `0 6px 20px rgba(20,19,26,0.10)` with a 0.15s transition:
 
-### 2.2 Mode "by set" — `isSets` (`:109–130`)
+| Region | Spec |
+|---|---|
+| Fan area | 118px tall, 11px bottom margin, `position: relative` (`:114`) |
+| Back-left card (`fan3`) | 74×102, radius 5, `left:50%; top:4px`, `translateX(-88%) rotate(-8deg)`, shadow `0 3px 10px` — **gradient only** (`:115`) |
+| Back-right card (`fan2`) | 74×102, radius 5, `left:50%; top:4px`, `translateX(-12%) rotate(8deg)`, shadow `0 3px 10px` — **gradient only** (`:116`) |
+| Front card (`fan1`) | 78×108, radius 5, `left:50%; top:0`, `translateX(-50%)`, shadow `0 5px 14px` — **carries the only `<image-slot>`** (`:117-118`) |
+| Name | Inter Tight 600 / 15.5px, centred (`:121`) |
+| Stat row | Centred flex, gap 8, JetBrains Mono 12px: `"{count} cards"` in `--mut2`, then `"{chg} 30d"` in a sign-derived colour (`:122-125`) |
 
-A single `<section>` (`:110`) containing **one flat CSS grid**: `repeat(auto-fill, minmax(230px, 1fr))`, `gap: 12px` (`:111`). `<sc-for list="{{ allSets }}">` emits one anchor tile per set (`:112–127`).
+### 2.3 Mode B — `by pokémon`
 
-**There are no era shelves.** `allSets` is the whole `SETS` array sorted alphabetically by name, mapped through `mkSet` (`:230`). `mkSet` (`:224–229`) does not read `era`, and the template never mentions it. `this.ERAS` (`:183–187`) is declared in the constructor and referenced nowhere else in the file (single occurrence, verified by grep). See §8 rows 1–5.
+Two sibling `sc-if isPoke` blocks (`:65-107` filter bar, `:132-154` grid), so in Pokémon mode the page is: header row → filter bar → caption → species grid → optional empty panel.
 
-No heading, no group label, no count, no sort control, no pagination, no empty state.
+- Caption line above the grid: **"Ordered by total market value across all printings"**, 12.5px `--mut2`, `margin-top:-8px` (`:133`). See §6 for why this is a claim rather than an enforced order.
+- Grid: `repeat(auto-fill, minmax(190px, 1fr))`, gap 12px (`:134`) — tighter than the set grid.
 
-### 2.3 Mode "by pokémon" — `isPoke` (`:65–107` and `:132–154`)
+**Species tile** (`:136-148`) — same card shell as a set tile but padding 13:
 
-Two separate `sc-if isPoke` regions, in DOM order:
+| Region | Spec |
+|---|---|
+| Avatar | 44×44 circle, `border-radius:50%`, background = per-species linear-gradient, centred single initial in `rgba(255,255,255,0.92)`, Inter Tight 700 / 17px (`:138`). **Gradient only — no `<image-slot>` anywhere in this mode.** |
+| Name | Inter Tight 600 / 15.5px, single line, ellipsis on overflow (`:140`) |
+| Sub-line | JetBrains Mono 11.5px `--mut2`: `"{printings} printings"` (`:141`) |
+| Footer row | `space-between`, baseline-aligned: value in Mono 14.5px/700 (`:145`), then `"{chg} 90d"` in Mono 12px, sign-coloured (`:146`) |
 
-1. **Filter bar** (`:66–106`) — `+ filter` button and its popover, then the applied-filter chips, a flex spacer, and the match count. `margin-top: -6px` pulls it tight to the header.
-2. **Results** — a caption, *"Ordered by total market value across all printings"* (`:133`, 12.5px `--mut2`, `margin-top: -8px`); then a grid `repeat(auto-fill, minmax(190px, 1fr))`, `gap: 12px` (`:134`) of species tiles (`:135–149`); then the no-match panel (`:151–153`).
+### 2.4 Image usage — summary
 
-### 2.4 How switching works — and what it does not do
-
-- Mode lives **only** in component state (`:209`). Not in the URL, not in `localStorage`, not in a prop.
-- Switching **does not clear** `pokeFilters`. Go to by‑pokémon, apply `type = Fire`, switch to by‑set, switch back — the chip is still there and still applied (`:209`, `:291`; nothing in `modeSets`/`modePoke` at `:247` touches filter state).
-- Switching does **not** close an open filter popover: `pAddOpen`/`pEditor` are untouched by the mode handlers (`:247`). The popover is simply unmounted with its `sc-if` and reappears open on return.
-- The filter bar exists **only** in by‑pokémon mode. There is no way to filter, sort, or search sets.
+Exactly **one** `<image-slot>` element exists on the screen (`:118`); the tag appears 4 times in the file, of which `:15` is the script include and `:22` is a CSS rule. It sits on the front card of the set-tile fan, `shape="rounded" radius="5" placeholder=" "`, id `art-set-<slug>` (`:118`, `:227`). The `placeholder=" "` value pairs with `image-slot[placeholder=" "]::part(empty){opacity:0}` (`:22`) so an unfilled slot is invisible and the gradient beneath shows through. Everything else on the screen — both back cards of every fan, and every species avatar — is a **CSS gradient with no image affordance**.
 
 ---
 
-## 3. Data contract — every rendered field
+## 3. Data contract — every field rendered
 
-### 3.1 Set tile
+### 3.1 View model root (`renderVals()`, `:245-313`)
 
-Source array `this.SETS` (`:171–182`), mapped by `mkSet` (`:224–229`), rendered at `:113–126`.
-
-| View field | Source field | Type | Transform | Rendered at |
-|---|---|---|---|---|
-| `href` | `s.href` | string | passthrough | `:113` — anchor target |
-| `tip` | `s.tip` | string | passthrough | `:113` — `title` attribute |
-| `fan1` | `s.fans[0]` | `[hex, hex]` | `linear-gradient(160deg, a, b)` (`:221`) | `:117` — **front** card |
-| `fan2` | `s.fans[1]` | `[hex, hex]` | same | `:116` — back-right card |
-| `fan3` | `s.fans[2]` | `[hex, hex]` | same | `:115` — back-left card |
-| `slotId` | `s.name` | string | `'art-set-' + name.toLowerCase().replace(/[^a-z0-9]+/g,'-')` (`:227`) | `:118` — `<image-slot id>` |
-| `name` | `s.name` | string | passthrough | `:121` — Inter Tight 600 / 15.5px / centred |
-| `count` | `s.count` | int | `String(count)`, rendered as `{count} cards` | `:123` — JetBrains Mono 12px, `--mut2` |
-| `chg` | `s.chg` | number (percent) | `pct()` (`:222`), rendered as `{chg} 30d` | `:124` — JetBrains Mono 12px |
-| `chgFg` | `s.chg` | colour | `fgOf()` (`:223`) — `--pos` if `>= 0`, `--neg2` if `< 0` | `:124` |
-
-**`s.era` is carried in the seed data and never read.** Values present: `'WOTC'`, `'Sun & Moon'`, `'Sword & Shield'`, and `null` on Vivid Voltage (`:181`). `mkSet` does not copy it; the template does not reference it.
-
-Seeded sets (`:172–181`), illustrative — 10 rows, but `DATA_MODEL.md:135` says ~303 sets exist:
-
-| Name | `era` | `count` | `chg` |
+| Key | Type | Rendered at | Meaning |
 |---|---|---|---|
-| Base Set | WOTC | 102 | +1.8 |
-| Neo Genesis | WOTC | 111 | +0.9 |
-| Hidden Fates | Sun & Moon | 163 | +2.6 |
-| Sword & Shield | Sword & Shield | 216 | −0.4 |
-| Evolving Skies | Sword & Shield | 237 | +4.1 |
-| Fusion Strike | Sword & Shield | 284 | +1.2 |
-| Brilliant Stars | Sword & Shield | 186 | +2.9 |
-| Lost Origin | Sword & Shield | 217 | +3.4 |
-| Silver Tempest | Sword & Shield | 215 | +1.7 |
-| Vivid Voltage | **`null`** | 203 | +0.6 |
+| `isSets` | bool | `:109` | mode gate for the set grid |
+| `isPoke` | bool | `:65`, `:132` | mode gate for the filter bar and species grid |
+| `modeSets`, `modePoke` | handlers | `:59`, `:60` | mode setters |
+| `msBg`, `msFg`, `mpBg`, `mpFg` | colour | `:59-60` | segmented-button fill/text per active mode |
+| `allSets` | list | `:112` | the set tiles (see 3.2) |
+| `pAddOpen` | bool | `:69` | filter popover open |
+| `pToggleAdd`, `pCloseAdd` | handlers | `:68`, `:70` | open/close popover |
+| `pShowMenu`, `pShowEditor` | bool | `:71`, `:80` | which pane inside the popover |
+| `pMenu` | list | `:73` | attribute list (see 3.4) |
+| `pEdName` | string | `:83` | editor header = attribute display name |
+| `pEdBack` | handler | `:82` | return to attribute list |
+| `pEdOpts` | list | `:86` | option rows (see 3.5) |
+| `pEdPreview` | string | `:94` | live expression preview or `"pick at least one"` |
+| `pEdAdd`, `pEdAddOff`, `pEdAddBg`, `pEdAddCur` | handler/bool/colour/cursor | `:95` | commit button and its disabled dressing |
+| `pokeChips` | list | `:101` | active filter chips (see 3.6) |
+| `speciesCount` | string | `:105` | `"{matched} of {total} species"` (`:303`) |
+| `species` | list | `:135` | the species tiles (see 3.3) |
+| `pokeNoMatch` | bool | `:151` | zero-result gate |
+| `pokeQ`, `setPokeQ` | string / handler | **nowhere** | exposed at `:251`, bound to no element — see §4.6 |
 
-### 3.2 Era table — as the HTML has it
+### 3.2 `allSets[]` — set tile fields (`mkSet`, `:224-229`; list built `:230`)
 
-`this.ERAS` (`:183–187`) — **three** entries, declared and never rendered:
-
-| `era` | `years` | Source line |
-|---|---|---|
-| WOTC | 1999–2003 | `:184` |
-| Sun & Moon | 2017–2019 | `:185` |
-| Sword & Shield | 2020–2022 | `:186` |
-
-Year separators are en dashes. This is the complete era vocabulary in this file. Docs assert eight — see §8 rows 2 and 3.
-
-**Why this matters for implementation.** Every era shelf the documents describe depends on a set-metadata table that does not exist. Verified directly in the sibling repo, 2026-08-10: `../PokemonInvestBatch/DATA_MODEL.md:139–146` lists the entire `sets` table as `id`, `slug`, `name`, `discovered_at`, `last_seen_at`, `last_walked_at` — **no era, no series, no release date**, and the table is described as "enumeration bookkeeping only" (`:135–137`). The gap is registered in `DECISIONS.md:199` (D-042 harvest of `PROJECT_LOG.md:218`), which names a **set metadata table** (release date + era/series for ~303 sets) as a prerequisite for "Browse's era shelves, the Set and Character pages, and the Screener's Era and Character filters," and states it does not exist. `CARDSTOCK_UI_SPEC_v1.md:200` and `:382` name it `set_metadata(set_id, released_on, era)`, static and hand-curated.
-
-*Citation correction:* the era/release-date gap is **not** what D-004 says. D-004 (`DECISIONS.md:61–63`) records that there is no index table and no metrics table among the eight DbSets; it does not mention `sets` columns. The correct receipts for "no era, no release date" are `DATA_MODEL.md:139–146` (primary) and `DECISIONS.md:199` (the derived record).
-
-### 3.3 Species tile
-
-Source `this.SPECIES` (`:188–205`), mapped at `:304–311`, rendered at `:136–148`.
-
-| View field | Source | Transform | Rendered at |
+| Field | Source | Format | Rendered |
 |---|---|---|---|
-| `href` | literal | `'Cardstock Character.dc.html'` for every species (`:310`) | `:136` |
-| `tip` | computed | `'Character page for ' + name + ' — prototype renders Umbreon data for every species'` (`:310`) | `:136` |
-| `accent` | `SPECIES_ACCENTS[name]` (`:207`) | `linear-gradient(160deg, a, b)`; fallback `['#8A9BB8','#D6E0EC']` (`:306`) | `:138` — 44px circle |
-| `initial` | `name[0]` (`:305`) | first character | `:138` — Inter Tight 700/17px, `rgba(255,255,255,0.92)` |
-| `name` | `s.name` | passthrough | `:140` — Inter Tight 600/15.5px, ellipsis on overflow |
-| `printings` | `s.printings` | `String()` (`:307`), rendered `{n} printings` | `:141` — JetBrains Mono 11.5px `--mut2` |
-| `value` | `s.value` | `'$' + (v >= 1000 ? Math.round(v/1000) + 'K' : v)` (`:308`) | `:145` — JetBrains Mono 14.5px/700 |
-| `chg` | `s.chg` | `pct()`, rendered `{chg} 90d` | `:146` — JetBrains Mono 12px |
-| `chgFg` | `s.chg` | `fgOf()` | `:146` |
+| `name` | `SETS[].name` | raw string | `:121` |
+| `count` | `SETS[].count` | `String(n)`, suffixed " cards" in markup | `:123` |
+| `chg` | `SETS[].chg` | `pct()` — `'+'` or U+2212 MINUS, `abs.toFixed(1)`, `'%'` (`:222`); suffixed " 30d" in markup | `:124` |
+| `chgFg` | derived | `--pos` when `chg >= 0`, `--neg2` when `< 0` (`:223`) | `:124` |
+| `fan1`, `fan2`, `fan3` | `SETS[].fans[0..2]` | `linear-gradient(160deg, c0, c1)` (`:221`) | `:117`, `:116`, `:115` |
+| `slotId` | derived from name | `'art-set-' + name.toLowerCase().replace(/[^a-z0-9]+/g,'-')` (`:227`) — e.g. `art-set-base-set`, `art-set-sword-shield` | `:118` |
+| `href` | `SETS[].href` | all 10 = `Cardstock Set.dc.html` (`:172-181`) | `:113` |
+| `tip` | `SETS[].tip` | native `title` | `:113` |
 
-**Computed but never rendered:** `sets` (`:307`), `type` (`:305`), `gen` (`:305`). `type` and `gen` are also used by the filter predicate; `sets` is used by nothing. See §8 row 10.
+**Declared on the seed but never mapped and never rendered: `era`** (`:172-181`). See §4.2.
 
-**Never surfaced anywhere** — filter-only attributes: `status`, `stage`, `color`, `egg`, `habitat` (`:189–205`, consumed only at `:233–244`).
+Seeded rows (`:172-181`) — 10 sets, illustrative:
 
-Seeded species, in array order (`:189–204`) — 16 rows. Fields per row: `name, type, gen, status, stage, color, egg, habitat, printings, sets, value, chg`. Illustrative only; the array order happens to be value-descending, which is what makes the caption at `:133` look true (see §6).
+| name | count | chg | era (unused) |
+|---|---|---|---|
+| Base Set | 102 | +1.8 | `WOTC` |
+| Neo Genesis | 111 | +0.9 | `WOTC` |
+| Hidden Fates | 163 | +2.6 | `Sun & Moon` |
+| Sword & Shield | 216 | −0.4 | `Sword & Shield` |
+| Evolving Skies | 237 | +4.1 | `Sword & Shield` |
+| Fusion Strike | 284 | +1.2 | `Sword & Shield` |
+| Brilliant Stars | 186 | +2.9 | `Sword & Shield` |
+| Lost Origin | 217 | +3.4 | `Sword & Shield` |
+| Silver Tempest | 215 | +1.7 | `Sword & Shield` |
+| Vivid Voltage | 203 | +0.6 | **`null`** |
 
-`this.REGIONS` (`:206`) — the complete generation→region map, 9 entries: `1 Kanto · 2 Johto · 3 Hoenn · 4 Sinnoh · 5 Unova · 6 Kalos · 7 Alola · 8 Galar · 9 Paldea`. Region is **derived from generation**, never stored on a species — matching `DESIGN_NOTES.md:71`.
+Nine of the ten tooltips read "Set page for {name} — prototype renders Evolving Skies data for every set"; Evolving Skies' reads "Evolving Skies — the deepest set in the corpus" (`:176`).
 
-### 3.4 Filter bar
+### 3.3 `species[]` — species tile fields (`:304-311`)
 
-| View field | Meaning | Rendered at |
+| Field | Source | Format | Rendered |
+|---|---|---|---|
+| `name` | `SPECIES[].name` | raw | `:140` |
+| `initial` | derived | `name[0]` — first character only (`:305`) | `:138` |
+| `accent` | `SPECIES_ACCENTS[name]` | `linear-gradient(160deg, …)`, fallback `['#8A9BB8','#D6E0EC']` (`:306`) | `:138` |
+| `printings` | `SPECIES[].printings` | `String(n)`, suffixed " printings" | `:141` |
+| `value` | `SPECIES[].value` | `'$' + (v >= 1000 ? round(v/1000)+'K' : v)` (`:308`) — e.g. `$284K` | `:145` |
+| `chg` | `SPECIES[].chg` | `pct()`, suffixed " 90d" | `:146` |
+| `chgFg` | derived | same sign rule as sets (`:309`) | `:146` |
+| `href` | literal | `Cardstock Character.dc.html` for every species (`:310`) | `:136` |
+| `tip` | derived | `"Character page for {name} — prototype renders Umbreon data for every species"` (`:310`) | `:136` |
+
+**Computed into the view model but never rendered: `type`, `gen`, `sets`** (`:305`, `:307`). `sets` in particular — the seed carries a per-species set count (e.g. Charizard 41) and the tile does not show it.
+
+**On the seed but never surfaced as a tile field:** `status`, `stage`, `color`, `egg`, `habitat` (`:189-204`) — these exist only to power the filters.
+
+Seeded rows (`:189-204`) — 16 species, illustrative. Fields: name, type, gen, status, stage, colour, egg group, habitat, printings, sets, value, 90d %.
+
+| name | type | gen | status | stage | color | egg | habitat | printings | sets | value | chg |
+|---|---|---|---|---|---|---|---|---|---|---|---|
+| Charizard | Fire | 1 | Ordinary | Stage 2 | Red | Monster | Mountain | 87 | 41 | 284000 | +3.2 |
+| Umbreon | Dark | 2 | Ordinary | Stage 1 | Black | Field | Urban | 34 | 19 | 96400 | +6.8 |
+| Lugia | Psychic | 2 | Legendary | Basic | White | No eggs | Rare | 41 | 23 | 88200 | +1.4 |
+| Rayquaza | Dragon | 3 | Legendary | Basic | Green | No eggs | Rare | 38 | 21 | 71500 | +2.1 |
+| Mewtwo | Psychic | 1 | Legendary | Basic | Purple | No eggs | Rare | 52 | 30 | 64800 | −0.8 |
+| Espeon | Psychic | 2 | Ordinary | Stage 1 | Purple | Field | Urban | 29 | 17 | 48900 | +5.2 |
+| Giratina | Ghost | 4 | Legendary | Basic | Black | No eggs | Rare | 26 | 15 | 42300 | +4.4 |
+| Blastoise | Water | 1 | Ordinary | Stage 2 | Blue | Monster | Waters-edge | 44 | 26 | 39700 | +0.7 |
+| Gengar | Ghost | 1 | Ordinary | Stage 2 | Purple | Amorphous | Cave | 39 | 24 | 36200 | +1.9 |
+| Sylveon | Fairy | 6 | Ordinary | Stage 1 | Pink | Field | Urban | 22 | 13 | 28800 | +3.6 |
+| Snorlax | Normal | 1 | Ordinary | Stage 1 | Black | Monster | Mountain | 35 | 22 | 21400 | +0.3 |
+| Alakazam | Psychic | 1 | Ordinary | Stage 2 | Brown | Human-Like | Urban | 31 | 20 | 19800 | −1.2 |
+| Machamp | Fighting | 1 | Ordinary | Stage 2 | Gray | Human-Like | Mountain | 33 | 21 | 14600 | +0.5 |
+| Dragonite | Dragon | 1 | Ordinary | Stage 2 | Brown | Water 1 | Waters-edge | 30 | 19 | 13900 | +1.1 |
+| Leafeon | Grass | 4 | Ordinary | Stage 1 | Green | Field | Forest | 18 | 11 | 12700 | +2.8 |
+| Glaceon | Ice | 4 | Ordinary | Stage 1 | Blue | Field | Snow | 17 | 11 | 11900 | +2.2 |
+
+Note `Snorlax` is seeded `Stage 1` and `Alakazam`/`Machamp`/`Dragonite` colours are Pokédex-body colours, not type colours — the seed is illustrative and must not be treated as a Pokédex fixture.
+
+### 3.4 `pMenu[]` — attribute menu rows (`:257-266`)
+
+`name` (display name), `tip` (`"Filter species by {lowercased name} — fixed Pokédex data"`), `add` (handler). Rendered `:74-77` with a trailing `›` chevron.
+
+### 3.5 `pEdOpts[]` — option rows (`:269-281`)
+
+`label` (per-attribute label function), `mark` (`✓` when selected, else empty), `tip` (`"Include X in the results"` / `"Stop including X"`), `bg` (`--acc` when on, `--card` when off), `bd` (`--acc` when on, `--line3` when off), `pick` (toggle handler). Rendered `:87-90` as a 14×14 checkbox square plus a 13px label.
+
+### 3.6 `pokeChips[]` — active filter chips (`:296-302`)
+
+`label` = **raw attribute key** + operator + comma-joined labels: `f.attr + (vals.length > 1 ? ' ∈ ' : ' = ') + vals.map(lbl).join(', ')` (`:299`). So chips read `gen = Gen 1`, `stage ∈ Basic, Stage 1`, `egg = Field` — the key, not the display name. `remove` drops the whole attribute (`:300`). Rendered `:102` as an accent-tinted mono pill with an `✕`.
+
+### 3.7 Constants declared in the component
+
+| Constant | Line | Read by |
 |---|---|---|
-| `pAddOpen` | popover open | `:69` |
-| `pShowMenu` | `pAddOpen && !pEditor` (`:255`) — attribute list visible | `:71` |
-| `pShowEditor` | `!!pEditor` (`:256`) — option editor visible | `:80` |
-| `pMenu[]` | `{ name, tip, add }` per attribute (`:257–266`) | `:73–78` |
-| `pEdName` | display name of the attribute being edited (`:267`) | `:83` |
-| `pEdOpts[]` | `{ label, mark, tip, bg, bd, pick }` per option (`:269–281`) | `:86–91` |
-| `pEdPreview` | expression preview or `pick at least one` (`:288`) | `:94` |
-| `pEdAddOff` / `pEdAddBg` / `pEdAddCur` | Add button disabled / background / cursor (`:283`, `:289`) | `:95` |
-| `pokeChips[]` | `{ label, remove }` per applied filter (`:296–302`) | `:101–103` |
-| `speciesCount` | `` `${matched} of ${total} species` `` (`:303`) | `:105` |
-| `pokeNoMatch` | `matched === 0` (`:312`) | `:151` |
-
-**Dead view fields — no bound element exists:** `pokeQ` and `setPokeQ` (`:251`), backed by `state.pokeQ` (`:209`) and the unused local `pq` (`:231`). There is no text input anywhere in the markup. See §8 row 9.
-
-### 3.5 Attribute filters — complete enumeration
-
-`ATTRS` (`:233–242`). Menu section header is **"Pokédex"** (`:72`). Every attribute's tooltip is generated: `'Filter species by ' + name.toLowerCase() + ' — fixed Pokédex data'` (`:259`).
-
-| # | Key | Display name | Option source | Option ordering | Option label | Line |
-|---|---|---|---|---|---|---|
-| 1 | `type` | Type | distinct `s.type` | default lexicographic | value verbatim | `:234` |
-| 2 | `gen` | Generation | distinct `s.gen` | numeric ascending | `'Gen ' + v` | `:235` |
-| 3 | `region` | Region | distinct `REGIONS[s.gen]` | by position in `REGIONS` (Kanto→Paldea) | value verbatim | `:236` |
-| 4 | `status` | Status | **fixed list** `['Ordinary','Legendary','Mythical']`, filtered to values present in the population | declaration order | value verbatim | `:237` |
-| 5 | `stage` | Evolution stage | **fixed list** `['Basic','Stage 1','Stage 2']`, filtered to values present | declaration order | value verbatim | `:238` |
-| 6 | `color` | Pokédex color | distinct `s.color` | default lexicographic | value verbatim | `:239` |
-| 7 | `egg` | Egg group | distinct `s.egg` | default lexicographic | value verbatim | `:240` |
-| 8 | `habitat` | Habitat | distinct `s.habitat` | default lexicographic | value verbatim | `:241` |
-
-Eight filters, not four. See §8 row 6.
-
-**Option values as they resolve against the seeded population** (structure is authoritative; membership is a function of the data):
-
-| Filter | Options rendered from the seed |
-|---|---|
-| Type | Dark, Dragon, Fairy, Fighting, Fire, Ghost, Grass, Ice, Normal, Psychic, Water |
-| Generation | Gen 1, Gen 2, Gen 3, Gen 4, Gen 6 |
-| Region | Kanto, Johto, Hoenn, Sinnoh, Kalos |
-| Status | Ordinary, Legendary — **Mythical is filtered out**, no seeded species has it (`:237`) |
-| Evolution stage | Basic, Stage 1, Stage 2 |
-| Pokédex color | Black, Blue, Brown, Gray, Green, Pink, Purple, Red, White |
-| Egg group | Amorphous, Field, Human-Like, Monster, No eggs, Water 1 |
-| Habitat | Cave, Forest, Mountain, Rare, Snow, Urban, Waters-edge |
-
-**Design consequence to carry into implementation:** six of the eight option lists are derived from the *loaded species population*, so the vocabulary shrinks with the corpus, and two (`status`, `stage`) are fixed candidate lists intersected with the population. Whether production shows the full Pokédex vocabulary or only present values is unresolved — §7.
+| `SETS` (10 rows) | `:171-182` | `allSets` (`:230`) — all fields **except `era`** |
+| `ERAS` (3 rows: `WOTC 1999–2003`, `Sun & Moon 2017–2019`, `Sword & Shield 2020–2022`) | `:183-187` | **nothing** |
+| `SPECIES` (16 rows) | `:188-205` | filters (`:232-244`), `species` (`:304`), `speciesCount` (`:303`) |
+| `REGIONS` (9: Kanto…Paldea) | `:206` | the `region` filter only (`:236`) |
+| `SPECIES_ACCENTS` (16 gradients) | `:207` | avatar gradient (`:306`) |
+| `PAL` | `:161-168` | every computed colour |
 
 ---
 
 ## 4. States — complete state space
 
-`state = { mode, pokeQ, pokeFilters, pAddOpen, pEditor }` (`:209`). `pokeQ` is inert. The reachable space:
+`state = { mode: 'sets', pokeQ: '', pokeFilters: [], pAddOpen: false, pEditor: null }` (`:209`). Five variables; everything below is a projection of them.
 
-### 4.1 Mode
+### 4.1 Mode states
 
-| State | Trigger | Renders |
+| State | Trigger | Rendering |
 |---|---|---|
-| **S1 — By set** (initial) | default `mode:'sets'` (`:209`); `by set` click (`:59`, `:247`) | Flat set grid (`:109–130`). Filter bar absent. |
-| **S2 — By pokémon** | `by pokémon` click (`:60`, `:247`) | Filter bar (`:65–107`) + species grid (`:132–154`). Set grid absent. |
+| **Sets mode** (default) | initial state; `by set` clicked (`:247`) | `:109-130` only. Filter bar and species grid unmounted. |
+| **Pokémon mode** | `by pokémon` clicked (`:247`) | `:65-107` filter bar + `:132-154` caption/grid. Set grid unmounted. |
 
-### 4.2 Filter popover — by-pokémon only
+Filters and popover state are **not reset** on mode change (`:247` sets only `mode`), so chips survive a round-trip through sets mode and reappear intact.
 
-| State | Trigger | Renders |
+### 4.2 Era shelves — **DO NOT EXIST**
+
+Verified by exhaustive read and by literal count over the file:
+
+- `ERAS` appears **1 time** — its own assignment at `:183`. Nothing reads it. It is dead data.
+- Per-set `era` values appear on all 10 seed rows (`:172-181`) and are **never mapped into the view model**: `mkSet` (`:224-229`) returns 9 keys and `era` is not among them, so no template expression can reach it.
+- Literal `"shelf"` / `"shelves"`: **0 occurrences.**
+- Literal `"Uncategorized"`: **0 occurrences.** There is no Uncategorized shelf, no unclassified group, no fallback bucket. `Vivid Voltage` carries `era: null` (`:181`) — the one seeded row that *would* land in such a bucket — and it renders as an ordinary tile in alphabetical position, visually identical to the other nine.
+- Literal `"METADATA PENDING"`: **0 occurrences.** Literal `"metadata"` (any case): **0 occurrences.** There is no honesty badge, no curation-pending affordance, and no state that could show one.
+
+**Era constants present in the file**, all inert: `'WOTC'`, `'Sun & Moon'`, `'Sword & Shield'` (as `ERAS[].era`, `:184-186`, with year ranges `1999–2003` / `2017–2019` / `2020–2022`); the same three strings plus `null` as `SETS[].era` (`:172-181`). Nothing reads any of them.
+
+This is consistent with the data: `sets` carries no era and no release date (`../PokemonInvestBatch/DATA_MODEL.md:139-146`), so era grouping would require the non-scraped set-metadata table that `DECISIONS.md:199` records as not existing. The prototype's flat alphabetical grid is the design that can actually be built today; the era shelving in the older documents is unbuilt intent.
+
+### 4.3 Filter popover states (Pokémon mode only)
+
+| State | Condition | Rendering |
 |---|---|---|
-| **S3 — Closed** (initial) | `pAddOpen:false` (`:209`); toggle off (`:253`); mouseleave with no editor (`:254`, `:70`); mousedown outside `[data-pfilter-pop]` (`:212`) | `+ filter` button only |
-| **S4 — Attribute list** | `+ filter` click while closed (`:253`); back `‹` from editor (`:268`, `:82`) | Popover: "Pokédex" header + 8 attribute rows with `›` chevrons (`:71–79`) |
-| **S5 — Option editor, nothing picked** | attribute row click when that attribute has no existing filter (`:260–265`) | Header `‹ {pEdName}` (`:81–84`); option rows with empty checkboxes; preview `pick at least one`; **Add disabled** (`--accMut`, `cursor: not-allowed`) (`:283`, `:288–289`) |
-| **S6 — Option editor, ≥1 picked** | option row click (`:275–279`); or opening an attribute that already has a chip, which pre-seeds the draft (`:262–263`) | Checked boxes show `✓` on `--acc` (`:272`, `:274`); preview `attr = X` or `attr ∈ X, Y` (`:288`); **Add enabled** (`--acc`, `cursor: pointer`) |
+| **Closed** | `pAddOpen === false` (default) | only the dashed `+ filter` button (`:68`) |
+| **Attribute list** | `pShowMenu = pAddOpen && !pEditor` (`:255`) | popover with `Pokédex` section label (`:72`) and 8 attribute rows (`:73-78`) |
+| **Option editor** | `pShowEditor = !!pEditor` (`:256`) — and, because the editor lives inside the `sc-if pAddOpen` popover (`:69`), only visible while the popover is open | back chevron + attribute name header (`:81-84`), scrollable option list capped at 220px (`:85`), preview + Add footer (`:93-96`) |
+| **Editor, nothing picked** | `picked.length === 0` (`:286`) | preview reads `"pick at least one"`; Add is `disabled`, background `--accMut`, cursor `not-allowed` (`:283`, `:289`) |
+| **Editor, ≥1 picked** | `picked.length > 0` | preview reads `attr = v` or `attr ∈ v1, v2`; Add enabled, background `--acc`, cursor `pointer` (`:288-289`) |
 
-The editor holds a **draft** (`pEditor.sel`). Toggling options mutates only the draft; results do not change until **Add** (`:290–293`). Leaving via `‹` or an outside click discards it.
+Popover box: absolute, `top:31px`, `z-index:50`, width 300px, `max-height:380px`, `overflow-y:auto` (`:70`).
 
-### 4.3 Results
+### 4.4 Result states (Pokémon mode)
 
-| State | Trigger | Renders |
+| State | Trigger | Rendering |
 |---|---|---|
-| **S7 — No filters** | `pokeFilters: []` (`:209`) | All species; no chips; count reads `16 of 16 species` (`:303`) |
-| **S8 — Filtered, matches exist** | ≥1 chip, `speciesAll.length > 0` (`:243–244`) | Chips (`:101–103`), reduced grid, `N of 16 species` |
-| **S9 — Filtered, no matches** | `speciesAll.length === 0` → `pokeNoMatch` (`:312`) | Chips + an **empty grid element** (the `sc-for` emits nothing but the grid container remains) + a panel: **"No species match these filters — remove one to widen the net."** (`:152`) — `--card` background, 1px `--line`, radius 10, 40px padding, centred, 14px `--mut2` |
+| **Unfiltered** | `pokeFilters` empty | all 16 species; counter reads `16 of 16 species` (`:105`, `:303`) |
+| **Filtered, ≥1 match** | every filter satisfied by ≥1 species (`:243-244`) | subset grid; counter reads `{n} of 16 species` |
+| **Filtered, 0 matches** | `pokeNoMatch = speciesAll.length === 0` (`:312`) | the grid still renders **empty** (`:134-150` is not gated), and below it a centred panel: **"No species match these filters — remove one to widen the net."** — card background, 1px border, radius 10, padding 40, 14px `--mut2` (`:151-153`). Counter reads `0 of 16 species`. |
 
-### 4.4 Presentation states
+### 4.5 States that are absent
 
-| State | Trigger |
-|---|---|
-| **S10 — Light theme** (default) | absence of `cardstock-theme=dark` in `localStorage` (`:33`, `:167`) |
-| **S11 — Dark theme** | `localStorage['cardstock-theme'] === 'dark'` → `data-theme="dark"` set pre-paint (`:33`); tokens at `:27–30`, JS mirror at `:166` |
-| **S12 — CVD palette** | `localStorage['cardstock-cvd'] === '1'` → `data-cvd="1"` (`:33`); `--neg2` becomes `#D55E00` (`:25`); JS palette swaps to blue/orange (`:162`, `:164`) |
-| **S13 — Positive delta** | `chg >= 0` → `--pos`, leading `+` (`:222–223`) |
-| **S14 — Negative delta** | `chg < 0` → `--neg2`, leading `−` U+2212 (`:222–223`) |
-| **S15 — Reduced motion** | `prefers-reduced-motion` → animations clamped to 0.01ms (`:23`) |
+No loading state, no skeleton, no error state, no offline/stale state, no pagination or "load more", no empty state for sets mode (`allSets` is always the full 10), no per-tile disabled state, and no honesty/pending badge anywhere on this screen.
 
-### 4.5 Image-slot states
+### 4.6 Species search — **DECLARED, NOT WIRED**
 
-| State | Trigger |
-|---|---|
-| **S16 — Set art empty** (what this prototype actually ships) | No `art-set-*` entry exists in `CardStock Mockup/.image-slots.state.json` — it holds only the Landing page's eight slots (`hero-card-*`, `features-card*`, `data-card*`), verified 2026-08-10. `placeholder=" "` (`:118`) combined with `image-slot[placeholder=" "]::part(empty) { opacity: 0 }` (`:22`) hides the empty-state chrome entirely, so the front card renders as **pure gradient**. This is deliberate, not a broken image. |
-| **S17 — Set art filled** | An image assigned to `art-set-{slug}`; it paints inside the 78×108 front card at `radius 5`, covering the `fan1` gradient |
+- `state.pokeQ` exists (`:209`), a normalized query is computed as `const pq = st.pokeQ.trim().toLowerCase()` (`:231`), and both `pokeQ` and a setter `setPokeQ` are exported from `renderVals()` (`:251`).
+- **`pq` is never referenced again.** The species list is `this.SPECIES.filter(s => st.pokeFilters.every(...))` (`:243-244`) — attribute filters only, no name matching.
+- The file contains **zero `<input>` elements** (literal count of `<input`: 0). Nothing binds `pokeQ` or calls `setPokeQ`. `speciesCount` (`:303`) counts filter matches only.
 
-### 4.6 States the HTML does **not** implement
+The only search on the screen is the **global nav typeahead** `<cardstock-search>` (`:50`), a shared web component (`cardstock-search.js`) that searches a frozen demo corpus of species/sets/cards and navigates to Character/Set/Card pages. It is page chrome, identical on every screen, and it does **not** filter the Browse grid.
 
-Recorded because documents assert them and an implementer will look for them:
-
-- **METADATA PENDING** — zero occurrences of `PENDING` in the file. No badge, no honesty affordance, no consumer of `era: null`.
-- **"Uncategorized" shelf** — zero occurrences of `Uncategorized` or `shelf`. `Vivid Voltage`'s `era: null` (`:181`) is read by nothing; it sorts alphabetically into the flat grid like every other set.
-- **Loading / skeleton** — none, in either mode.
-- **Error** — none.
-- **Empty catalogue** — by-set has no counterpart to `pokeNoMatch`; an empty `SETS` array would render an empty grid with no message.
-- **Species search** — no input element (see §3.4).
+**Implementation consequence:** `pokeQ` / `setPokeQ` / `pq` are dead code left behind when the inline search was replaced by the shared component (`DESIGN_NOTES.md:123-124` records that replacement). Do not port them. If a species search is wanted, it is a new decision, not a transcription.
 
 ---
 
@@ -260,116 +262,81 @@ Recorded because documents assert them and an implementer will look for them:
 
 | # | Control | Line | Consequence |
 |---|---|---|---|
-| 1 | `by set` button | `:59`, `:247` | `mode:'sets'`. Set grid mounts, filter bar and species grid unmount. Filter state preserved. |
-| 2 | `by pokémon` button | `:60`, `:247` | `mode:'poke'`. Filter bar + species grid mount with previously applied filters still active. |
-| 3 | `+ filter` button | `:68`, `:253` | Toggles `pAddOpen` **and always clears `pEditor`** — so clicking it while an editor is open closes the whole popover, discarding the draft. |
-| 4 | Popover `mouseleave` | `:70`, `:254` | Closes **only if no editor is open** (`if (!this.state.pEditor)`). Moving the mouse out of the attribute list dismisses it; moving out of the editor does not. |
-| 5 | Document `mousedown` outside `[data-pfilter-pop]` | `:67`, `:211–214` | Closes popover and clears the editor. Guarded by `e.target.isConnected`, so a click on an element removed during the same event does not trigger it. Listener added on mount (`:214`), removed on unmount (`:217`). |
-| 6 | Attribute row (8 of them) | `:74–77`, `:260–265` | Opens the editor for that attribute. **If a chip already exists for it, the draft is pre-seeded with the chip's current values** (`:262–263`) — editing, not restarting. |
-| 7 | `‹` back | `:82`, `:268` | `pEditor: null` → returns to the attribute list with the popover still open. Draft discarded; `aria-label="Back to attributes"`. |
-| 8 | Option row | `:87–90`, `:275–279` | Toggles that value in the draft. Checkbox fills `--acc` with `✓`, or empties to `--card` with a `--line3` border (`:272`, `:274`). **Results do not change.** Tooltip flips between "Include X in the results" and "Stop including X" (`:273`). |
-| 9 | `Add` | `:95`, `:290–293` | No-op when nothing is picked (disabled attribute + early return). Otherwise: **replaces** any existing filter for that attribute (`filter(f => f.attr !== attr).concat([...])`), then closes editor *and* popover. Results and count recompute. |
-| 10 | Chip `✕` | `:102`, `:300` | Removes that attribute's filter entirely (all its values). `aria-label="Remove filter"`. Hover turns it `--neg2`. |
-| 11 | Set tile | `:113` | Navigates to `Cardstock Set.dc.html`. **All ten sets share this one href** (`:172–181`). Hover: `box-shadow 0 6px 20px rgba(20,19,26,0.10)`, 0.15s ease, underline suppressed. |
-| 12 | Species tile | `:136`, `:310` | Navigates to `Cardstock Character.dc.html`. Same href for every species. Same hover treatment. |
-| 13 | Nav links / logo / account circle | `:39–47`, `:51` | Home, Screener, Charts, Binder, Browse, Profile. Logo has `aria-label="Cardstock home"`. |
-| 14 | `<cardstock-search>` | `:50` | Shared web component. Corpus is frozen inside `cardstock-search.js`: 16 species (`:6`), 10 sets (`:7`), 5 cards (`:16–20`); fires at ≥2 chars, caps at 4 characters / 4 sets / 5 cards (`:36–41`); rows link to Character / Set / Card pages. |
-| 15 | Keyboard focus | `:21` | `*:focus-visible` → 2px `--acc` outline, `outline-offset: 1px`. Every control is a real `<button>` or `<a>`, so tab order is natural. |
+| 1 | `by set` button | `:59` | `mode = 'sets'`. Swaps the whole body to the set grid. Filters/popover state untouched. |
+| 2 | `by pokémon` button | `:60` | `mode = 'poke'`. Shows filter bar + caption + species grid. |
+| 3 | Set tile | `:113` | Full-tile link → `Cardstock Set.dc.html`. Hover raises a shadow. Native `title` tooltip. All 10 tiles go to the same page. |
+| 4 | Species tile | `:136` | Full-tile link → `Cardstock Character.dc.html`. Same hover/tooltip treatment. |
+| 5 | `+ filter` | `:68` | `pToggleAdd` — flips `pAddOpen` **and** clears `pEditor` (`:253`), so reopening always lands on the attribute list. |
+| 6 | Attribute row | `:74` | `pEditor = { attr, sel }`. If a chip for that attribute already exists, its values are pre-checked (`:262-263`), making the row an *edit* action as well as an *add*. |
+| 7 | Option row | `:87` | Toggles that value in `pEditor.sel` (`:275-279`). Immediate: checkbox fills `--acc` with `✓`, preview and Add-enablement update. No re-run yet. |
+| 8 | Back `‹` | `:82` | `pEditor = null` — returns to the attribute list, **discarding the in-progress selection**. Popover stays open. |
+| 9 | `Add` | `:95` | No-op when disabled. Otherwise removes any existing filter with the same `attr` and appends the new one (`:290-293`) — one chip per attribute, always — then closes editor and popover. Grid and counter re-run. |
+| 10 | Chip `✕` | `:102` | Removes the entire attribute filter (`:300`). Grid re-runs. There is no "clear all". |
+| 11 | Mouse leaves popover | `:70` | `pCloseAdd` closes it **only if no editor is open** (`:254`), so drifting off mid-edit does not lose work. |
+| 12 | `mousedown` outside | `:212` | If open and the target is outside `[data-pfilter-pop]` and still connected, closes popover **and** discards the editor. Listener added on mount, removed on unmount (`:210-218`). |
+| 13 | Nav / search / avatar | `:39-51` | Standard chrome navigation. `<cardstock-search>` supplies `/`-to-focus, Esc-to-close typeahead. |
+
+**Not present:** sort controls, density/view toggles, pagination, keyboard shortcuts local to this screen, context menus, drag-and-drop (beyond whatever `image-slot.js` offers at design time), and any bulk action.
 
 ---
 
 ## 6. Rules and invariants
 
-**Filter algebra**
-1. **At most one filter per attribute.** Enforced at add time: the new condition is concatenated after removing any prior condition on the same attribute (`:291`). Chips are therefore 1:1 with attributes, max 8.
-2. **Within an attribute: OR.** `f.vals.some(...)` (`:244`).
-3. **Across attributes: AND.** `st.pokeFilters.every(...)` (`:243–244`). Matches the `+ filter` tooltip: *"results must satisfy every filter"* (`:68`).
-4. **Comparison is string-coerced on both sides** — `String(v) === String(ATTRS[f.attr].of(s))` (`:244`). Load-bearing for `gen`, whose source values are numbers and whose draft keys are strings (`:263`, `:277`).
-5. **A filter cannot be added with zero values** (`:286`, `:290`). There is no "match nothing" state reachable from an empty selection.
-6. **Draft edits are transactional** — nothing takes effect until `Add`; back / outside-click / `+ filter` all discard.
-
-**Ordering**
-7. **Sets are ordered alphabetically ascending by name** (`:230`), on a copy (`slice()`). Not by era, not by release date, not by value. The comparator `(a,b) => a.name < b.name ? -1 : 1` returns `1` for equal names — harmless here, but an implementation should use a total ordering.
-8. **Species are not sorted at all.** `speciesAll` is `SPECIES.filter(...)` (`:243`), which preserves array order, and the mapper (`:304`) preserves it again. The caption *"Ordered by total market value across all printings"* (`:133`) is true only because the seed array happens to be value-descending. **A real implementation must apply `ORDER BY total_value DESC` explicitly** or the caption becomes a lie.
-
-**Formatting**
-9. `pct(n)` (`:222`) — sign, then `Math.abs(n).toFixed(1)`, then `%`. Positive/zero prefix is ASCII `+`; negative prefix is **U+2212 MINUS SIGN**, not a hyphen.
-10. `fgOf(n)` (`:223`) — `>= 0` is positive-coloured. **Zero renders as `+0.0%` in the positive colour.**
-11. Sign is always printed, so direction never depends on colour alone — honouring the spec invariant at `CARDSTOCK_UI_SPEC_v1.md:11`. (The mode toggle at `:59–60` does *not* honour it; see §7.)
-12. Money (`:308`) — `$` + `Math.round(value/1000) + 'K'` at or above 1000, else the bare integer. No thousands separators, no cents, no locale formatting.
-13. Set delta window is **30d** (`:124`); species delta window is **90d** (`:146`). Both are literal text in the template, not data.
-14. `count` and `printings` are stringified in the mapper (`:225`, `:307`), never formatted — a 4-digit count would render unseparated.
-
-**Counting**
-15. `speciesCount` (`:303`) is `matched of TOTAL`, where TOTAL is the entire species list, never the filtered one.
-
-**Labelling**
-16. **Chips and the editor preview use the raw attribute *key*, not the display name** (`:288`, `:299`). The menu row says "Egg group"; the chip says `egg = Field`. Likewise `gen`, `habitat`, `stage`, `color`. Option labels *do* use the display transform (`Gen 1`). This asymmetry is in the HTML and should be treated as intentional terminal-style shorthand unless the owner rules otherwise.
-17. Operators in chip/preview text: `=` for one value, `∈` (U+2208) for many (`:288`, `:299`).
-
-**Imagery — "where card images earn their keep"**
-18. **Only set tiles have an image slot.** Species tiles carry a 44px gradient circle with a letter (`:138`), not art (`:136–148`). On this screen the phrase from `PROJECT_LOG.md:214` applies to the set fan alone.
-19. The fan is **three rectangles, one slot** (`:114–119`), inside a 118px-tall relatively-positioned box:
-    - back-left `fan3`: **74×102**, `top: 4px`, `translateX(-88%) rotate(-8deg)`, radius 5, shadow `0 3px 10px` (`:115`)
-    - back-right `fan2`: **74×102**, `top: 4px`, `translateX(-12%) rotate(8deg)`, radius 5, same shadow (`:116`)
-    - front `fan1`: **78×108**, `top: 0`, `translateX(-50%)`, radius 5, shadow `0 5px 14px` (`:117`) — the only one containing `<image-slot>` (`:118`)
-20. 78×108 is **0.7222**, exactly the 325×450 portrait card ratio the spec mandates (`CARDSTOCK_UI_SPEC_v1.md:338`). The slot uses `shape="rounded" radius="5"` to match the card corner.
-21. **Unfilled slots are invisible by design** — `placeholder=" "` plus the `::part(empty)` opacity rule (`:22`, `:118`). The gradient is the fallback art, so a set with no images still reads as a set of cards.
-22. Slot ids are derived, not authored: `art-set-{slugified name}` (`:227`) — e.g. `art-set-base-set`, `art-set-sword-shield`. **The slug collapses runs of non-alphanumerics to a single `-`**, so two sets differing only in punctuation would collide.
-
-**Tile geometry**
-23. Set tile: min column 230px, `padding: 14px`, `radius: 10px`, 1px `--line` border, `--card` background (`:111`, `:113`).
-24. Species tile: min column 190px, `padding: 13px`, `radius: 10px`, same border/background (`:134`, `:136`).
-25. Both grids are `auto-fill` — column count is viewport-driven, and neither grid paginates or virtualizes.
-
-**Structural**
-26. Both catalogues render **every** row in one pass. With ~303 sets (`DATA_MODEL.md:135`) and a full species list, this needs a paging or virtualization decision the prototype does not make.
-27. `hint-placeholder-count` / `hint-placeholder-val` attributes (`:65`, `:73`, `:86`, `:101`, `:112`, `:135`) are Design Composer authoring hints for static preview — **not** runtime defaults and not part of the contract.
+1. **Exactly two modes, `sets` default.** `mode` is `'sets' | 'poke'` (`:209`, `:247`); everything else is a projection.
+2. **Set ordering is alphabetical by name, ascending** — `SETS.slice().sort((a,b) => a.name < b.name ? -1 : 1)` (`:230`). Not chronological, not by value, not by size, and **not grouped**. Rendered order for the seed: Base Set, Brilliant Stars, Evolving Skies, Fusion Strike, Hidden Fates, Lost Origin, Neo Genesis, Silver Tempest, Sword & Shield, Vivid Voltage. The comparator never returns 0, so it is not a stable sort for equal names — irrelevant for unique names, worth fixing in the port.
+3. **The species grid is NOT sorted.** `speciesAll` is `this.SPECIES.filter(...)` (`:243`) — literal array order, no `.sort()` anywhere on the species path (the only two `.sort()` calls in the file are the set sort at `:230` and the filter-option sorts at `:232`/`:236`). The caption "Ordered by total market value across all printings" (`:133`) is true of the seed **only because the seed array happens to be written in descending `value` order** (284000 → 11900, `:189-204`). Nothing enforces it. **The Blazor implementation must add an explicit `ORDER BY total_value DESC` to make the caption honest** — this is a real requirement the prototype leaves implicit.
+4. **Filter algebra: AND across attributes, OR within an attribute.** `pokeFilters.every(f => f.vals.some(v => String(v) === String(ATTRS[f.attr].of(s))))` (`:243-244`). Comparison is stringified on both sides, which is what lets numeric `gen` round-trip through the string-keyed `sel` map.
+5. **One chip per attribute, enforced on commit.** `pEdAdd` filters out same-`attr` entries before concatenating (`:291`). Re-opening an attribute pre-loads its current values (`:262-263`), so the interaction is edit-in-place.
+6. **Add requires at least one value** (`:286`, `:290`); a filter can never be committed empty, so `pokeFilters` never contains an empty `vals`.
+7. **Filter options are derived from the loaded species set, not from a fixed vocabulary** — `uniq()` over `SPECIES` (`:232`) for type/gen/color/egg/habitat and for region-via-`REGIONS`. `status` and `stage` *do* start from fixed vocabularies but are then `.filter()`ed to values actually present (`:237-238`), which is why **`Mythical` never appears** — no seeded species has it. In production these lists must come from the Pokédex source, not from the current page's rows.
+8. **Chips and the preview expression use the raw attribute key, not the display name** (`:288`, `:299`) — `gen`, `egg`, `stage`, `habitat`. Deliberate terminal-flavoured shorthand; preserve it or change it as an explicit design decision.
+9. **Percent formatting is uniform**: sign (`+` / U+2212 MINUS, not a hyphen), one decimal, `%` (`:222`). Colour is `--pos` for `>= 0` — **zero renders positive-green with a `+`** — and `--neg2` for `< 0` (`:223`).
+10. **Window suffixes are fixed and different per mode**: sets show `30d` (`:124`), species show `90d` (`:146`). Both are hard-coded strings in the markup, not data.
+11. **Value abbreviation:** `$` + `round(v/1000) + 'K'` at or above 1000, else the raw integer (`:308`). No thousands separators, no cents, no currency selector.
+12. **Every set tile links to the same page and every species tile links to the same page** (`:172-181`, `:310`) — a prototype shortcut, stated openly in the tooltips ("prototype renders Evolving Skies data for every set" / "…Umbreon data for every species"). In production these become per-entity routes.
+13. **`<image-slot>` ids must stay unique** (`:118`, `:227`); `image-slot.js` persists drops per id in a sidecar shared by every page in the directory. Design-time only — irrelevant to the Blazor port except as the marker for *where real card art belongs*: the front card of the fan, and nowhere else on this screen.
+14. **Theme and CVD are read once, at construction.** `PAL` is a class-field IIFE reading `localStorage` (`:161-168`), and the inline head script stamps `data-theme` / `data-cvd` (`:33`). A theme change therefore needs a reload for the JS-computed colours (deltas, mode buttons, checkboxes) even though the CSS-variable colours would flip live. Do not carry this quirk into Blazor — resolve palette per render.
+15. **Colour is never the only signal for direction**: the sign character carries it too (`:222`), and a CVD palette swaps green/red for blue/orange (`:25`, `:162-165`).
+16. **No props.** `data-props=""` (`:159`); the screen is self-contained and has no demo/empty-state prop, matching `DESIGN_NOTES.md:141`.
 
 ---
 
 ## 7. Open questions
 
-1. **Era shelves: build them or not?** The HTML is Tier 1 and renders a flat alphabetical grid. But `this.ERAS` (`:183–187`) and `SETS[].era` sit in the file unused, which reads like an intent that was cut or never wired. Owner ruling needed: ship the flat grid, or implement the shelves the documents describe.
-2. **If shelves: which era vocabulary?** Three eras with 1999–2003 / 2017–2019 / 2020–2022 (`:184–186`), or the eight from `CARDSTOCK_UI_SPEC_v1.md:199` / `DISPLAY_VOCABULARY.md:123` with different end years? Browse and the Screener's Era filter must not diverge.
-3. **Does the "Uncategorized" + METADATA PENDING honesty state ship?** Nothing in the HTML implements it. `era: null` exists in the data (`:181`) but drives no rendering. This is the only honesty affordance the docs claim for this screen.
-4. **Species search box.** `pokeQ`/`setPokeQ`/`pq` are dead (`:209`, `:231`, `:251`) and both the spec (`:199`) and `DESIGN_NOTES.md:71` describe one. Wire an input, or delete the state?
-5. **`sets` per species** — computed (`:307`), never rendered. Show "34 printings across 19 sets", or drop the field?
-6. **Set routing.** All ten tiles point at the same flat filename (`:172–181`). `HANDOFF.md:75` says `/set/{id}`; `CARDSTOCK_UI_SPEC_v1.md:207` says `/set/{slug}` with a verbatim-URL rule. Same question for Character: `HANDOFF.md:75` says `/character/{name}`. Needs one answer before either page is built.
-7. **Filter option vocabulary** — derived from the loaded population (six of eight attributes) or the full Pokédex vocabulary? Today `Mythical` silently disappears when no seeded species has it (`:237`). Empty-vocabulary and single-option cases are unspecified.
-8. **Where do the species value and 90d delta come from?** No character aggregate exists — `card_characters` is unbuilt (`DECISIONS.md:199`) and no index table exists at all (D-004, `DECISIONS.md:61–63`). Both numbers on every species tile are currently unsourceable.
-9. **Where does the set-index 30d move come from?** Same problem: `CARDSTOCK_UI_SPEC_v1.md:200` sources it from an `indices` table that does not exist (D-004).
-10. **Where do the fan gradients come from?** Hard-coded triples per set in the prototype (`:172–181`). `CARDSTOCK_UI_SPEC_v1.md:207` proposes a derived `card_accents` table; `DECISIONS.md` D-042 flags that a derived accent column on `cards` would mean writing to the scraper's tables (open — D-026).
-11. **Which images fill the front slot?** `CARDSTOCK_UI_SPEC_v1.md:200` says top cards by latest PSA-10 price. Only one slot exists, so "top-3" needs reducing to "top-1" or the fan needs two more slots. And `HANDOFF.md` §6 records that all card imagery is an unresolved **licensing** question — the largest open risk on this screen.
-12. **Scale strategy** — ~303 sets and a full species list in unpaginated `auto-fill` grids. Virtualize, page, or lazy-load?
-13. **Loading, error, and empty-catalogue states** are undesigned in both modes.
-14. **URL state.** Mode and filters live only in component state. Should `/browse` accept `?mode=` and filter params so a filtered view is linkable and back-button-safe?
-15. **Accessibility gap to close, not to copy.** The mode toggle signals selection by colour alone (`:248–249`) with no `aria-pressed` or `role="tablist"`; the filter popover has no `role="dialog"`/`aria-expanded` and no focus trap or Escape handler (dismissal is mouse-only — `:70`, `:212`). The prototype is a visual document, not an a11y reference.
-16. **Chip labels use raw attribute keys** (`egg = Field`, `:299`). Intentional terminal shorthand, or a prototype shortcut to clean up?
+1. **Do era shelves ship at all?** The prototype deleted them; three older documents still describe them (§8). Shelving needs the non-scraped set-metadata table (`DECISIONS.md:199`; `../PokemonInvestBatch/DATA_MODEL.md:139-146` confirms `sets` has neither era nor release date). Decide: (a) build the curation table and restore shelves, (b) ship the flat alphabetical grid the prototype specifies, or (c) flat now, shelves later. Until decided, **build (b)** — it is what the authoritative artefact shows.
+2. **If shelves return, does "Uncategorized" + METADATA PENDING return with them?** Both are absent from the prototype (0 literal occurrences each). `DESIGN_NOTES.md:70` argues METADATA PENDING applies to *card/set* metadata, not Pokédex attributes — so an Uncategorized set shelf would be consistent with that ruling, while a pending badge on a species filter would not.
+3. **Alphabetical is the only set ordering.** ~303 real sets in one alphabetical wall is a very different object from 10 tiles. Does production need era/date grouping, a sort control, or search purely as a scale mitigation, independent of the era question?
+4. **Species search.** The prototype has none (§4.6). At 16 seeded species the filters suffice; the real species count does not. Is the global nav typeahead the intended answer, or does the grid need its own query box?
+5. **Set-mode filtering.** Pokémon mode has 8 filters; set mode has none. Intentional asymmetry or unfinished?
+6. **Where do the aggregates come from?** Set `count` and 30d %, species `printings`/`sets`/total value/90d % are all seeded literals. Given append-only, change-only history (ADR-0001), each needs a defined derivation — especially "30d %" and "90d %", where the naive month-window query returns nothing for most cards.
+7. **Species → printings/sets counts** depend on the card↔species join (`card_characters`) recorded as not-yet-existing (`DECISIONS.md:199`). Browse-by-Pokémon cannot ship before that table does.
+8. **Is `sets` (per-species set count) meant to be displayed?** It is computed (`:307`) and dropped; `DESIGN_NOTES.md:71` says the tile shows "printings/sets". Show it or delete it.
+9. **Chip vocabulary** — raw keys (`gen`, `egg`) vs display names (`Generation`, `Egg group`). Prototype uses keys; confirm that is the intended terminal voice.
+10. **Mode is not in the URL.** Should `/browse?mode=pokemon` (and filter state) be shareable/bookmarkable?
+11. **Grid virtualization / paging** for the real corpus — the prototype renders every row.
+12. **Accessibility gaps to close in the port:** the mode switch has no `aria-pressed`/tablist semantics, the filter popover is a plain `div` with no `role="dialog"`/focus trap/Esc handler (only mouseleave and outside-mousedown close it, `:70`/`:212`), and option rows are `<button>`s styled as checkboxes with no `role="checkbox"`/`aria-checked`.
 
 ---
 
 ## 8. Contradictions found
 
-Every row: the document's claim, the exact source line, and what `Cardstock Browse.dc.html` actually does. The HTML wins in all of them.
-
-| # | Claim | Source doc:line | What the HTML actually does |
-|---|---|---|---|
-| 1 | "By set = era shelves (WOTC / Sun & Moon / Sword & Shield + 'Uncategorized' shelf w/ METADATA PENDING badge — honesty state from spec §4.8)" | `CardStock Mockup/DESIGN_NOTES.md:71` | **No shelves exist.** `allSets` is one flat grid sorted alphabetically by name (`:230`, `:111–128`). `mkSet` never copies `era` (`:224–229`); the template never mentions it. `this.ERAS` (`:183–187`) is declared once and referenced nowhere. Zero occurrences of `Uncategorized`, `shelf`, or `PENDING` in the file. |
-| 2 | "*By set:* era shelves (WOTC, EX, DP, BW, XY, SM, SWSH, SV…)" — eight eras | `CardStock Mockup/uploads/CARDSTOCK_UI_SPEC_v1.md:199` | The file's only era list has **three** entries — WOTC, Sun & Moon, Sword & Shield (`:184–186`) — with different labels from the spec's abbreviations, and it is never rendered. |
-| 3 | Era year ranges "WOTC (1999–03) · … · SM (2017–20) · SWSH (2020–23) · SV (2023– )" | `CardStock Mockup/DISPLAY_VOCABULARY.md:123` | End years differ from the HTML: WOTC **1999–2003**, Sun & Moon **2017–2019**, Sword & Shield **2020–2022** (`:184–186`). Only three of the eight ranges have any counterpart here. |
-| 4 | "*Maturity:* sets missing metadata fall into an 'Uncategorized' shelf (curation TODO surfaces honestly)" / "'Uncategorized' shelf is the honest fallback until complete" | `…/CARDSTOCK_UI_SPEC_v1.md:201` and `:446` | Not implemented. The only trace is `era: null` on Vivid Voltage (`:181`), which nothing reads — it sorts into the flat alphabetical grid indistinguishably from the other nine sets. |
-| 5 | "*Loading:* shelf skeletons" | `…/CARDSTOCK_UI_SPEC_v1.md:201` | No loading state, skeleton, or spinner anywhere in the file, in either mode. |
-| 6 | "Pokédex filter menu = Type / Generation / Region / Status" — repeated as "Browse species filter = Type/Generation/Region/Status" | `CardStock Mockup/DESIGN_NOTES.md:71` and `:85` | **Eight** filters, not four: Type, Generation, Region, Status, Evolution stage, Pokédex color, Egg group, Habitat (`:233–242`). |
-| 7 | "Only Evolving Skies links to a built Set page; others tooltip why" | `CardStock Mockup/DESIGN_NOTES.md:71` | All ten sets link to `Cardstock Set.dc.html` (`:172–181`). The tooltips do not explain a missing page — they say "prototype renders Evolving Skies data for every set", i.e. the page exists and the *data* is reused. |
-| 8 | "character pages are P2 (#)" | `CardStock Mockup/DESIGN_NOTES.md:71` | Every species links to `Cardstock Character.dc.html` (`:310`). No `#` placeholder hrefs remain. (`DESIGN_NOTES.md:164` separately records Character as DONE — the same file contradicts itself.) |
-| 9 | "species picker (search-as-you-type grid ordered by total market value of printings)" / "species grid … + filter box" | `…/CARDSTOCK_UI_SPEC_v1.md:199`; `DESIGN_NOTES.md:71` | **No search input exists.** `state.pokeQ` (`:209`), `setPokeQ` (`:251`) and the local `pq` (`:231`) are declared and bound to nothing. Narrowing is by attribute chips only. |
-| 10 | "species grid … (accent initial circle, **printings/sets**, total value, 90d %)" | `CardStock Mockup/DESIGN_NOTES.md:71` | Tiles render `printings` only (`:141`). `sets` is computed into the view model (`:307`) and never displayed. |
-| 11 | "fan of **top-3 chase-card images**" | `…/CARDSTOCK_UI_SPEC_v1.md:199` | The fan is three gradient rectangles; only the front one holds an `<image-slot>` (`:115–119`). The two back cards can never show art. |
-| 12 | "grid **ordered by** total market value of printings" — restated on-screen as "Ordered by total market value across all printings" | `…/CARDSTOCK_UI_SPEC_v1.md:199`; HTML caption `:133` | **No sort is applied.** `speciesAll` is a plain `.filter()` (`:243`) over `SPECIES` in literal array order (`:189–204`). The caption is a claim about data the code does not enforce — the seed array merely happens to be value-descending. |
-| 13 | "shelves grouped by era, tiles show card count + set-index 30d move" | `CardStock Mockup/uploads/PROJECT_LOG.md:214` (Tier 3) | Tiles do show count + 30d (`:123–124`), so the second half holds. The shelves do not exist (see row 1). |
-| 14 | Route `/set/{id}` | `CardStock Mockup/HANDOFF.md:75` (vs `/set/{slug}` at `…/CARDSTOCK_UI_SPEC_v1.md:207`) | The HTML settles neither — every tile points at the bare filename `Cardstock Set.dc.html` (`:172–181`), encoding no id and no slug. Doc-vs-doc, unresolved by Tier 1. |
-
-**One citation correction, not a contradiction.** It is sometimes said that D-004 confirms the `sets` table carries no era and no release date. D-004 (`DECISIONS.md:61–63`) says something narrower — there is no index table and no metrics table among the eight DbSets — and never mentions `sets` columns. The claim is nonetheless **true**, verified directly 2026-08-10 against `../PokemonInvestBatch/DATA_MODEL.md:139–146`, which lists the whole table as `id`, `slug`, `name`, `discovered_at`, `last_seen_at`, `last_walked_at`, describing it (`:135–137`) as "enumeration bookkeeping only". The derived record lives at `DECISIONS.md:199`. Cite `DATA_MODEL.md:139–146`, not D-004.
-
-**Where the docs are right:** `HANDOFF.md:75` — "By set and by Pokémon, attribute filters" — is an accurate one-line summary, and `DESIGN_NOTES.md:71`'s description of the set tile (3-card fan with accent gradients, front card an image-slot, name, count, 30d %) and of region-derived-from-generation matches the HTML exactly. `DESIGN_NOTES.md:70`'s ruling that Pokédex attributes need no METADATA PENDING state is consistent with what is built.
+| Claim | Source doc:line | What the HTML actually does |
+|---|---|---|
+| "By set = era shelves (WOTC / Sun & Moon / Sword & Shield…)" | `CardStock Mockup/DESIGN_NOTES.md:71` | No shelves. One flat grid, `auto-fill minmax(230px,1fr)` (`:111`), sorted **alphabetically by name** (`:230`). `ERAS` is declared at `:183` and read by nothing (1 literal occurrence, its own assignment); `SETS[].era` is never mapped by `mkSet` (`:224-229`). |
+| "era shelves (WOTC, EX, DP, BW, XY, SM, SWSH, SV…)" — 8+ eras | `CardStock Mockup/uploads/CARDSTOCK_UI_SPEC_v1.md:199` | No shelves at all, and only **three** era constants exist anywhere in the file (`WOTC`, `Sun & Moon`, `Sword & Shield`, `:184-186`). `EX/DP/BW/XY/SV` appear nowhere. |
+| "By set (shelves grouped by era…)" | `CardStock Mockup/uploads/PROJECT_LOG.md:214` | Same — no grouping of any kind (`:110-129`). |
+| "'Uncategorized' shelf w/ METADATA PENDING badge — honesty state from spec §4.8" | `CardStock Mockup/DESIGN_NOTES.md:71` | **0 literal occurrences of "Uncategorized"; 0 of "METADATA PENDING"; 0 of "metadata".** `Vivid Voltage` has `era: null` (`:181`) and renders as an ordinary tile in alphabetical position. |
+| "sets missing metadata fall into an 'Uncategorized' shelf (curation TODO surfaces honestly)" | `CardStock Mockup/uploads/CARDSTOCK_UI_SPEC_v1.md:201` | No such shelf and no honesty affordance (`:109-130`). |
+| "'Uncategorized' shelf is the honest fallback until [era/release curation is] complete" | `CardStock Mockup/uploads/CARDSTOCK_UI_SPEC_v1.md:446` | Not implemented. The prototype's answer to missing era data is to **not group at all**. |
+| "*Loading:* shelf skeletons" | `CardStock Mockup/uploads/CARDSTOCK_UI_SPEC_v1.md:201` | No loading state, no skeleton, no shimmer anywhere in the file. |
+| "Pokédex filter menu = Type / Generation / Region / Status" (4 filters) | `CardStock Mockup/DESIGN_NOTES.md:71` and again at `:85` | **8 filters** (`ATTRS`, `:233-242`): Type, Generation, Region, Status, Evolution stage, Pokédex color, Egg group, Habitat — 48 seeded options total (11 / 5 / 5 / 2 / 3 / 9 / 6 / 7). |
+| "species picker (search-as-you-type grid…)" | `CardStock Mockup/uploads/CARDSTOCK_UI_SPEC_v1.md:199` | **No search input exists** — 0 `<input>` elements in the file. `pokeQ` (`:209`), `pq` (`:231`) and `setPokeQ` (`:251`) are declared and never bound or read; filtering is attribute-only (`:243-244`). |
+| "By pokémon = species grid… + filter box" | `CardStock Mockup/DESIGN_NOTES.md:71` | Filter *popover* exists (`:67-100`); the "filter box" text input does not. |
+| "species grid ordered by total market value" / "grid ordered by total market value of printings" | `CardStock Mockup/DESIGN_NOTES.md:71`; `uploads/CARDSTOCK_UI_SPEC_v1.md:199` | The **caption** claims it (`:133`) but no sort is applied — `speciesAll` is a plain `.filter()` (`:243`) preserving literal array order. True of the seed by coincidence of authoring (`:189-204` is written descending). Must be made an explicit sort in the port. |
+| Species tile shows "printings/sets" | `CardStock Mockup/DESIGN_NOTES.md:71` | Only `printings` is rendered (`:141`). `sets` is computed (`:307`) and never used. |
+| "Only Evolving Skies links to a built Set page; others tooltip why" | `CardStock Mockup/DESIGN_NOTES.md:71` | **All 10** set tiles link to `Cardstock Set.dc.html` (`:172-181`); the tooltip explains the *data* is a stand-in ("prototype renders Evolving Skies data for every set"), not that the link is dead. |
+| "character pages are P2 (#)" | `CardStock Mockup/DESIGN_NOTES.md:71` | Species tiles link to a real `Cardstock Character.dc.html` (`:310`). Superseded by the same file's later line 164 ("~~Character~~ DONE"); `:71` was not updated. |
+| "no crops except the tile fan on Browse shelves" | `CardStock Mockup/uploads/CARDSTOCK_UI_SPEC_v1.md:338` | The fan exists (`:114-119`) but is not on a shelf, and only the **front** card can hold an image (`<image-slot>`, `:118`); the two rear cards are gradient-only (`:115-116`). |
+| "Browse's era shelves" listed as a consumer of the set-metadata table | `DECISIONS.md:199` | Accurate about the *data gap* — `sets` has no era/release (`../PokemonInvestBatch/DATA_MODEL.md:139-146`) — but the dependency is **latent, not live**: the current prototype needs no set-metadata table because it does not group. |
+| "/browse — By set and by Pokémon, attribute filters" | `CardStock Mockup/HANDOFF.md:75` | **Matches the HTML.** Recorded as a confirmed agreement, not a contradiction. |
+| "no METADATA PENDING honesty state… on Pokédex attributes" | `CardStock Mockup/DESIGN_NOTES.md:70`; `HANDOFF.md:107` | **Matches** — the screen has no pending state on any species attribute (nor anywhere else). |

@@ -369,6 +369,24 @@ All lines read directly 2026-08-10. Owner asked for this to be tracked, 2026-08-
 
 ---
 
+### D-043 — 🚩 Tier 1 contradicts Tier 1: the account-deletion promise
+Two prototypes state incompatible deletion policies. D-040 says the mockups are absolute truth — but it has no rule for when two mockups disagree, so this needs an owner ruling and D-040 needs a tiebreak clause.
+
+| Source | Says |
+|---|---|
+| `Cardstock Legal.dc.html:57` | data "removed within **30 days**" |
+| `Cardstock Profile.dc.html:181, :191` | "**immediately and permanently**… no recovery" |
+
+**Why it matters now rather than later:** D-011 made the app publicly signup-able, so the privacy policy is a public commitment rather than placeholder copy. Shipping both texts means one of them is false to every user who reads it.
+
+**Interaction with D-017:** once off-box backups exist — and they must — "immediately and permanently" becomes impossible to honour literally, because deleted rows survive in dumps until those dumps age out. A bounded window is the only promise a backed-up system can actually keep. That argues for the Legal page's version, with the retention window set to match backup rotation.
+
+Also verified in the same pass: `Cardstock Legal.dc.html:57` tells users to "export your binder as CSV first" — but the Profile page has **no export affordance** (0 occurrences). The Binder's CSV control exists but generates no file (`HANDOFF.md` §6). So the policy instructs a step the product cannot perform.
+
+**Needed:** one deletion policy, written once, reflected in both prototypes and whatever ships.
+
+---
+
 ### D-031 — Two more numbers in `HANDOFF.md` §5 contradict better sources
 The §5 data-dependency table carries at least two more values that disagree with documents closer to the data.
 
