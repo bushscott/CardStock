@@ -205,8 +205,10 @@ Owner, 2026-08-10. Resolves the hosting half of D-016.
 ### D-037 — Security posture for a public, single-box deployment
 Follows from D-011 (public, open signup) and D-036 (same box). Not yet designed — this is the checklist the design must satisfy.
 
-**Non-negotiable given D-011:**
-- **Cloudflare Tunnel or equivalent.** Outbound-only. No port forwarding, no inbound firewall holes, residential IP never published.
+**Network exposure — two viable routes, owner has the hardware for either.** Updated 2026-08-10: the home network runs a **static IP on business-grade hardware capable of VLANs and firewall rules.** That removes the assumption behind my original "tunnel is non-negotiable" framing.
+- **Segmented direct exposure** — Pi on an isolated DMZ VLAN, inbound 443 only, **no lateral route to the rest of the LAN**. This directly addresses D-036's blast-radius cost: a compromised web app is still adjacent to Postgres and the crawler on that Pi, but it is contained to that Pi rather than sitting inside the home network. Legitimate with this hardware.
+- **Cloudflare Tunnel or equivalent** — outbound-only, no inbound holes at all. Still worth weighing even with good hardware, because it also brings DDoS absorption, a WAF, and origin-IP concealment that a home firewall does not.
+- Not yet decided. Both are defensible; the VLAN route keeps everything under the owner's control, the tunnel route offloads the classes of attack a home firewall handles worst.
 - **Dedicated `cardstock_app` Postgres role** — `SELECT`-only on the scraper's eight tables, full DML on CardStock's own, no DDL. This enforces D-026 **at the database** rather than by convention, making the app structurally incapable of writing scraper data. Migrations use a separate role, at deploy only.
 - **Per-user rate limiting in front of `express-visit`.** D-024's guardrails bound load on the *source site*; nothing bounds user-triggered frequency.
 - **systemd hardening on the web unit** — `NoNewPrivileges`, `ProtectSystem=strict`, `PrivateTmp`, dedicated user, and `MemoryMax` so the web tier cannot starve the crawler.
