@@ -1,0 +1,318 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="icon" href="./brand/favicon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="anonymous">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Inter+Tight:wght@600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<script src="./image-slot.js"></script>
+<style>
+  html, body { margin: 0; padding: 0; background: var(--bg, var(--bg, #FAFAF7)); }
+  body { font-family: 'Inter', system-ui, sans-serif; color: var(--ink, #1C1C1E); }
+  a { color: var(--acc, #4A63D0); text-decoration: none; }
+  a:hover { color: var(--accH, #3A4FB8); text-decoration: underline; }
+  *:focus-visible { outline: 2px solid var(--acc, #4A63D0); outline-offset: 1px; border-radius: 2px; }
+  image-slot[placeholder=" "]::part(empty) { opacity: 0; }
+  @media (prefers-reduced-motion: reduce) { * { animation-duration: 0.01ms !important; } }
+
+  :root[data-cvd="1"] { --neg2: #D55E00; }
+
+  :root[data-theme="dark"] { color-scheme: dark; --bg: #161614; --card: #1E1E1C; --ink: #E9E9E5; --mut: #B4B4AE; --mut2: #A8A8A2; --mut3: #9A9A94; --mutbg: #2A2A27; --hov: #282825; --line: #33332F; --line2: #3E3E39; --line3: #4A4A44; --line4: #262623; --acc: #8C9BF2; --accH: #AAB6F6; --btn: #4A63D0; --warn: #D6A54A; --warnInk: #D6A54A; --tooltipBg: rgba(30, 30, 28, 0.95); --accBg: #252B44; --accMut: #3A4570; }
+  :root[data-theme="dark"]:not([data-cvd="1"]) { --pos: #4CC08D; --pos2: #4CC08D; --neg: #E57B7B; --neg2: #E57B7B; --neg3: #E57B7B; }
+  :root[data-theme="dark"][data-cvd="1"] { --pos: #58A9E6; --pos2: #58A9E6; --neg: #F5924E; --neg2: #F5924E; --neg3: #E8874D; }
+  :root[data-theme="dark"] { --logoTeal: #3FBFAD; }
+</style>
+<script src="./cardstock-search.js"></script>
+<script>if(localStorage.getItem('cardstock-cvd')==='1')document.documentElement.setAttribute('data-cvd','1');if(localStorage.getItem('cardstock-theme')==='dark')document.documentElement.setAttribute('data-theme','dark');</script>
+</helmet>
+<div data-screen-label="Browse" style="min-height: 100vh; display: flex; flex-direction: column; font-size: 15px;">
+
+  <nav style="height: 48px; background: var(--card, #FFFFFF); border-bottom: 1px solid var(--line, #E4E4E0); display: flex; align-items: center; gap: 24px; padding: 0 20px; position: sticky; top: 0; z-index: 20;">
+    <div style="display: flex; align-items: center; gap: 10px;">
+      <a href="Cardstock Home.dc.html" aria-label="Cardstock home" style="display: flex; align-items: center; gap: 10px; color: inherit; text-decoration: none;"><svg width="24" height="24" viewBox="0 0 32 32" fill="none" aria-hidden="true" style="flex: 0 0 auto;"><rect x="5.5" y="5.5" width="15" height="21" rx="2.5" style="stroke: var(--ink, #1C1C1E);" stroke-width="2" transform="rotate(-12 13 16)"></rect><rect x="12" y="5.5" width="15" height="21" rx="2.5" style="fill: var(--card, #FFFFFF); stroke: var(--ink, #1C1C1E);" stroke-width="2"></rect><polyline points="15,21.5 17.5,17 19.5,18.5 23.5,12.5" style="stroke: var(--logoTeal, #0E8A7B);" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" fill="none"></polyline><circle cx="23.5" cy="12.5" r="1.7" style="fill: var(--logoTeal, #0E8A7B);"></circle></svg>
+      <span style="font-family: 'Inter', sans-serif; font-weight: 700; font-size: 18px; letter-spacing: -0.03em; color: var(--ink, #1C1C1E);">Cardstock</span></a>
+      </div>
+    <div style="display: flex; gap: 2px; height: 100%;">
+      <a href="Cardstock Home.dc.html" style="display: flex; align-items: center; padding: 0 12px; font-weight: 500; font-size: 15px; color: var(--mut, #5B5B57); border-bottom: 2px solid transparent; margin-bottom: -1px;">Home</a>
+      <a href="Cardstock Screener.dc.html" style="display: flex; align-items: center; padding: 0 12px; font-weight: 500; font-size: 15px; color: var(--mut, #5B5B57); border-bottom: 2px solid transparent; margin-bottom: -1px;">Screener</a>
+      <a href="Cardstock Charts.dc.html" style="display: flex; align-items: center; padding: 0 12px; font-weight: 500; font-size: 15px; color: var(--mut, #5B5B57); border-bottom: 2px solid transparent; margin-bottom: -1px;">Charts</a>
+      <a href="Cardstock Binder.dc.html" style="display: flex; align-items: center; padding: 0 12px; font-weight: 500; font-size: 15px; color: var(--mut, #5B5B57); border-bottom: 2px solid transparent; margin-bottom: -1px;">Binder</a>
+      <a href="Cardstock Browse.dc.html" style="display: flex; align-items: center; padding: 0 12px; font-weight: 600; font-size: 15px; color: var(--ink, #1C1C1E); border-bottom: 2px solid var(--acc, #4A63D0); margin-bottom: -1px;">Browse</a>
+    </div>
+    <div style="flex: 1;"></div>
+    <cardstock-search></cardstock-search>
+    <a href="Cardstock Profile.dc.html" aria-label="Account" title="Profile & settings" style="display: flex; align-items: center; justify-content: center; width: 28px; height: 28px; border-radius: 50%; border: 1px solid var(--line, #E4E4E0); background: var(--mutbg, #F3F3EE); color: var(--mut, #5B5B57); font-weight: 600; font-size: 14px; text-decoration: none; flex-shrink: 0;">O</a>
+  </nav>
+
+  <main style="flex: 1; max-width: 1480px; width: 100%; box-sizing: border-box; margin: 0 auto; padding: 14px 20px 28px 20px; display: flex; flex-direction: column; gap: 18px;">
+
+    <div style="display: flex; align-items: center; gap: 14px;">
+      <h1 style="font-family: 'Inter Tight', sans-serif; font-weight: 700; font-size: 26px; letter-spacing: -0.01em; margin: 0;">Browse</h1>
+      <div style="display: flex; border: 1px solid var(--line, #E4E4E0); border-radius: 6px; overflow: hidden; background: var(--card, #FFFFFF);">
+        <button onClick="{{ modeSets }}" title="Browse by set — every release, its size, and its market value" style="background: {{ msBg }}; color: {{ msFg }}; border: none; height: 28px; padding: 0 14px; font-family: 'JetBrains Mono', monospace; font-size: 13px; font-weight: 600; cursor: pointer;">by set</button>
+        <button onClick="{{ modePoke }}" title="Browse by Pokémon — every species and all of its printings" style="background: {{ mpBg }}; color: {{ mpFg }}; border: none; height: 28px; padding: 0 14px; font-family: 'JetBrains Mono', monospace; font-size: 13px; font-weight: 600; cursor: pointer;">by pokémon</button>
+      </div>
+      <div style="flex: 1;"></div>
+    </div>
+
+    <sc-if value="{{ isPoke }}" hint-placeholder-val="{{ false }}">
+      <div style="display: flex; align-items: center; gap: 6px; flex-wrap: wrap; margin-top: -6px;">
+        <div data-pfilter-pop="1" style="position: relative;">
+          <button onClick="{{ pToggleAdd }}" title="Add another condition — results must satisfy every filter" style="background: var(--card, #FFFFFF); border: 1px dashed var(--line2, #D9D9D4); border-radius: 6px; height: 27px; padding: 0 10px; font-family: 'Inter', sans-serif; font-size: 13px; color: var(--mut, #5B5B57); cursor: pointer;" style-hover="border-color: var(--acc, #4A63D0); color: var(--acc, #4A63D0);">+ filter</button>
+          <sc-if value="{{ pAddOpen }}" hint-placeholder-val="{{ false }}">
+            <div onMouseLeave="{{ pCloseAdd }}" style="position: absolute; left: 0; top: 31px; z-index: 50; background: var(--card, #FFFFFF); border: 1px solid var(--line, #E4E4E0); border-radius: 8px; box-shadow: 0 8px 24px rgba(20, 19, 26, 0.13); width: 300px; max-height: 380px; overflow-y: auto; padding: 6px;">
+              <sc-if value="{{ pShowMenu }}" hint-placeholder-val="{{ true }}">
+                <div style="font-size: 11.5px; font-weight: 600; letter-spacing: 0.06em; color: var(--mut2, #6B6B66); text-transform: uppercase; padding: 8px 8px 3px 8px;">Pokédex</div>
+                <sc-for list="{{ pMenu }}" as="fi" hint-placeholder-count="2">
+                  <button onClick="{{ fi.add }}" title="{{ fi.tip }}" style="display: flex; align-items: center; gap: 8px; width: 100%; text-align: left; background: none; border: none; cursor: pointer; font-family: 'Inter', sans-serif; font-size: 13.5px; color: var(--ink, #1C1C1E); padding: 5px 8px; border-radius: 4px;" style-hover="background: var(--hov, #F6F6F2);">
+                    <span style="flex: 1;">{{ fi.name }}</span>
+                    <span style="color: var(--line3, #C9C9C4); font-size: 13px;">›</span>
+                  </button>
+                </sc-for>
+              </sc-if>
+              <sc-if value="{{ pShowEditor }}" hint-placeholder-val="{{ false }}">
+                <div style="display: flex; align-items: center; gap: 4px; padding: 2px 2px 7px 2px; border-bottom: 1px solid var(--line4, #F0F0EC);">
+                  <button onClick="{{ pEdBack }}" title="Back to the attribute list without adding this filter" aria-label="Back to attributes" style="background: none; border: none; cursor: pointer; color: var(--mut, #5B5B57); font-size: 16px; padding: 2px 6px; border-radius: 4px; line-height: 1;" style-hover="background: var(--hov, #F6F6F2); color: var(--ink, #1C1C1E);">‹</button>
+                  <span style="font-size: 13.5px; font-weight: 600; flex: 1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">{{ pEdName }}</span>
+                </div>
+                <div style="max-height: 220px; overflow-y: auto; padding: 5px 0 0 0;">
+                  <sc-for list="{{ pEdOpts }}" as="eo" hint-placeholder-count="5">
+                    <button onClick="{{ eo.pick }}" title="{{ eo.tip }}" style="display: flex; align-items: center; gap: 8px; width: 100%; text-align: left; background: none; border: none; cursor: pointer; font-family: 'Inter', sans-serif; padding: 5px 8px; border-radius: 4px;" style-hover="background: var(--hov, #F6F6F2);">
+                      <span style="width: 14px; height: 14px; border: 1.5px solid {{ eo.bd }}; border-radius: 3px; background: {{ eo.bg }}; color: #FFFFFF; font-size: 10px; line-height: 14px; text-align: center; flex-shrink: 0; box-sizing: border-box;">{{ eo.mark }}</span>
+                      <span style="font-size: 13px; color: var(--ink, #1C1C1E);">{{ eo.label }}</span>
+                    </button>
+                  </sc-for>
+                </div>
+                <div style="display: flex; align-items: center; gap: 8px; margin: 10px 2px 2px 2px; padding-top: 9px; border-top: 1px solid var(--line4, #F0F0EC);">
+                  <span style="flex: 1; min-width: 0; font-family: 'JetBrains Mono', monospace; font-size: 12px; color: var(--mut, #5B5B57); white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">{{ pEdPreview }}</span>
+                  <button onClick="{{ pEdAdd }}" title="Add this condition and re-run" disabled="{{ pEdAddOff }}" style="background: {{ pEdAddBg }}; color: #FFFFFF; border: none; border-radius: 6px; height: 26px; padding: 0 12px; font-family: 'Inter', sans-serif; font-size: 13px; font-weight: 600; cursor: {{ pEdAddCur }}; flex-shrink: 0;">Add</button>
+                </div>
+              </sc-if>
+            </div>
+          </sc-if>
+        </div>
+        <sc-for list="{{ pokeChips }}" as="c" hint-placeholder-count="2">
+          <span style="display: inline-flex; align-items: center; gap: 6px; background: var(--accBg, #EEF1FB); border: 1px solid rgba(74, 99, 208, 0.25); color: var(--ink, #1C1C1E); border-radius: 6px; padding: 3px 6px 3px 9px; font-family: 'JetBrains Mono', monospace; font-size: 12.5px; font-weight: 500;">{{ c.label }}<button onClick="{{ c.remove }}" title="Remove this filter" aria-label="Remove filter" style="background: none; border: none; cursor: pointer; color: var(--mut, #5B5B57); font-size: 12px; padding: 0 2px; line-height: 1;" style-hover="color: var(--neg2, #D64545);">✕</button></span>
+        </sc-for>
+        <div style="flex: 1;"></div>
+        <span style="font-family: 'JetBrains Mono', monospace; font-size: 12.5px; color: var(--mut, #5B5B57); white-space: nowrap;">{{ speciesCount }}</span>
+      </div>
+    </sc-if>
+
+    <sc-if value="{{ isSets }}" hint-placeholder-val="{{ true }}">
+        <section>
+          <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(230px, 1fr)); gap: 12px;">
+            <sc-for list="{{ allSets }}" as="se" hint-placeholder-count="10">
+              <a href="{{ se.href }}" title="{{ se.tip }}" style="display: block; background: var(--card, #FFFFFF); border: 1px solid var(--line, #E4E4E0); border-radius: 10px; padding: 14px; color: var(--ink, #1C1C1E); text-decoration: none; transition: box-shadow 0.15s ease;" style-hover="box-shadow: 0 6px 20px rgba(20, 19, 26, 0.10); text-decoration: none; color: var(--ink, #1C1C1E);">
+                <div style="position: relative; height: 118px; margin-bottom: 11px;">
+                  <div style="position: absolute; left: 50%; top: 4px; width: 74px; height: 102px; border-radius: 5px; background: {{ se.fan3 }}; transform: translateX(-88%) rotate(-8deg); box-shadow: 0 3px 10px rgba(20, 19, 26, 0.14);"></div>
+                  <div style="position: absolute; left: 50%; top: 4px; width: 74px; height: 102px; border-radius: 5px; background: {{ se.fan2 }}; transform: translateX(-12%) rotate(8deg); box-shadow: 0 3px 10px rgba(20, 19, 26, 0.14);"></div>
+                  <div style="position: absolute; left: 50%; top: 0; width: 78px; height: 108px; border-radius: 5px; background: {{ se.fan1 }}; transform: translateX(-50%); box-shadow: 0 5px 14px rgba(20, 19, 26, 0.20);">
+                    <image-slot id="{{ se.slotId }}" shape="rounded" radius="5" placeholder=" "></image-slot>
+                  </div>
+                </div>
+                <div style="font-family: 'Inter Tight', sans-serif; font-weight: 600; font-size: 15.5px; text-align: center;">{{ se.name }}</div>
+                <div style="display: flex; justify-content: center; gap: 8px; margin-top: 4px; font-family: 'JetBrains Mono', monospace; font-size: 12px;">
+                  <span style="color: var(--mut2, #6B6B66);">{{ se.count }} cards</span>
+                  <span style="color: {{ se.chgFg }};">{{ se.chg }} 30d</span>
+                </div>
+              </a>
+            </sc-for>
+          </div>
+        </section>
+    </sc-if>
+
+    <sc-if value="{{ isPoke }}" hint-placeholder-val="{{ false }}">
+      <div style="font-size: 12.5px; color: var(--mut2, #6B6B66); margin-top: -8px;">Ordered by total market value across all printings</div>
+      <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(190px, 1fr)); gap: 12px;">
+        <sc-for list="{{ species }}" as="sp" hint-placeholder-count="8">
+          <a href="{{ sp.href }}" title="{{ sp.tip }}" style="display: block; background: var(--card, #FFFFFF); border: 1px solid var(--line, #E4E4E0); border-radius: 10px; padding: 13px; color: var(--ink, #1C1C1E); text-decoration: none; transition: box-shadow 0.15s ease;" style-hover="box-shadow: 0 6px 20px rgba(20, 19, 26, 0.10); text-decoration: none; color: var(--ink, #1C1C1E);">
+            <div style="display: flex; align-items: center; gap: 10px;">
+              <div style="width: 44px; height: 44px; border-radius: 50%; background: {{ sp.accent }}; flex-shrink: 0; display: flex; align-items: center; justify-content: center; color: rgba(255, 255, 255, 0.92); font-family: 'Inter Tight', sans-serif; font-weight: 700; font-size: 17px;">{{ sp.initial }}</div>
+              <div style="min-width: 0;">
+                <div style="font-family: 'Inter Tight', sans-serif; font-weight: 600; font-size: 15.5px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">{{ sp.name }}</div>
+                <div style="font-family: 'JetBrains Mono', monospace; font-size: 11.5px; color: var(--mut2, #6B6B66);">{{ sp.printings }} printings</div>
+              </div>
+            </div>
+            <div style="display: flex; justify-content: space-between; align-items: baseline; margin-top: 10px;">
+              <span style="font-family: 'JetBrains Mono', monospace; font-size: 14.5px; font-weight: 700;">{{ sp.value }}</span>
+              <span style="font-family: 'JetBrains Mono', monospace; font-size: 12px; color: {{ sp.chgFg }};">{{ sp.chg }} 90d</span>
+            </div>
+          </a>
+        </sc-for>
+      </div>
+      <sc-if value="{{ pokeNoMatch }}" hint-placeholder-val="{{ false }}">
+        <div style="background: var(--card, #FFFFFF); border: 1px solid var(--line, #E4E4E0); border-radius: 10px; padding: 40px; text-align: center; font-size: 14px; color: var(--mut2, #6B6B66);">No species match these filters — remove one to widen the net.</div>
+      </sc-if>
+    </sc-if>
+
+  </main>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="">
+class Component extends DCLogic {
+  PAL = (() => { const d = localStorage.getItem('cardstock-theme') === 'dark', c = localStorage.getItem('cardstock-cvd') === '1';
+    const s = d ? (c ? {pos:'#58A9E6',pos2:'#58A9E6',neg:'#F5924E',neg2:'#F5924E',neg3:'#E8874D',posBg:a=>'rgba(0,114,178,'+a+')',negBg:a=>'rgba(213,94,0,'+a+')'}
+                     : {pos:'#4CC08D',pos2:'#4CC08D',neg:'#E57B7B',neg2:'#E57B7B',neg3:'#E57B7B',posBg:a=>'rgba(24,158,99,'+a+')',negBg:a=>'rgba(214,69,69,'+a+')'})
+              : (c ? {pos:'#0B69A8',pos2:'#0072B2',neg:'#CC5F00',neg2:'#D55E00',neg3:'#B34E00',posBg:a=>'rgba(0,114,178,'+a+')',negBg:a=>'rgba(213,94,0,'+a+')'}
+                   : {pos:'#157A50',pos2:'#189E63',neg:'#C13A3A',neg2:'#D64545',neg3:'#A93838',posBg:a=>'rgba(24,158,99,'+a+')',negBg:a=>'rgba(214,69,69,'+a+')'});
+    const ch = d ? {bg:'#161614',card:'#1E1E1C',ink:'#E9E9E5',mut:'#B4B4AE',mut2:'#A8A8A2',mut3:'#9A9A94',mutbg:'#2A2A27',hov:'#282825',line:'#33332F',line2:'#3E3E39',line3:'#4A4A44',line4:'#262623',acc:'#8C9BF2',accH:'#AAB6F6',btn:'#4A63D0',accBg:'#252B44',accMut:'#3A4570',warn:'#D6A54A',warnInk:'#D6A54A'}
+               : {bg:'#FAFAF7',card:'#FFFFFF',ink:'#1C1C1E',mut:'#5B5B57',mut2:'#6B6B66',mut3:'#8F8F8A',mutbg:'#F3F3EE',hov:'#F6F6F2',line:'#E4E4E0',line2:'#D9D9D4',line3:'#C9C9C4',line4:'#F0F0EC',acc:'#4A63D0',accH:'#3A4FB8',btn:'#4A63D0',accBg:'#EEF1FB',accMut:'#B9C4E8',warn:'#8F6614',warnInk:'#8F6614'};
+    return Object.assign(ch, s); })();
+  constructor(props) {
+    super(props);
+    this.SETS = [
+      { name: 'Base Set', era: 'WOTC', count: 102, chg: 1.8, fans: [['#2E6B8A', '#7CB8D6'], ['#B0552E', '#E8A87C'], ['#3E5C4B', '#8CB89E']], href: 'Cardstock Set.dc.html', tip: 'Set page for Base Set — prototype renders Evolving Skies data for every set' },
+      { name: 'Neo Genesis', era: 'WOTC', count: 111, chg: 0.9, fans: [['#8A9BB8', '#D6E0EC'], ['#8A7139', '#D6C288'], ['#3D3552', '#8C7BA6']], href: 'Cardstock Set.dc.html', tip: 'Set page for Neo Genesis — prototype renders Evolving Skies data for every set' },
+      { name: 'Hidden Fates', era: 'Sun & Moon', count: 163, chg: 2.6, fans: [['#7E6BA8', '#C9B8E8'], ['#2B2D42', '#5C6B9E'], ['#B0552E', '#E8A87C']], href: 'Cardstock Set.dc.html', tip: 'Set page for Hidden Fates — prototype renders Evolving Skies data for every set' },
+      { name: 'Sword & Shield', era: 'Sword & Shield', count: 216, chg: -0.4, fans: [['#3E5C4B', '#8CB89E'], ['#2E6B8A', '#7CB8D6'], ['#8A7139', '#D6C288']], href: 'Cardstock Set.dc.html', tip: 'Set page for Sword & Shield — prototype renders Evolving Skies data for every set' },
+      { name: 'Evolving Skies', era: 'Sword & Shield', count: 237, chg: 4.1, fans: [['#2B2D42', '#5C6B9E'], ['#7E6BA8', '#C9B8E8'], ['#8A9BB8', '#D6E0EC']], href: 'Cardstock Set.dc.html', tip: 'Evolving Skies — the deepest set in the corpus' },
+      { name: 'Fusion Strike', era: 'Sword & Shield', count: 284, chg: 1.2, fans: [['#3D3552', '#8C7BA6'], ['#2E6B8A', '#7CB8D6'], ['#B0552E', '#E8A87C']], href: 'Cardstock Set.dc.html', tip: 'Set page for Fusion Strike — prototype renders Evolving Skies data for every set' },
+      { name: 'Brilliant Stars', era: 'Sword & Shield', count: 186, chg: 2.9, fans: [['#B0552E', '#E8A87C'], ['#2B2D42', '#5C6B9E'], ['#3E5C4B', '#8CB89E']], href: 'Cardstock Set.dc.html', tip: 'Set page for Brilliant Stars — prototype renders Evolving Skies data for every set' },
+      { name: 'Lost Origin', era: 'Sword & Shield', count: 217, chg: 3.4, fans: [['#3D3552', '#8C7BA6'], ['#8A9BB8', '#D6E0EC'], ['#2B2D42', '#5C6B9E']], href: 'Cardstock Set.dc.html', tip: 'Set page for Lost Origin — prototype renders Evolving Skies data for every set' },
+      { name: 'Silver Tempest', era: 'Sword & Shield', count: 215, chg: 1.7, fans: [['#8A9BB8', '#D6E0EC'], ['#2E6B8A', '#7CB8D6'], ['#7E6BA8', '#C9B8E8']], href: 'Cardstock Set.dc.html', tip: 'Set page for Silver Tempest — prototype renders Evolving Skies data for every set' },
+      { name: 'Vivid Voltage', era: null, count: 203, chg: 0.6, fans: [['#8A7139', '#D6C288'], ['#B0552E', '#E8A87C'], ['#2E6B8A', '#7CB8D6']], href: 'Cardstock Set.dc.html', tip: 'Set page for Vivid Voltage — prototype renders Evolving Skies data for every set' }
+    ];
+    this.ERAS = [
+      { era: 'WOTC', years: '1999–2003' },
+      { era: 'Sun & Moon', years: '2017–2019' },
+      { era: 'Sword & Shield', years: '2020–2022' }
+    ];
+    this.SPECIES = [
+      { name: 'Charizard', type: 'Fire', gen: 1, status: 'Ordinary', stage: 'Stage 2', color: 'Red', egg: 'Monster', habitat: 'Mountain', printings: 87, sets: 41, value: 284000, chg: 3.2 },
+      { name: 'Umbreon', type: 'Dark', gen: 2, status: 'Ordinary', stage: 'Stage 1', color: 'Black', egg: 'Field', habitat: 'Urban', printings: 34, sets: 19, value: 96400, chg: 6.8 },
+      { name: 'Lugia', type: 'Psychic', gen: 2, status: 'Legendary', stage: 'Basic', color: 'White', egg: 'No eggs', habitat: 'Rare', printings: 41, sets: 23, value: 88200, chg: 1.4 },
+      { name: 'Rayquaza', type: 'Dragon', gen: 3, status: 'Legendary', stage: 'Basic', color: 'Green', egg: 'No eggs', habitat: 'Rare', printings: 38, sets: 21, value: 71500, chg: 2.1 },
+      { name: 'Mewtwo', type: 'Psychic', gen: 1, status: 'Legendary', stage: 'Basic', color: 'Purple', egg: 'No eggs', habitat: 'Rare', printings: 52, sets: 30, value: 64800, chg: -0.8 },
+      { name: 'Espeon', type: 'Psychic', gen: 2, status: 'Ordinary', stage: 'Stage 1', color: 'Purple', egg: 'Field', habitat: 'Urban', printings: 29, sets: 17, value: 48900, chg: 5.2 },
+      { name: 'Giratina', type: 'Ghost', gen: 4, status: 'Legendary', stage: 'Basic', color: 'Black', egg: 'No eggs', habitat: 'Rare', printings: 26, sets: 15, value: 42300, chg: 4.4 },
+      { name: 'Blastoise', type: 'Water', gen: 1, status: 'Ordinary', stage: 'Stage 2', color: 'Blue', egg: 'Monster', habitat: 'Waters-edge', printings: 44, sets: 26, value: 39700, chg: 0.7 },
+      { name: 'Gengar', type: 'Ghost', gen: 1, status: 'Ordinary', stage: 'Stage 2', color: 'Purple', egg: 'Amorphous', habitat: 'Cave', printings: 39, sets: 24, value: 36200, chg: 1.9 },
+      { name: 'Sylveon', type: 'Fairy', gen: 6, status: 'Ordinary', stage: 'Stage 1', color: 'Pink', egg: 'Field', habitat: 'Urban', printings: 22, sets: 13, value: 28800, chg: 3.6 },
+      { name: 'Snorlax', type: 'Normal', gen: 1, status: 'Ordinary', stage: 'Stage 1', color: 'Black', egg: 'Monster', habitat: 'Mountain', printings: 35, sets: 22, value: 21400, chg: 0.3 },
+      { name: 'Alakazam', type: 'Psychic', gen: 1, status: 'Ordinary', stage: 'Stage 2', color: 'Brown', egg: 'Human-Like', habitat: 'Urban', printings: 31, sets: 20, value: 19800, chg: -1.2 },
+      { name: 'Machamp', type: 'Fighting', gen: 1, status: 'Ordinary', stage: 'Stage 2', color: 'Gray', egg: 'Human-Like', habitat: 'Mountain', printings: 33, sets: 21, value: 14600, chg: 0.5 },
+      { name: 'Dragonite', type: 'Dragon', gen: 1, status: 'Ordinary', stage: 'Stage 2', color: 'Brown', egg: 'Water 1', habitat: 'Waters-edge', printings: 30, sets: 19, value: 13900, chg: 1.1 },
+      { name: 'Leafeon', type: 'Grass', gen: 4, status: 'Ordinary', stage: 'Stage 1', color: 'Green', egg: 'Field', habitat: 'Forest', printings: 18, sets: 11, value: 12700, chg: 2.8 },
+      { name: 'Glaceon', type: 'Ice', gen: 4, status: 'Ordinary', stage: 'Stage 1', color: 'Blue', egg: 'Field', habitat: 'Snow', printings: 17, sets: 11, value: 11900, chg: 2.2 }
+    ];
+    this.REGIONS = { 1: 'Kanto', 2: 'Johto', 3: 'Hoenn', 4: 'Sinnoh', 5: 'Unova', 6: 'Kalos', 7: 'Alola', 8: 'Galar', 9: 'Paldea' };
+    this.SPECIES_ACCENTS = { Charizard: ['#B0552E', '#E8A87C'], Umbreon: ['#2B2D42', '#5C6B9E'], Lugia: ['#8A9BB8', '#D6E0EC'], Rayquaza: ['#3E5C4B', '#8CB89E'], Mewtwo: ['#7E6BA8', '#C9B8E8'], Espeon: ['#7E6BA8', '#C9B8E8'], Giratina: ['#3D3552', '#8C7BA6'], Blastoise: ['#2E6B8A', '#7CB8D6'], Gengar: ['#3D3552', '#8C7BA6'], Sylveon: ['#C98BA8', '#EBD0DE'], Snorlax: ['#3E5C4B', '#8CB89E'], Alakazam: ['#8A7139', '#D6C288'], Machamp: ['#8A7139', '#D6C288'], Dragonite: ['#B0855C', '#E8CBA8'], Leafeon: ['#5C7A3E', '#A8C88C'], Glaceon: ['#6B9BB8', '#C2DCE8'] };
+  }
+  state = { mode: 'sets', pokeQ: '', pokeFilters: [], pAddOpen: false, pEditor: null };
+  componentDidMount() {
+    this._navDoc = (e) => {
+      if (this.state.pAddOpen && !e.target.closest('[data-pfilter-pop]') && e.target.isConnected) this.setState({ pAddOpen: false, pEditor: null });
+    };
+    document.addEventListener('mousedown', this._navDoc);
+  }
+  componentWillUnmount() {
+    document.removeEventListener('mousedown', this._navDoc);
+  }
+  renderVals() {
+    const st = this.state;
+    const grad = (p) => 'linear-gradient(160deg, ' + p[0] + ', ' + p[1] + ')';
+    const pct = (n) => (n >= 0 ? '+' : '\u2212') + Math.abs(n).toFixed(1) + '%';
+    const fgOf = (n) => n >= 0 ? this.PAL.pos : this.PAL.neg2;
+    const mkSet = (s) => ({
+      name: s.name, count: String(s.count), chg: pct(s.chg), chgFg: fgOf(s.chg),
+      fan1: grad(s.fans[0]), fan2: grad(s.fans[1]), fan3: grad(s.fans[2]),
+      slotId: 'art-set-' + s.name.toLowerCase().replace(/[^a-z0-9]+/g, '-'),
+      href: s.href, tip: s.tip
+    });
+    const allSets = this.SETS.slice().sort((a, b) => a.name < b.name ? -1 : 1).map(mkSet);
+    const pq = st.pokeQ.trim().toLowerCase();
+    const uniq = (f, num) => [...new Set(this.SPECIES.map(f))].sort(num ? (a, b) => a - b : undefined);
+    const ATTRS = {
+      type: { name: 'Type', vals: () => uniq(s => s.type), lbl: (v) => v, of: (s) => s.type },
+      gen: { name: 'Generation', vals: () => uniq(s => s.gen, true), lbl: (v) => 'Gen ' + v, of: (s) => s.gen },
+      region: { name: 'Region', vals: () => { const R = this.REGIONS; return [...new Set(this.SPECIES.map(s => R[s.gen]))].sort((a, b) => Object.values(R).indexOf(a) - Object.values(R).indexOf(b)); }, lbl: (v) => v, of: (s) => this.REGIONS[s.gen] },
+      status: { name: 'Status', vals: () => ['Ordinary', 'Legendary', 'Mythical'].filter(v => this.SPECIES.some(s => s.status === v)), lbl: (v) => v, of: (s) => s.status },
+      stage: { name: 'Evolution stage', vals: () => ['Basic', 'Stage 1', 'Stage 2'].filter(v => this.SPECIES.some(s => s.stage === v)), lbl: (v) => v, of: (s) => s.stage },
+      color: { name: 'Pokédex color', vals: () => uniq(s => s.color), lbl: (v) => v, of: (s) => s.color },
+      egg: { name: 'Egg group', vals: () => uniq(s => s.egg), lbl: (v) => v, of: (s) => s.egg },
+      habitat: { name: 'Habitat', vals: () => uniq(s => s.habitat), lbl: (v) => v, of: (s) => s.habitat }
+    };
+    const speciesAll = this.SPECIES.filter(s =>
+      st.pokeFilters.every(f => f.vals.some(v => String(v) === String(ATTRS[f.attr].of(s)))));
+    return {
+      isSets: st.mode === 'sets', isPoke: st.mode === 'poke',
+      modeSets: () => this.setState({ mode: 'sets' }), modePoke: () => this.setState({ mode: 'poke' }),
+      msBg: st.mode === 'sets' ? this.PAL.acc : this.PAL.card, msFg: st.mode === 'sets' ? this.PAL.card : this.PAL.mut,
+      mpBg: st.mode === 'poke' ? this.PAL.acc : this.PAL.card, mpFg: st.mode === 'poke' ? this.PAL.card : this.PAL.mut,
+      allSets,
+      pokeQ: st.pokeQ, setPokeQ: (e) => this.setState({ pokeQ: e.target.value }),
+      pAddOpen: st.pAddOpen,
+      pToggleAdd: () => this.setState(s => ({ pAddOpen: !s.pAddOpen, pEditor: null })),
+      pCloseAdd: () => { if (!this.state.pEditor) this.setState({ pAddOpen: false }); },
+      pShowMenu: st.pAddOpen && !st.pEditor,
+      pShowEditor: !!st.pEditor,
+      pMenu: Object.keys(ATTRS).map(k => ({
+        name: ATTRS[k].name,
+        tip: 'Filter species by ' + ATTRS[k].name.toLowerCase() + ' \u2014 fixed Pok\u00E9dex data',
+        add: () => {
+          const existing = st.pokeFilters.find(f => f.attr === k);
+          const sel = {};
+          if (existing) existing.vals.forEach(v => { sel[String(v)] = true; });
+          this.setState({ pEditor: { attr: k, sel } });
+        }
+      })),
+      pEdName: st.pEditor ? ATTRS[st.pEditor.attr].name : '',
+      pEdBack: () => this.setState({ pEditor: null }),
+      pEdOpts: st.pEditor ? ATTRS[st.pEditor.attr].vals().map(v => {
+        const on = !!st.pEditor.sel[String(v)];
+        return {
+          label: ATTRS[st.pEditor.attr].lbl(v), mark: on ? '\u2713' : '',
+          tip: (on ? 'Stop including ' : 'Include ') + ATTRS[st.pEditor.attr].lbl(v) + (on ? '' : ' in the results'),
+          bg: on ? this.PAL.acc : this.PAL.card, bd: on ? this.PAL.acc : this.PAL.line3,
+          pick: () => this.setState(s => {
+            const sel = Object.assign({}, s.pEditor.sel);
+            if (sel[String(v)]) delete sel[String(v)]; else sel[String(v)] = true;
+            return { pEditor: Object.assign({}, s.pEditor, { sel }) };
+          })
+        };
+      }) : [],
+      ...(() => {
+        if (!st.pEditor) return { pEdPreview: '', pEdAdd: () => {}, pEdAddOff: true, pEdAddBg: this.PAL.accMut, pEdAddCur: 'not-allowed' };
+        const a = ATTRS[st.pEditor.attr];
+        const picked = a.vals().filter(v => st.pEditor.sel[String(v)]);
+        const ok = picked.length > 0;
+        return {
+          pEdPreview: ok ? st.pEditor.attr + (picked.length > 1 ? ' \u2208 ' : ' = ') + picked.map(a.lbl).join(', ') : 'pick at least one',
+          pEdAddOff: !ok, pEdAddBg: ok ? this.PAL.acc : this.PAL.accMut, pEdAddCur: ok ? 'pointer' : 'not-allowed',
+          pEdAdd: () => { if (!ok) return; this.setState(s => ({
+            pokeFilters: s.pokeFilters.filter(f => f.attr !== s.pEditor.attr).concat([{ attr: s.pEditor.attr, vals: picked }]),
+            pEditor: null, pAddOpen: false
+          })); }
+        };
+      })(),
+      pokeChips: st.pokeFilters.map(f => {
+        const a = ATTRS[f.attr];
+        return {
+          label: f.attr + (f.vals.length > 1 ? ' \u2208 ' : ' = ') + f.vals.map(a.lbl).join(', '),
+          remove: () => this.setState(s => ({ pokeFilters: s.pokeFilters.filter(x => x.attr !== f.attr) }))
+        };
+      }),
+      speciesCount: speciesAll.length + ' of ' + this.SPECIES.length + ' species',
+      species: speciesAll.map(s => ({
+        name: s.name, initial: s.name[0], type: s.type, gen: String(s.gen),
+        accent: grad(this.SPECIES_ACCENTS[s.name] || ['#8A9BB8', '#D6E0EC']),
+        printings: String(s.printings), sets: String(s.sets),
+        value: '$' + (s.value >= 1000 ? Math.round(s.value / 1000) + 'K' : s.value),
+        chg: pct(s.chg), chgFg: fgOf(s.chg),
+        href: 'Cardstock Character.dc.html', tip: 'Character page for ' + s.name + ' \u2014 prototype renders Umbreon data for every species'
+      })),
+      pokeNoMatch: speciesAll.length === 0,
+    };
+  }
+}
+</script>
+</body>
+</html>

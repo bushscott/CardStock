@@ -1,0 +1,881 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="icon" href="./brand/favicon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="anonymous">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Inter+Tight:wght@600;700&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+<script src="./image-slot.js"></script>
+<style>
+  html, body { margin: 0; padding: 0; background: var(--bg, var(--bg, #FAFAF7)); }
+  body { font-family: 'Inter', system-ui, sans-serif; color: var(--ink, #1C1C1E); }
+  a { color: var(--acc, #4A63D0); text-decoration: none; }
+  a:hover { color: var(--accH, #3A4FB8); text-decoration: underline; }
+  *:focus-visible { outline: 2px solid var(--acc, #4A63D0); outline-offset: 1px; border-radius: 2px; }
+  image-slot[placeholder=" "]::part(empty) { opacity: 0; }
+
+  :root[data-cvd="1"] { --neg2: #D55E00; --neg3: #B34E00; --negBg07: rgba(213,94,0,0.07); --negBg06: rgba(213,94,0,0.06); --negBg25: rgba(213,94,0,0.25); }
+
+  :root[data-theme="dark"] { color-scheme: dark; --bg: #161614; --card: #1E1E1C; --ink: #E9E9E5; --mut: #B4B4AE; --mut2: #A8A8A2; --mut3: #9A9A94; --mutbg: #2A2A27; --hov: #282825; --line: #33332F; --line2: #3E3E39; --line3: #4A4A44; --line4: #262623; --acc: #8C9BF2; --accH: #AAB6F6; --btn: #4A63D0; --warn: #D6A54A; --warnInk: #D6A54A; --tooltipBg: rgba(30, 30, 28, 0.95); --accBg: #252B44; --accMut: #3A4570; }
+  :root[data-theme="dark"]:not([data-cvd="1"]) { --pos: #4CC08D; --pos2: #4CC08D; --neg: #E57B7B; --neg2: #E57B7B; --neg3: #E57B7B; }
+  :root[data-theme="dark"][data-cvd="1"] { --pos: #58A9E6; --pos2: #58A9E6; --neg: #F5924E; --neg2: #F5924E; --neg3: #E8874D; }
+  :root[data-theme="dark"] { --logoTeal: #3FBFAD; }
+</style>
+<script src="./cardstock-search.js"></script>
+<script>if(localStorage.getItem('cardstock-cvd')==='1')document.documentElement.setAttribute('data-cvd','1');if(localStorage.getItem('cardstock-theme')==='dark')document.documentElement.setAttribute('data-theme','dark');</script>
+</helmet>
+<div data-screen-label="Screener" style="height: 100vh; overflow: hidden; display: flex; flex-direction: column; font-size: 15px;">
+
+  <nav style="height: 48px; background: var(--card, #FFFFFF); border-bottom: 1px solid var(--line, #E4E4E0); display: flex; align-items: center; gap: 24px; padding: 0 20px; flex-shrink: 0; z-index: 20;">
+    <div style="display: flex; align-items: center; gap: 10px;"><a href="Cardstock Home.dc.html" aria-label="Cardstock home" style="display: flex; align-items: center; gap: 10px; color: inherit; text-decoration: none;"><svg width="24" height="24" viewBox="0 0 32 32" fill="none" aria-hidden="true" style="flex: 0 0 auto;"><rect x="5.5" y="5.5" width="15" height="21" rx="2.5" style="stroke: var(--ink, #1C1C1E);" stroke-width="2" transform="rotate(-12 13 16)"></rect><rect x="12" y="5.5" width="15" height="21" rx="2.5" style="fill: var(--card, #FFFFFF); stroke: var(--ink, #1C1C1E);" stroke-width="2"></rect><polyline points="15,21.5 17.5,17 19.5,18.5 23.5,12.5" style="stroke: var(--logoTeal, #0E8A7B);" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" fill="none"></polyline><circle cx="23.5" cy="12.5" r="1.7" style="fill: var(--logoTeal, #0E8A7B);"></circle></svg><span style="font-family: 'Inter', sans-serif; font-weight: 700; font-size: 18px; letter-spacing: -0.03em; color: var(--ink, #1C1C1E);">Cardstock</span></a></div>
+    <div style="display: flex; gap: 2px; height: 100%;">
+      <a href="Cardstock Home.dc.html" style="display: flex; align-items: center; padding: 0 12px; font-weight: 500; font-size: 15px; color: var(--mut, #5B5B57); border-bottom: 2px solid transparent; margin-bottom: -1px;">Home</a>
+      <a href="#" style="display: flex; align-items: center; padding: 0 12px; font-weight: 600; font-size: 15px; color: var(--ink, #1C1C1E); border-bottom: 2px solid var(--acc, #4A63D0); margin-bottom: -1px;">Screener</a>
+      <a href="Cardstock Charts.dc.html" style="display: flex; align-items: center; padding: 0 12px; font-weight: 500; font-size: 15px; color: var(--mut, #5B5B57); border-bottom: 2px solid transparent; margin-bottom: -1px;">Charts</a>
+      <a href="Cardstock Binder.dc.html" style="display: flex; align-items: center; padding: 0 12px; font-weight: 500; font-size: 15px; color: var(--mut, #5B5B57); border-bottom: 2px solid transparent; margin-bottom: -1px;">Binder</a>
+      <a href="Cardstock Browse.dc.html" style="display: flex; align-items: center; padding: 0 12px; font-weight: 500; font-size: 15px; color: var(--mut, #5B5B57); border-bottom: 2px solid transparent; margin-bottom: -1px;">Browse</a>
+    </div>
+    <div style="flex: 1;"></div>
+    <cardstock-search></cardstock-search>
+    <a href="Cardstock Profile.dc.html" aria-label="Account" title="Profile & settings" style="display: flex; align-items: center; justify-content: center; width: 28px; height: 28px; border-radius: 50%; border: 1px solid var(--line, #E4E4E0); background: var(--mutbg, #F3F3EE); color: var(--mut, #5B5B57); font-weight: 600; font-size: 14px; text-decoration: none; flex-shrink: 0;">O</a>
+  </nav>
+
+  <div style="flex: 1; display: flex; align-items: stretch; min-height: 0;">
+
+    <sc-if value="{{ railOpen }}" hint-placeholder-val="{{ true }}">
+    <aside aria-label="Saved screens" style="width: 232px; flex-shrink: 0; background: var(--card, #FFFFFF); border-right: 1px solid var(--line, #E4E4E0); overflow-y: auto; padding: 14px 10px; box-sizing: border-box;">
+      <div style="font-size: 12.5px; font-weight: 600; letter-spacing: 0.08em; color: var(--mut2, #6B6B66); text-transform: uppercase; padding: 0 6px 6px 6px;">Your screens</div>
+      <sc-for list="{{ myScreens }}" as="s" hint-placeholder-count="2">
+        <div style="position: relative; display: flex; align-items: stretch; background: {{ s.bg }}; border-left: 2px solid {{ s.bd }}; border-radius: 0 5px 5px 0;">
+          <button onClick="{{ s.pick }}" title="{{ s.tip }}" style="flex: 1; min-width: 0; text-align: left; background: none; border: none; cursor: pointer; font-family: 'Inter', sans-serif; padding: 7px 8px;">
+            <span style="font-size: 14px; font-weight: {{ s.wt }}; color: var(--ink, #1C1C1E); display: block; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">{{ s.name }}</span>
+            <span style="font-size: 12px; color: var(--mut2, #6B6B66); display: block; margin-top: 1px;">{{ s.sub }}</span>
+          </button>
+          <button onClick="{{ s.menu }}" title="Rename, duplicate, or delete this screen" aria-label="Screen actions" style="background: none; border: none; cursor: pointer; color: var(--mut2, #6B6B66); font-size: 15px; padding: 0 6px; flex-shrink: 0;" style-hover="color: var(--ink, #1C1C1E);">⋯</button>
+          <sc-if value="{{ s.menuOpen }}" hint-placeholder-val="{{ false }}">
+            <div data-rail-menu="1" onMouseLeave="{{ closeRailMenu }}" style="position: absolute; right: 4px; top: 34px; z-index: 60; background: var(--card, #FFFFFF); border: 1px solid var(--line, #E4E4E0); border-radius: 8px; box-shadow: 0 8px 24px rgba(20, 19, 26, 0.13); width: 160px; padding: 4px;">
+              <button onClick="{{ s.rename }}" title="Give this screen a new name" style="display: block; width: 100%; text-align: left; background: none; border: none; cursor: pointer; font-family: 'Inter', sans-serif; font-size: 13.5px; color: var(--ink, #1C1C1E); padding: 6px 9px; border-radius: 4px;" style-hover="background: var(--hov, #F6F6F2);">Rename</button>
+              <button onClick="{{ s.editThesis }}" title="Edit the one-line thesis shown under the screen name" style="display: block; width: 100%; text-align: left; background: none; border: none; cursor: pointer; font-family: 'Inter', sans-serif; font-size: 13.5px; color: var(--ink, #1C1C1E); padding: 6px 9px; border-radius: 4px;" style-hover="background: var(--hov, #F6F6F2);">Edit thesis</button>
+              <button onClick="{{ s.duplicate }}" title="Copy this screen and its filters into a new one — the original is untouched" style="display: block; width: 100%; text-align: left; background: none; border: none; cursor: pointer; font-family: 'Inter', sans-serif; font-size: 13.5px; color: var(--ink, #1C1C1E); padding: 6px 9px; border-radius: 4px;" style-hover="background: var(--hov, #F6F6F2);">Duplicate</button>
+              <div style="height: 1px; background: var(--line4, #F0F0EC); margin: 4px 2px;"></div>
+              <button onClick="{{ s.del }}" title="Delete this screen permanently — its filters and backtest history go with it" style="display: block; width: 100%; text-align: left; background: none; border: none; cursor: pointer; font-family: 'Inter', sans-serif; font-size: 13.5px; color: var(--neg2, #D64545); padding: 6px 9px; border-radius: 4px;" style-hover="background: var(--negBg07, rgba(214, 69, 69, 0.07));">Delete</button>
+            </div>
+          </sc-if>
+        </div>
+      </sc-for>
+            <button onClick="{{ newScreen }}" title="Start an empty screen and add filters to it" style="display: block; width: 100%; text-align: left; background: none; border: 1px dashed var(--line2, #D9D9D4); border-radius: 6px; cursor: pointer; font-family: 'Inter', sans-serif; font-size: 14px; color: var(--mut, #5B5B57); padding: 8px; margin-top: 14px;" style-hover="border-color: var(--acc, #4A63D0); color: var(--acc, #4A63D0);">+ New screen</button>
+    </aside>
+    </sc-if>
+
+    <main style="flex: 1; min-width: 0; display: flex; flex-direction: column; min-height: 0;">
+
+      <div style="padding: 12px 18px 0 18px; flex-shrink: 0;">
+        <div style="display: flex; align-items: baseline; gap: 10px;">
+          <button onClick="{{ toggleRail }}" title="Toggle screens panel" style="background: var(--card, #FFFFFF); border: 1px solid var(--line, #E4E4E0); border-radius: 6px; height: 26px; width: 28px; cursor: pointer; color: var(--mut, #5B5B57); font-size: 13px; flex-shrink: 0; align-self: center;" style-hover="background: var(--hov, #F6F6F2); color: var(--ink, #1C1C1E);">{{ railGlyph }}</button>
+          <sc-if value="{{ editingName }}" hint-placeholder-val="{{ false }}">
+            <input type="text" value="{{ editNameVal }}" onChange="{{ nameChange }}" onBlur="{{ nameCommit }}" onKeyDown="{{ nameKey }}" autoFocus="{{ true }}" style="font-family: 'Inter Tight', sans-serif; font-size: 17px; font-weight: 700; color: var(--ink, #1C1C1E); border: none; border-bottom: 2px solid var(--acc, #4A63D0); background: var(--card, #FFFFFF); padding: 0 2px; outline: none; width: 300px;"></input>
+          </sc-if>
+          <sc-if value="{{ notEditingName }}" hint-placeholder-val="{{ true }}">
+            <span style="font-family: 'Inter Tight', sans-serif; font-size: 17px; font-weight: 700;">{{ screenName }}</span>
+          </sc-if>
+          <sc-if value="{{ editingThesis }}" hint-placeholder-val="{{ false }}">
+            <input type="text" value="{{ editThesisVal }}" onChange="{{ thesisChange }}" onBlur="{{ thesisCommit }}" onKeyDown="{{ thesisKey }}" autoFocus="{{ true }}" style="font-family: 'Inter', sans-serif; font-size: 13px; font-style: italic; color: var(--mut, #5B5B57); border: none; border-bottom: 2px solid var(--acc, #4A63D0); background: var(--card, #FFFFFF); padding: 0 2px; outline: none; width: 420px;"></input>
+          </sc-if>
+          <sc-if value="{{ notEditingThesis }}" hint-placeholder-val="{{ true }}">
+            <span style="font-size: 13px; color: var(--mut2, #6B6B66);"><span style="font-size: 11px; font-weight: 600; letter-spacing: 0.07em; text-transform: uppercase; color: var(--mut2, #6B6B66); margin-right: 5px;">Thesis</span><span style="font-style: italic;">{{ screenThesis }}</span></span>
+          </sc-if>
+          <div style="flex: 1;"></div>
+        </div>
+        <div style="display: flex; align-items: center; gap: 6px; flex-wrap: wrap; margin-top: 8px;">
+          <sc-if value="{{ notBt }}" hint-placeholder-val="{{ true }}">
+          <div data-filter-pop="1" style="position: relative;">
+            <button onClick="{{ toggleAdd }}" title="Add another condition — results must satisfy every filter" style="background: var(--card, #FFFFFF); border: 1px dashed var(--line2, #D9D9D4); border-radius: 6px; height: 27px; padding: 0 10px; font-family: 'Inter', sans-serif; font-size: 13px; color: var(--mut, #5B5B57); cursor: pointer;" style-hover="border-color: var(--acc, #4A63D0); color: var(--acc, #4A63D0);">+ filter</button>
+            <sc-if value="{{ addOpen }}" hint-placeholder-val="{{ false }}">
+              <div onMouseLeave="{{ closeAdd }}" style="position: absolute; left: 0; top: 31px; z-index: 50; background: var(--card, #FFFFFF); border: 1px solid var(--line, #E4E4E0); border-radius: 8px; box-shadow: 0 8px 24px rgba(20, 19, 26, 0.13); width: 300px; max-height: 380px; overflow-y: auto; padding: 6px;">
+                <sc-if value="{{ showMenu }}" hint-placeholder-val="{{ true }}">
+                <sc-for list="{{ filterMenu }}" as="fg">
+                  <div style="font-size: 11.5px; font-weight: 600; letter-spacing: 0.06em; color: var(--mut2, #6B6B66); text-transform: uppercase; padding: 8px 8px 3px 8px;">{{ fg.group }}</div>
+                  <sc-for list="{{ fg.items }}" as="fi" hint-placeholder-count="3">
+                    <button onClick="{{ fi.add }}" title="{{ fi.tip }}" style="display: flex; align-items: center; gap: 8px; width: 100%; text-align: left; background: none; border: none; cursor: {{ fi.cur }}; font-family: 'Inter', sans-serif; font-size: 13.5px; color: {{ fi.fg }}; padding: 5px 8px; border-radius: 4px;" style-hover="background: var(--hov, #F6F6F2);">
+                      <span style="flex: 1;">{{ fi.name }}</span>
+                      <span style="font-family: 'JetBrains Mono', monospace; font-size: 10.5px; font-weight: 600; color: {{ fi.badgeFg }}; background: {{ fi.badgeBg }}; padding: 1px 5px; border-radius: 3px; white-space: nowrap;">{{ fi.badge }}</span>
+                      <span style="color: var(--line3, #C9C9C4); font-size: 13px;">›</span>
+                    </button>
+                  </sc-for>
+                </sc-for>
+                </sc-if>
+                <sc-if value="{{ showEditor }}" hint-placeholder-val="{{ false }}">
+                  <div style="display: flex; align-items: center; gap: 4px; padding: 2px 2px 7px 2px; border-bottom: 1px solid var(--line4, #F0F0EC);">
+                    <button onClick="{{ edBack }}" title="Back to the metric list without adding this filter" aria-label="Back to signals" style="background: none; border: none; cursor: pointer; color: var(--mut, #5B5B57); font-size: 16px; padding: 2px 6px; border-radius: 4px; line-height: 1;" style-hover="background: var(--hov, #F6F6F2); color: var(--ink, #1C1C1E);">‹</button>
+                    <span style="font-size: 13.5px; font-weight: 600; flex: 1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">{{ edName }}</span>
+                    <sc-if value="{{ edHasBadge }}" hint-placeholder-val="{{ false }}">
+                      <span style="font-family: 'JetBrains Mono', monospace; font-size: 10.5px; font-weight: 600; color: var(--warnInk, #8F6614); background: rgba(176, 127, 26, 0.12); padding: 1px 5px; border-radius: 3px; white-space: nowrap;">{{ edBadge }}</span>
+                    </sc-if>
+                  </div>
+                  <sc-if value="{{ edHasWin }}" hint-placeholder-val="{{ false }}">
+                    <div style="padding: 9px 4px 0 4px;">
+                      <div style="font-size: 11px; font-weight: 600; letter-spacing: 0.06em; color: var(--mut2, #6B6B66); text-transform: uppercase; margin-bottom: 5px;">{{ edWinLabel }}</div>
+                      <div style="display: flex; gap: 4px; flex-wrap: wrap;">
+                        <sc-for list="{{ edWins }}" as="w" hint-placeholder-count="3">
+                          <button onClick="{{ w.pick }}" title="{{ w.tip }}" style="background: {{ w.bg }}; color: {{ w.fg }}; border: 1px solid {{ w.bd }}; border-radius: 5px; height: 24px; padding: 0 9px; font-family: 'JetBrains Mono', monospace; font-size: 12px; font-weight: 600; cursor: pointer;">{{ w.label }}</button>
+                        </sc-for>
+                      </div>
+                    </div>
+                  </sc-if>
+                  <sc-if value="{{ edIsRange }}" hint-placeholder-val="{{ false }}">
+                    <div style="padding: 9px 4px 0 4px;">
+                      <div style="font-size: 11px; font-weight: 600; letter-spacing: 0.06em; color: var(--mut2, #6B6B66); text-transform: uppercase; margin-bottom: 5px;">Condition</div>
+                      <div style="display: flex; gap: 4px;">
+                        <sc-for list="{{ edOps }}" as="o" hint-placeholder-count="3">
+                          <button onClick="{{ o.pick }}" title="{{ o.tip }}" style="background: {{ o.bg }}; color: {{ o.fg }}; border: 1px solid {{ o.bd }}; border-radius: 5px; height: 24px; padding: 0 9px; font-family: 'JetBrains Mono', monospace; font-size: 12px; font-weight: 600; cursor: pointer;">{{ o.label }}</button>
+                        </sc-for>
+                      </div>
+                      <div style="display: flex; gap: 6px; align-items: center; margin-top: 8px;">
+                        <sc-if value="{{ edHasPre }}" hint-placeholder-val="{{ false }}"><span style="font-family: 'JetBrains Mono', monospace; font-size: 13px; color: var(--mut, #5B5B57);">{{ edUnit }}</span></sc-if>
+                        <input type="number" value="{{ edV1 }}" onChange="{{ edV1Chg }}" aria-label="Value" style="width: 84px; height: 26px; border: 1px solid var(--line, #E4E4E0); border-radius: 5px; background: var(--bg, var(--bg, #FAFAF7)); padding: 0 8px; font-family: 'JetBrains Mono', monospace; font-size: 13px; color: var(--ink, #1C1C1E); box-sizing: border-box;"></input>
+                        <sc-if value="{{ edIsBetween }}" hint-placeholder-val="{{ false }}">
+                          <span style="color: var(--mut2, #6B6B66);">–</span>
+                          <input type="number" value="{{ edV2 }}" onChange="{{ edV2Chg }}" aria-label="Upper value" style="width: 84px; height: 26px; border: 1px solid var(--line, #E4E4E0); border-radius: 5px; background: var(--bg, var(--bg, #FAFAF7)); padding: 0 8px; font-family: 'JetBrains Mono', monospace; font-size: 13px; color: var(--ink, #1C1C1E); box-sizing: border-box;"></input>
+                        </sc-if>
+                        <sc-if value="{{ edHasSuf }}" hint-placeholder-val="{{ false }}"><span style="font-family: 'JetBrains Mono', monospace; font-size: 13px; color: var(--mut, #5B5B57);">{{ edUnit }}</span></sc-if>
+                      </div>
+                    </div>
+                  </sc-if>
+                  <sc-if value="{{ edSearchable }}" hint-placeholder-val="{{ false }}">
+                    <input type="text" value="{{ edSearch }}" onChange="{{ edSearchChg }}" placeholder="Filter options" aria-label="Filter options" style="width: 100%; box-sizing: border-box; height: 26px; border: 1px solid var(--line, #E4E4E0); border-radius: 5px; background: var(--bg, var(--bg, #FAFAF7)); padding: 0 8px; font-family: 'Inter', sans-serif; font-size: 13px; color: var(--ink, #1C1C1E); margin-top: 9px;"></input>
+                  </sc-if>
+                  <sc-if value="{{ edHasOpts }}" hint-placeholder-val="{{ false }}">
+                    <div style="max-height: 168px; overflow-y: auto; padding: 5px 0 0 0;">
+                      <sc-for list="{{ edOpts }}" as="eo" hint-placeholder-count="4">
+                        <button onClick="{{ eo.pick }}" title="{{ eo.tip }}" style="display: flex; align-items: center; gap: 8px; width: 100%; text-align: left; background: none; border: none; cursor: pointer; font-family: 'Inter', sans-serif; padding: 5px 8px; border-radius: 4px;" style-hover="background: var(--hov, #F6F6F2);">
+                          <span style="width: 14px; height: 14px; border: 1.5px solid {{ eo.bd }}; border-radius: {{ eo.rad }}; background: {{ eo.bg }}; color: #FFFFFF; font-size: 10px; line-height: 14px; text-align: center; flex-shrink: 0; box-sizing: border-box;">{{ eo.mark }}</span>
+                          <span style="font-size: 13px; color: var(--ink, #1C1C1E);">{{ eo.label }}</span>
+                        </button>
+                      </sc-for>
+                    </div>
+                  </sc-if>
+                  <sc-if value="{{ edHasCaution }}" hint-placeholder-val="{{ false }}">
+                    <div style="margin: 9px 4px 0 4px; background: rgba(176, 127, 26, 0.07); border: 1px solid rgba(176, 127, 26, 0.2); border-radius: 6px; padding: 7px 9px; font-size: 12px; color: var(--warnInk, #8F6614); line-height: 1.45;">{{ edCaution }}</div>
+                  </sc-if>
+                  <div style="display: flex; align-items: center; gap: 8px; margin: 10px 2px 2px 2px; padding-top: 9px; border-top: 1px solid var(--line4, #F0F0EC);">
+                    <span style="flex: 1; min-width: 0; font-family: 'JetBrains Mono', monospace; font-size: 12px; color: var(--mut, #5B5B57); white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">{{ edPreview }}</span>
+                    <button onClick="{{ edAdd }}" title="Add this condition to the screen and re-run it" style="background: var(--btn, var(--acc, #4A63D0)); color: #FFFFFF; border: none; border-radius: 6px; height: 26px; padding: 0 12px; font-family: 'Inter', sans-serif; font-size: 13px; font-weight: 600; cursor: pointer; flex-shrink: 0;" style-hover="background: var(--accH, #3A4FB8);">Add</button>
+                  </div>
+                </sc-if>
+              </div>
+            </sc-if>
+          </div>
+          </sc-if>
+          <sc-for list="{{ chips }}" as="c" hint-placeholder-count="3">
+            <span style="display: inline-flex; align-items: center; gap: 6px; background: var(--accBg, #EEF1FB); border: 1px solid rgba(74, 99, 208, 0.25); color: var(--ink, #1C1C1E); border-radius: 6px; padding: 3px 6px 3px 9px; font-family: 'JetBrains Mono', monospace; font-size: 12.5px; font-weight: 500;">{{ c.label }}<sc-if value="{{ notBt }}" hint-placeholder-val="{{ true }}"><button onClick="{{ c.remove }}" title="Remove this filter from the screen" aria-label="Remove filter" style="background: none; border: none; cursor: pointer; color: var(--mut, #5B5B57); font-size: 12px; padding: 0 2px; line-height: 1;" style-hover="color: var(--neg2, #D64545);">✕</button></sc-if></span>
+          </sc-for>
+          <div style="flex: 1;"></div>
+          <span style="font-family: 'JetBrains Mono', monospace; font-size: 12.5px; color: var(--mut, #5B5B57); white-space: nowrap;">{{ matchLabel }}</span>
+        </div>
+      </div>
+
+      <div style="display: flex; align-items: center; gap: 6px; padding: 10px 18px 0 18px;">
+        <sc-if value="{{ notBt }}" hint-placeholder-val="{{ true }}">
+        <div style="display: flex; border: 1px solid var(--line, #E4E4E0); border-radius: 6px; overflow: hidden;">
+          <button onClick="{{ viewTerminal }}" title="Terminal density — more rows, tighter type, every metric column" style="background: {{ termBg }}; color: {{ termFg }}; border: none; height: 27px; padding: 0 10px; font-family: 'JetBrains Mono', monospace; font-size: 12.5px; font-weight: 600; cursor: pointer;">terminal</button>
+          <button onClick="{{ viewBinder }}" title="Binder density — fewer rows with card art" style="background: {{ bindBg }}; color: {{ bindFg }}; border: none; border-left: 1px solid var(--line, #E4E4E0); height: 27px; padding: 0 10px; font-family: 'JetBrains Mono', monospace; font-size: 12.5px; font-weight: 600; cursor: pointer;">binder</button>
+        </div>
+        <div style="flex: 1;"></div>
+        <button onClick="{{ doSave }}" title="Save these filters to the current screen" style="background: {{ saveBg }}; border: 1px solid {{ saveBd }}; border-radius: 6px; height: 27px; padding: 0 10px; font-family: 'Inter', sans-serif; font-size: 13px; font-weight: 500; color: {{ saveFg }}; cursor: pointer; transition: background 0.15s, color 0.15s, border-color 0.15s;" style-hover="background: {{ saveHoverBg }};">{{ saveLabel }}</button>
+        <button onClick="{{ goBt }}" title="Would this screen have made money? Replays history month by month: every time a card newly matched these filters counts as a buy signal, then we measure its price 3/6/12 months later. Pick a horizon, hit Run, and compare the screen's return to just holding the market." style="background: var(--btn, var(--acc, #4A63D0)); color: #FFFFFF; border: none; border-radius: 6px; height: 27px; padding: 0 12px; font-family: 'Inter', sans-serif; font-size: 13px; font-weight: 600; cursor: pointer;" style-hover="background: var(--accH, #3A4FB8);">Backtest →</button>
+        </sc-if>
+        <sc-if value="{{ isBt }}" hint-placeholder-val="{{ false }}">
+        <button onClick="{{ exitBt }}" title="Back to the live results table" style="background: var(--card, #FFFFFF); border: 1px solid var(--line, #E4E4E0); border-radius: 6px; height: 27px; padding: 0 10px; font-family: 'Inter', sans-serif; font-size: 13px; color: var(--ink, #1C1C1E); cursor: pointer;" style-hover="background: var(--hov, #F6F6F2);">← Results</button>
+        <span style="font-family: 'JetBrains Mono', monospace; font-size: 11.5px; font-weight: 600; letter-spacing: 0.08em; color: var(--acc, #4A63D0); background: var(--accBg, #EEF1FB); border: 1px solid rgba(74, 99, 208, 0.25); border-radius: 4px; padding: 3px 8px;">BACKTEST MODE</span>
+        <div style="flex: 1;"></div>
+        <span style="font-size: 12.5px; color: var(--mut2, #6B6B66);">filters are read-only while backtesting</span>
+        </sc-if>
+      </div>
+
+      <sc-if value="{{ isBt }}" hint-placeholder-val="{{ false }}">
+      <div style="flex: 1; min-height: 0; overflow-y: auto; padding: 10px 18px 14px 18px; display: flex; flex-direction: column; gap: 12px;">
+        <div style="background: var(--card, #FFFFFF); border: 1px solid var(--line, #E4E4E0); border-radius: 8px; padding: 12px 14px; display: flex; align-items: center; gap: 22px; flex-wrap: wrap;">
+          <div>
+            <div style="font-size: 11px; font-weight: 600; letter-spacing: 0.06em; color: var(--mut2, #6B6B66); text-transform: uppercase; margin-bottom: 5px;">Entry rule</div>
+            <span style="font-family: 'JetBrains Mono', monospace; font-size: 13px; color: var(--ink, #1C1C1E);">card enters “{{ btEntryName }}”</span>
+          </div>
+          <div>
+            <div style="font-size: 11px; font-weight: 600; letter-spacing: 0.06em; color: var(--mut2, #6B6B66); text-transform: uppercase; margin-bottom: 5px;">Exit rule</div>
+            <div style="display: flex; gap: 4px;">
+              <sc-for list="{{ btExits }}" as="x" hint-placeholder-count="2">
+                <button onClick="{{ x.pick }}" title="{{ x.tip }}" style="background: {{ x.bg }}; color: {{ x.fg }}; border: 1px solid {{ x.bd }}; border-radius: 5px; height: 24px; padding: 0 10px; font-family: 'JetBrains Mono', monospace; font-size: 12px; font-weight: 600; cursor: pointer;">{{ x.label }}</button>
+              </sc-for>
+            </div>
+          </div>
+          <div title="{{ btHTitle }}" style="opacity: {{ btHOp }}; pointer-events: {{ btHPe }}; transition: opacity 0.15s;">
+            <div style="font-size: 11px; font-weight: 600; letter-spacing: 0.06em; color: var(--mut2, #6B6B66); text-transform: uppercase; margin-bottom: 5px;">Sell after (horizon)</div>
+            <div style="display: flex; gap: 4px;">
+              <sc-for list="{{ btHs }}" as="h" hint-placeholder-count="3">
+                <button onClick="{{ h.pick }}" disabled="{{ h.off }}" title="{{ h.tip }}" style="background: {{ h.bg }}; color: {{ h.fg }}; border: 1px solid {{ h.bd }}; border-radius: 5px; height: 24px; padding: 0 10px; font-family: 'JetBrains Mono', monospace; font-size: 12px; font-weight: 600; cursor: {{ h.cur }}; opacity: {{ h.op }};">{{ h.label }}</button>
+              </sc-for>
+            </div>
+          </div>
+          <div>
+            <div style="font-size: 11px; font-weight: 600; letter-spacing: 0.06em; color: var(--mut2, #6B6B66); text-transform: uppercase; margin-bottom: 5px;">Date range</div>
+            <span title="Bounded by the honest floor below" style="font-family: 'JetBrains Mono', monospace; font-size: 13px; color: var(--ink, #1C1C1E);">{{ btRange }}</span>
+          </div>
+          <div style="flex: 1;"></div>
+          <button onClick="{{ btRun }}" title="Replay history month by month: every card that entered the screen counts as a buy signal, measured against the market index" style="background: var(--btn, var(--acc, #4A63D0)); color: #FFFFFF; border: none; border-radius: 6px; height: 32px; padding: 0 16px; font-family: 'Inter', sans-serif; font-size: 13.5px; font-weight: 600; cursor: pointer;" style-hover="background: var(--accH, #3A4FB8);">Run backtest</button>
+        </div>
+        <div style="background: rgba(176, 127, 26, 0.07); border: 1px solid rgba(176, 127, 26, 0.2); border-radius: 8px; padding: 9px 12px; font-size: 12.5px; color: var(--warnInk, #8F6614); line-height: 1.5;">{{ btFloorNote }}</div>
+        <sc-if value="{{ btIdle }}" hint-placeholder-val="{{ true }}">
+          <div style="background: var(--card, #FFFFFF); border: 1px solid var(--line, #E4E4E0); border-radius: 8px; padding: 34px 24px; text-align: center;">
+            <div style="font-size: 14.5px; color: var(--mut, #5B5B57); max-width: 590px; margin: 0 auto; line-height: 1.6;">{{ btIdleText }}</div>
+          </div>
+        </sc-if>
+        <sc-if value="{{ btRunning }}" hint-placeholder-val="{{ false }}">
+          <div style="background: var(--card, #FFFFFF); border: 1px solid var(--line, #E4E4E0); border-radius: 8px; padding: 34px 24px; text-align: center;">
+            <span style="font-family: 'JetBrains Mono', monospace; font-size: 13.5px; color: var(--acc, #4A63D0);">{{ btScanText }}</span>
+          </div>
+        </sc-if>
+        <sc-if value="{{ btDone }}" hint-placeholder-val="{{ false }}">
+          <div style="background: var(--accBg, #EEF1FB); border: 1px solid rgba(74, 99, 208, 0.25); border-radius: 8px; padding: 11px 14px; font-size: 13.5px; color: var(--ink, #1C1C1E); line-height: 1.55;">{{ btStory }}</div>
+          <div style="background: var(--card, #FFFFFF); border: 1px solid var(--line, #E4E4E0); border-radius: 8px; padding: 13px 14px;">
+            <div style="display: flex; align-items: baseline; gap: 16px; margin-bottom: 10px;">
+              <span style="font-size: 13.5px; font-weight: 600;">Equity curve · normalized 100</span>
+              <span style="font-family: 'JetBrains Mono', monospace; font-size: 13px; font-weight: 700; color: var(--acc, #4A63D0);">screen {{ btScrRet }}</span>
+              <span style="font-family: 'JetBrains Mono', monospace; font-size: 13px; color: var(--mut2, #6B6B66);">index {{ btIdxRet }}</span>
+              <div style="flex: 1;"></div>
+              <span style="font-family: 'JetBrains Mono', monospace; font-size: 12px; color: var(--mut2, #6B6B66);">{{ btRange }}</span>
+            </div>
+            <div style="display: flex; gap: 8px;">
+            <div style="position: relative; width: 32px; flex-shrink: 0;">
+              <span style="position: absolute; right: 0; top: 2px; font-family: 'JetBrains Mono', monospace; font-size: 10.5px; color: var(--mut2, #6B6B66);">{{ btYMax }}</span>
+              <sc-if value="{{ btShow100 }}" hint-placeholder-val="{{ false }}"><span style="position: absolute; right: 0; top: {{ btBasePct }}%; transform: translateY(-50%); font-family: 'JetBrains Mono', monospace; font-size: 10.5px; color: var(--mut2, #6B6B66);">100</span></sc-if>
+              <span style="position: absolute; right: 0; bottom: 2px; font-family: 'JetBrains Mono', monospace; font-size: 10.5px; color: var(--mut2, #6B6B66);">{{ btYMin }}</span>
+            </div>
+            <div onMouseMove="{{ btChartMove }}" onMouseLeave="{{ btChartOut }}" style="position: relative; cursor: crosshair; flex: 1; min-width: 0;">
+              <svg width="100%" height="200" viewBox="0 0 800 200" preserveAspectRatio="none" style="display: block;">
+                <line x1="0" y1="{{ btBaseY }}" x2="800" y2="{{ btBaseY }}" style="stroke: var(--line, var(--line, #E4E4E0));" stroke-dasharray="4 4" vector-effect="non-scaling-stroke"></line>
+                <polyline points="{{ btIdxPts }}" fill="none" style="stroke: var(--mut3, var(--mut3, #8F8F8A));" stroke-width="1.5" vector-effect="non-scaling-stroke"></polyline>
+                <polyline points="{{ btScrPts }}" fill="none" style="stroke: var(--acc, var(--acc, #4A63D0));" stroke-width="2" vector-effect="non-scaling-stroke"></polyline>
+              </svg>
+              <sc-if value="{{ btHovShow }}" hint-placeholder-val="{{ false }}">
+                <div style="position: absolute; top: 0; bottom: 0; left: {{ btHovLeft }}%; width: 1px; background: rgba(28, 28, 30, 0.22); pointer-events: none;"></div>
+                <div style="position: absolute; left: {{ btHovLeft }}%; top: {{ btHovScrTop }}%; width: 9px; height: 9px; border-radius: 50%; background: var(--btn, var(--acc, #4A63D0)); border: 1.5px solid #FFFFFF; transform: translate(-50%, -50%); pointer-events: none; box-sizing: border-box;"></div>
+                <div style="position: absolute; left: {{ btHovLeft }}%; top: {{ btHovIdxTop }}%; width: 9px; height: 9px; border-radius: 50%; background: var(--mut3, #8F8F8A); border: 1.5px solid #FFFFFF; transform: translate(-50%, -50%); pointer-events: none; box-sizing: border-box;"></div>
+                <div style="position: absolute; top: 8px; left: 8px; background: var(--tooltipBg, rgba(255, 255, 255, 0.95)); border: 1px solid var(--line, #E4E4E0); border-radius: 6px; padding: 5px 9px; pointer-events: none; box-shadow: 0 4px 12px rgba(20, 19, 26, 0.08);">
+                  <div style="font-family: 'JetBrains Mono', monospace; font-size: 11px; color: var(--mut2, #6B6B66);">{{ btHovMonth }}</div>
+                  <div style="font-family: 'JetBrains Mono', monospace; font-size: 12.5px; font-weight: 700; color: var(--acc, #4A63D0);">screen {{ btHovScr }}</div>
+                  <div style="font-family: 'JetBrains Mono', monospace; font-size: 12.5px; color: var(--mut, #5B5B57);">index {{ btHovIdx }}</div>
+                </div>
+              </sc-if>
+            </div>
+            </div>
+            <div style="display: flex; justify-content: space-between; margin-top: 4px; margin-left: 40px;">
+              <span style="font-family: 'JetBrains Mono', monospace; font-size: 10.5px; color: var(--mut2, #6B6B66);">{{ btX0 }}</span>
+              <span style="font-family: 'JetBrains Mono', monospace; font-size: 10.5px; color: var(--mut2, #6B6B66);">{{ btX1 }}</span>
+              <span style="font-family: 'JetBrains Mono', monospace; font-size: 10.5px; color: var(--mut2, #6B6B66);">{{ btX2 }}</span>
+            </div>
+          </div>
+          <div style="display: grid; grid-template-columns: minmax(0, 1fr) 440px; gap: 12px; align-items: stretch;">
+          <div style="display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px;">
+            <sc-for list="{{ btStats }}" as="sc" hint-placeholder-count="6">
+              <div title="{{ sc.tip }}" style="background: var(--card, #FFFFFF); border: 1px solid var(--line, #E4E4E0); border-radius: 8px; padding: 11px 14px; cursor: help;">
+                <div style="font-size: 11px; font-weight: 600; letter-spacing: 0.06em; color: var(--mut2, #6B6B66); text-transform: uppercase; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">{{ sc.k }}</div>
+                <div style="font-family: 'JetBrains Mono', monospace; font-size: 21px; font-weight: 700; color: {{ sc.fg }}; margin-top: 4px;">{{ sc.v }}</div>
+                <div style="font-size: 11.5px; color: var(--mut2, #6B6B66); margin-top: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">{{ sc.sub }}</div>
+              </div>
+            </sc-for>
+          </div>
+          <div style="background: var(--card, #FFFFFF); border: 1px solid var(--line, #E4E4E0); border-radius: 8px; padding: 13px 14px; display: flex; flex-direction: column;">
+              <span style="font-size: 13.5px; font-weight: 600;">{{ btHistTitle }}</span>
+              <sc-if value="{{ btHasBars }}" hint-placeholder-val="{{ true }}">
+              <div style="display: flex; align-items: flex-end; gap: 7px; flex: 1; min-height: 110px; margin-top: 12px;">
+                <sc-for list="{{ btBars }}" as="b" hint-placeholder-count="6">
+                  <div style="flex: 1; display: flex; flex-direction: column; justify-content: flex-end; align-items: center; gap: 4px; height: 100%;">
+                    <span style="font-family: 'JetBrains Mono', monospace; font-size: 11px; color: var(--mut2, #6B6B66);">{{ b.n }}</span>
+                    <div style="width: 100%; height: {{ b.h }}px; background: {{ b.bg }}; border-radius: 3px 3px 0 0;"></div>
+                    <span style="font-size: 10.5px; color: var(--mut2, #6B6B66); white-space: nowrap;">{{ b.label }}</span>
+                  </div>
+                </sc-for>
+              </div>
+              </sc-if>
+              <sc-if value="{{ btNoBars }}" hint-placeholder-val="{{ false }}">
+                <div style="font-size: 12.5px; color: var(--mut2, #6B6B66); margin-top: 12px; line-height: 1.5;">{{ btAgeNote }}</div>
+              </sc-if>
+          </div>
+          </div>
+          <sc-if value="{{ btHasAgeNote }}" hint-placeholder-val="{{ false }}">
+            <div style="background: var(--mutbg, #F3F3EE); border: 1px solid var(--line, #E4E4E0); border-radius: 8px; padding: 9px 12px; font-size: 12.5px; color: var(--mut, #5B5B57);">{{ btAgeNote }}</div>
+          </sc-if>
+          <sc-if value="{{ btHasWarn }}" hint-placeholder-val="{{ false }}">
+            <div style="background: var(--negBg06, rgba(214, 69, 69, 0.06)); border: 1px solid var(--negBg25, rgba(214, 69, 69, 0.25)); border-radius: 8px; padding: 9px 12px; font-size: 12.5px; color: var(--neg3, #A93838); line-height: 1.5;"><span style="font-weight: 700; letter-spacing: 0.05em; font-size: 11px; text-transform: uppercase; margin-right: 6px;">⚠ Concentration</span>{{ btWarn }}</div>
+          </sc-if>
+          <div style="display: grid; grid-template-columns: minmax(0, 1fr); gap: 12px; align-items: start;">
+            <div style="background: var(--card, #FFFFFF); border: 1px solid var(--line, #E4E4E0); border-radius: 8px;">
+              <div style="display: flex; align-items: center; padding: 11px 14px 9px 14px; border-bottom: 1px solid var(--line, #E4E4E0);">
+                <span style="font-size: 13.5px; font-weight: 600;">Buy signals (entries)</span>
+                <div style="flex: 1;"></div>
+                <button type="button" title="Download every buy signal in this backtest as a CSV — card, entry date, entry price, and return at each horizon" style="background: none; border: none; padding: 0; cursor: pointer; font-family: 'Inter', sans-serif; font-size: 12.5px; color: var(--acc, #4A63D0);" style-hover="text-decoration: underline;">export CSV ↓</button>
+              </div>
+              <div style="display: grid; grid-template-columns: {{ btGridCols }}; gap: 8px; padding: 7px 14px; border-bottom: 1px solid var(--line, #E4E4E0); font-size: 11.5px; font-weight: 600; letter-spacing: 0.05em; color: var(--mut2, #6B6B66); text-transform: uppercase;">
+                <sc-for list="{{ btCols }}" as="bc" hint-placeholder-count="6">
+                  <div style="display: flex; align-items: center; min-width: 0; background: {{ bc.bg }}; border-radius: 4px;"><span style="flex: 1; text-align: center; overflow: hidden; white-space: nowrap;">{{ bc.name }}</span><span onMouseDown="{{ bc.rs }}" title="Drag to resize" style="cursor: col-resize; color: var(--line3, #C9C9C4); padding: 2px 3px; margin-right: -6px; flex-shrink: 0;" style-hover="color: var(--acc, #4A63D0);">│</span></div>
+                </sc-for>
+              </div>
+              <sc-for list="{{ btRows }}" as="r" hint-placeholder-count="8">
+                <div style="display: grid; grid-template-columns: {{ btGridCols }}; gap: 8px; padding: 6px 14px; border-bottom: 1px solid var(--line4, #F0F0EC); align-items: center;">
+                  <span style="font-size: 13.5px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">{{ r.name }}</span>
+                  <span style="font-family: 'JetBrains Mono', monospace; font-size: 12.5px; color: var(--mut, #5B5B57); text-align: center;">{{ r.date }}</span>
+                  <span style="font-family: 'JetBrains Mono', monospace; font-size: 13px; font-weight: 700; text-align: center;">{{ r.price }}</span>
+                  <span style="font-family: 'JetBrains Mono', monospace; font-size: 13px; text-align: center; color: {{ r.r3Fg }}; background: {{ btSelBg3 }}; font-weight: {{ btSelW3 }}; align-self: stretch; display: flex; align-items: center; justify-content: center;">{{ r.r3 }}</span>
+                  <span style="font-family: 'JetBrains Mono', monospace; font-size: 13px; text-align: center; color: {{ r.r6Fg }}; background: {{ btSelBg6 }}; font-weight: {{ btSelW6 }}; align-self: stretch; display: flex; align-items: center; justify-content: center;">{{ r.r6 }}</span>
+                  <span style="font-family: 'JetBrains Mono', monospace; font-size: 13px; text-align: center; color: {{ r.r12Fg }}; background: {{ btSelBg12 }}; font-weight: {{ btSelW12 }}; align-self: stretch; display: flex; align-items: center; justify-content: center;">{{ r.r12 }}</span>
+                </div>
+              </sc-for>
+              <sc-if value="{{ btHasMore }}" hint-placeholder-val="{{ false }}">
+                <div style="padding: 8px 14px; font-size: 12.5px; color: var(--mut2, #6B6B66);">{{ btMore }}</div>
+              </sc-if>
+            </div>
+          </div>
+          <div style="font-size: 12px; color: var(--mut2, #6B6B66); padding: 0 2px 4px 2px;">Returns are gross of selling fees. Each entry snapshot is computed only from data captured on or before the entry date — lookahead is structurally impossible.</div>
+        </sc-if>
+      </div>
+      </sc-if>
+
+      <sc-if value="{{ isTerminal }}" hint-placeholder-val="{{ true }}">
+      <div style="flex: 1; min-height: 0; overflow: auto; padding: 10px 18px 0 18px;">
+        <div style="background: var(--card, #FFFFFF); border: 1px solid var(--line, #E4E4E0); border-radius: 8px 8px 0 0; width: max-content; min-width: 100%; box-sizing: border-box;">
+          <div style="display: grid; grid-template-columns: {{ gridCols }}; gap: 8px; padding: 7px 12px; border-bottom: 1px solid var(--line, #E4E4E0); font-size: 12px; font-weight: 600; letter-spacing: 0.05em; color: var(--mut2, #6B6B66); text-transform: uppercase; align-items: center; position: sticky; top: 0; background: var(--card, #FFFFFF); z-index: 5; border-radius: 8px 8px 0 0; box-shadow: 0 -12px 0 0 var(--bg, #FAFAF7), 0 1px 0 0 var(--line, #E4E4E0);">
+            <span></span>
+            <div style="display: flex; align-items: center; min-width: 0;"><span style="flex: 1; text-align: center; overflow: hidden; white-space: nowrap;">Card</span><span onMouseDown="{{ rsName }}" title="Drag to resize" style="cursor: col-resize; color: var(--line3, #C9C9C4); padding: 2px 3px; margin-right: -6px; flex-shrink: 0;" style-hover="color: var(--acc, #4A63D0);">│</span></div>
+            <sc-for list="{{ cols }}" as="col" hint-placeholder-count="7">
+              <div style="display: flex; align-items: center; min-width: 0;"><button onClick="{{ col.sort }}" title="{{ col.tip }}" style="flex: 1; min-width: 0; background: none; border: none; cursor: pointer; font-family: 'Inter', sans-serif; font-size: 12px; font-weight: 600; letter-spacing: 0.05em; color: {{ col.fg }}; text-transform: uppercase; padding: 0; display: flex; align-items: center; justify-content: center; gap: 3px; overflow: hidden; white-space: nowrap;">{{ col.name }} <span style="font-family: 'JetBrains Mono', monospace;">{{ col.arrow }}</span></button><span onMouseDown="{{ col.rs }}" title="Drag to resize" style="cursor: col-resize; color: var(--line3, #C9C9C4); padding: 2px 3px; margin-right: -6px; flex-shrink: 0;" style-hover="color: var(--acc, #4A63D0);">│</span></div>
+            </sc-for>
+          </div>
+          <sc-for list="{{ rows }}" as="row" hint-placeholder-count="10">
+            <div role="button" tabindex="0" style="display: grid; grid-template-columns: {{ gridCols }}; gap: 8px; align-items: center; padding: 6px 12px; border-bottom: 1px solid var(--line4, #F0F0EC); cursor: pointer;" style-hover="background: var(--hov, #F6F6F2);">
+              <div onMouseEnter="{{ row.pvIn }}" onMouseLeave="{{ pvOut }}" style="width: 48px; height: 66px; border-radius: 4px; background: {{ row.thumbBg }}; position: relative;">
+                <image-slot id="{{ row.slotId }}" shape="rounded" radius="4" placeholder=" "></image-slot>
+              </div>
+              <div style="min-width: 0;">
+                <div style="font-weight: 600; font-size: 14px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">{{ row.name }}</div>
+                <div style="font-size: 12.5px; color: var(--mut2, #6B6B66); white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">{{ row.set }} · {{ row.tier }}</div>
+              </div>
+              <span style="font-family: 'JetBrains Mono', monospace; font-size: 13.5px; font-weight: 700; text-align: center;">{{ row.price }}</span>
+              <span style="font-family: 'JetBrains Mono', monospace; font-size: 13px; text-align: center; color: {{ row.roc3Fg }};">{{ row.roc3 }}</span>
+              <span style="font-family: 'JetBrains Mono', monospace; font-size: 13px; text-align: center; color: var(--mut, #5B5B57);">{{ row.rs }}</span>
+              <span style="font-family: 'JetBrains Mono', monospace; font-size: 13px; text-align: center; color: var(--mut, #5B5B57);">{{ row.z }}</span>
+              <span style="font-family: 'JetBrains Mono', monospace; font-size: 13px; text-align: center; color: {{ row.churnFg }};">{{ row.churn }}</span>
+              <span style="font-family: 'JetBrains Mono', monospace; font-size: 13px; text-align: center; color: {{ row.popFg }};">{{ row.pop }}</span>
+              <div style="display: flex; justify-content: center;">
+                <span title="{{ row.compTip }}" style="font-family: 'JetBrains Mono', monospace; font-size: 11.5px; font-weight: 600; color: {{ row.compFg }}; background: {{ row.compBg }}; padding: 2px 7px; border-radius: 4px; white-space: nowrap;">{{ row.comp }}</span>
+              </div>
+            </div>
+          </sc-for>
+        </div>
+        <div style="display: flex; align-items: center; gap: 8px; background: rgba(176, 127, 26, 0.07); border: 1px solid rgba(176, 127, 26, 0.2); border-top: none; border-radius: 0 0 8px 8px; padding: 7px 12px; margin-bottom: 14px; width: max-content; min-width: 100%; box-sizing: border-box;">
+          <span style="font-family: 'JetBrains Mono', monospace; font-size: 12.5px; color: var(--warnInk, #8F6614);">{{ hiddenCount }} cards hidden — insufficient data for {{ hiddenMetric }}</span>
+          <button type="button" onClick="{{ showHidden }}" title="Show the rows that fall below the data-sufficiency floor — their metrics are unreliable" style="background: none; border: none; padding: 0; cursor: pointer; font-family: 'Inter', sans-serif; font-size: 12.5px; color: var(--acc, #4A63D0);" style-hover="text-decoration: underline;">show anyway →</button>
+          <div style="flex: 1;"></div>
+          <a href="Cardstock About Data.dc.html#sufficiency" title="Why some signals are locked — the full sufficiency table" style="font-size: 12px; color: var(--mut2, #6B6B66);">sufficiency rules ⓘ</a>
+        </div>
+      </div>
+      </sc-if>
+
+      <sc-if value="{{ isBinder }}" hint-placeholder-val="{{ false }}">
+      <div style="flex: 1; min-height: 0; overflow-y: auto; padding: 10px 18px 14px 18px;">
+        <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 12px;">
+          <sc-for list="{{ binderCards }}" as="bc" hint-placeholder-count="8">
+            <div role="button" tabindex="0" style="background: var(--card, #FFFFFF); border: 1px solid var(--line, #E4E4E0); border-radius: 8px; padding: 10px; cursor: pointer; transition: box-shadow 0.15s ease;" style-hover="box-shadow: 0 6px 20px rgba(20, 19, 26, 0.10);">
+              <div style="aspect-ratio: 325 / 450; border-radius: 5px; background: {{ bc.thumbBg }}; margin-bottom: 8px;">
+                <image-slot id="{{ bc.slotId }}" shape="rounded" radius="5" placeholder=" "></image-slot>
+              </div>
+              <div style="font-weight: 600; font-size: 13.5px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">{{ bc.name }}</div>
+              <div style="display: flex; justify-content: space-between; align-items: baseline; margin-top: 3px;">
+                <span style="font-family: 'JetBrains Mono', monospace; font-size: 13.5px; font-weight: 700;">{{ bc.price }}</span>
+                <span style="font-family: 'JetBrains Mono', monospace; font-size: 12px; color: {{ bc.rocFg }};">{{ bc.roc3 }}</span>
+              </div>
+            </div>
+          </sc-for>
+        </div>
+      </div>
+      </sc-if>
+
+    </main>
+  </div>
+  <sc-if value="{{ hasPv }}" hint-placeholder-val="{{ false }}">
+    <div style="position: fixed; left: {{ pvX }}px; top: {{ pvY }}px; width: 164px; height: 226px; border-radius: 8px; background: {{ pvBg }}; box-shadow: 0 14px 40px rgba(20, 19, 26, 0.35); z-index: 100; pointer-events: none;">
+      <image-slot id="{{ pvSlot }}" shape="rounded" radius="8" placeholder=" "></image-slot>
+    </div>
+  </sc-if>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;defaultView&quot;: {&quot;editor&quot;: &quot;enum&quot;, &quot;options&quot;: [&quot;terminal&quot;, &quot;binder&quot;], &quot;default&quot;: &quot;terminal&quot;, &quot;tsType&quot;: &quot;string&quot;, &quot;section&quot;: &quot;Screener&quot;}}">
+class Component extends DCLogic {
+  PAL = (() => { const d = localStorage.getItem('cardstock-theme') === 'dark', c = localStorage.getItem('cardstock-cvd') === '1';
+    const s = d ? (c ? {pos:'#58A9E6',pos2:'#58A9E6',neg:'#F5924E',neg2:'#F5924E',neg3:'#E8874D',posBg:a=>'rgba(0,114,178,'+a+')',negBg:a=>'rgba(213,94,0,'+a+')'}
+                     : {pos:'#4CC08D',pos2:'#4CC08D',neg:'#E57B7B',neg2:'#E57B7B',neg3:'#E57B7B',posBg:a=>'rgba(24,158,99,'+a+')',negBg:a=>'rgba(214,69,69,'+a+')'})
+              : (c ? {pos:'#0B69A8',pos2:'#0072B2',neg:'#CC5F00',neg2:'#D55E00',neg3:'#B34E00',posBg:a=>'rgba(0,114,178,'+a+')',negBg:a=>'rgba(213,94,0,'+a+')'}
+                   : {pos:'#157A50',pos2:'#189E63',neg:'#C13A3A',neg2:'#D64545',neg3:'#A93838',posBg:a=>'rgba(24,158,99,'+a+')',negBg:a=>'rgba(214,69,69,'+a+')'});
+    const ch = d ? {bg:'#161614',card:'#1E1E1C',ink:'#E9E9E5',mut:'#B4B4AE',mut2:'#A8A8A2',mut3:'#9A9A94',mutbg:'#2A2A27',hov:'#282825',line:'#33332F',line2:'#3E3E39',line3:'#4A4A44',line4:'#262623',acc:'#8C9BF2',accH:'#AAB6F6',btn:'#4A63D0',accBg:'#252B44',accMut:'#3A4570',warn:'#D6A54A',warnInk:'#D6A54A'}
+               : {bg:'#FAFAF7',card:'#FFFFFF',ink:'#1C1C1E',mut:'#5B5B57',mut2:'#6B6B66',mut3:'#8F8F8A',mutbg:'#F3F3EE',hov:'#F6F6F2',line:'#E4E4E0',line2:'#D9D9D4',line3:'#C9C9C4',line4:'#F0F0EC',acc:'#4A63D0',accH:'#3A4FB8',btn:'#4A63D0',accBg:'#EEF1FB',accMut:'#B9C4E8',warn:'#8F6614',warnInk:'#8F6614'};
+    return Object.assign(ch, s); })();
+  state = { screen: 'g1', view: 'terminal', railOpen: true, bt: false, btH: '3M', btExit: 'horizon', btHover: null, btPhase: 'idle', addOpen: false, editor: null, edWin: '', edOp: '\u2265', edV1: '', edV2: '', edSel: null, edMulti: {}, edSearch: '', added: {}, sortKey: 'comp', sortDir: -1, removed: {}, pv: null, editing: null, editVal: '', edits: {}, myIds: ['g1', 'g2', 'g3', 'arb', 'my1', 'my2'], railMenu: null, colW: { name: 170, price: 78, roc3: 78, rs: 64, z: 64, churn: 72, pop: 84, comp: 96 }, btColW: { name: 150, entry: 80, price: 96, r3: 72, r6: 72, r12: 72 } };
+  startResize(key, bucket) {
+    return (e) => {
+      e.preventDefault(); e.stopPropagation();
+      const b = bucket || 'colW';
+      const startX = e.clientX, startW = this.state[b][key];
+      const mv = (ev) => {
+        const w = Math.max(40, Math.min(420, startW + ev.clientX - startX));
+        this.setState(s => ({ [b]: Object.assign({}, s[b], { [key]: w }) }));
+      };
+      const up = () => { document.removeEventListener('mousemove', mv); document.removeEventListener('mouseup', up); document.body.style.cursor = ''; document.body.style.userSelect = ''; };
+      document.body.style.cursor = 'col-resize';
+      document.body.style.userSelect = 'none';
+      document.addEventListener('mousemove', mv);
+      document.addEventListener('mouseup', up);
+    };
+  }
+  constructor(props) {
+    super(props);
+    this.ACCENTS = {
+      giratina: ['#B09A62','#7E6C3E'], umbreon: ['#5C63B8','#3E4489'], espeon: ['#B393DD','#8465B3'],
+      gengar: ['#8A67C2','#5E4295'], zardv: ['#D9975A','#A9662C'], lugia: ['#7FA3C9','#54789E'],
+      rayquaza: ['#57B183','#2F8257'], sylveon: ['#E8A0C8','#B86E98'], leafeon: ['#8FBF6A','#5E8F3E'],
+      glaceon: ['#8FC6D9','#5E96A9'], mewtwo: ['#9A86C4','#6A5694'], alakazam: ['#C4A250','#94722'.slice(0,6)+'0'],
+      dragonite: ['#D9B45A','#A9842A'], snorlax: ['#6A8A9A','#3A5A6A'], machamp: ['#C47A5A','#944A2A']
+    };
+    this.SCREENS = {
+      g1: { name: 'Quiet Accumulation', sub: 'default · G1 composite', thesis: 'churn building while price and pop stay flat — someone knows something', preset: true,
+        chips: ['Churn accel ≥ ×1.4', 'ROC 1M between −2% and +2%', 'Pop Δ 60d ≤ +1%', 'Price ≥ $50'] },
+      g2: { name: 'Supply Flood Watch', sub: 'default · G2 composite', thesis: 'graded supply outrunning demand — exit or avoid', preset: true,
+        chips: ['Pop Δ 60d ≥ +4%', 'Spread compressing', 'ROC 3M ≤ 0%'] },
+      g3: { name: 'RS Breakout', sub: 'default · G4 composite', thesis: 'new 12M high on rising churn, corpus RS leader', preset: true,
+        chips: ['RS pct ≥ 90th', 'New 12M high', 'Churn 30d ≥ ×1.2 baseline'] },
+      arb: { name: 'Grading arbitrage', sub: 'default · E1', thesis: 'raw copies worth grading at current gem rates', preset: true,
+        chips: ['Arb EV ≥ +$50', 'Tier: Raw', 'Gem rate ≥ 40%'] },
+      my1: { name: 'Alt-art momentum', sub: '4 filters · edited 2d ago', thesis: 'my alt-art universe with trend confirmation', preset: false,
+        chips: ['Character: any alt art', 'EMA 3/9 bullish', 'ROC 3M ≥ +5%', 'Price $200–$2,000'] },
+      my2: { name: 'Cheap vintage holos', sub: '3 filters · edited 3w ago', thesis: 'WOTC-era holos under $300 with improving liquidity', preset: false,
+        chips: ['Era: WOTC', 'Price ≤ $300', 'Churn accel ≥ ×1.1'] }
+    };
+    this.CARDS = [
+      { id: 'giratina', name: 'Giratina V (Alt Art)', set: 'Lost Origin', tier: 'PSA 10', price: 845, roc3: 16.7, rs: 96, z: 1.71, churn: 2.4, pop: 0.6, comp: 'ACTIVE', compSince: 'Jun ’26' },
+      { id: 'umbreon', name: 'Umbreon VMAX (Alt Art)', set: 'Evolving Skies', tier: 'PSA 10', price: 1486, roc3: 10.9, rs: 94, z: 1.62, churn: 1.6, pop: 0.8, comp: 'ACTIVE', compSince: 'Jul ’26' },
+      { id: 'sylveon', name: 'Sylveon VMAX (Alt Art)', set: 'Evolving Skies', tier: 'PSA 10', price: 612, roc3: 1.4, rs: 71, z: 0.32, churn: 1.9, pop: 0.4, comp: 'ACTIVE', compSince: 'Jul ’26' },
+      { id: 'gengar', name: 'Gengar VMAX (Alt Art)', set: 'Fusion Strike', tier: 'PSA 10', price: 588, roc3: 0.8, rs: 66, z: 0.18, churn: 1.7, pop: 0.5, comp: 'ACTIVE', compSince: 'Jun ’26' },
+      { id: 'mewtwo', name: 'Mewtwo GX (Shiny)', set: 'Hidden Fates', tier: 'PSA 10', price: 342, roc3: -0.6, rs: 58, z: -0.11, churn: 1.5, pop: 0.2, comp: 'ACTIVE', compSince: 'Jul ’26' },
+      { id: 'leafeon', name: 'Leafeon VMAX (Alt Art)', set: 'Evolving Skies', tier: 'PSA 10', price: 486, roc3: 1.9, rs: 74, z: 0.44, churn: 1.4, pop: 0.9, comp: 'WATCH', compSince: 'churn ×1.4 not yet sustained' },
+      { id: 'glaceon', name: 'Glaceon VMAX (Alt Art)', set: 'Evolving Skies', tier: 'PSA 10', price: 452, roc3: -1.2, rs: 62, z: -0.25, churn: 1.4, pop: 0.7, comp: 'WATCH', compSince: 'price drifting below band' },
+      { id: 'dragonite', name: 'Dragonite V (Alt Art)', set: 'Evolving Skies', tier: 'PSA 10', price: 398, roc3: 0.4, rs: 60, z: 0.09, churn: 1.5, pop: 0.3, comp: 'ACTIVE', compSince: 'Jul ’26' },
+      { id: 'snorlax', name: 'Snorlax VMAX (Gigantamax)', set: 'Sword & Shield Base', tier: 'PSA 10', price: 285, roc3: 1.1, rs: 64, z: 0.21, churn: 1.6, pop: 0.4, comp: 'ACTIVE', compSince: 'Jun ’26' },
+      { id: 'machamp', name: 'Machamp (1st Edition)', set: 'Base Set', tier: 'Grade 9', price: 168, roc3: 0.2, rs: 52, z: 0.02, churn: 1.8, pop: 0.1, comp: 'ACTIVE', compSince: 'Jul ’26' },
+      { id: 'alakazam', name: 'Alakazam Holo', set: 'Base Set Unlimited', tier: 'Grade 9', price: 224, roc3: -0.8, rs: 55, z: -0.15, churn: 1.4, pop: 0.2, comp: 'WATCH', compSince: 'pop reading is 1 observation old' },
+      { id: 'lugia', name: 'Lugia V (Alt Art)', set: 'Silver Tempest', tier: 'PSA 10', price: 478, roc3: 5.1, rs: 88, z: 1.62, churn: 1.3, pop: 1.2, comp: 'EXITED', compSince: 'pop Δ crossed +1% · Jul ’26' }
+    ];
+    this.FILTER_MENU = [
+      { group: 'Price & trend', items: [
+        { name: 'Price (tier)', ok: true }, { name: 'ROC 1/3/6/12M', ok: true }, { name: 'EMA cross state', ok: true },
+        { name: 'MACD state', ok: true }, { name: 'Trend R²', ok: true }, { name: 'Drawdown from peak', ok: true }] },
+      { group: 'Momentum & reversion', items: [
+        { name: 'RS vs index (percentile)', ok: true }, { name: 'z-score vs 6M MA', ok: true },
+        { name: 'Bollinger %B / bandwidth', ok: true }, { name: 'RSI (6)', ok: true }, { name: 'Beta vs index', ok: true, badge: '24M MIN' }] },
+      { group: 'Liquidity', items: [
+        { name: 'Churn 30/90d + acceleration', ok: true, badge: 'POST-SEAM' }, { name: 'Monthly sales count', ok: true, badge: 'POST-SEAM' },
+        { name: 'Amihud percentile', ok: true, badge: 'LOW DATA', tip: 'Needs ~24 post-seam months (Apr \u201927) for stable baselines \u2014 readings today are noisy.' }, { name: 'Price dispersion', ok: true, badge: 'LOW DATA', tip: 'Needs \u22658 sales/mo per bucket \u2014 most cards are below that today.' },
+        { name: 'Discount-to-list', ok: true, badge: 'LOW DATA', tip: 'Listed price captured on only ~12% of rows so far.' }, { name: 'Cross-marketplace gap', ok: true, badge: 'LOW DATA', tip: 'eBay-only depth today \u2014 needs \u22655 sales per venue per window.' }] },
+      { group: 'Supply (2026+)', items: [
+        { name: 'Pop Δ 30/60/90d', ok: true, badge: '7 OBS' }, { name: 'Gem rate + drift', ok: true, badge: '7 OBS' },
+        { name: 'Supply overhang', ok: true, badge: 'LOW DATA', tip: 'Needs 12 months of census history \u2014 7/12 so far; treat readings as provisional.' }] },
+      { group: 'Valuation', items: [
+        { name: 'Tier-spread ratio', ok: true }, { name: 'Grading-arb EV', ok: true }] },
+      { group: 'Identity', items: [
+        { name: 'Set', ok: true }, { name: 'Era', ok: true }, { name: 'Character', ok: true }] },
+      { group: 'Composites', items: [
+        { name: 'Quiet Accumulation (G1)', ok: true }, { name: 'Supply Flood Watch (G2)', ok: true }, { name: 'RS Breakout (G4)', ok: true }] }
+    ];
+    const mkSeries = (n, drift, amp, seed) => { const a = []; let v = 100; for (let k = 0; k < n; k++) { a.push(Math.round(v * 10) / 10); v *= 1 + drift + amp * Math.sin(k * 0.9 + seed) + (((k * 29 + seed * 7) % 13) - 6) * 0.003; } return a; };
+    this.BT = {
+      short: { range: 'Mar \u201926 \u2192 Aug \u201926', months: 6, start: [2026, 2], scr: [100, 103.2, 105.0, 104.3, 107.9, 110.2], idx: [100, 100.9, 101.6, 102.2, 102.7, 103.1], entries: 14,
+        floor: 'This screen\u2019s history starts Mar 2026 (the honest floor): Pop \u0394 60d needs the grading census, which begins Jan 2026, plus a 60-day window. Price history reaches back to Dec 2020, but a screen is only as old as its youngest metric.',
+        stats: { '3M': { aged: 8, hit: '63%', hitSub: '5 of 8 aged entries', med: '+3.8%', mean: '+3.2%', dd: '\u22122.0%', buckets: [0, 3, 3, 2, 0, 0] }, '6M': null, '12M': null },
+        ageNote: { '6M': 'No entries have aged 6 months yet \u2014 the earliest cohort matures Sep 2026.', '12M': 'No entries have aged 12 months yet \u2014 the earliest cohort matures Mar 2027.' },
+        rows: [['Umbreon VMAX (Alt Art)', 'Mar \u201926', 1310, 9.2, null, null], ['Espeon VMAX (Alt Art)', 'Mar \u201926', 676, 4.1, null, null], ['Gengar VMAX (Alt Art)', 'Apr \u201926', 562, 4.6, null, null], ['Mewtwo GX (Shiny)', 'Apr \u201926', 349, -2.0, null, null], ['Dragonite V (Alt Art)', 'May \u201926', 391, 1.8, null, null], ['Snorlax VMAX (Gigantamax)', 'May \u201926', 271, 5.2, null, null], ['Machamp (1st Edition)', 'Jun \u201926', 166, null, null, null], ['Leafeon VMAX (Alt Art)', 'Jun \u201926', 474, null, null, null], ['Alakazam Holo', 'Jul \u201926', 228, null, null, null]], more: '+ 5 more entries \u2014 12 cards match today; 2 of the 14 entered and later exited the screen',
+        warn: '8 of 14 buy signals are SWSH alt arts. This screen may be finding one set\u2019s moment, not a repeatable pattern \u2014 check whether the thesis still holds outside it.' },
+      mid: { range: 'Jun \u201925 \u2192 Aug \u201926', months: 15, start: [2025, 5], scr: [100, 101.8, 104.6, 103.9, 107.2, 110.8, 109.4, 113.6, 118.2, 116.5, 121.9, 126.4, 124.8, 129.5, 133.0], idx: [100, 100.7, 101.9, 102.6, 103.8, 104.9, 105.4, 106.8, 108.1, 108.5, 109.9, 111.2, 111.8, 113.0, 114.1], entries: 21,
+        floor: 'This screen\u2019s history starts Jun 2025 (the honest floor): churn needs 60 post-seam days and the per-sale ledger begins Apr 2025.',
+        stats: { '3M': { aged: 18, hit: '61%', hitSub: '11 of 18 aged entries', med: '+3.9%', mean: '+5.2%', dd: '\u22126.8%', buckets: [1, 3, 7, 5, 2, 0] }, '6M': { aged: 15, hit: '67%', hitSub: '10 of 15 aged entries', med: '+7.9%', mean: '+9.3%', dd: '\u22126.8%', buckets: [1, 2, 5, 4, 3, 0] }, '12M': { aged: 3, hit: '67%', hitSub: '2 of 3 aged entries', med: '+18.0%', mean: '+16.2%', dd: '\u22126.8%', buckets: [0, 1, 0, 1, 1, 0] } },
+        ageNote: {},
+        rows: [['Lugia V (Alt Art)', 'Jul \u201925', 392, 11.4, 19.8, 21.9], ['Umbreon VMAX (Alt Art)', 'Aug \u201925', 1180, 7.6, 13.2, 18.7], ['Giratina V (Alt Art)', 'Sep \u201925', 702, 3.1, 8.4, null], ['Charizard V (Brilliant Stars)', 'Oct \u201925', 248, -4.2, -1.8, null], ['Sylveon VMAX (Alt Art)', 'Nov \u201925', 655, 5.9, 9.1, null], ['Rayquaza VMAX (Alt Art)', 'Jan \u201926', 940, 8.8, null, null], ['Espeon VMAX (Alt Art)', 'Mar \u201926', 668, 4.4, null, null], ['Snorlax VMAX (Gigantamax)', 'May \u201926', 270, null, null, null]], more: '+ 13 more entries \u2014 export CSV for the full list' },
+      long: { range: 'Dec \u201921 \u2192 Aug \u201926', months: 57, start: [2021, 11], scr: mkSeries(57, 0.0115, 0.012, 1), idx: mkSeries(57, 0.0065, 0.008, 3), entries: 34,
+        floor: 'This screen\u2019s history starts Dec 2021 (the honest floor): it uses price metrics only; ROC 12M needs 12 months of history and monthly prices begin Dec 2020.',
+        stats: { '3M': { aged: 34, hit: '65%', hitSub: '22 of 34 aged entries', med: '+5.8%', mean: '+7.4%', dd: '\u221218.2%', buckets: [3, 6, 12, 8, 4, 1] }, '6M': { aged: 32, hit: '68%', hitSub: '22 of 32 aged entries', med: '+9.6%', mean: '+12.1%', dd: '\u221218.2%', buckets: [2, 5, 10, 9, 6, 2] }, '12M': { aged: 28, hit: '72%', hitSub: '20 of 28 aged entries', med: '+16.4%', mean: '+21.7%', dd: '\u221218.2%', buckets: [2, 4, 8, 9, 7, 4] } },
+        ageNote: {},
+        rows: [['Charizard Holo (Base Set)', 'Feb \u201922', 1850, 6.2, 14.8, 22.4], ['Blastoise Holo (Base Set)', 'May \u201922', 420, -3.4, 2.1, 9.8], ['Lugia Holo (Neo Genesis)', 'Sep \u201922', 612, 8.9, 15.2, 28.6], ['Umbreon VMAX (Alt Art)', 'Jan \u201923', 890, 12.1, 24.0, 41.2], ['Rayquaza VMAX (Alt Art)', 'Jun \u201923', 560, 4.6, 11.8, 19.5], ['Mewtwo GX (Shiny)', 'Nov \u201923', 298, -6.8, -2.4, 3.1], ['Giratina V (Alt Art)', 'Apr \u201924', 618, 7.4, 10.9, 16.8], ['Espeon VMAX (Alt Art)', 'Oct \u201924', 540, 9.6, 18.4, 26.2], ['Gengar VMAX (Alt Art)', 'Mar \u201925', 502, 5.1, 9.8, null], ['Lugia V (Alt Art)', 'Nov \u201925', 438, 6.4, 12.0, null]], more: '+ 24 more entries \u2014 export CSV for the full list' }
+    };
+    this.BT_MAP = { g1: 'short', g2: 'short', g3: 'mid' };
+    this.BT_EXIT = {
+      short: { hit: '57%', hitSub: '4 of 7 closed trades', med: '+2.9%', mean: '+2.4%', medHold: '2 mo', open: 7,
+        rows: [['Umbreon VMAX (Alt Art)', 'Mar \u201926', 1310, 7.1, 4], ['Espeon VMAX (Alt Art)', 'Mar \u201926', 676, 3.4, 3], ['Gengar VMAX (Alt Art)', 'Apr \u201926', 562, -1.8, 2], ['Mewtwo GX (Shiny)', 'Apr \u201926', 349, -2.6, 1], ['Dragonite V (Alt Art)', 'May \u201926', 391, 2.2, 2], ['Snorlax VMAX (Gigantamax)', 'May \u201926', 271, 4.0, 2], ['Machamp (1st Edition)', 'Jun \u201926', 166, 1.2, 1], ['Leafeon VMAX (Alt Art)', 'Jun \u201926', 474, null, null], ['Alakazam Holo', 'Jul \u201926', 228, null, null]],
+        buckets: [0, 3, 3, 1, 0, 0], more: '+ 5 more \u2014 7 positions still open (card still matches today), shown as unrealized' },
+      mid: { hit: '63%', hitSub: '12 of 19 closed trades', med: '+5.1%', mean: '+6.6%', medHold: '4 mo', open: 2,
+        rows: [['Lugia V (Alt Art)', 'Jul \u201925', 392, 14.2, 7], ['Umbreon VMAX (Alt Art)', 'Aug \u201925', 1180, 9.8, 6], ['Giratina V (Alt Art)', 'Sep \u201925', 702, 4.9, 5], ['Charizard V (Brilliant Stars)', 'Oct \u201925', 248, -5.5, 2], ['Sylveon VMAX (Alt Art)', 'Nov \u201925', 655, 7.2, 6], ['Rayquaza VMAX (Alt Art)', 'Jan \u201926', 940, 6.1, 4], ['Espeon VMAX (Alt Art)', 'Mar \u201926', 668, null, null], ['Snorlax VMAX (Gigantamax)', 'May \u201926', 270, null, null]],
+        buckets: [1, 5, 8, 4, 1, 0], more: '+ 13 more \u2014 2 positions still open, shown as unrealized' },
+      long: { hit: '66%', hitSub: '21 of 32 closed trades', med: '+8.3%', mean: '+11.4%', medHold: '5 mo', open: 2,
+        rows: [['Charizard Holo (Base Set)', 'Feb \u201922', 1850, 11.6, 8], ['Blastoise Holo (Base Set)', 'May \u201922', 420, -4.1, 3], ['Lugia Holo (Neo Genesis)', 'Sep \u201922', 612, 13.8, 9], ['Umbreon VMAX (Alt Art)', 'Jan \u201923', 890, 19.4, 11], ['Rayquaza VMAX (Alt Art)', 'Jun \u201923', 560, 7.7, 6], ['Mewtwo GX (Shiny)', 'Nov \u201923', 298, -7.9, 2], ['Giratina V (Alt Art)', 'Apr \u201924', 618, 8.8, 5], ['Espeon VMAX (Alt Art)', 'Oct \u201924', 540, 12.6, 7], ['Gengar VMAX (Alt Art)', 'Mar \u201925', 502, 6.4, 5], ['Lugia V (Alt Art)', 'Nov \u201925', 438, null, null]],
+        buckets: [2, 7, 9, 8, 5, 1], more: '+ 24 more \u2014 2 positions still open, shown as unrealized' }
+    };
+    const compOpts = ['ACTIVE', 'WATCH', 'ACTIVE or WATCH', 'EXITED \u2264 30d ago'];
+    this.EDITORS = {
+      'Price (tier)': { short: 'Price', kind: 'range', unit: '$', windows: ['Any tier', 'BGS 10 Black', 'BGS 10', 'SGC 10', 'ACE 10', 'TAG 10', 'CGC 10 Prist.', 'CGC 10', 'PSA 10', 'Grade 9.5', 'Grade 9', 'Grade 8', 'Grade 7', 'Grade 6', 'Grade 5', 'Grade 4', 'Grade 3', 'Grade 2', 'Grade 1', 'Raw'], winLabel: 'Tier', defWin: 'PSA 10', defOp: 'between', v1: 50, v2: 2000 },
+      'ROC 1/3/6/12M': { short: 'ROC', kind: 'range', unit: '%', signed: true, windows: ['1M', '3M', '6M', '12M'], defWin: '3M', v1: 5 },
+      'EMA cross state': { short: 'EMA', kind: 'enum', opts: ['3/9 bullish', '3/9 bearish', '9/21 bullish', '9/21 bearish', 'Fresh cross \u2264 1 mo'] },
+      'MACD state': { short: 'MACD', kind: 'enum', opts: ['Above signal', 'Below signal', 'Histogram rising', 'Histogram falling', 'Fresh bullish cross'] },
+      'Trend R\u00B2': { short: 'Trend R\u00B2', kind: 'range', windows: ['6M', '12M'], defWin: '12M', v1: 0.6 },
+      'Drawdown from peak': { short: 'Drawdown', kind: 'range', unit: '%', windows: ['12M peak', '24M peak', 'All-time'], winLabel: 'Peak', defWin: '24M peak', v1: 30 },
+      'RS vs index (percentile)': { short: 'RS pct', kind: 'range', unit: 'th', windows: ['1M', '3M'], defWin: '3M', v1: 90 },
+      'z-score vs 6M MA': { short: 'z 6M', kind: 'range', unit: '\u03C3', signed: true, v1: 1.5 },
+      'Bollinger %B / bandwidth': { short: 'Boll', kind: 'range', windows: ['%B', 'Bandwidth'], winLabel: 'Measure', defWin: '%B', v1: 1 },
+      'RSI (6)': { short: 'RSI 6', kind: 'range', defOp: '\u2264', v1: 30 },
+      'Beta vs index': { short: 'Beta', kind: 'range', signed: true, v1: 1.2, caution: 'Monthly data means ~24 usable observations at best \u2014 beta estimates carry wide error bars.' },
+      'Churn 30/90d + acceleration': { short: 'Churn', kind: 'range', unit: '\u00D7', windows: ['30d', '90d', 'accel'], winLabel: 'Measure', defWin: 'accel', v1: 1.4, caution: 'Post-seam only \u2014 cards with under 60 post-seam days are hidden from results.' },
+      'Monthly sales count': { short: 'Sales/mo', kind: 'range', v1: 8, caution: 'Post-seam only \u2014 counts before the per-sale ledger begins are estimates and excluded.' },
+      'Amihud percentile': { short: 'Amihud', kind: 'range', unit: 'th', defOp: '\u2264', v1: 25, caution: 'Needs ~24 post-seam months (Apr \u201927) for stable baselines \u2014 readings today are noisy.' },
+      'Price dispersion': { short: 'Dispersion', kind: 'range', unit: '%', defOp: '\u2264', v1: 12, caution: 'Needs \u22658 sales/mo per bucket \u2014 most cards are below that today.' },
+      'Discount-to-list': { short: 'Disc-list', kind: 'range', unit: '%', v1: 8, caution: 'Listed price captured on only ~12% of rows so far.' },
+      'Cross-marketplace gap': { short: 'Mkt gap', kind: 'range', unit: '%', v1: 5, caution: 'eBay-only depth today \u2014 needs \u22655 sales per venue per window.' },
+      'Pop \u0394 30/60/90d': { short: 'Pop \u0394', kind: 'range', unit: '%', signed: true, windows: ['30d', '60d', '90d'], defWin: '60d', defOp: '\u2264', v1: 1, caution: 'Census history starts Jan \u201926 \u2014 7 observations so far.' },
+      'Gem rate + drift': { short: 'Gem rate', kind: 'range', unit: '%', windows: ['Gem rate', 'Drift 90d'], winLabel: 'Measure', defWin: 'Gem rate', v1: 40, caution: 'Census history starts Jan \u201926 \u2014 7 observations so far.' },
+      'Supply overhang': { short: 'Overhang', kind: 'range', unit: ' mo', defOp: '\u2264', v1: 6, caution: 'Needs 12 months of census history \u2014 7/12 so far; treat readings as provisional.' },
+      'Tier-spread ratio': { short: 'Spread', kind: 'range', unit: '\u00D7', windows: ['PSA 10 / 9', '9 / raw', '10 / raw'], winLabel: 'Pair', defWin: 'PSA 10 / 9', v1: 3 },
+      'Grading-arb EV': { short: 'Arb EV', kind: 'range', unit: '$', signed: true, v1: 50 },
+      'Set': { short: 'Set', kind: 'multi', search: true, opts: ['Base Set', 'Jungle', 'Fossil', 'Team Rocket', 'Neo Genesis', 'Hidden Fates', 'Evolving Skies', 'Fusion Strike', 'Brilliant Stars', 'Astral Radiance', 'Lost Origin', 'Silver Tempest', 'Crown Zenith', '151', 'Obsidian Flames', 'Paldean Fates', 'Prismatic Evolutions'] },
+      'Era': { short: 'Era', kind: 'multi', opts: ['WOTC (1999\u201303)', 'EX (2003\u201307)', 'DP (2007\u201311)', 'BW (2011\u201314)', 'XY (2014\u201317)', 'SM (2017\u201320)', 'SWSH (2020\u201323)', 'SV (2023\u2013 )'] },
+      'Character': { short: 'Character', kind: 'multi', search: true, opts: ['Charizard', 'Pikachu', 'Umbreon', 'Espeon', 'Sylveon', 'Leafeon', 'Glaceon', 'Vaporeon', 'Jolteon', 'Flareon', 'Gengar', 'Mewtwo', 'Mew', 'Rayquaza', 'Lugia', 'Giratina', 'Dragonite', 'Snorlax', 'Any alt art'] },
+      'Quiet Accumulation (G1)': { short: 'G1', kind: 'enum', opts: compOpts },
+      'Supply Flood Watch (G2)': { short: 'G2', kind: 'enum', opts: compOpts },
+      'RS Breakout (G4)': { short: 'G4', kind: 'enum', opts: compOpts }
+    };
+  }
+  money(n) { return '$' + Math.round(n).toLocaleString('en-US'); }
+  btChartVals(st, ds, mn, mx) {
+    const MO = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+    const n = ds.scr.length;
+    const lab = (k) => MO[(ds.start[1] + k) % 12] + ' \u2019' + String((ds.start[0] + Math.floor((ds.start[1] + k) / 12)) % 100);
+    const yPct = (v) => (192 - (v - mn) / (mx - mn) * 184) / 200 * 100;
+    const i = st.btHover;
+    const has = i != null && i >= 0 && i < n;
+    const dv = (v) => { const d = v - 100; return v.toFixed(1) + ' \u00B7 ' + (d >= 0 ? '+' : '\u2212') + Math.abs(d).toFixed(1) + '%'; };
+    return {
+      btChartMove: (e) => { const r = e.currentTarget.getBoundingClientRect(); const f = Math.max(0, Math.min(1, (e.clientX - r.left) / r.width)); const idx = Math.round(f * (n - 1)); if (idx !== this.state.btHover) this.setState({ btHover: idx }); },
+      btChartOut: () => this.setState({ btHover: null }),
+      btYMax: mx.toFixed(0), btYMin: mn.toFixed(0), btBasePct: yPct(100).toFixed(1),
+      btShow100: yPct(100) > 10 && yPct(100) < 88,
+      btX0: lab(0), btX1: lab(Math.round((n - 1) / 2)), btX2: lab(n - 1),
+      btHovShow: has, btHovLeft: has ? (i / (n - 1) * 100).toFixed(2) : 0,
+      btHovScrTop: has ? yPct(ds.scr[i]).toFixed(1) : 0, btHovIdxTop: has ? yPct(ds.idx[i]).toFixed(1) : 0,
+      btHovMonth: has ? lab(i) : '', btHovScr: has ? dv(ds.scr[i]) : '', btHovIdx: has ? dv(ds.idx[i]) : ''
+    };
+  }
+  btVals(st) {
+    const key = this.BT_MAP[st.screen] || 'long';
+    const ds = this.BT[key];
+    const isExit = st.btExit === 'exit';
+    const ex = this.BT_EXIT[key];
+    const s = ds.stats[st.btH];
+    const all = ds.scr.concat(ds.idx);
+    const mn = Math.min.apply(null, all), mx = Math.max.apply(null, all);
+    const pts = (arr) => arr.map((v, k) => (k / (arr.length - 1) * 800).toFixed(1) + ',' + (192 - (v - mn) / (mx - mn) * 184).toFixed(1)).join(' ');
+    const ret = (arr) => { const d = arr[arr.length - 1] - 100; return (d >= 0 ? '+' : '\u2212') + Math.abs(d).toFixed(1) + '%'; };
+    const pc = (v) => v == null ? { t: '\u2014', fg: this.PAL.mut3 } : { t: (v > 0 ? '+' : v < 0 ? '\u2212' : '') + Math.abs(v).toFixed(1) + '%', fg: v > 0 ? this.PAL.pos : v < 0 ? this.PAL.neg2 : this.PAL.mut };
+    const maxB = Math.max.apply(null, (isExit ? ex.buckets : s ? s.buckets : []).concat([1]));
+    const pill = (on) => ({ bg: on ? this.PAL.acc : this.PAL.card, fg: on ? this.PAL.card : this.PAL.mut, bd: on ? this.PAL.acc : this.PAL.line });
+    const labels = ['\u2264\u221210%', '\u221210\u20130', '0\u201310', '10\u201325', '25\u201350', '50%+'];
+    return {
+      notBt: !st.bt, isBt: st.bt,
+      goBt: () => this.setState({ bt: true, btPhase: 'idle' }),
+      exitBt: () => this.setState({ bt: false }),
+      btEntryName: Object.assign({}, this.SCREENS[st.screen], st.edits[st.screen] || {}).name,
+      btHs: ['3M', '6M', '12M'].map(h => {
+        const off = !ds.stats[h];
+        const p = pill(st.btH === h);
+        return { label: h, pick: () => this.setState({ btH: h }), off: off,
+          tip: off ? 'No entries have aged ' + h.replace('M', ' months') + ' yet \u2014 ' + (ds.ageNote[h] || '').replace(/^No entries[^\u2014]*\u2014 /, '')
+            : isExit ? 'Not used with signal exit \u2014 the screen decides when to sell'
+            : 'Hold each entry ' + h.replace('M', ' months') + ', then sell regardless of what the screen says' + (st.btH === h ? ' (currently selected)' : ''),
+          bg: off ? this.PAL.hov : p.bg, fg: off ? this.PAL.mut3 : p.fg, bd: off ? '#EBEBE7' : p.bd, cur: off ? 'not-allowed' : 'pointer', op: 1 };
+      }),
+      btStory: (() => {
+        if (isExit) return 'We found ' + ds.entries + ' buy signals (entries) between ' + ds.range.replace(' \u2192 ', ' and ') + ', selling each when its card stopped matching the screen. Of the closed trades, ' + ex.hit + ' made money (' + ex.hitSub + '), median ' + ex.med + ' over a typical ' + ex.medHold + ' hold \u2014 vs ' + ret(ds.idx) + ' for buying and holding the market index. ' + ex.open + ' positions are still open.';
+        const hword = st.btH.replace('M', ' months');
+        if (!s) return 'We found ' + ds.entries + ' buy signals between ' + ds.range.replace(' \u2192 ', ' and ') + '. None have aged ' + hword + ' yet \u2014 ' + (ds.ageNote[st.btH] || '');
+        return 'We found ' + ds.entries + ' buy signals (entries) between ' + ds.range.replace(' \u2192 ', ' and ') + '. Holding each for ' + hword + ', ' + s.hit + ' made money (' + s.hitSub + '), with a median return of ' + s.med + ' \u2014 vs ' + ret(ds.idx) + ' for buying and holding the market index over the same window.';
+      })(),
+      btRange: ds.range, btFloorNote: ds.floor,
+      btIdleText: isExit
+        ? 'For every card that historically entered this screen, hold it until it stops matching the filters, then sell \u2014 and compare against just holding the market index. Each entry uses only data captured on or before its entry date, so lookahead is structurally impossible.'
+        : 'For every card that historically entered this screen, measure what happened 3, 6, and 12 months later \u2014 against just holding the market index. Each entry uses only data captured on or before its entry date, so lookahead is structurally impossible.',
+      btIdle: st.btPhase === 'idle', btRunning: st.btPhase === 'run', btDone: st.btPhase === 'done',
+      btRun: () => { clearTimeout(this._btT); this.setState({ btPhase: 'run' }); this._btT = setTimeout(() => this.setState({ btPhase: 'done' }), 1100); },
+      btScanText: 'scanning ' + ds.months + ' months of history (' + ds.range + ') \u00B7 ' + (isExit ? 'holding until signal exit\u2026' : 'measuring +' + st.btH + ' outcomes\u2026'),
+      btScrPts: pts(ds.scr), btIdxPts: pts(ds.idx), btBaseY: (192 - (100 - mn) / (mx - mn) * 184).toFixed(1),
+      btScrRet: ret(ds.scr), btIdxRet: ret(ds.idx),
+      btStats: isExit ? [
+        { k: 'Buy signals (entries)', v: String(ds.entries), sub: ds.range, fg: this.PAL.ink, tip: 'Every time a card newly satisfied all of this screen\u2019s filters during the window.' },
+        { k: 'Hit rate', v: ex.hit, sub: ex.hitSub, fg: this.PAL.ink, tip: 'Share of closed trades that sold higher than entry. A trade closes when the card stops matching the screen.' },
+        { k: 'Median return', v: ex.med, sub: 'per closed trade', fg: ex.med.indexOf('+') === 0 ? this.PAL.pos : this.PAL.neg2, tip: 'Middle return across closed trades, entry to exit.' },
+        { k: 'Median hold', v: ex.medHold, sub: 'entry to screen exit', fg: this.PAL.ink, tip: 'How long the screen typically keeps a card before it stops matching \u2014 the strategy\u2019s natural holding period.' },
+        { k: 'Open positions', v: String(ex.open), sub: 'still match today', fg: this.PAL.acc, tip: 'Entries whose cards still match the screen \u2014 no exit yet, so their returns are unrealized and excluded from the stats.' },
+        { k: 'Market index', v: ret(ds.idx), sub: 'same window, buy & hold', fg: this.PAL.mut, tip: 'What buying and holding the whole-corpus index over the same window returned \u2014 the bar this screen has to beat.' }
+      ] : [
+        { k: 'Buy signals (entries)', v: String(ds.entries), sub: ds.range, fg: this.PAL.ink, tip: 'Every time a card newly satisfied all of this screen\u2019s filters during the window \u2014 usually more than today\u2019s match count, since it also counts cards that entered and later exited, and re-entries. Every card matching today appears here once.' },
+        { k: 'Hit rate ' + st.btH, v: s ? s.hit : '\u2014', sub: s ? s.hitSub : 'no entries aged yet', fg: this.PAL.ink, tip: 'Share of aged entries whose price was higher ' + st.btH.replace('M', ' months') + ' after entry. Only entries old enough to measure are counted.' },
+        { k: 'Median ' + st.btH, v: s ? s.med : '\u2014', sub: 'return per entry', fg: s && s.med.indexOf('+') === 0 ? this.PAL.pos : s ? this.PAL.neg2 : this.PAL.mut3, tip: 'Middle return across aged entries \u2014 half did better, half worse. Less swayed by one big winner than the mean.' },
+        { k: 'Mean ' + st.btH, v: s ? s.mean : '\u2014', sub: 'return per entry', fg: s && s.mean.indexOf('+') === 0 ? this.PAL.pos : s ? this.PAL.neg2 : this.PAL.mut3, tip: 'Average return across aged entries. If mean is well above median, a few big winners are carrying the screen.' },
+        { k: 'Max drawdown', v: ds.stats['3M'].dd, sub: 'screen equity', fg: this.PAL.neg2, tip: 'Worst peak-to-trough fall of the screen\u2019s equity curve \u2014 the most you\u2019d have been down buying every entry.' },
+        { k: 'Market index', v: ret(ds.idx), sub: 'same window, buy & hold', fg: this.PAL.mut, tip: 'What buying and holding the whole-corpus index over the same window returned \u2014 the bar this screen has to beat.' },
+        ...(s ? (() => {
+          const aged = ds.rows.map(r => ({ name: r[0], v: r[st.btH === '3M' ? 3 : st.btH === '6M' ? 4 : 5] })).filter(r => r.v != null);
+          if (!aged.length) return [];
+          const best = aged.reduce((a, b) => b.v > a.v ? b : a), worst = aged.reduce((a, b) => b.v < a.v ? b : a);
+          const f = (v) => (v > 0 ? '+' : v < 0 ? '\u2212' : '') + Math.abs(v).toFixed(1) + '%';
+          return [
+            { k: 'Best entry ' + st.btH, v: f(best.v), sub: best.name, fg: this.PAL.pos, tip: 'The single best-performing entry at this horizon \u2014 if the mean leans on this one card, the screen\u2019s edge is fragile.' },
+            { k: 'Worst entry ' + st.btH, v: f(worst.v), sub: worst.name, fg: this.PAL.neg2, tip: 'The single worst-performing entry at this horizon \u2014 the blowup risk a single position carried.' }
+          ];
+        })() : [])
+      ],
+      btExits: [
+        { k: 'horizon', l: 'horizon exit', tip: 'Sell on a timer: buy when a card enters the screen, sell a fixed 3, 6, or 12 months later no matter what. Like cooking for exactly 30 minutes. Pick the timer with the horizon buttons.' },
+        { k: 'exit', l: 'signal exit', tip: 'Sell when it stops matching: buy when a card enters the screen, sell the month it fails any one of the filters \u2014 the reason you bought is gone. Like cooking until it\u2019s done. Cards still matching today stay open (unrealized).' }
+      ].map(x => Object.assign({ label: x.l, tip: x.tip, pick: () => this.setState({ btExit: x.k }) }, pill(st.btExit === x.k))),
+      btHOp: isExit ? 0.35 : 1, btHPe: isExit ? 'none' : 'auto', btHTitle: isExit ? 'Not used with signal exit \u2014 the screen decides when to sell' : 'How long each entry is held before selling, regardless of what the screen says afterwards',
+      btHasAgeNote: !s, btAgeNote: ds.ageNote[st.btH] || '',
+      btHistTitle: isExit ? 'Closed-trade return distribution' : st.btH + ' return distribution',
+      btHasBars: isExit || !!s, btNoBars: !isExit && !s,
+      btBars: (isExit ? ex.buckets : s ? s.buckets : []).map((n, i) => ({ n: String(n), h: Math.round(n / maxB * 92) + (n > 0 ? 4 : 1), bg: i < 2 ? this.PAL.negBg(0.45) : this.PAL.posBg(0.5), label: labels[i] })),
+      btRows: isExit
+        ? ex.rows.map(r => { const open = r[3] == null; const v = pc(r[3]); return { name: r[0], date: r[1], price: this.money(r[2]), r3: open ? 'unrealized' : v.t, r3Fg: open ? this.PAL.mut3 : v.fg, r6: open ? '\u2014' : r[4] + ' mo', r6Fg: this.PAL.mut, r12: open ? 'OPEN' : 'closed', r12Fg: open ? this.PAL.acc : this.PAL.mut2 }; })
+        : ds.rows.map(r => { const a = pc(r[3]), b = pc(r[4]), c = pc(r[5]); return { name: r[0], date: r[1], price: this.money(r[2]), r3: a.t, r3Fg: a.fg, r6: b.t, r6Fg: b.fg, r12: c.t, r12Fg: c.fg }; }),
+      btSelBg3: !isExit && st.btH === '3M' ? this.PAL.accBg : 'transparent', btSelBg6: !isExit && st.btH === '6M' ? this.PAL.accBg : 'transparent', btSelBg12: !isExit && st.btH === '12M' ? this.PAL.accBg : 'transparent',
+      btSelW3: !isExit && st.btH === '3M' ? 700 : 400, btSelW6: !isExit && st.btH === '6M' ? 700 : 400, btSelW12: !isExit && st.btH === '12M' ? 700 : 400,
+      btHasMore: !!(isExit ? ex.more : ds.more), btMore: isExit ? ex.more : ds.more,
+      btHasWarn: st.btPhase === 'done' && !!ds.warn, btWarn: ds.warn || '',
+      ...this.btChartVals(st, ds, mn, mx),
+      btGridCols: 'minmax(' + st.btColW.name + 'px, 1fr) ' + ['entry', 'price', 'r3', 'r6', 'r12'].map(k => st.btColW[k] + 'px').join(' '),
+      btCols: (isExit
+        ? [{ n: 'Card', k: 'name' }, { n: 'Entry', k: 'entry' }, { n: 'Price then', k: 'price' }, { n: 'Exit return', k: 'r3' }, { n: 'Held', k: 'r6' }, { n: 'Status', k: 'r12' }].map(c => ({ n: c.n, k: c.k, h: 'x' }))
+        : [{ n: 'Card', k: 'name', h: '' }, { n: 'Entry', k: 'entry', h: '' }, { n: 'Price then', k: 'price', h: '' }, { n: '+3M', k: 'r3', h: '3M' }, { n: '+6M', k: 'r6', h: '6M' }, { n: '+12M', k: 'r12', h: '12M' }]
+      ).map(c => ({ name: c.n, rs: this.startResize(c.k, 'btColW'), bg: c.h === st.btH ? this.PAL.accBg : 'transparent' }))
+    };
+  }
+  openEditor(name) {
+    const ed = this.EDITORS[name];
+    if (!ed) { this.setState({ addOpen: false }); return; }
+    this.setState({ editor: name, edWin: ed.defWin || (ed.windows ? ed.windows[0] : ''), edOp: ed.defOp || '\u2265', edV1: ed.v1 != null ? String(ed.v1) : '', edV2: ed.v2 != null ? String(ed.v2) : '', edSel: ed.kind === 'enum' ? ed.opts[0] : null, edMulti: {}, edSearch: '' });
+  }
+  componentDidMount() {
+    this._docClick = (e) => {
+      if (this.state.railMenu && !e.target.closest('[data-rail-menu]') && e.target.getAttribute && e.target.getAttribute('aria-label') !== 'Screen actions') this.setState({ railMenu: null });
+      if (this.state.addOpen && e.target.closest && e.target.isConnected && !e.target.closest('[data-filter-pop]')) this.setState({ addOpen: false, editor: null });
+    };
+    document.addEventListener('click', this._docClick);
+  }
+  componentWillUnmount() { document.removeEventListener('click', this._docClick); }
+  renderVals() {
+    const st = this.state;
+    const base = this.SCREENS[st.screen];
+    const ov = st.edits[st.screen] || {};
+    const scr = Object.assign({}, base, ov);
+    const canEdit = true;
+    const startEdit = (field) => () => { if (canEdit) this.setState({ editing: field, editVal: field === 'name' ? scr.name : scr.thesis }); };
+    const commit = () => {
+      const st2 = this.state;
+      if (!st2.editing) return;
+      const v = st2.editVal.trim();
+      const patch = {};
+      if (v) patch[st2.editing] = v;
+      this.setState({ editing: null, edits: Object.assign({}, st2.edits, { [st2.screen]: Object.assign({}, st2.edits[st2.screen], patch) }) });
+    };
+    const keyH = (e) => { if (e.key === 'Enter') e.target.blur(); if (e.key === 'Escape') this.setState({ editing: null }); };
+    const chg = (e) => this.setState({ editVal: e.target.value });
+    const mkScreen = (id) => {
+      const s = Object.assign({}, this.SCREENS[id], st.edits[id] || {}); const on = st.screen === id;
+      return { name: s.name, sub: s.sub, wt: on ? 600 : 500, bg: on ? this.PAL.accBg : 'transparent', bd: on ? this.PAL.acc : 'transparent',
+        tip: on ? 'Currently showing \u201C' + s.name + '\u201D' : 'Run \u201C' + s.name + '\u201D' + (s.sub ? ' \u2014 ' + s.sub : ''),
+        pick: () => this.setState({ screen: id, removed: {}, sortKey: 'comp', sortDir: -1 }) };
+    };
+    const myScreens = st.myIds.map(id => {
+      const base = mkScreen(id);
+      const eff = Object.assign({}, this.SCREENS[id], st.edits[id] || {});
+      return Object.assign(base, {
+        menuOpen: st.railMenu === id,
+        menu: (e) => { e.stopPropagation(); this.setState({ railMenu: st.railMenu === id ? null : id }); },
+        rename: () => this.setState({ railMenu: null, screen: id, editing: 'name', editVal: eff.name }),
+        editThesis: () => this.setState({ railMenu: null, screen: id, editing: 'thesis', editVal: eff.thesis }),
+        duplicate: () => {
+          const nid = id + '-copy' + Date.now() % 1000;
+          this.SCREENS[nid] = Object.assign({}, eff, { name: eff.name + ' (copy)', sub: eff.sub, preset: false });
+          this.setState({ railMenu: null, myIds: st.myIds.concat([nid]), screen: nid });
+        },
+        del: () => { const rest = st.myIds.filter(x => x !== id); this.setState({ railMenu: null, myIds: rest, screen: st.screen === id ? rest[0] : st.screen }); }
+      });
+    });
+    const chips = scr.chips.concat(st.added[st.screen] || []).filter(c => !st.removed[c]).map(c => ({
+      label: c, remove: () => this.setState({ removed: Object.assign({}, st.removed, { [c]: true }) })
+    }));
+    const CHIPSTATE = {
+      ACTIVE: { fg: this.PAL.pos, bg: this.PAL.posBg(0.10) },
+      WATCH: { fg: this.PAL.warnInk, bg: 'rgba(176,127,26,0.12)' },
+      EXITED: { fg: this.PAL.mut2, bg: this.PAL.mutbg }
+    };
+    const fmtPct = (v) => (v >= 0 ? '+' : '\u2212') + Math.abs(v).toFixed(1) + '%';
+    const sorted = this.CARDS.slice().sort((a, b) => {
+      const k = st.sortKey;
+      const va = k === 'comp' ? (a.comp === 'ACTIVE' ? 2 : a.comp === 'WATCH' ? 1 : 0) : a[k];
+      const vb = k === 'comp' ? (b.comp === 'ACTIVE' ? 2 : b.comp === 'WATCH' ? 1 : 0) : b[k];
+      return (va < vb ? -1 : va > vb ? 1 : 0) * st.sortDir;
+    });
+    const rows = sorted.map(c => {
+      const cs = CHIPSTATE[c.comp];
+      return {
+        name: c.name, set: c.set, tier: c.tier, slotId: 'art-' + c.id,
+        pvIn: (e) => {
+          const r = e.currentTarget.getBoundingClientRect();
+          const row = e.currentTarget.closest('[role="button"]');
+          const tbl = row.parentElement.getBoundingClientRect();
+          const hdr = row.parentElement.firstElementChild.getBoundingClientRect();
+          const minY = Math.max(8, hdr.bottom + 4);
+          const maxY = Math.min(window.innerHeight - 234, tbl.bottom - 230);
+          const y = Math.max(minY, Math.min(maxY, r.top + r.height / 2 - 113));
+          this.setState({ pv: { slot: 'art-' + c.id, bg: `linear-gradient(160deg, ${this.ACCENTS[c.id][0]}, ${this.ACCENTS[c.id][1]})`, x: r.right + 10, y } });
+        },
+        thumbBg: `linear-gradient(160deg, ${this.ACCENTS[c.id][0]}, ${this.ACCENTS[c.id][1]})`,
+        price: this.money(c.price),
+        roc3: fmtPct(c.roc3), roc3Fg: c.roc3 >= 0 ? this.PAL.pos2 : this.PAL.neg2,
+        rs: c.rs + 'th', z: (c.z >= 0 ? '+' : '\u2212') + Math.abs(c.z).toFixed(2),
+        churn: '\u00D7' + c.churn.toFixed(1), churnFg: c.churn >= 1.4 ? this.PAL.pos : this.PAL.mut,
+        pop: '+' + c.pop.toFixed(1) + '%', popFg: c.pop <= 1 ? this.PAL.mut : this.PAL.warnInk,
+        comp: c.comp, compFg: cs.fg, compBg: cs.bg,
+        compTip: c.comp === 'ACTIVE' ? 'In screen since ' + c.compSince : c.compSince
+      };
+    });
+    const colDefs = [
+      { key: 'price', name: 'Price', tip: 'Latest monthly price for the row tier' },
+      { key: 'roc3', name: 'ROC 3M', tip: 'Rate of change, 3 months' },
+      { key: 'rs', name: 'RS pct', tip: 'Relative strength vs market index, 3M percentile' },
+      { key: 'z', name: 'z 6M', tip: 'z-score vs 6-month moving average' },
+      { key: 'churn', name: 'Churn', tip: 'Churn acceleration: 30d vs 90d baseline. Requires 60+ post-seam days \u2014 3 cards hidden' },
+      { key: 'pop', name: 'Pop \u0394 60d', tip: 'Census growth, 60 days. 2026+ \u2014 7 observations' },
+      { key: 'comp', name: 'Screen', tip: 'Composite state for this screen: ACTIVE / WATCH / EXITED' }
+    ];
+    const cols = colDefs.map(cd => ({
+      name: cd.name, tip: cd.tip, rs: this.startResize(cd.key),
+      fg: st.sortKey === cd.key ? this.PAL.acc : this.PAL.mut2,
+      arrow: st.sortKey === cd.key ? (st.sortDir === 1 ? '\u2191' : '\u2193') : '',
+      sort: () => this.setState({ sortKey: cd.key, sortDir: st.sortKey === cd.key ? -st.sortDir : -1 })
+    }));
+    const filterMenu = this.FILTER_MENU.map(g => ({
+      group: g.group,
+      items: g.items.map(it => ({
+        name: it.name, tip: it.tip || '',
+        fg: this.PAL.ink, cur: 'pointer',
+        badge: it.badge || '', badgeFg: this.PAL.warnInk, badgeBg: it.badge ? 'rgba(176,127,26,0.12)' : 'transparent',
+        add: () => this.openEditor(it.name)
+      }))
+    }));
+    const ed = st.editor ? this.EDITORS[st.editor] : null;
+    let edVals = { showMenu: true, showEditor: false };
+    if (ed) {
+      const u = ed.unit || '';
+      const fv = (v) => {
+        if (v === '' || v == null) return '\u2026';
+        const n = Number(v);
+        let s = String(v);
+        if (ed.signed && n >= 0) s = '+' + s;
+        if (u === '$') return (n < 0 ? '\u2212' : '') + (ed.signed && n >= 0 ? '+' : '') + '$' + Math.abs(n).toLocaleString('en-US');
+        if (u === '\u00D7') return '\u00D7' + s;
+        return s + u;
+      };
+      const winPart = ed.windows ? ' ' + st.edWin : '';
+      let preview;
+      if (ed.kind === 'range') preview = ed.short + winPart + (st.edOp === 'between' ? ' ' + fv(st.edV1) + '\u2013' + fv(st.edV2) : ' ' + st.edOp + ' ' + fv(st.edV1));
+      else if (ed.kind === 'enum') preview = ed.short + ': ' + st.edSel;
+      else { const sel = Object.keys(st.edMulti).filter(k => st.edMulti[k]); preview = ed.short + ': ' + (sel.length === 0 ? 'any' : sel.length <= 2 ? sel.join(', ') : sel.length + ' selected'); }
+      let badge = '';
+      this.FILTER_MENU.forEach(g => g.items.forEach(it => { if (it.name === st.editor && it.badge) badge = it.badge; }));
+      const opts = ed.kind === 'enum' ? ed.opts : ed.kind === 'multi' ? ed.opts.filter(o => o.toLowerCase().includes(st.edSearch.toLowerCase())) : [];
+      const pill = (on) => ({ bg: on ? this.PAL.acc : this.PAL.card, fg: on ? this.PAL.card : this.PAL.mut, bd: on ? this.PAL.acc : this.PAL.line });
+      edVals = {
+        showMenu: false, showEditor: true,
+        edName: st.editor, edBadge: badge, edHasBadge: !!badge,
+        edBack: () => this.setState({ editor: null }),
+        edHasWin: !!ed.windows, edWinLabel: ed.winLabel || 'Window',
+        edWins: (ed.windows || []).map(w => Object.assign({ label: w, tip: 'Measure this metric over ' + w, pick: () => this.setState({ edWin: w }) }, pill(st.edWin === w))),
+        edIsRange: ed.kind === 'range',
+        edOps: ['\u2265', '\u2264', 'between'].map(o => Object.assign({ label: o, tip: o === '\u2265' ? 'Keep cards at or above the value you set' : o === '\u2264' ? 'Keep cards at or below the value you set' : 'Keep cards between two values \u2014 useful for quiet, mid-range bands', pick: () => this.setState({ edOp: o }) }, pill(st.edOp === o))),
+        edIsBetween: st.edOp === 'between',
+        edHasPre: ed.kind === 'range' && (u === '$' || u === '\u00D7'), edHasSuf: ed.kind === 'range' && u !== '' && u !== '$' && u !== '\u00D7', edUnit: u,
+        edV1: st.edV1, edV2: st.edV2,
+        edV1Chg: (e) => this.setState({ edV1: e.target.value }), edV2Chg: (e) => this.setState({ edV2: e.target.value }),
+        edHasOpts: opts.length > 0, edSearchable: ed.kind === 'multi' && !!ed.search,
+        edSearch: st.edSearch, edSearchChg: (e) => this.setState({ edSearch: e.target.value }),
+        edOpts: opts.map(o => {
+          const on = ed.kind === 'enum' ? st.edSel === o : !!st.edMulti[o];
+          return { label: o, mark: on ? '\u2713' : '', tip: ed.kind === 'enum' ? (on ? 'Currently matching ' + o : 'Match cards in the state: ' + o) : (on ? 'Stop including ' + o : 'Include ' + o + ' in the results'), bg: on ? this.PAL.acc : this.PAL.card, bd: on ? this.PAL.acc : this.PAL.line3, rad: ed.kind === 'enum' ? '50%' : '3px',
+            pick: () => ed.kind === 'enum' ? this.setState({ edSel: o }) : this.setState(s => ({ edMulti: Object.assign({}, s.edMulti, { [o]: !s.edMulti[o] }) })) };
+        }),
+        edHasCaution: !!ed.caution, edCaution: ed.caution || '',
+        edPreview: preview,
+        edAdd: () => this.setState(s => ({ added: Object.assign({}, s.added, { [s.screen]: (s.added[s.screen] || []).concat([preview]) }), editor: null, addOpen: false }))
+      };
+    }
+    const binderCards = sorted.map(c => ({
+      name: c.name, slotId: 'art-' + c.id,
+      thumbBg: `linear-gradient(160deg, ${this.ACCENTS[c.id][0]}, ${this.ACCENTS[c.id][1]})`,
+      price: this.money(c.price), roc3: fmtPct(c.roc3), rocFg: c.roc3 >= 0 ? this.PAL.pos2 : this.PAL.neg2
+    }));
+    return {
+      myScreens,
+      screenName: scr.name, screenThesis: '\u201C' + scr.thesis + '\u201D',
+      editingName: st.editing === 'name', notEditingName: st.editing !== 'name',
+      editingThesis: st.editing === 'thesis', notEditingThesis: st.editing !== 'thesis',
+      editNameVal: st.editing === 'name' ? st.editVal : '', editThesisVal: st.editing === 'thesis' ? st.editVal : '',
+      nameChange: chg, thesisChange: chg, nameCommit: commit, thesisCommit: commit, nameKey: keyH, thesisKey: keyH,
+      closeRailMenu: () => this.setState({ railMenu: null }),
+      newScreen: () => {
+        const nid = 'new' + Date.now() % 100000;
+        this.SCREENS[nid] = { name: 'Untitled screen', sub: '0 filters \u00B7 just now', thesis: 'click Edit thesis to say why this screen should work', preset: false, chips: [] };
+        this.setState({ myIds: st.myIds.concat([nid]), screen: nid, editing: 'name', editVal: 'Untitled screen', removed: {} });
+      },
+      matchLabel: rows.length + (rows.length === 1 ? ' match' : ' matches'), chips,
+      saveLabel: st.saved ? '\u2713 Saved' : 'Save',
+      saveBg: st.saved ? this.PAL.posBg(0.10) : this.PAL.card, saveHoverBg: st.saved ? this.PAL.posBg(0.10) : this.PAL.hov,
+      saveFg: st.saved ? this.PAL.pos : this.PAL.ink, saveBd: st.saved ? this.PAL.posBg(0.35) : this.PAL.line,
+      doSave: () => { clearTimeout(this._saveT); this.setState({ saved: true }); this._saveT = setTimeout(() => this.setState({ saved: false }), 1800); },
+      railOpen: st.railOpen, toggleRail: () => this.setState({ railOpen: !st.railOpen }), railGlyph: st.railOpen ? '\u00AB' : '\u00BB',
+      addOpen: st.addOpen, toggleAdd: () => this.setState({ addOpen: !st.addOpen, editor: null }), closeAdd: () => { if (!this.state.editor) this.setState({ addOpen: false }); },
+      filterMenu, ...edVals,
+      isTerminal: st.view === 'terminal' && !st.bt, isBinder: st.view === 'binder' && !st.bt,
+      ...this.btVals(st),
+      viewTerminal: () => this.setState({ view: 'terminal' }), viewBinder: () => this.setState({ view: 'binder' }),
+      termBg: st.view === 'terminal' ? this.PAL.acc : this.PAL.card, termFg: st.view === 'terminal' ? this.PAL.card : this.PAL.mut,
+      bindBg: st.view === 'binder' ? this.PAL.acc : this.PAL.card, bindFg: st.view === 'binder' ? this.PAL.card : this.PAL.mut,
+      cols, rows, binderCards,
+      gridCols: '52px minmax(' + st.colW.name + 'px, 1.4fr) ' + ['price','roc3','rs','z','churn','pop','comp'].map(k => st.colW[k] + 'px').join(' '),
+      rsName: this.startResize('name'),
+      hiddenCount: 3, hiddenMetric: 'churn (needs 60+ post-seam days)',
+      showHidden: () => this.setState(s => ({ revealHidden: !s.revealHidden })),
+      hasPv: !!st.pv, pvSlot: st.pv ? st.pv.slot : '', pvBg: st.pv ? st.pv.bg : '', pvX: st.pv ? st.pv.x : 0, pvY: st.pv ? st.pv.y : 0,
+      pvOut: () => this.setState({ pv: null })
+    };
+  }
+}
+</script>
+</body>
+</html>

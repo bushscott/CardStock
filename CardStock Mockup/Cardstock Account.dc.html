@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="icon" href="./brand/favicon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="anonymous">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Inter+Tight:wght@600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  html, body { margin: 0; padding: 0; background: #FAFAF7; }
+  body { font-family: 'Inter', system-ui, sans-serif; }
+  a { color: var(--acc, #4A63D0); text-decoration: none; }
+  a:hover { color: var(--accH, #3A4FB8); text-decoration: underline; }
+  *:focus-visible { outline: 2px solid var(--acc, #4A63D0); outline-offset: 1px; border-radius: 2px; }
+  :root[data-theme="dark"] { --logoTeal: #3FBFAD; }
+</style>
+</helmet>
+<div style="{{ themeVars }}">
+<div data-screen-label="Account" style="min-height: 100vh; box-sizing: border-box; background: var(--bg, #FAFAF7); color: var(--ink, #1C1C1E); font-family: 'Inter', system-ui, sans-serif; font-size: 15px; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 40px 16px;">
+  <div style="display: flex; flex-direction: column; align-items: center; gap: 4px; margin-bottom: 22px;">
+    <div style="display: flex; align-items: center; gap: 12px;">
+      <svg width="32" height="32" viewBox="0 0 32 32" fill="none" aria-hidden="true" style="flex: 0 0 auto;"><rect x="5.5" y="5.5" width="15" height="21" rx="2.5" style="stroke: var(--ink, #1C1C1E);" stroke-width="2" transform="rotate(-12 13 16)"></rect><rect x="12" y="5.5" width="15" height="21" rx="2.5" style="fill: var(--card, #FFFFFF); stroke: var(--ink, #1C1C1E);" stroke-width="2"></rect><polyline points="15,21.5 17.5,17 19.5,18.5 23.5,12.5" style="stroke: var(--logoTeal, #0E8A7B);" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" fill="none"></polyline><circle cx="23.5" cy="12.5" r="1.7" style="fill: var(--logoTeal, #0E8A7B);"></circle></svg>
+      <span style="font-family: 'Inter', sans-serif; font-weight: 700; font-size: 25px; letter-spacing: -0.03em;">Cardstock</span>
+    </div>
+    <span style="font-size: 14px; color: var(--mut2, #6B6B66);">Pokémon card market analytics</span>
+  </div>
+  <div style="width: 380px; max-width: 100%; box-sizing: border-box; background: var(--card, #FFFFFF); border: 1px solid var(--line, #E4E4E0); border-radius: 10px; padding: 22px;">
+
+    <sc-if value="{{ isSignin }}" hint-placeholder-val="{{ true }}">
+      <sc-if value="{{ flashOn }}" hint-placeholder-val="{{ false }}">
+        <div style="font-size: 13.5px; color: var(--pos, #157A50); background: var(--posBg, rgba(24,158,99,0.10)); border-radius: 6px; padding: 8px 10px; margin-bottom: 14px;">Password updated — sign in with your new password.</div>
+      </sc-if>
+      <sc-if value="{{ showErr }}" hint-placeholder-val="{{ false }}">
+        <div style="font-size: 13.5px; color: var(--neg, #C13A3A); background: var(--negBg, rgba(214,69,69,0.10)); border-radius: 6px; padding: 8px 10px; margin-bottom: 14px;">That email and password don't match. <a href="#" onClick="{{ goForgot }}">Reset your password</a></div>
+      </sc-if>
+      <h1 style="font-family: 'Inter Tight', sans-serif; font-size: 19.5px; font-weight: 700; margin: 0;">Sign in</h1>
+      <label style="display: block; font-size: 13px; font-weight: 600; color: var(--mut, #5B5B57); margin: 14px 0 5px;">Email</label>
+      <input type="email" autocomplete="email" style="width: 100%; box-sizing: border-box; height: 34px; border: 1px solid var(--line, #E4E4E0); border-radius: 6px; background: var(--inbg, #FAFAF7); padding: 0 10px; font-family: 'Inter', sans-serif; font-size: 15px; color: var(--ink, #1C1C1E);">
+      <div style="display: flex; justify-content: space-between; align-items: baseline; margin: 14px 0 5px;">
+        <label style="font-size: 13px; font-weight: 600; color: var(--mut, #5B5B57);">Password</label>
+        <button onClick="{{ goForgot }}" title="Send a password reset link to your email" style="background: none; border: none; padding: 0; cursor: pointer; font-family: 'Inter', sans-serif; font-size: 13px; color: var(--acc, #4A63D0);">Forgot?</button>
+      </div>
+      <input type="password" autocomplete="current-password" style="width: 100%; box-sizing: border-box; height: 34px; border: 1px solid var(--line, #E4E4E0); border-radius: 6px; background: var(--inbg, #FAFAF7); padding: 0 10px; font-family: 'Inter', sans-serif; font-size: 15px; color: var(--ink, #1C1C1E);">
+      <button onClick="{{ doSignin }}" title="Sign in to your binder, screens, and watchlist" style="width: 100%; height: 34px; margin-top: 18px; background: var(--btn, #4A63D0); color: #FFFFFF; border: none; border-radius: 6px; font-family: 'Inter', sans-serif; font-size: 15px; font-weight: 600; cursor: pointer;" style-hover="background: var(--btnH, #3A4FB8);">Sign in</button>
+      <div style="display: flex; align-items: center; gap: 10px; margin: 16px 0;">
+        <div style="flex: 1; height: 1px; background: var(--line, #E4E4E0);"></div>
+        <span style="font-size: 12.5px; color: var(--mut2, #6B6B66);">or</span>
+        <div style="flex: 1; height: 1px; background: var(--line, #E4E4E0);"></div>
+      </div>
+      <button onClick="{{ goDemo }}" title="Explore the whole app with seeded data — nothing you change is saved" style="width: 100%; height: 34px; background: var(--card, #FFFFFF); color: var(--ink, #1C1C1E); border: 1px solid var(--line, #E4E4E0); border-radius: 6px; font-family: 'Inter', sans-serif; font-size: 15px; font-weight: 600; cursor: pointer;" style-hover="background: var(--hov, #F6F6F2);">Browse the demo →</button>
+      <div style="text-align: center; font-size: 12.5px; color: var(--mut2, #6B6B66); margin-top: 6px;">Read-only, seeded data — no account needed.</div>
+      <div style="text-align: center; font-size: 13.5px; color: var(--mut, #5B5B57); margin-top: 18px;">New to Cardstock? <button onClick="{{ goCreate }}" title="Create a free account — email and password only" style="background: none; border: none; padding: 0; cursor: pointer; font-family: 'Inter', sans-serif; font-size: 13.5px; color: var(--acc, #4A63D0);">Create an account</button></div>
+    </sc-if>
+
+    <sc-if value="{{ isCreate }}" hint-placeholder-val="{{ false }}">
+      <h1 style="font-family: 'Inter Tight', sans-serif; font-size: 19.5px; font-weight: 700; margin: 0;">Create your account</h1>
+      <label style="display: block; font-size: 13px; font-weight: 600; color: var(--mut, #5B5B57); margin: 14px 0 5px;">Email</label>
+      <input type="email" autocomplete="email" style="width: 100%; box-sizing: border-box; height: 34px; border: 1px solid var(--line, #E4E4E0); border-radius: 6px; background: var(--inbg, #FAFAF7); padding: 0 10px; font-family: 'Inter', sans-serif; font-size: 15px; color: var(--ink, #1C1C1E);">
+      <label style="display: block; font-size: 13px; font-weight: 600; color: var(--mut, #5B5B57); margin: 14px 0 5px;">Password</label>
+      <input type="password" autocomplete="new-password" style="width: 100%; box-sizing: border-box; height: 34px; border: 1px solid var(--line, #E4E4E0); border-radius: 6px; background: var(--inbg, #FAFAF7); padding: 0 10px; font-family: 'Inter', sans-serif; font-size: 15px; color: var(--ink, #1C1C1E);">
+      <div style="font-size: 12.5px; color: var(--mut2, #6B6B66); margin-top: 5px;">12+ characters — length beats complexity.</div>
+      <label style="display: block; font-size: 13px; font-weight: 600; color: var(--mut, #5B5B57); margin: 14px 0 5px;">Confirm password</label>
+      <input type="password" autocomplete="new-password" style="width: 100%; box-sizing: border-box; height: 34px; border: 1px solid var(--line, #E4E4E0); border-radius: 6px; background: var(--inbg, #FAFAF7); padding: 0 10px; font-family: 'Inter', sans-serif; font-size: 15px; color: var(--ink, #1C1C1E);">
+      <button onClick="{{ doCreate }}" title="Create the account and send a verification link to your email" style="width: 100%; height: 34px; margin-top: 18px; background: var(--btn, #4A63D0); color: #FFFFFF; border: none; border-radius: 6px; font-family: 'Inter', sans-serif; font-size: 15px; font-weight: 600; cursor: pointer;" style-hover="background: var(--btnH, #3A4FB8);">Create account</button>
+      <div style="text-align: center; font-size: 13.5px; color: var(--mut, #5B5B57); margin-top: 18px;">Already have one? <button onClick="{{ goSignin }}" title="Back to the sign-in screen" style="background: none; border: none; padding: 0; cursor: pointer; font-family: 'Inter', sans-serif; font-size: 13.5px; color: var(--acc, #4A63D0);">Sign in</button></div>
+    </sc-if>
+
+    <sc-if value="{{ isForgot }}" hint-placeholder-val="{{ false }}">
+      <h1 style="font-family: 'Inter Tight', sans-serif; font-size: 19.5px; font-weight: 700; margin: 0;">Reset your password</h1>
+      <div style="font-size: 13.5px; color: var(--mut, #5B5B57); margin-top: 8px;">Enter your account email and we'll send a reset link.</div>
+      <label style="display: block; font-size: 13px; font-weight: 600; color: var(--mut, #5B5B57); margin: 14px 0 5px;">Email</label>
+      <input type="email" autocomplete="email" style="width: 100%; box-sizing: border-box; height: 34px; border: 1px solid var(--line, #E4E4E0); border-radius: 6px; background: var(--inbg, #FAFAF7); padding: 0 10px; font-family: 'Inter', sans-serif; font-size: 15px; color: var(--ink, #1C1C1E);">
+      <button onClick="{{ doForgot }}" title="Email me a link to set a new password" style="width: 100%; height: 34px; margin-top: 18px; background: var(--btn, #4A63D0); color: #FFFFFF; border: none; border-radius: 6px; font-family: 'Inter', sans-serif; font-size: 15px; font-weight: 600; cursor: pointer;" style-hover="background: var(--btnH, #3A4FB8);">Send reset link</button>
+      <div style="text-align: center; margin-top: 18px;"><button onClick="{{ goSignin }}" title="Back to the sign-in screen" style="background: none; border: none; padding: 0; cursor: pointer; font-family: 'Inter', sans-serif; font-size: 13.5px; color: var(--acc, #4A63D0);">← Back to sign in</button></div>
+    </sc-if>
+
+    <sc-if value="{{ isSent }}" hint-placeholder-val="{{ false }}">
+      <h1 style="font-family: 'Inter Tight', sans-serif; font-size: 19.5px; font-weight: 700; margin: 0;">Check your email</h1>
+      <div style="font-size: 13.5px; color: var(--mut, #5B5B57); margin-top: 8px; line-height: 1.5;">We sent a {{ sentWhat }} link to <span style="font-family: 'JetBrains Mono', monospace; font-size: 13px;">o•••@gmail.com</span>. It expires in 30 minutes.</div>
+      <div style="font-size: 12.5px; color: var(--mut2, #6B6B66); margin-top: 12px;">Nothing after a few minutes? Check spam — or resend in 0:58.</div>
+      <button onClick="{{ goSignin }}" title="Back to the sign-in screen" style="width: 100%; height: 34px; margin-top: 18px; background: var(--card, #FFFFFF); color: var(--ink, #1C1C1E); border: 1px solid var(--line, #E4E4E0); border-radius: 6px; font-family: 'Inter', sans-serif; font-size: 15px; font-weight: 600; cursor: pointer;" style-hover="background: var(--hov, #F6F6F2);">Back to sign in</button>
+    </sc-if>
+
+    <sc-if value="{{ isReset }}" hint-placeholder-val="{{ false }}">
+      <h1 style="font-family: 'Inter Tight', sans-serif; font-size: 19.5px; font-weight: 700; margin: 0;">Set a new password</h1>
+      <div style="font-size: 13.5px; color: var(--mut, #5B5B57); margin-top: 8px;">You followed a reset link for <span style="font-family: 'JetBrains Mono', monospace; font-size: 13px;">o•••@gmail.com</span>.</div>
+      <label style="display: block; font-size: 13px; font-weight: 600; color: var(--mut, #5B5B57); margin: 14px 0 5px;">New password</label>
+      <input type="password" autocomplete="new-password" style="width: 100%; box-sizing: border-box; height: 34px; border: 1px solid var(--line, #E4E4E0); border-radius: 6px; background: var(--inbg, #FAFAF7); padding: 0 10px; font-family: 'Inter', sans-serif; font-size: 15px; color: var(--ink, #1C1C1E);">
+      <div style="font-size: 12.5px; color: var(--mut2, #6B6B66); margin-top: 5px;">12+ characters — length beats complexity.</div>
+      <label style="display: block; font-size: 13px; font-weight: 600; color: var(--mut, #5B5B57); margin: 14px 0 5px;">Confirm new password</label>
+      <input type="password" autocomplete="new-password" style="width: 100%; box-sizing: border-box; height: 34px; border: 1px solid var(--line, #E4E4E0); border-radius: 6px; background: var(--inbg, #FAFAF7); padding: 0 10px; font-family: 'Inter', sans-serif; font-size: 15px; color: var(--ink, #1C1C1E);">
+      <button onClick="{{ doReset }}" title="Save the new password and sign in" style="width: 100%; height: 34px; margin-top: 18px; background: var(--btn, #4A63D0); color: #FFFFFF; border: none; border-radius: 6px; font-family: 'Inter', sans-serif; font-size: 15px; font-weight: 600; cursor: pointer;" style-hover="background: var(--btnH, #3A4FB8);">Update password</button>
+    </sc-if>
+
+  </div>
+  <div style="font-size: 12.5px; color: var(--mut2, #6B6B66); margin-top: 16px;">Fan project · not affiliated with Nintendo or The Pokémon Company.</div>
+  <div style="display: flex; align-items: center; gap: 10px; margin-top: 28px; font-size: 12.5px; color: var(--mut2, #6B6B66);">
+    <span>Prototype screens:</span>
+    <sc-for list="{{ jumps }}" as="j" hint-placeholder-count="5">
+      <button onClick="{{ j.go }}" style="background: none; border: none; padding: 0; cursor: pointer; font-family: 'Inter', sans-serif; font-size: 12.5px; color: {{ j.fg }}; font-weight: {{ j.wt }};">{{ j.label }}</button>
+    </sc-for>
+  </div>
+</div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;view&quot;: {&quot;editor&quot;: &quot;enum&quot;, &quot;options&quot;: [&quot;signin&quot;, &quot;create&quot;, &quot;forgot&quot;, &quot;sent&quot;, &quot;reset&quot;], &quot;default&quot;: &quot;signin&quot;, &quot;tsType&quot;: &quot;string&quot;, &quot;section&quot;: &quot;Prototype&quot;}, &quot;showError&quot;: {&quot;editor&quot;: &quot;boolean&quot;, &quot;default&quot;: false, &quot;tsType&quot;: &quot;boolean&quot;, &quot;section&quot;: &quot;Prototype&quot;}}">
+class Component extends DCLogic {
+  state = { view: null, sentKind: 'verification', flash: false, theme: null, cvd: null };
+  componentDidMount() {
+    const upd = {};
+    if (localStorage.getItem('cardstock-theme') === 'dark') upd.theme = 'dark';
+    if (localStorage.getItem('cardstock-cvd') === '1') upd.cvd = true;
+    if (location.hash === '#reset') upd.view = 'reset';
+    if (Object.keys(upd).length) this.setState(upd);
+  }
+  vars(dark, cvd) {
+    const ch = dark
+      ? { '--bg': '#161614', '--card': '#1E1E1C', '--line': '#33332F', '--ink': '#E9E9E5', '--mut': '#B4B4AE', '--mut2': '#A8A8A2', '--hov': '#282825', '--mutbg': '#2A2A27', '--logoTeal': '#3FBFAD', '--acc': '#8C9BF2', '--accH': '#8CA4F0', '--btn': '#4A63D0', '--btnH': '#AAB6F6', '--inbg': '#262624' }
+      : { '--bg': '#FAFAF7', '--card': '#FFFFFF', '--line': '#E4E4E0', '--ink': '#1C1C1E', '--mut': '#5B5B57', '--mut2': '#6B6B66', '--hov': '#F6F6F2', '--mutbg': '#F3F3EE', '--logoTeal': '#0E8A7B', '--acc': '#4A63D0', '--accH': '#3A4FB8', '--btn': '#4A63D0', '--btnH': '#3A4FB8', '--inbg': '#FAFAF7' };
+    const s = dark
+      ? (cvd ? { '--pos': '#58A9E6', '--posBg': 'rgba(0,114,178,0.20)', '--neg': '#F5924E', '--negBg': 'rgba(213,94,0,0.20)' } : { '--pos': '#4CC08D', '--posBg': 'rgba(24,158,99,0.18)', '--neg': '#E57B7B', '--negBg': 'rgba(214,69,69,0.18)' })
+      : (cvd ? { '--pos': '#0B69A8', '--posBg': 'rgba(0,114,178,0.10)', '--neg': '#CC5F00', '--negBg': 'rgba(213,94,0,0.10)' } : { '--pos': '#157A50', '--posBg': 'rgba(24,158,99,0.10)', '--neg': '#C13A3A', '--negBg': 'rgba(214,69,69,0.10)' });
+    const w = dark ? { '--warn': '#D6A54A', '--warnBg': 'rgba(176,127,26,0.20)' } : { '--warn': '#8F6614', '--warnBg': 'rgba(176,127,26,0.12)' };
+    return Object.assign({ display: 'contents', colorScheme: dark ? 'dark' : 'light' }, ch, s, w);
+  }
+  renderVals() {
+    const st = this.state;
+    const view = st.view ?? (this.props.view ?? 'signin');
+    const go = (v) => () => this.setState({ view: v, flash: false });
+    const jump = (label, v) => ({ label, go: go(v), fg: view === v ? 'var(--ink, #1C1C1E)' : 'var(--mut2, #6B6B66)', wt: view === v ? 600 : 400 });
+    return {
+      themeVars: this.vars((st.theme ?? 'light') === 'dark', st.cvd ?? false),
+      isSignin: view === 'signin', isCreate: view === 'create', isForgot: view === 'forgot', isSent: view === 'sent', isReset: view === 'reset',
+      flashOn: st.flash && view === 'signin',
+      showErr: (this.props.showError ?? false) && view === 'signin' && !st.flash,
+      sentWhat: st.sentKind,
+      doSignin: () => { location.href = 'Cardstock Home.dc.html'; },
+      goDemo: () => { location.href = 'Cardstock Home.dc.html'; },
+      doCreate: () => this.setState({ view: 'sent', sentKind: 'verification' }),
+      doForgot: () => this.setState({ view: 'sent', sentKind: 'reset' }),
+      doReset: () => this.setState({ view: 'signin', flash: true }),
+      goSignin: go('signin'), goCreate: go('create'), goForgot: go('forgot'),
+      jumps: [jump('sign in', 'signin'), jump('create', 'create'), jump('forgot', 'forgot'), jump('email sent', 'sent'), jump('reset', 'reset')]
+    };
+  }
+}
+</script>
+</body>
+</html>

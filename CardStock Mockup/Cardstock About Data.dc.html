@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="icon" href="./brand/favicon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="anonymous">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Inter+Tight:wght@600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  html, body { margin: 0; padding: 0; background: var(--bg, #FAFAF7); }
+  body { font-family: 'Inter', system-ui, sans-serif; }
+  a { color: var(--acc, #4A63D0); text-decoration: none; }
+  a:hover { color: var(--accH, #3A4FB8); text-decoration: underline; }
+  *:focus-visible { outline: 2px solid var(--acc, #4A63D0); outline-offset: 1px; border-radius: 2px; }
+  :root[data-theme="dark"] { color-scheme: dark; --bg: #161614; --card: #1E1E1C; --ink: #E9E9E5; --mut: #B4B4AE; --mut2: #A8A8A2; --mut3: #9A9A94; --mutbg: #2A2A27; --hov: #282825; --line: #33332F; --line2: #3E3E39; --line4: #262623; --acc: #8C9BF2; --accH: #AAB6F6; --btn: #4A63D0; --warn: #D6A54A; --warnInk: #D6A54A; }
+  :root[data-theme="dark"]:not([data-cvd="1"]) { --pos: #4CC08D; --neg: #E57B7B; }
+  :root[data-theme="dark"][data-cvd="1"] { --pos: #58A9E6; --neg: #F5924E; }
+  :root[data-cvd="1"] { --pos: #0B69A8; --neg: #CC5F00; }
+  :root[data-theme="dark"] { --logoTeal: #3FBFAD; }
+</style>
+<script src="./cardstock-search.js"></script>
+<script>if(localStorage.getItem('cardstock-cvd')==='1')document.documentElement.setAttribute('data-cvd','1');if(localStorage.getItem('cardstock-theme')==='dark')document.documentElement.setAttribute('data-theme','dark');</script>
+</helmet>
+<div data-screen-label="About our data" style="min-height: 100vh; background: var(--bg, #FAFAF7); color: var(--ink, #1C1C1E); font-family: 'Inter', system-ui, sans-serif; font-size: 15px; display: flex; flex-direction: column;">
+
+  <nav style="height: 48px; background: var(--card, #FFFFFF); border-bottom: 1px solid var(--line, #E4E4E0); display: flex; align-items: center; gap: 24px; padding: 0 20px; position: sticky; top: 0; z-index: 20;">
+    <div style="display: flex; align-items: center; gap: 10px;"><a href="Cardstock Home.dc.html" aria-label="Cardstock home" style="display: flex; align-items: center; gap: 10px; color: inherit; text-decoration: none;"><svg width="24" height="24" viewBox="0 0 32 32" fill="none" aria-hidden="true" style="flex: 0 0 auto;"><rect x="5.5" y="5.5" width="15" height="21" rx="2.5" style="stroke: var(--ink, #1C1C1E);" stroke-width="2" transform="rotate(-12 13 16)"></rect><rect x="12" y="5.5" width="15" height="21" rx="2.5" style="fill: var(--card, #FFFFFF); stroke: var(--ink, #1C1C1E);" stroke-width="2"></rect><polyline points="15,21.5 17.5,17 19.5,18.5 23.5,12.5" style="stroke: var(--logoTeal, #0E8A7B);" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" fill="none"></polyline><circle cx="23.5" cy="12.5" r="1.7" style="fill: var(--logoTeal, #0E8A7B);"></circle></svg><span style="font-family: 'Inter', sans-serif; font-weight: 700; font-size: 18px; letter-spacing: -0.03em; color: var(--ink, #1C1C1E);">Cardstock</span></a></div>
+    <div style="display: flex; gap: 2px; height: 100%;">
+      <a href="Cardstock Home.dc.html" style="display: flex; align-items: center; padding: 0 12px; font-weight: 500; font-size: 15px; color: var(--mut, #5B5B57); border-bottom: 2px solid transparent; margin-bottom: -1px;">Home</a>
+      <a href="Cardstock Screener.dc.html" style="display: flex; align-items: center; padding: 0 12px; font-weight: 500; font-size: 15px; color: var(--mut, #5B5B57); border-bottom: 2px solid transparent; margin-bottom: -1px;">Screener</a>
+      <a href="Cardstock Charts.dc.html" style="display: flex; align-items: center; padding: 0 12px; font-weight: 500; font-size: 15px; color: var(--mut, #5B5B57); border-bottom: 2px solid transparent; margin-bottom: -1px;">Charts</a>
+      <a href="Cardstock Binder.dc.html" style="display: flex; align-items: center; padding: 0 12px; font-weight: 500; font-size: 15px; color: var(--mut, #5B5B57); border-bottom: 2px solid transparent; margin-bottom: -1px;">Binder</a>
+      <a href="Cardstock Browse.dc.html" style="display: flex; align-items: center; padding: 0 12px; font-weight: 500; font-size: 15px; color: var(--mut, #5B5B57); border-bottom: 2px solid transparent; margin-bottom: -1px;">Browse</a>
+    </div>
+    <div style="flex: 1;"></div>
+    <cardstock-search></cardstock-search>
+    <a href="Cardstock Profile.dc.html" aria-label="Account" title="Profile & settings" style="display: flex; align-items: center; justify-content: center; width: 28px; height: 28px; border-radius: 50%; border: 1px solid var(--line, #E4E4E0); background: var(--mutbg, #F3F3EE); color: var(--mut, #5B5B57); font-weight: 600; font-size: 14px; text-decoration: none; flex-shrink: 0;">O</a>
+  </nav>
+
+  <div style="width: 100%; max-width: 820px; margin: 0 auto; padding: 32px 24px 80px; box-sizing: border-box;">
+    <h1 style="font-family: 'Inter Tight', sans-serif; font-size: 27px; font-weight: 700; margin: 0 0 6px;">About our data</h1>
+    <div style="font-size: 14.5px; color: var(--mut2, #6B6B66); margin-bottom: 18px;">Where every number comes from, how fresh it is, and what we refuse to show.</div>
+
+    <div style="display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 28px;">
+      <a href="#sources" style="font-size: 13px; font-weight: 600; border: 1px solid var(--line, #E4E4E0); border-radius: 99px; padding: 4px 12px; background: var(--card, #FFFFFF);">Sources</a>
+      <a href="#seam" style="font-size: 13px; font-weight: 600; border: 1px solid var(--line, #E4E4E0); border-radius: 99px; padding: 4px 12px; background: var(--card, #FFFFFF);">The Apr ’25 seam</a>
+      <a href="#refresh" style="font-size: 13px; font-weight: 600; border: 1px solid var(--line, #E4E4E0); border-radius: 99px; padding: 4px 12px; background: var(--card, #FFFFFF);">Refresh & closed months</a>
+      <a href="#sufficiency" style="font-size: 13px; font-weight: 600; border: 1px solid var(--line, #E4E4E0); border-radius: 99px; padding: 4px 12px; background: var(--card, #FFFFFF);">Sufficiency rules</a>
+      <a href="#honesty" style="font-size: 13px; font-weight: 600; border: 1px solid var(--line, #E4E4E0); border-radius: 99px; padding: 4px 12px; background: var(--card, #FFFFFF);">Honesty policy</a>
+      <a href="#disclaimers" style="font-size: 13px; font-weight: 600; border: 1px solid var(--line, #E4E4E0); border-radius: 99px; padding: 4px 12px; background: var(--card, #FFFFFF);">Disclaimers</a>
+    </div>
+
+    <section id="sources" style="scroll-margin-top: 62px; background: var(--card, #FFFFFF); border: 1px solid var(--line, #E4E4E0); border-radius: 8px; padding: 20px 22px; margin-bottom: 14px;">
+      <h2 style="font-family: 'Inter Tight', sans-serif; font-size: 18.5px; font-weight: 700; margin: 0 0 10px;">Sources & coverage</h2>
+      <div style="font-size: 14.5px; line-height: 1.6; color: var(--mut, #5B5B57);">
+        <p style="margin: 0 0 10px;"><strong style="color: var(--ink, #1C1C1E);">Prices</strong> come from realized sales only — completed marketplace listings and major auction results. Asking prices never enter an aggregate; the rare Listed figures you see are labeled as such and cover under 5% of rows.</p>
+        <p style="margin: 0 0 10px;"><strong style="color: var(--ink, #1C1C1E);">Populations</strong> come from the public census reports the grading companies publish monthly. When a grader restates a past census (it happens), we mark the affected window on charts rather than silently rewriting history.</p>
+        <p style="margin: 0;"><strong style="color: var(--ink, #1C1C1E);">Excluded</strong>: bulk lots, listings with ambiguous grade or damage notes, sales where the card can't be matched to one printing, and marketplaces whose sold data we can't verify. Coverage is deepest for English-language cards graded PSA, BGS, CGC, SGC, ACE, and TAG, plus raw sales.</p>
+      </div>
+    </section>
+
+    <section id="seam" style="scroll-margin-top: 62px; background: var(--card, #FFFFFF); border: 1px solid var(--line, #E4E4E0); border-radius: 8px; padding: 20px 22px; margin-bottom: 14px;">
+      <h2 style="font-family: 'Inter Tight', sans-serif; font-size: 18.5px; font-weight: 700; margin: 0 0 10px;">The April 2025 seam</h2>
+      <div style="font-size: 14.5px; line-height: 1.6; color: var(--mut, #5B5B57);">
+        <p style="margin: 0 0 10px;">Before April 2025 our archive holds <strong style="color: var(--ink, #1C1C1E);">monthly aggregates</strong> — averages and sale counts, back to August 2023. From April 2025 forward we keep the <strong style="color: var(--ink, #1C1C1E);">per-sale ledger</strong>: every individual transaction with its date, venue, and grade.</p>
+        <p style="margin: 0;">That boundary is drawn as a marker on charts. Indicators that need individual sales — churn, price dispersion, Amihud illiquidity, cross-marketplace gap, discount-to-list — can only be computed after it, which is why their history starts there and why backtests refuse to reach further back (the "honest floor").</p>
+      </div>
+    </section>
+
+    <section id="refresh" style="scroll-margin-top: 62px; background: var(--card, #FFFFFF); border: 1px solid var(--line, #E4E4E0); border-radius: 8px; padding: 20px 22px; margin-bottom: 14px;">
+      <h2 style="font-family: 'Inter Tight', sans-serif; font-size: 18.5px; font-weight: 700; margin: 0 0 10px;">Refresh & closed months</h2>
+      <div style="font-size: 14.5px; line-height: 1.6; color: var(--mut, #5B5B57);">
+        <p style="margin: 0 0 10px;">Sales data refreshes daily; census data lands when graders publish, roughly monthly. The footer stamp on every page tells you how fresh what you're looking at is.</p>
+        <p style="margin: 0;">Monthly series only include <strong style="color: var(--ink, #1C1C1E);">closed months</strong>. The current month appears as a hollow, dashed point — it aggregates the sales recorded so far and will keep revising until the month closes. We never project or extrapolate it.</p>
+      </div>
+    </section>
+
+    <section id="sufficiency" style="scroll-margin-top: 62px; background: var(--card, #FFFFFF); border: 1px solid var(--line, #E4E4E0); border-radius: 8px; padding: 20px 22px; margin-bottom: 14px;">
+      <h2 style="font-family: 'Inter Tight', sans-serif; font-size: 18.5px; font-weight: 700; margin: 0 0 10px;">Sufficiency rules</h2>
+      <div style="font-size: 14.5px; line-height: 1.6; color: var(--mut, #5B5B57); margin-bottom: 12px;">An indicator that doesn't have enough history to be trustworthy is locked, with its unlock date shown — not rendered anyway with a warning buried in a tooltip. The rules:</div>
+      <div style="border: 1px solid var(--line, #E4E4E0); border-radius: 6px; overflow: hidden;">
+        <div style="display: grid; grid-template-columns: 1.2fr 2fr; gap: 0; font-size: 13.5px;">
+          <div style="padding: 8px 12px; background: var(--mutbg, #F3F3EE); font-weight: 600; font-size: 12px; letter-spacing: 0.06em; text-transform: uppercase; color: var(--mut2, #6B6B66);">Signal</div>
+          <div style="padding: 8px 12px; background: var(--mutbg, #F3F3EE); font-weight: 600; font-size: 12px; letter-spacing: 0.06em; text-transform: uppercase; color: var(--mut2, #6B6B66);">Needs</div>
+          <div style="padding: 8px 12px; border-top: 1px solid var(--line4, #F0F0EC); font-family: 'JetBrains Mono', monospace; font-size: 12.5px;">Churn 30d</div>
+          <div style="padding: 8px 12px; border-top: 1px solid var(--line4, #F0F0EC); color: var(--mut, #5B5B57);">30 days of per-sale ledger in that grade bucket; starts LOW CONFIDENCE for its first 30 days</div>
+          <div style="padding: 8px 12px; border-top: 1px solid var(--line4, #F0F0EC); font-family: 'JetBrains Mono', monospace; font-size: 12.5px;">Weekly bars</div>
+          <div style="padding: 8px 12px; border-top: 1px solid var(--line4, #F0F0EC); color: var(--mut, #5B5B57);">~6 months of ledger (≈ Jan 2027)</div>
+          <div style="padding: 8px 12px; border-top: 1px solid var(--line4, #F0F0EC); font-family: 'JetBrains Mono', monospace; font-size: 12.5px;">Daily bars</div>
+          <div style="padding: 8px 12px; border-top: 1px solid var(--line4, #F0F0EC); color: var(--mut, #5B5B57);">~12 months of ledger, liquid cards only</div>
+          <div style="padding: 8px 12px; border-top: 1px solid var(--line4, #F0F0EC); font-family: 'JetBrains Mono', monospace; font-size: 12.5px;">Oscillators (RSI, z-score)</div>
+          <div style="padding: 8px 12px; border-top: 1px solid var(--line4, #F0F0EC); color: var(--mut, #5B5B57);">their full warm-up window of monthly closes before the first value renders</div>
+          <div style="padding: 8px 12px; border-top: 1px solid var(--line4, #F0F0EC); font-family: 'JetBrains Mono', monospace; font-size: 12.5px;">Seasonality</div>
+          <div style="padding: 8px 12px; border-top: 1px solid var(--line4, #F0F0EC); color: var(--mut, #5B5B57);">one observed cycle so far — labeled illustrative until there are three</div>
+          <div style="padding: 8px 12px; border-top: 1px solid var(--line4, #F0F0EC); font-family: 'JetBrains Mono', monospace; font-size: 12.5px;">Composites (G1–G4)</div>
+          <div style="padding: 8px 12px; border-top: 1px solid var(--line4, #F0F0EC); color: var(--mut, #5B5B57);">every component signal individually sufficient — a composite never fires on partial inputs</div>
+        </div>
+      </div>
+    </section>
+
+    <section id="honesty" style="scroll-margin-top: 62px; background: var(--card, #FFFFFF); border: 1px solid var(--line, #E4E4E0); border-radius: 8px; padding: 20px 22px; margin-bottom: 14px;">
+      <h2 style="font-family: 'Inter Tight', sans-serif; font-size: 18.5px; font-weight: 700; margin: 0 0 10px;">Honesty policy</h2>
+      <div style="font-size: 14.5px; line-height: 1.6; color: var(--mut, #5B5B57);">
+        <p style="margin: 0 0 10px;">Some things we simply don't show:</p>
+        <ul style="margin: 0; padding-left: 20px; display: flex; flex-direction: column; gap: 6px;">
+          <li>No projected or extrapolated data points — a partial month renders as partial, never as a forecast.</li>
+          <li>Backtests start at each screen's honest floor — the first date every filter in it could actually be computed — not at the start of our archive.</li>
+          <li>A backtest that mostly found one set's moment says so, instead of presenting it as a repeatable pattern.</li>
+          <li>Missing metadata renders as METADATA PENDING, not as a silent blank or a guess.</li>
+          <li>When a grader restates history, the restatement window stays visibly marked.</li>
+        </ul>
+      </div>
+    </section>
+
+    <section id="disclaimers" style="scroll-margin-top: 62px; background: var(--card, #FFFFFF); border: 1px solid var(--line, #E4E4E0); border-radius: 8px; padding: 20px 22px;">
+      <h2 style="font-family: 'Inter Tight', sans-serif; font-size: 18.5px; font-weight: 700; margin: 0 0 10px;">Disclaimers</h2>
+      <div style="font-size: 14.5px; line-height: 1.6; color: var(--mut, #5B5B57);">
+        <p style="margin: 0 0 10px;">Cardstock is a fan-made analytics project. It is not affiliated with, endorsed by, or sponsored by Nintendo, The Pokémon Company, or any grading company or marketplace. Pokémon names and card references are used for identification only; all trademarks belong to their owners.</p>
+        <p style="margin: 0;">Nothing here is financial advice. Collectible prices are volatile and thinly traded; signals describe the past, not the future. Do your own research before spending money on cardboard.</p>
+      </div>
+    </section>
+
+    <div style="font-size: 12.5px; color: var(--mut2, #6B6B66); margin-top: 20px;">
+      <span>Questions about a number? Every stat's tooltip names its source and window.</span>
+    </div>
+  </div>
+</div>
+</x-dc>
+</body>
+</html>

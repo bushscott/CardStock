@@ -1,0 +1,621 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="icon" href="./brand/favicon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="anonymous">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Inter+Tight:wght@600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<script src="./image-slot.js"></script>
+<style>
+  html, body { margin: 0; padding: 0; background: var(--bg, var(--bg, #FAFAF7)); }
+  image-slot[placeholder=" "]::part(empty) { opacity: 0; }
+  input[type="number"]::-webkit-outer-spin-button, input[type="number"]::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+  input[type="number"] { -moz-appearance: textfield; appearance: textfield; }
+  body { font-family: 'Inter', system-ui, sans-serif; color: var(--ink, #1C1C1E); }
+  a { color: var(--acc, #4A63D0); text-decoration: none; }
+  a:hover { color: var(--accH, #3A4FB8); text-decoration: underline; }
+  *:focus-visible { outline: 2px solid var(--acc, #4A63D0); outline-offset: 1px; border-radius: 2px; }
+  @media (prefers-reduced-motion: reduce) { * { animation-duration: 0.01ms !important; } }
+
+  :root[data-cvd="1"] { --pos: #0B69A8; }
+
+  :root[data-theme="dark"] { color-scheme: dark; --bg: #161614; --card: #1E1E1C; --ink: #E9E9E5; --mut: #B4B4AE; --mut2: #A8A8A2; --mut3: #9A9A94; --mutbg: #2A2A27; --hov: #282825; --line: #33332F; --line2: #3E3E39; --line3: #4A4A44; --line4: #262623; --acc: #8C9BF2; --accH: #AAB6F6; --btn: #4A63D0; --warn: #D6A54A; --warnInk: #D6A54A; --tooltipBg: rgba(30, 30, 28, 0.95); --accBg: #252B44; --accMut: #3A4570; }
+  :root[data-theme="dark"]:not([data-cvd="1"]) { --pos: #4CC08D; --pos2: #4CC08D; --neg: #E57B7B; --neg2: #E57B7B; --neg3: #E57B7B; }
+  :root[data-theme="dark"][data-cvd="1"] { --pos: #58A9E6; --pos2: #58A9E6; --neg: #F5924E; --neg2: #F5924E; --neg3: #E8874D; }
+  :root[data-theme="dark"] { --logoTeal: #3FBFAD; }
+</style>
+<script src="./cardstock-search.js"></script>
+<script>if(localStorage.getItem('cardstock-cvd')==='1')document.documentElement.setAttribute('data-cvd','1');if(localStorage.getItem('cardstock-theme')==='dark')document.documentElement.setAttribute('data-theme','dark');</script>
+</helmet>
+<div data-screen-label="Binder" style="min-height: 100vh; display: flex; flex-direction: column; font-size: 15px;">
+
+  <nav style="height: 48px; background: var(--card, #FFFFFF); border-bottom: 1px solid var(--line, #E4E4E0); display: flex; align-items: center; gap: 24px; padding: 0 20px; position: sticky; top: 0; z-index: 20;">
+    <div style="display: flex; align-items: center; gap: 10px;">
+      <a href="Cardstock Home.dc.html" aria-label="Cardstock home" style="display: flex; align-items: center; gap: 10px; color: inherit; text-decoration: none;"><svg width="24" height="24" viewBox="0 0 32 32" fill="none" aria-hidden="true" style="flex: 0 0 auto;"><rect x="5.5" y="5.5" width="15" height="21" rx="2.5" style="stroke: var(--ink, #1C1C1E);" stroke-width="2" transform="rotate(-12 13 16)"></rect><rect x="12" y="5.5" width="15" height="21" rx="2.5" style="fill: var(--card, #FFFFFF); stroke: var(--ink, #1C1C1E);" stroke-width="2"></rect><polyline points="15,21.5 17.5,17 19.5,18.5 23.5,12.5" style="stroke: var(--logoTeal, #0E8A7B);" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" fill="none"></polyline><circle cx="23.5" cy="12.5" r="1.7" style="fill: var(--logoTeal, #0E8A7B);"></circle></svg>
+      <span style="font-family: 'Inter', sans-serif; font-weight: 700; font-size: 18px; letter-spacing: -0.03em; color: var(--ink, #1C1C1E);">Cardstock</span></a>
+      </div>
+    <div style="display: flex; gap: 2px; height: 100%;">
+      <a href="Cardstock Home.dc.html" style="display: flex; align-items: center; padding: 0 12px; font-weight: 500; font-size: 15px; color: var(--mut, #5B5B57); border-bottom: 2px solid transparent; margin-bottom: -1px;">Home</a>
+      <a href="Cardstock Screener.dc.html" style="display: flex; align-items: center; padding: 0 12px; font-weight: 500; font-size: 15px; color: var(--mut, #5B5B57); border-bottom: 2px solid transparent; margin-bottom: -1px;">Screener</a>
+      <a href="Cardstock Charts.dc.html" style="display: flex; align-items: center; padding: 0 12px; font-weight: 500; font-size: 15px; color: var(--mut, #5B5B57); border-bottom: 2px solid transparent; margin-bottom: -1px;">Charts</a>
+      <a href="Cardstock Binder.dc.html" style="display: flex; align-items: center; padding: 0 12px; font-weight: 600; font-size: 15px; color: var(--ink, #1C1C1E); border-bottom: 2px solid var(--acc, #4A63D0); margin-bottom: -1px;">Binder</a>
+      <a href="Cardstock Browse.dc.html" style="display: flex; align-items: center; padding: 0 12px; font-weight: 500; font-size: 15px; color: var(--mut, #5B5B57); border-bottom: 2px solid transparent; margin-bottom: -1px;">Browse</a>
+    </div>
+    <div style="flex: 1;"></div>
+    <cardstock-search></cardstock-search>
+    <a href="Cardstock Profile.dc.html" aria-label="Account" title="Profile & settings" style="display: flex; align-items: center; justify-content: center; width: 28px; height: 28px; border-radius: 50%; border: 1px solid var(--line, #E4E4E0); background: var(--mutbg, #F3F3EE); color: var(--mut, #5B5B57); font-weight: 600; font-size: 14px; text-decoration: none; flex-shrink: 0;">O</a>
+  </nav>
+
+  <main style="flex: 1; max-width: 1480px; width: 100%; box-sizing: border-box; margin: 0 auto; padding: 14px 20px 28px 20px; display: flex; flex-direction: column; gap: 14px;">
+
+    <div style="display: flex; align-items: center; gap: 12px;">
+      <h1 style="font-family: 'Inter Tight', sans-serif; font-weight: 700; font-size: 26px; letter-spacing: -0.01em; margin: 0;">Binder</h1>
+      <span title="Binder data is strictly private — no social features, never shared" style="font-family: 'JetBrains Mono', monospace; font-size: 11px; font-weight: 600; letter-spacing: 0.08em; color: var(--mut2, #6B6B66); border: 1px solid var(--line, #E4E4E0); border-radius: 3px; padding: 1px 6px; cursor: help;">PRIVATE</span>
+      <div style="flex: 1;"></div>
+      <sc-if value="{{ isTx }}" hint-placeholder-val="{{ false }}">
+        <button onClick="{{ exportCsv }}" title="Download every transaction as a CSV — date, card, grade, quantity, price, and note" style="background: var(--card, #FFFFFF); border: 1px solid var(--line, #E4E4E0); border-radius: 6px; height: 29px; padding: 0 11px; font-family: 'Inter', sans-serif; font-size: 13.5px; font-weight: 500; color: var(--ink, #1C1C1E); cursor: pointer;" style-hover="background: var(--hov, #F6F6F2);">{{ csvLabel }}</button>
+      </sc-if>
+      <button onClick="{{ openTx }}" title="Log a buy or a sell — updates your cost basis and P&L immediately" style="background: var(--btn, var(--acc, #4A63D0)); color: #FFFFFF; border: none; border-radius: 6px; height: 29px; padding: 0 12px; font-family: 'Inter', sans-serif; font-size: 13.5px; font-weight: 600; cursor: pointer;" style-hover="background: var(--accH, #3A4FB8);">+ Add transaction</button>
+    </div>
+
+    <div style="display: flex; gap: 10px;">
+      <div style="display: flex; border: 1px solid var(--line, #E4E4E0); border-radius: 6px; overflow: hidden; background: var(--card, #FFFFFF);">
+        <sc-for list="{{ tabs }}" as="tb" hint-placeholder-count="3">
+          <button onClick="{{ tb.pick }}" title="{{ tb.tip }}" style="background: {{ tb.bg }}; color: {{ tb.fg }}; border: none; height: 28px; padding: 0 14px; font-family: 'JetBrains Mono', monospace; font-size: 13px; font-weight: 600; cursor: pointer;">{{ tb.label }}</button>
+        </sc-for>
+      </div>
+      <sc-if value="{{ isHoldTab }}" hint-placeholder-val="{{ true }}">
+        <div style="display: flex; border: 1px solid var(--line, #E4E4E0); border-radius: 6px; overflow: hidden; background: var(--card, #FFFFFF);">
+          <button onClick="{{ viewTable }}" title="Table view" style="background: {{ vtBg }}; color: {{ vtFg }}; border: none; height: 28px; padding: 0 12px; font-family: 'JetBrains Mono', monospace; font-size: 13px; font-weight: 600; cursor: pointer;">table</button>
+          <button onClick="{{ viewGallery }}" title="Gallery view — your collection as card art" style="background: {{ vgBg }}; color: {{ vgFg }}; border: none; height: 28px; padding: 0 12px; font-family: 'JetBrains Mono', monospace; font-size: 13px; font-weight: 600; cursor: pointer;">gallery</button>
+        </div>
+      </sc-if>
+    </div>
+
+    <sc-if value="{{ isEmpty }}" hint-placeholder-val="{{ false }}">
+      <section style="background: var(--card, #FFFFFF); border: 1px solid var(--line, #E4E4E0); border-radius: 10px; padding: 64px 24px; text-align: center;">
+        <div style="font-family: 'Inter Tight', sans-serif; font-weight: 600; font-size: 19px;">Log your first purchase</div>
+        <div style="font-size: 14.5px; color: var(--mut, #5B5B57); margin-top: 6px;">30 seconds, and your P&amp;L starts here.</div>
+        <button onClick="{{ openTx }}" title="Log a buy or a sell — updates your cost basis and P&L immediately" style="margin-top: 16px; background: var(--btn, var(--acc, #4A63D0)); color: #FFFFFF; border: none; border-radius: 6px; height: 32px; padding: 0 14px; font-family: 'Inter', sans-serif; font-size: 14px; font-weight: 600; cursor: pointer;" style-hover="background: var(--accH, #3A4FB8);">+ Add transaction</button>
+      </section>
+    </sc-if>
+
+    <sc-if value="{{ isGallery }}" hint-placeholder-val="{{ false }}">
+      <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 14px;">
+        <sc-for list="{{ galleryCards }}" as="gc" hint-placeholder-count="8">
+          <div style="background: var(--card, #FFFFFF); border: 1px solid var(--line, #E4E4E0); border-radius: 8px; padding: 12px; transition: box-shadow 0.15s ease;" style-hover="box-shadow: 0 6px 20px rgba(20, 19, 26, 0.10);">
+            <div style="aspect-ratio: 325 / 450; border-radius: 5px; background: {{ gc.thumbBg }}; margin-bottom: 9px;">
+              <image-slot id="{{ gc.slotId }}" shape="rounded" radius="5" placeholder=" "></image-slot>
+            </div>
+            <div style="font-weight: 600; font-size: 14px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;"><a href="Cardstock Card.dc.html" style="color: var(--ink, #1C1C1E);" style-hover="color: var(--acc, #4A63D0);">{{ gc.name }}</a></div>
+            <div style="font-family: 'JetBrains Mono', monospace; font-size: 12px; color: var(--mut2, #6B6B66); margin-top: 2px;">{{ gc.sub }}</div>
+            <div style="display: flex; justify-content: space-between; align-items: baseline; margin-top: 5px;">
+              <span style="font-family: 'JetBrains Mono', monospace; font-size: 14.5px; font-weight: 700;">{{ gc.value }}</span>
+              <span style="font-family: 'JetBrains Mono', monospace; font-size: 12.5px; color: {{ gc.plFg }};">{{ gc.pl }}</span>
+            </div>
+          </div>
+        </sc-for>
+      </div>
+    </sc-if>
+
+    <sc-if value="{{ isHold }}" hint-placeholder-val="{{ true }}">
+      <section style="background: var(--card, #FFFFFF); border: 1px solid var(--line, #E4E4E0); border-radius: 10px;">
+        <div style="display: grid; grid-template-columns: {{ hGridCols }}; gap: 8px; padding: 7px 16px; border-bottom: 1px solid var(--line, #E4E4E0); font-size: 11.5px; font-weight: 600; letter-spacing: 0.05em; color: var(--mut2, #6B6B66); text-transform: uppercase; background: var(--bg, var(--bg, #FAFAF7)); border-radius: 10px 10px 0 0;">
+          <sc-for list="{{ hCols }}" as="hc" hint-placeholder-count="7">
+            <div style="display: flex; align-items: center; min-width: 0;"><span onClick="{{ hc.sort }}" title="Click to sort" style="flex: 1; text-align: center; overflow: hidden; white-space: nowrap; cursor: pointer;" style-hover="color: var(--acc, #4A63D0);">{{ hc.name }}{{ hc.arrow }}</span><span onMouseDown="{{ hc.rs }}" title="Drag to resize" style="cursor: col-resize; color: var(--line3, #C9C9C4); padding: 2px 3px; margin-right: -6px; flex-shrink: 0;" style-hover="color: var(--acc, #4A63D0);">│</span></div>
+          </sc-for>
+        </div>
+        <sc-for list="{{ hRows }}" as="h" hint-placeholder-count="8">
+          <div style="display: grid; grid-template-columns: {{ hGridCols }}; gap: 8px; padding: 7px 16px; align-items: center; border-bottom: 1px solid var(--line4, #F0F0EC);">
+            <span style="font-size: 14px; font-weight: 500; text-align: center; overflow: hidden; white-space: nowrap; text-overflow: ellipsis;"><a href="Cardstock Card.dc.html" style="color: var(--ink, #1C1C1E);" style-hover="color: var(--acc, #4A63D0);">{{ h.card }}</a></span>
+            <span style="font-family: 'JetBrains Mono', monospace; font-size: 12.5px; text-align: center;">{{ h.tier }}</span>
+            <span style="font-family: 'JetBrains Mono', monospace; font-size: 13px; text-align: center;">{{ h.qty }}</span>
+            <span title="What you paid never changes" style="font-family: 'JetBrains Mono', monospace; font-size: 13px; text-align: center;">{{ h.cost }}</span>
+            <span style="text-align: center; white-space: nowrap;"><span style="font-family: 'JetBrains Mono', monospace; font-size: 13.5px; font-weight: 700;">{{ h.value }}</span><span title="{{ h.estTip }}" style="display: {{ h.estShow }}; font-family: 'JetBrains Mono', monospace; font-size: 10px; font-weight: 600; letter-spacing: 0.06em; color: var(--warnInk, #8F6614); background: rgba(176, 127, 26, 0.12); border-radius: 3px; padding: 1px 4px; margin-left: 6px; cursor: help; vertical-align: 1px;">EST</span></span>
+            <span style="font-family: 'JetBrains Mono', monospace; font-size: 13px; text-align: center; color: {{ h.plFg }};">{{ h.pl }}</span>
+            <span style="font-family: 'JetBrains Mono', monospace; font-size: 12.5px; text-align: center; color: var(--mut, #5B5B57);">{{ h.pct }}</span>
+          </div>
+        </sc-for>
+        <div style="display: grid; grid-template-columns: {{ hGridCols }}; gap: 8px; padding: 8px 16px; align-items: center; background: var(--bg, var(--bg, #FAFAF7)); border-radius: 0 0 10px 10px; font-weight: 600;">
+          <span style="font-size: 13px; text-align: center; color: var(--mut, #5B5B57);">{{ totLabel }}</span>
+          <span></span><span></span>
+          <span style="font-family: 'JetBrains Mono', monospace; font-size: 13px; text-align: center;">{{ totCost }}</span>
+          <span style="font-family: 'JetBrains Mono', monospace; font-size: 13.5px; font-weight: 700; text-align: center;">{{ totValue }}</span>
+          <span style="font-family: 'JetBrains Mono', monospace; font-size: 13px; text-align: center; color: {{ totPlFg }};">{{ totPl }}</span>
+          <span style="font-family: 'JetBrains Mono', monospace; font-size: 12.5px; text-align: center; color: var(--mut, #5B5B57);">100%</span>
+        </div>
+      </section>
+    </sc-if>
+
+    <sc-if value="{{ isTx }}" hint-placeholder-val="{{ false }}">
+      <section style="background: var(--card, #FFFFFF); border: 1px solid var(--line, #E4E4E0); border-radius: 10px;">
+        <div style="display: flex; align-items: center; gap: 10px; padding: 12px 16px 9px 16px;">
+          <h2 style="font-family: 'Inter Tight', sans-serif; font-weight: 600; font-size: 17px; margin: 0;">Transactions</h2>
+          <span title="Every edit is stored as a correction under the hood — the table shows the current truth, the audit trail is kept" style="font-family: 'JetBrains Mono', monospace; font-size: 11px; font-weight: 600; letter-spacing: 0.06em; color: var(--mut2, #6B6B66); background: var(--mutbg, #F3F3EE); border-radius: 3px; padding: 1px 6px; cursor: help;">AUDIT LOG</span>
+          <div style="flex: 1;"></div>
+          <span style="font-family: 'JetBrains Mono', monospace; font-size: 12.5px; color: var(--mut, #5B5B57);">{{ txCount }}</span>
+        </div>
+        <div style="display: grid; grid-template-columns: {{ tGridCols }}; gap: 8px; padding: 7px 16px; border-top: 1px solid var(--line, #E4E4E0); border-bottom: 1px solid var(--line, #E4E4E0); font-size: 11.5px; font-weight: 600; letter-spacing: 0.05em; color: var(--mut2, #6B6B66); text-transform: uppercase; background: var(--bg, var(--bg, #FAFAF7));">
+          <sc-for list="{{ tCols }}" as="tc" hint-placeholder-count="7">
+            <div style="display: flex; align-items: center; min-width: 0;"><span style="flex: 1; text-align: center; overflow: hidden; white-space: nowrap;">{{ tc.name }}</span><span onMouseDown="{{ tc.rs }}" title="Drag to resize" style="cursor: col-resize; color: var(--line3, #C9C9C4); padding: 2px 3px; margin-right: -6px; flex-shrink: 0;" style-hover="color: var(--acc, #4A63D0);">│</span></div>
+          </sc-for>
+        </div>
+        <sc-for list="{{ txRows }}" as="t" hint-placeholder-count="10">
+          <div title="{{ t.voidTip }}" style="display: grid; grid-template-columns: {{ tGridCols }}; gap: 8px; padding: 6px 16px; align-items: center; border-bottom: 1px solid var(--line4, #F0F0EC); opacity: {{ t.op }};">
+            <span style="font-family: 'JetBrains Mono', monospace; font-size: 12.5px; color: var(--mut, #5B5B57); text-align: center; text-decoration: {{ t.strike }};">{{ t.date }}</span>
+            <span style="text-align: center;"><span style="display: inline-block; font-family: 'JetBrains Mono', monospace; font-size: 11.5px; font-weight: 600; letter-spacing: 0.05em; padding: 1px 7px; border-radius: 4px; background: {{ t.kBg }}; color: {{ t.kFg }}; border: 1px solid {{ t.kBd }};">{{ t.kind }}</span></span>
+            <span style="font-size: 14px; font-weight: 500; text-align: center; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; text-decoration: {{ t.strike }};">{{ t.card }}</span>
+            <span style="font-family: 'JetBrains Mono', monospace; font-size: 12.5px; text-align: center; text-decoration: {{ t.strike }};">{{ t.tier }}</span>
+            <span style="font-family: 'JetBrains Mono', monospace; font-size: 13px; text-align: center; text-decoration: {{ t.strike }};">{{ t.qty }}</span>
+            <span style="font-family: 'JetBrains Mono', monospace; font-size: 13.5px; font-weight: 700; text-align: center; text-decoration: {{ t.strike }};">{{ t.price }}</span>
+            <span style="font-size: 13px; color: var(--mut, #5B5B57); text-align: center; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; text-decoration: {{ t.strike }};">{{ t.note }}</span>
+            <span style="text-align: center;"><button onClick="{{ t.voidIt }}" title="Edit this transaction" style="display: {{ t.voidShow }}; background: none; border: 1px solid transparent; border-radius: 4px; font-family: 'JetBrains Mono', monospace; font-size: 11.5px; font-weight: 600; color: var(--mut2, #6B6B66); cursor: pointer; padding: 2px 7px;" style-hover="color: var(--acc, #4A63D0); border-color: rgba(74, 99, 208, 0.35); background: rgba(74, 99, 208, 0.06);">edit ✎</button></span>
+          </div>
+        </sc-for>
+      </section>
+    </sc-if>
+
+    <sc-if value="{{ isPerf }}" hint-placeholder-val="{{ false }}">
+      <section style="background: var(--card, #FFFFFF); border: 1px solid var(--line, #E4E4E0); border-radius: 10px; padding: 14px 16px;">
+        <div style="display: flex; align-items: baseline; gap: 14px; margin-bottom: 8px;">
+          <h2 style="font-family: 'Inter Tight', sans-serif; font-weight: 600; font-size: 17px; margin: 0;">Portfolio vs market index</h2>
+          <span style="display: inline-flex; align-items: center; gap: 5px; font-family: 'JetBrains Mono', monospace; font-size: 12.5px; color: var(--mut, #5B5B57);"><span style="width: 14px; height: 2.5px; background: var(--btn, var(--acc, #4A63D0)); display: inline-block; border-radius: 1px;"></span>Binder</span>
+          <span style="display: inline-flex; align-items: center; gap: 5px; font-family: 'JetBrains Mono', monospace; font-size: 12.5px; color: var(--mut, #5B5B57);"><span style="width: 14px; height: 2.5px; background: var(--mut2, #6B6B66); display: inline-block; border-radius: 1px;"></span>Market index</span>
+          <span style="font-size: 12.5px; color: var(--mut2, #6B6B66);">both indexed to 100 at first transaction (Jan ’25)</span>
+          <div style="flex: 1;"></div>
+          <span style="font-family: 'JetBrains Mono', monospace; font-size: 13px; font-weight: 600; color: var(--pos, #157A50);">{{ perfEdge }}</span>
+        </div>
+        <div style="display: flex; gap: 8px;">
+          <div style="position: relative; width: 44px; flex-shrink: 0;">
+            <span style="position: absolute; right: 0; top: 2px; font-family: 'JetBrains Mono', monospace; font-size: 10.5px; color: var(--mut2, #6B6B66);">{{ pfYMax }}</span>
+            <span style="position: absolute; right: 0; bottom: 2px; font-family: 'JetBrains Mono', monospace; font-size: 10.5px; color: var(--mut2, #6B6B66);">{{ pfYMin }}</span>
+          </div>
+          <div onMouseMove="{{ pfMove }}" onMouseLeave="{{ pfOut }}" style="position: relative; cursor: crosshair; flex: 1; min-width: 0;">
+            <svg width="100%" height="230" viewBox="0 0 800 230" preserveAspectRatio="none" style="display: block;">
+              <line x1="0" y1="115" x2="800" y2="115" style="stroke: var(--line4, var(--line4, #F0F0EC));" vector-effect="non-scaling-stroke"></line>
+              <polyline points="{{ pfIxSolid }}" fill="none" style="stroke: var(--mut2, var(--mut2, #6B6B66));" stroke-width="1.5" vector-effect="non-scaling-stroke"></polyline>
+              <polyline points="{{ pfIxDash }}" fill="none" style="stroke: var(--mut2, var(--mut2, #6B6B66));" stroke-width="1.5" stroke-dasharray="4 4" vector-effect="non-scaling-stroke"></polyline>
+              <polyline points="{{ pfBvSolid }}" fill="none" style="stroke: var(--acc, var(--acc, #4A63D0));" stroke-width="2" vector-effect="non-scaling-stroke"></polyline>
+              <polyline points="{{ pfBvDash }}" fill="none" style="stroke: var(--acc, var(--acc, #4A63D0));" stroke-width="2" stroke-dasharray="4 4" vector-effect="non-scaling-stroke"></polyline>
+            </svg>
+            <div title="Aug is month-to-date — the point firms up as the month’s sales land, and finalizes when the month closes" style="position: absolute; left: 100%; top: {{ pfHollowTop }}%; width: 8px; height: 8px; border-radius: 50%; background: var(--card, #FFFFFF); border: 1.5px solid var(--acc, #4A63D0); transform: translate(-50%, -50%); box-sizing: border-box;"></div>
+            <sc-if value="{{ pfHovShow }}" hint-placeholder-val="{{ false }}">
+              <div style="position: absolute; top: 0; bottom: 0; left: {{ pfHovLeft }}%; width: 1px; background: rgba(28, 28, 30, 0.22); pointer-events: none;"></div>
+              <div style="position: absolute; top: 8px; left: 8px; background: var(--tooltipBg, rgba(255, 255, 255, 0.95)); border: 1px solid var(--line, #E4E4E0); border-radius: 6px; padding: 5px 9px; pointer-events: none; box-shadow: 0 4px 12px rgba(20, 19, 26, 0.08);">
+                <div style="font-family: 'JetBrains Mono', monospace; font-size: 11px; color: var(--mut2, #6B6B66);">{{ pfHovMonth }}</div>
+                <div style="font-family: 'JetBrains Mono', monospace; font-size: 12.5px; font-weight: 700; color: var(--acc, #4A63D0);">Binder {{ pfHovBv }}</div>
+                <div style="font-family: 'JetBrains Mono', monospace; font-size: 12.5px; color: var(--mut, #5B5B57);">Index {{ pfHovIx }}</div>
+              </div>
+            </sc-if>
+          </div>
+        </div>
+        <div style="display: flex; justify-content: space-between; margin-top: 4px; margin-left: 52px;">
+          <span style="font-family: 'JetBrains Mono', monospace; font-size: 10.5px; color: var(--mut2, #6B6B66);">Jan ’25</span>
+          <span style="font-family: 'JetBrains Mono', monospace; font-size: 10.5px; color: var(--mut2, #6B6B66);">Oct ’25</span>
+          <span style="font-family: 'JetBrains Mono', monospace; font-size: 10.5px; color: var(--mut2, #6B6B66);">Aug ’26</span>
+        </div>
+      </section>
+      <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px;">
+        <sc-for list="{{ perfStats }}" as="ps" hint-placeholder-count="4">
+          <div title="{{ ps.tip }}" style="background: var(--card, #FFFFFF); border: 1px solid var(--line, #E4E4E0); border-radius: 8px; padding: 11px 13px; cursor: help;">
+            <div style="font-size: 11px; font-weight: 600; letter-spacing: 0.06em; color: var(--mut2, #6B6B66); text-transform: uppercase;">{{ ps.k }}</div>
+            <div style="font-family: 'JetBrains Mono', monospace; font-size: 21px; font-weight: 700; margin-top: 3px; color: {{ ps.fg }};">{{ ps.v }}</div>
+            <div style="font-size: 12.5px; color: var(--mut2, #6B6B66); margin-top: 1px;">{{ ps.sub }}</div>
+          </div>
+        </sc-for>
+      </div>
+      <section style="background: var(--card, #FFFFFF); border: 1px solid var(--line, #E4E4E0); border-radius: 10px;">
+        <div style="padding: 12px 16px 9px 16px;"><h2 style="font-family: 'Inter Tight', sans-serif; font-weight: 600; font-size: 17px; margin: 0;">Yearly summary</h2></div>
+        <div style="display: grid; grid-template-columns: 90px 1fr 1fr 1fr 1fr; gap: 8px; padding: 7px 16px; border-top: 1px solid var(--line, #E4E4E0); border-bottom: 1px solid var(--line, #E4E4E0); font-size: 11.5px; font-weight: 600; letter-spacing: 0.05em; color: var(--mut2, #6B6B66); text-transform: uppercase; background: var(--bg, var(--bg, #FAFAF7));">
+          <span style="text-align: center;">Year</span><span style="text-align: center;">Invested</span><span style="text-align: center;">Proceeds</span><span style="text-align: center;">Realized ±</span><span style="text-align: center;">Year-end value</span>
+        </div>
+        <sc-for list="{{ yearRows }}" as="y" hint-placeholder-count="2">
+          <div style="display: grid; grid-template-columns: 90px 1fr 1fr 1fr 1fr; gap: 8px; padding: 7px 16px; align-items: center; border-bottom: 1px solid var(--line4, #F0F0EC);">
+            <span style="font-family: 'JetBrains Mono', monospace; font-size: 13px; font-weight: 600; text-align: center;">{{ y.yr }}</span>
+            <span style="font-family: 'JetBrains Mono', monospace; font-size: 13px; text-align: center;">{{ y.inv }}</span>
+            <span style="font-family: 'JetBrains Mono', monospace; font-size: 13px; text-align: center;">{{ y.pro }}</span>
+            <span style="font-family: 'JetBrains Mono', monospace; font-size: 13px; text-align: center; color: {{ y.rlFg }};">{{ y.rl }}</span>
+            <span style="font-family: 'JetBrains Mono', monospace; font-size: 13.5px; font-weight: 700; text-align: center;">{{ y.end }}</span>
+          </div>
+        </sc-for>
+      </section>
+    </sc-if>
+
+    <div style="display: flex; align-items: center; gap: 8px; padding: 9px 14px; background: var(--mutbg, #F3F3EE); border: 1px solid var(--line, #E4E4E0); border-radius: 8px; font-size: 12.5px; color: var(--mut, #5B5B57);">
+      <span style="font-family: 'JetBrains Mono', monospace; font-weight: 600; color: var(--mut2, #6B6B66);">IRON RULE</span>
+      <span>Your entered prices never change. Current values are estimates that move with the market — badged <span style="font-family: 'JetBrains Mono', monospace; font-size: 10px; font-weight: 600; letter-spacing: 0.06em; color: var(--warnInk, #8F6614); background: rgba(176, 127, 26, 0.12); border-radius: 3px; padding: 1px 4px;">EST</span> when no recent sales support them.</span>
+    </div>
+
+    <sc-if value="{{ txOpen }}" hint-placeholder-val="{{ false }}">
+      <div onClick="{{ closeTx }}" style="position: fixed; inset: 0; background: rgba(20, 19, 26, 0.45); z-index: 100; display: flex; align-items: center; justify-content: center;">
+        <div onClick="{{ stopClick }}" style="background: var(--card, #FFFFFF); border-radius: 10px; box-shadow: 0 16px 48px rgba(20, 19, 26, 0.25); width: 400px; padding: 18px 20px; display: flex; flex-direction: column; gap: 12px;">
+          <div style="display: flex; align-items: center;">
+            <h2 style="font-family: 'Inter Tight', sans-serif; font-weight: 600; font-size: 18px; margin: 0;">{{ modalTitle }}</h2>
+            <div style="flex: 1;"></div>
+            <button onClick="{{ closeTx }}" title="Close without saving this transaction" aria-label="Close" style="background: none; border: none; font-size: 15px; color: var(--mut2, #6B6B66); cursor: pointer; padding: 4px;" style-hover="color: var(--ink, #1C1C1E);">✕</button>
+          </div>
+          <div style="display: flex; border: 1px solid var(--line, #E4E4E0); border-radius: 6px; overflow: hidden; align-self: flex-start;">
+            <button onClick="{{ pickBuy }}" title="Log a purchase — adds a lot with its own cost basis" style="background: {{ buyBg }}; color: {{ buyFg }}; border: none; height: 28px; padding: 0 16px; font-family: 'JetBrains Mono', monospace; font-size: 13px; font-weight: 600; cursor: pointer;">BUY</button>
+            <button onClick="{{ pickSell }}" title="Log a sale — limited to what you currently hold; realizes P&L against your cost basis" style="background: {{ sellBg }}; color: {{ sellFg }}; border: none; height: 28px; padding: 0 16px; font-family: 'JetBrains Mono', monospace; font-size: 13px; font-weight: 600; cursor: pointer;">SELL</button>
+          </div>
+          <sc-if value="{{ isBuy }}" hint-placeholder-val="{{ true }}">
+            <div style="display: flex; flex-direction: column; gap: 4px; font-size: 12.5px; font-weight: 600; color: var(--mut, #5B5B57); position: relative;">
+              <label for="tx-card-input" style="display: flex; align-items: baseline; gap: 6px;">Card <span style="font-weight: 400; color: {{ cardHintFg }};">{{ cardHint }}</span></label>
+              <input id="tx-card-input" type="text" value="{{ txCard }}" onInput="{{ setTxCard }}" placeholder="Start typing a card name…" autocomplete="off" style="height: 32px; border: 1px solid {{ cardBd }}; border-radius: 6px; padding: 0 10px; font-family: 'Inter', sans-serif; font-size: 14px; color: var(--ink, #1C1C1E); background: var(--card, #FFFFFF);"></input>
+              <sc-if value="{{ cardMenuOpen }}" hint-placeholder-val="{{ false }}">
+                <div style="position: absolute; top: 56px; left: 0; right: 0; z-index: 30; background: var(--card, #FFFFFF); border: 1px solid var(--line, #E4E4E0); border-radius: 8px; box-shadow: 0 8px 24px rgba(20, 19, 26, 0.12); padding: 4px; max-height: 190px; overflow-y: auto;">
+                  <sc-for list="{{ cardMatches }}" as="cm" hint-placeholder-count="4">
+                    <button onClick="{{ cm.pick }}" title="{{ cm.tip }}" style="display: flex; align-items: baseline; gap: 8px; width: 100%; background: none; border: none; border-radius: 5px; padding: 6px 8px; font-family: 'Inter', sans-serif; font-size: 13.5px; color: var(--ink, #1C1C1E); cursor: pointer; text-align: left;" style-hover="background: var(--hov, #F6F6F2);"><span style="font-weight: 500;">{{ cm.name }}</span><span style="font-size: 12px; color: var(--mut2, #6B6B66);">{{ cm.set }}</span></button>
+                  </sc-for>
+                  <sc-if value="{{ cardNoMatch }}" hint-placeholder-val="{{ false }}">
+                    <div style="padding: 8px; font-size: 12.5px; font-weight: 400; color: var(--mut2, #6B6B66);">No matching card — binder entries must link to a card we track.</div>
+                  </sc-if>
+                </div>
+              </sc-if>
+            </div>
+          </sc-if>
+          <sc-if value="{{ isSellNew }}" hint-placeholder-val="{{ false }}">
+            <label style="display: flex; flex-direction: column; gap: 4px; font-size: 12.5px; font-weight: 600; color: var(--mut, #5B5B57);">Card <span style="font-weight: 400; color: var(--mut2, #6B6B66);">(from your holdings — you can only sell what the binder holds)</span>
+              <select onChange="{{ setTxSell }}" style="height: 32px; border: 1px solid var(--line, #E4E4E0); border-radius: 6px; padding: 0 6px; font-family: 'Inter', sans-serif; font-size: 14px; color: var(--ink, #1C1C1E); background: var(--card, #FFFFFF);">
+                <option value="">Select a holding…</option>
+                <sc-for list="{{ sellOpts }}" as="so" hint-placeholder-count="8">
+                  <option value="{{ so.i }}">{{ so.label }}</option>
+                </sc-for>
+              </select>
+            </label>
+          </sc-if>
+          <sc-if value="{{ isSellEdit }}" hint-placeholder-val="{{ false }}">
+            <label style="display: flex; flex-direction: column; gap: 4px; font-size: 12.5px; font-weight: 600; color: var(--mut, #5B5B57);">Card <span style="font-weight: 400; color: var(--mut2, #6B6B66);">(from the original sale — correct price, qty, date, or note)</span>
+              <span style="display: flex; align-items: center; height: 32px; border: 1px solid #EBEBE7; border-radius: 6px; padding: 0 10px; font-family: 'Inter', sans-serif; font-size: 14px; color: var(--ink, #1C1C1E); background: var(--bg, var(--bg, #FAFAF7)); box-sizing: border-box;">{{ editCardName }}</span>
+            </label>
+          </sc-if>
+          <div style="display: grid; grid-template-columns: 1fr 90px; gap: 10px;">
+            <sc-if value="{{ isBuy }}" hint-placeholder-val="{{ true }}">
+              <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+                <label style="display: flex; flex-direction: column; gap: 4px; font-size: 12.5px; font-weight: 600; color: var(--mut, #5B5B57);">Grader
+                  <select value="{{ txGrader }}" onChange="{{ setTxGrader }}" style="height: 32px; border: 1px solid var(--line, #E4E4E0); border-radius: 6px; padding: 0 6px; font-family: 'Inter', sans-serif; font-size: 14px; color: var(--ink, #1C1C1E); background: var(--card, #FFFFFF);">
+                    <sc-for list="{{ graderOpts }}" as="go" hint-placeholder-count="7">
+                      <option value="{{ go.v }}">{{ go.v }}</option>
+                    </sc-for>
+                  </select>
+                </label>
+                <label style="display: flex; flex-direction: column; gap: 4px; font-size: 12.5px; font-weight: 600; color: {{ gradeFg }};">Grade
+                  <select value="{{ txGrade }}" onChange="{{ setTxGrade }}" disabled="{{ gradeOff }}" style="height: 32px; border: 1px solid var(--line, #E4E4E0); border-radius: 6px; padding: 0 6px; font-family: 'Inter', sans-serif; font-size: 14px; color: var(--ink, #1C1C1E); background: {{ gradeBg }};">
+                    <sc-for list="{{ gradeOpts }}" as="gr" hint-placeholder-count="10">
+                      <option value="{{ gr.v }}">{{ gr.v }}</option>
+                    </sc-for>
+                  </select>
+                </label>
+              </div>
+            </sc-if>
+            <sc-if value="{{ isSell }}" hint-placeholder-val="{{ false }}">
+              <label style="display: flex; flex-direction: column; gap: 4px; font-size: 12.5px; font-weight: 600; color: var(--mut, #5B5B57);"><span style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">Grade tier <span style="font-weight: 400; color: var(--mut2, #6B6B66);">{{ sellTierNote }}</span></span>
+                <span style="display: flex; align-items: center; height: 32px; border: 1px solid #EBEBE7; border-radius: 6px; padding: 0 10px; font-family: 'JetBrains Mono', monospace; font-size: 13px; color: {{ sellTierFg }}; background: var(--bg, var(--bg, #FAFAF7)); box-sizing: border-box;">{{ sellTier }}</span>
+              </label>
+            </sc-if>
+            <label style="display: flex; flex-direction: column; gap: 4px; font-size: 12.5px; font-weight: 600; color: var(--mut, #5B5B57);"><span style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">Qty&nbsp;{{ qtyMaxNote }}&nbsp;</span>
+              <input type="number" value="{{ txQty }}" onInput="{{ setTxQty }}" min="1" max="{{ qtyMax }}" style="height: 32px; border: 1px solid {{ qtyBd }}; border-radius: 6px; padding: 0 10px; font-family: 'JetBrains Mono', monospace; font-size: 14px; color: var(--ink, #1C1C1E); box-sizing: border-box; width: 100%;"></input>
+            </label>
+          </div>
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+            <label style="display: flex; flex-direction: column; gap: 4px; font-size: 12.5px; font-weight: 600; color: var(--mut, #5B5B57);">{{ priceLabel }}
+              <input type="number" value="{{ txPrice }}" onInput="{{ setTxPrice }}" placeholder="0.00" style="height: 32px; border: 1px solid var(--line, #E4E4E0); border-radius: 6px; padding: 0 10px; font-family: 'JetBrains Mono', monospace; font-size: 14px; color: var(--ink, #1C1C1E); box-sizing: border-box; width: 100%;"></input>
+            </label>
+            <label style="display: flex; flex-direction: column; gap: 4px; font-size: 12.5px; font-weight: 600; color: var(--mut, #5B5B57);">Date
+              <input type="date" value="{{ txDate }}" onInput="{{ setTxDate }}" style="height: 32px; border: 1px solid var(--line, #E4E4E0); border-radius: 6px; padding: 0 10px; font-family: 'JetBrains Mono', monospace; font-size: 13px; color: var(--ink, #1C1C1E); box-sizing: border-box; width: 100%;"></input>
+            </label>
+          </div>
+          <label style="display: flex; flex-direction: column; gap: 4px; font-size: 12.5px; font-weight: 600; color: var(--mut, #5B5B57);">Note <span style="font-weight: 400; color: var(--mut2, #6B6B66);">(optional)</span>
+            <input type="text" value="{{ txNote }}" onInput="{{ setTxNote }}" placeholder="e.g. auction win" style="height: 32px; border: 1px solid var(--line, #E4E4E0); border-radius: 6px; padding: 0 10px; font-family: 'Inter', sans-serif; font-size: 14px; color: var(--ink, #1C1C1E);"></input>
+          </label>
+          <div style="font-size: 12px; color: var(--mut2, #6B6B66); line-height: 1.5;">Mistakes are fixable — hit <span style="font-family: 'JetBrains Mono', monospace; color: var(--acc, #4A63D0);">edit ✎</span> on any row. Corrections are kept in the audit log under the hood.</div>
+          <div style="display: flex; justify-content: flex-end; gap: 8px; margin-top: 2px;">
+            <button onClick="{{ closeTx }}" title="Close without saving this transaction" style="background: var(--card, #FFFFFF); border: 1px solid var(--line, #E4E4E0); border-radius: 6px; height: 31px; padding: 0 12px; font-family: 'Inter', sans-serif; font-size: 13.5px; font-weight: 500; color: var(--ink, #1C1C1E); cursor: pointer;" style-hover="background: var(--hov, #F6F6F2);">Cancel</button>
+            <button onClick="{{ saveTx }}" title="Save this transaction — it appears in the ledger and updates your totals immediately" disabled="{{ saveOff }}" style="background: {{ saveBg }}; color: #FFFFFF; border: none; border-radius: 6px; height: 31px; padding: 0 14px; font-family: 'Inter', sans-serif; font-size: 13.5px; font-weight: 600; cursor: {{ saveCur }};">Save</button>
+          </div>
+        </div>
+      </div>
+    </sc-if>
+
+  </main>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;emptyState&quot;: {&quot;editor&quot;: &quot;boolean&quot;, &quot;default&quot;: false, &quot;tsType&quot;: &quot;boolean&quot;, &quot;section&quot;: &quot;Mode&quot;}}">
+class Component extends DCLogic {
+  PAL = (() => { const d = localStorage.getItem('cardstock-theme') === 'dark', c = localStorage.getItem('cardstock-cvd') === '1';
+    const s = d ? (c ? {pos:'#58A9E6',pos2:'#58A9E6',neg:'#F5924E',neg2:'#F5924E',neg3:'#E8874D',posBg:a=>'rgba(0,114,178,'+a+')',negBg:a=>'rgba(213,94,0,'+a+')'}
+                     : {pos:'#4CC08D',pos2:'#4CC08D',neg:'#E57B7B',neg2:'#E57B7B',neg3:'#E57B7B',posBg:a=>'rgba(24,158,99,'+a+')',negBg:a=>'rgba(214,69,69,'+a+')'})
+              : (c ? {pos:'#0B69A8',pos2:'#0072B2',neg:'#CC5F00',neg2:'#D55E00',neg3:'#B34E00',posBg:a=>'rgba(0,114,178,'+a+')',negBg:a=>'rgba(213,94,0,'+a+')'}
+                   : {pos:'#157A50',pos2:'#189E63',neg:'#C13A3A',neg2:'#D64545',neg3:'#A93838',posBg:a=>'rgba(24,158,99,'+a+')',negBg:a=>'rgba(214,69,69,'+a+')'});
+    const ch = d ? {bg:'#161614',card:'#1E1E1C',ink:'#E9E9E5',mut:'#B4B4AE',mut2:'#A8A8A2',mut3:'#9A9A94',mutbg:'#2A2A27',hov:'#282825',line:'#33332F',line2:'#3E3E39',line3:'#4A4A44',line4:'#262623',acc:'#8C9BF2',accH:'#AAB6F6',btn:'#4A63D0',accBg:'#252B44',accMut:'#3A4570',warn:'#D6A54A',warnInk:'#D6A54A'}
+               : {bg:'#FAFAF7',card:'#FFFFFF',ink:'#1C1C1E',mut:'#5B5B57',mut2:'#6B6B66',mut3:'#8F8F8A',mutbg:'#F3F3EE',hov:'#F6F6F2',line:'#E4E4E0',line2:'#D9D9D4',line3:'#C9C9C4',line4:'#F0F0EC',acc:'#4A63D0',accH:'#3A4FB8',btn:'#4A63D0',accBg:'#EEF1FB',accMut:'#B9C4E8',warn:'#8F6614',warnInk:'#8F6614'};
+    return Object.assign(ch, s); })();
+  constructor(props) {
+    super(props);
+    this.HOLD = [
+      { card: 'Umbreon VMAX (Alt Art)', tier: 'PSA 10', qty: 1, cost: 1180, cur: 1486, est: false },
+      { card: 'Giratina V (Alt Art)', tier: 'PSA 10', qty: 1, cost: 618, cur: 702, est: false },
+      { card: 'Espeon VMAX (Alt Art)', tier: 'Grade 9', qty: 1, cost: 540, cur: 668, est: false },
+      { card: 'Charizard V (Brilliant Stars)', tier: 'PSA 10', qty: 2, cost: 232, cur: 248, est: false },
+      { card: 'Lugia V (Alt Art)', tier: 'Grade 9', qty: 1, cost: 355, cur: 392, est: false },
+      { card: 'Blastoise Holo (Base Set)', tier: 'Grade 7', qty: 1, cost: 410, cur: 398, est: false },
+      { card: 'Snorlax VMAX (Gigantamax)', tier: 'Raw', qty: 3, cost: 88, cur: 96, est: true },
+      { card: 'Machamp (1st Edition)', tier: 'Grade 8', qty: 1, cost: 152, cur: 166, est: true }
+    ];
+    this.TX = [
+      { d: '2026-07-30', k: 'BUY', card: 'Alakazam Holo', tier: 'Grade 8', q: 1, p: 228, note: 'auction win', v: false },
+      { d: '2026-07-12', k: 'SELL', card: 'Gengar VMAX (Alt Art)', tier: 'PSA 10', q: 1, p: 562, note: 'took profit \u2014 pop climbing', v: false },
+      { d: '2026-06-28', k: 'BUY', card: 'Espeon VMAX (Alt Art)', tier: 'Grade 9', q: 1, p: 540, note: '', v: false },
+      { d: '2026-05-16', k: 'BUY', card: 'Snorlax VMAX (Gigantamax)', tier: 'Raw', q: 3, p: 88, note: 'grading candidates', v: false },
+      { d: '2026-04-02', k: 'SELL', card: 'Mewtwo GX (Shiny)', tier: 'Grade 9', q: 1, p: 341, note: '', v: false },
+      { d: '2026-02-19', k: 'BUY', card: 'Charizard V (Brilliant Stars)', tier: 'PSA 10', q: 2, p: 232, note: 'dip buy', v: false },
+      { d: '2025-11-07', k: 'BUY', card: 'Blastoise Holo (Base Set)', tier: 'Grade 7', q: 1, p: 410, note: '', v: false },
+      { d: '2025-09-23', k: 'SELL', card: 'Rayquaza VMAX (Alt Art)', tier: 'PSA 10', q: 1, p: 1044, note: 'funded Umbreon buy', v: false },
+      { d: '2025-06-30', k: 'BUY', card: 'Lugia V (Alt Art)', tier: 'Grade 9', q: 1, p: 355, note: '', v: false },
+      { d: '2025-03-11', k: 'BUY', card: 'Umbreon VMAX (Alt Art)', tier: 'PSA 10', q: 1, p: 1180, note: 'the grail', v: false },
+      { d: '2025-01-04', k: 'BUY', card: 'Machamp (1st Edition)', tier: 'Grade 8', q: 1, p: 152, note: 'first entry', v: false }
+    ];
+    this.BV = [100, 103, 101, 106, 109, 114, 112, 118, 123, 121, 127, 133, 131, 138, 142, 140, 146, 149, 151, 152];
+    this.IX = [100, 101, 103, 102, 104, 106, 105, 108, 110, 109, 112, 114, 113, 116, 117, 116, 118, 119, 120, 121];
+    this.TX.forEach((t, i) => { t.id = 'tx' + i; });
+    const halves = []; for (let n = 10; n >= 1; n -= 0.5) halves.push(String(n));
+    this.GRADERS = {
+      'Raw': [],
+      'PSA': halves.filter(g => g !== '9.5'),
+      'CGC': ['10 Pristine'].concat(halves),
+      'BGS': ['10 Black Label'].concat(halves),
+      'TAG': ['10 Pristine'].concat(halves),
+      'ACE': halves.slice(),
+      'SGC': ['10 Pristine'].concat(halves)
+    };
+    this.CARDS = [
+      { name: 'Umbreon VMAX (Alt Art)', set: 'Evolving Skies' },
+      { name: 'Espeon VMAX (Alt Art)', set: 'Evolving Skies' },
+      { name: 'Sylveon VMAX (Alt Art)', set: 'Evolving Skies' },
+      { name: 'Leafeon VMAX (Alt Art)', set: 'Evolving Skies' },
+      { name: 'Rayquaza VMAX (Alt Art)', set: 'Evolving Skies' },
+      { name: 'Giratina V (Alt Art)', set: 'Lost Origin' },
+      { name: 'Lugia V (Alt Art)', set: 'Silver Tempest' },
+      { name: 'Gengar VMAX (Alt Art)', set: 'Fusion Strike' },
+      { name: 'Charizard V (Brilliant Stars)', set: 'Brilliant Stars' },
+      { name: 'Charizard Holo (Base Set)', set: 'Base Set' },
+      { name: 'Blastoise Holo (Base Set)', set: 'Base Set' },
+      { name: 'Snorlax VMAX (Gigantamax)', set: 'Sword & Shield' },
+      { name: 'Machamp (1st Edition)', set: 'Base Set' },
+      { name: 'Alakazam Holo', set: 'Base Set' },
+      { name: 'Mewtwo GX (Shiny)', set: 'Hidden Fates' },
+      { name: 'Lugia Holo (Neo Genesis)', set: 'Neo Genesis' },
+      { name: 'Dragonite V (Alt Art)', set: 'Evolving Skies' }
+    ];
+    this.ACCENTS = {
+      'Umbreon VMAX (Alt Art)': ['#2B2D42', '#5C6B9E'],
+      'Giratina V (Alt Art)': ['#3D3552', '#8C7BA6'],
+      'Espeon VMAX (Alt Art)': ['#7E6BA8', '#C9B8E8'],
+      'Charizard V (Brilliant Stars)': ['#B0552E', '#E8A87C'],
+      'Lugia V (Alt Art)': ['#8A9BB8', '#D6E0EC'],
+      'Blastoise Holo (Base Set)': ['#2E6B8A', '#7CB8D6'],
+      'Snorlax VMAX (Gigantamax)': ['#3E5C4B', '#8CB89E'],
+      'Machamp (1st Edition)': ['#8A7139', '#D6C288']
+    };
+    this.PMONTHS = ['Jan \u201925','Feb \u201925','Mar \u201925','Apr \u201925','May \u201925','Jun \u201925','Jul \u201925','Aug \u201925','Sep \u201925','Oct \u201925','Nov \u201925','Dec \u201925','Jan \u201926','Feb \u201926','Mar \u201926','Apr \u201926','May \u201926','Jun \u201926','Jul \u201926','Aug \u201926'];
+  }
+  state = { tab: 'holdings', hView: 'table', sortKey: 'value', sortDir: 'desc', pfHov: null, txOpen: false, csvDone: false,
+    txKind: 'BUY', txCard: '', txTier: 'PSA 10', txGrader: 'PSA', txGrade: '10', txQty: '1', txPrice: '', txDate: '2026-08-04', txNote: '', added: [], sellIdx: '', txEdit: null, txOverrides: {}, txCardOk: false,
+    hColW: { card: 220, tier: 92, qty: 60, cost: 96, value: 130, pl: 130, pct: 90 },
+    tColW: { date: 100, kind: 70, card: 220, tier: 92, qty: 56, price: 92 } };
+  money(n) { return '$' + Math.round(n).toLocaleString('en-US'); }
+  // Raw slab label → internal grade bucket (valuation tier); the slab label is kept on the transaction.
+  bucketOf(label) {
+    if (label === 'Raw') return 'Raw';
+    const n = parseFloat(label.replace(/[^0-9.]/g, ''));
+    if (n >= 10) return 'PSA 10';
+    if (n >= 9.5) return 'Grade 9.5';
+    if (n >= 9) return 'PSA 9';
+    if (n >= 8) return 'PSA 8';
+    return 'PSA 7';
+  }
+  canSave(st) {
+    if (!(parseFloat(st.txPrice) > 0)) return false;
+    if (st.txKind === 'BUY') return !!st.txCardOk;
+    if (st.txEdit) return (parseInt(st.txQty, 10) || 0) >= 1;
+    if (st.sellIdx === '') return false;
+    const q = parseInt(st.txQty, 10) || 0;
+    return q >= 1 && q <= this.HOLD[+st.sellIdx].qty;
+  }
+  componentDidMount() {
+    if (location.hash === '#performance') this.setState({ tab: 'performance' });
+  }
+  startResize(key, bag) {
+    return (e) => {
+      e.preventDefault();
+      const startX = e.clientX, startW = this.state[bag][key];
+      const move = (ev) => this.setState(s => ({ [bag]: Object.assign({}, s[bag], { [key]: Math.max(52, startW + ev.clientX - startX) }) }));
+      const up = () => { document.removeEventListener('mousemove', move); document.removeEventListener('mouseup', up); };
+      document.addEventListener('mousemove', move);
+      document.addEventListener('mouseup', up);
+    };
+  }
+  renderVals() {
+    const st = this.state;
+    const empty = this.props.emptyState ?? false;
+    const seg = (on) => ({ bg: on ? this.PAL.acc : this.PAL.card, fg: on ? this.PAL.card : this.PAL.mut });
+    const totV = this.HOLD.reduce((a, h) => a + h.cur * h.qty, 0);
+    const totC = this.HOLD.reduce((a, h) => a + h.cost * h.qty, 0);
+    const tierRank = (t) => ['Raw', 'Grade 1', 'Grade 2', 'Grade 3', 'Grade 4', 'Grade 5', 'Grade 6', 'Grade 7', 'Grade 8', 'Grade 9', 'Grade 9.5', 'PSA 10', 'CGC 10', 'CGC 10 Prist.', 'TAG 10', 'ACE 10', 'SGC 10', 'BGS 10', 'BGS 10 Black'].indexOf(t);
+    const hs = this.HOLD.map(h => ({ h: h, value: h.cur * h.qty, pl: (h.cur - h.cost) * h.qty }));
+    const sk = st.sortKey, sd = st.sortDir;
+    hs.sort((a, b) => {
+      let va, vb;
+      if (sk === 'card') { va = a.h.card; vb = b.h.card; }
+      else if (sk === 'tier') { va = tierRank(a.h.tier); vb = tierRank(b.h.tier); }
+      else if (sk === 'qty') { va = a.h.qty; vb = b.h.qty; }
+      else if (sk === 'cost') { va = a.h.cost; vb = b.h.cost; }
+      else if (sk === 'pl') { va = a.pl; vb = b.pl; }
+      else { va = a.value; vb = b.value; }
+      const r = va < vb ? -1 : va > vb ? 1 : 0;
+      return sd === 'asc' ? r : -r;
+    });
+    const pcf = (n, d) => (n >= 0 ? '+' : '\u2212') + Math.abs(n / d * 100).toFixed(1) + '%';
+    const allBI = this.BV.concat(this.IX);
+    const mn = Math.min.apply(null, allBI), mx = Math.max.apply(null, allBI);
+    const N = this.BV.length;
+    const pts = (arr, from, to) => arr.slice(from, to).map((v, k) => (((k + from) / (N - 1)) * 800).toFixed(1) + ',' + (222 - (v - mn) / (mx - mn) * 212).toFixed(1)).join(' ');
+    const hi = st.pfHov, hovHas = hi != null;
+    const realized = 612, unreal = totV - totC;
+    const txAll = st.added.concat(this.TX).map(t => st.txOverrides[t.id] ? Object.assign({}, t, st.txOverrides[t.id]) : t);
+    return {
+      isEmpty: empty,
+      isHold: !empty && st.tab === 'holdings' && st.hView === 'table',
+      isGallery: !empty && st.tab === 'holdings' && st.hView === 'gallery',
+      isHoldTab: !empty && st.tab === 'holdings',
+      isTx: !empty && st.tab === 'transactions', isPerf: !empty && st.tab === 'performance',
+      viewTable: () => this.setState({ hView: 'table' }), viewGallery: () => this.setState({ hView: 'gallery' }),
+      vtBg: st.hView === 'table' ? this.PAL.acc : this.PAL.card, vtFg: st.hView === 'table' ? this.PAL.card : this.PAL.mut,
+      vgBg: st.hView === 'gallery' ? this.PAL.acc : this.PAL.card, vgFg: st.hView === 'gallery' ? this.PAL.card : this.PAL.mut,
+      galleryCards: hs.map(({ h, value, pl }) => ({
+        name: h.card,
+        slotId: 'art-' + h.card.toLowerCase().replace(/[^a-z0-9]+/g, '-'),
+        thumbBg: 'linear-gradient(160deg, ' + (this.ACCENTS[h.card] || ['#D9DDE8', '#B9C2D6']).join(', ') + ')',
+        sub: h.tier + (h.qty > 1 ? ' \u00B7 \u00D7' + h.qty : ''),
+        value: this.money(value),
+        pl: (pl >= 0 ? '+' : '\u2212') + Math.abs(pl / (h.cost * h.qty) * 100).toFixed(1) + '%',
+        plFg: pl >= 0 ? this.PAL.pos : this.PAL.neg2
+      })),
+      tabs: ['holdings', 'transactions', 'performance'].map(t => Object.assign({ label: t, tip: t === 'holdings' ? 'What you own now \u2014 quantity, cost basis, current value, and P&L per position' : t === 'transactions' ? 'Every buy, sell, and correction, newest first' : 'Your binder against the market index since your first transaction', pick: () => this.setState({ tab: t }) }, seg(st.tab === t))),
+      hGridCols: 'minmax(' + st.hColW.card + 'px, 1fr) ' + ['tier', 'qty', 'cost', 'value', 'pl'].map(k => st.hColW[k] + 'px').join(' ') + ' ' + st.hColW.pct + 'px',
+      hCols: [{ n: 'Card', k: 'card', s: 'card' }, { n: 'Tier', k: 'tier', s: 'tier' }, { n: 'Qty', k: 'qty', s: 'qty' }, { n: 'Avg cost', k: 'cost', s: 'cost' }, { n: 'Current value', k: 'value', s: 'value' }, { n: 'Unrealized \u00B1', k: 'pl', s: 'pl' }, { n: '% of binder', k: 'pct', s: 'value' }].map(c => ({
+        name: c.n, rs: this.startResize(c.k, 'hColW'),
+        arrow: sk === c.s && c.k !== 'pct' ? (sd === 'desc' ? ' \u25BE' : ' \u25B4') : '',
+        sort: () => this.setState(s2 => ({ sortKey: c.s, sortDir: s2.sortKey === c.s ? (s2.sortDir === 'desc' ? 'asc' : 'desc') : 'desc' }))
+      })),
+      hRows: hs.map(({ h, value, pl }) => ({
+        card: h.card, tier: h.tier, qty: String(h.qty),
+        cost: this.money(h.cost) + (h.qty > 1 ? ' ea' : ''),
+        value: this.money(value),
+        estShow: h.est ? 'inline-block' : 'none',
+        estTip: 'No recent sales in this tier \u2014 value estimated from index movement since the last observed sale',
+        pl: (pl >= 0 ? '+' : '\u2212') + '$' + Math.abs(pl).toLocaleString('en-US') + ' \u00B7 ' + pcf(pl, h.cost * h.qty),
+        plFg: pl >= 0 ? this.PAL.pos : this.PAL.neg2,
+        pct: (value / totV * 100).toFixed(1) + '%'
+      })),
+      totLabel: this.HOLD.length + ' positions', totCost: this.money(totC), totValue: this.money(totV),
+      totPl: (unreal >= 0 ? '+' : '\u2212') + '$' + Math.abs(unreal).toLocaleString('en-US') + ' \u00B7 ' + pcf(unreal, totC),
+      totPlFg: unreal >= 0 ? this.PAL.pos : this.PAL.neg2,
+      txCount: txAll.length + ' transactions',
+      tGridCols: ['date', 'kind', 'card', 'tier', 'qty', 'price'].map(k => st.tColW[k] + 'px').join(' ').replace(st.tColW.card + 'px', 'minmax(' + st.tColW.card + 'px, 1fr)') + ' minmax(140px, 1fr) 72px',
+      tCols: [{ n: 'Date', k: 'date' }, { n: 'Type', k: 'kind' }, { n: 'Card', k: 'card' }, { n: 'Tier', k: 'tier' }, { n: 'Qty', k: 'qty' }, { n: 'Price', k: 'price' }, { n: 'Note', k: 'price' }, { n: '', k: 'price' }].map(c => ({ name: c.n, rs: this.startResize(c.k, 'tColW') })),
+      txRows: txAll.map(t => ({
+        date: t.d, kind: t.v ? 'VOID' : t.k, card: t.card, tier: t.tier, qty: String(t.q), price: this.money(t.p), note: t.note || '\u2014',
+        kBg: t.v ? 'rgba(176,127,26,0.12)' : t.k === 'BUY' ? this.PAL.posBg(0.10) : 'rgba(74,99,208,0.10)',
+        kFg: t.v ? this.PAL.warnInk : t.k === 'BUY' ? this.PAL.pos : this.PAL.acc,
+        kBd: t.v ? 'rgba(176,127,26,0.35)' : t.k === 'BUY' ? this.PAL.posBg(0.3) : 'rgba(74,99,208,0.3)',
+        strike: t.v ? 'line-through' : 'none', op: t.v ? 0.62 : 1,
+        voidTip: t.v ? 'Superseded by a correction \u2014 kept in the audit log, excluded from your totals' : 'Hover the row and use \u270E to correct it \u2014 the original is kept in the audit log',
+        voidShow: 'inline-block',
+        voidIt: () => {
+          const parts = t.tier.split(' ');
+          const grader = t.tier === 'Raw' ? 'Raw' : (this.GRADERS[parts[0]] ? parts[0] : 'PSA');
+          const grade = grader === 'Raw' ? '' : (this.GRADERS[parts[0]] ? parts.slice(1).join(' ') : t.tier.replace('Grade ', ''));
+          this.setState({
+            txEdit: t.id, txCardOk: true,
+            txOpen: true, txKind: t.k, txCard: t.card, txTier: t.tier, txGrader: grader, txGrade: grade,
+            txQty: String(t.q), txPrice: String(t.p), txDate: t.d, txNote: t.note || '',
+            sellIdx: ''
+          });
+        }
+      })),
+      exportCsv: () => { this.setState({ csvDone: true }); setTimeout(() => this.setState({ csvDone: false }), 1800); },
+      csvLabel: st.csvDone ? '\u2713 Exported' : '\u2193 Export CSV',
+      perfEdge: '+' + (this.BV[N - 1] - this.IX[N - 1]) + 'pp vs index',
+      pfYMax: String(mx), pfYMin: String(mn),
+      pfBvSolid: pts(this.BV, 0, N - 1), pfBvDash: pts(this.BV, N - 2, N),
+      pfIxSolid: pts(this.IX, 0, N - 1), pfIxDash: pts(this.IX, N - 2, N),
+      pfHollowTop: ((222 - (this.BV[N - 1] - mn) / (mx - mn) * 212) / 230 * 100).toFixed(1),
+      pfMove: (e) => { const r = e.currentTarget.getBoundingClientRect(); const f = Math.max(0, Math.min(1, (e.clientX - r.left) / r.width)); const idx = Math.round(f * (N - 1)); if (idx !== this.state.pfHov) this.setState({ pfHov: idx }); },
+      pfOut: () => this.setState({ pfHov: null }),
+      pfHovShow: hovHas, pfHovLeft: hovHas ? (hi / (N - 1) * 100).toFixed(2) : 0,
+      pfHovMonth: hovHas ? this.PMONTHS[hi] : '',
+      pfHovBv: hovHas ? String(this.BV[hi]) : '', pfHovIx: hovHas ? String(this.IX[hi]) : '',
+      perfStats: [
+        { k: 'Realized P&L', v: '+$612', sub: '3 closed sales', fg: this.PAL.pos, tip: 'Profit locked in on sold positions \u2014 sale proceeds minus what you paid. Never re-estimated.' },
+        { k: 'Unrealized \u00B1', v: (unreal >= 0 ? '+' : '\u2212') + '$' + Math.abs(unreal).toLocaleString('en-US'), sub: 'on ' + this.HOLD.length + ' open positions', fg: unreal >= 0 ? this.PAL.pos : this.PAL.neg2, tip: 'Current estimated value of holdings minus cost basis. Moves with the market; EST-badged positions are index-estimated.' },
+        { k: 'Win rate', v: '67%', sub: '2 of 3 sales above cost', fg: this.PAL.ink, tip: 'Share of closed sales that sold for more than you paid.' },
+        { k: 'Avg hold', v: '7.2 mo', sub: 'across closed sales', fg: this.PAL.ink, tip: 'Average time between buy and sell on closed positions.' }
+      ],
+      yearRows: [
+        { yr: '2025', inv: this.money(2097), pro: this.money(1044), rl: '+$219', rlFg: this.PAL.pos, end: this.money(2381) },
+        { yr: '2026 YTD', inv: this.money(1552), pro: this.money(903), rl: '+$393', rlFg: this.PAL.pos, end: this.money(totV) }
+      ],
+      txOpen: st.txOpen,
+      openTx: () => this.setState({ txOpen: true }),
+      closeTx: () => this.setState({ txOpen: false, txEdit: null, txCard: '', txPrice: '', txNote: '', sellIdx: '', txCardOk: false }),
+      modalTitle: st.txEdit ? 'Edit transaction' : 'Add transaction',
+      stopClick: (e) => e.stopPropagation(),
+      pickBuy: () => this.setState({ txKind: 'BUY' }), pickSell: () => this.setState({ txKind: 'SELL', sellIdx: '', txQty: '1' }),
+      isBuy: st.txKind === 'BUY', isSell: st.txKind === 'SELL',
+      isSellNew: st.txKind === 'SELL' && !st.txEdit,
+      isSellEdit: st.txKind === 'SELL' && !!st.txEdit,
+      editCardName: st.txCard || '\u2014',
+      sellTierNote: st.txEdit ? '(from the original sale)' : '(from holding)',
+      sellOpts: this.HOLD.map((h, i) => ({ i: String(i), label: h.card + ' \u00B7 ' + h.tier + ' \u00B7 ' + h.qty + ' held' })),
+      setTxSell: (e) => { const i = e.target.value; this.setState({ sellIdx: i, txQty: '1' }); },
+      sellTier: st.txEdit ? st.txTier : st.sellIdx !== '' ? this.HOLD[+st.sellIdx].tier : '\u2014',
+      sellTierFg: st.txEdit || st.sellIdx !== '' ? this.PAL.ink : this.PAL.mut3,
+      qtyMax: st.txKind === 'SELL' && !st.txEdit && st.sellIdx !== '' ? String(this.HOLD[+st.sellIdx].qty) : '99',
+      qtyMaxNote: st.txKind === 'SELL' && !st.txEdit && st.sellIdx !== '' ? '(max ' + this.HOLD[+st.sellIdx].qty + ')' : '',
+      qtyBd: st.txKind === 'SELL' && !st.txEdit && st.sellIdx !== '' && (parseInt(st.txQty, 10) || 0) > this.HOLD[+st.sellIdx].qty ? this.PAL.neg2 : this.PAL.line,
+      buyBg: st.txKind === 'BUY' ? this.PAL.pos2 : this.PAL.card, buyFg: st.txKind === 'BUY' ? this.PAL.card : this.PAL.mut,
+      sellBg: st.txKind === 'SELL' ? this.PAL.acc : this.PAL.card, sellFg: st.txKind === 'SELL' ? this.PAL.card : this.PAL.mut,
+      priceLabel: st.txKind === 'BUY' ? 'Price paid ($)' : 'Price received ($)',
+      txCard: st.txCard, txQty: st.txQty, txPrice: st.txPrice, txDate: st.txDate, txNote: st.txNote,
+      setTxCard: (e) => this.setState({ txCard: e.target.value, txCardOk: false }),
+      cardMenuOpen: st.txKind === 'BUY' && !st.txCardOk && st.txCard.trim().length >= 2,
+      cardMatches: this.CARDS.filter(c => c.name.toLowerCase().includes(st.txCard.trim().toLowerCase())).slice(0, 6).map(c => ({
+        name: c.name, set: c.set, tip: 'Log this transaction against ' + c.name + ' (' + c.set + ')',
+        pick: () => this.setState({ txCard: c.name, txCardOk: true })
+      })),
+      cardNoMatch: st.txCard.trim().length >= 2 && this.CARDS.filter(c => c.name.toLowerCase().includes(st.txCard.trim().toLowerCase())).length === 0,
+      cardBd: st.txCardOk ? this.PAL.posBg(0.45) : this.PAL.line,
+      cardHint: st.txCardOk ? '\u2713 linked' : '(must link to a tracked card)',
+      cardHintFg: st.txCardOk ? this.PAL.pos : this.PAL.mut2,
+      txGrader: st.txGrader, txGrade: st.txGrade,
+      graderOpts: Object.keys(this.GRADERS).map(g => ({ v: g })),
+      gradeOpts: (this.GRADERS[st.txGrader] || []).map(g => ({ v: g })),
+      gradeOff: st.txGrader === 'Raw',
+      gradeBg: st.txGrader === 'Raw' ? this.PAL.bg : this.PAL.card,
+      gradeFg: st.txGrader === 'Raw' ? this.PAL.mut3 : this.PAL.mut,
+      setTxGrader: (e) => { const g = e.target.value; const first = (this.GRADERS[g] || [])[0] || ''; this.setState({ txGrader: g, txGrade: first, txTier: g === 'Raw' ? 'Raw' : g + ' ' + first }); },
+      setTxGrade: (e) => this.setState(s => ({ txGrade: e.target.value, txTier: s.txGrader + ' ' + e.target.value })),
+      setTxQty: (e) => this.setState({ txQty: e.target.value }),
+      setTxPrice: (e) => this.setState({ txPrice: e.target.value }),
+      setTxDate: (e) => this.setState({ txDate: e.target.value }),
+      setTxNote: (e) => this.setState({ txNote: e.target.value }),
+      saveOff: !this.canSave(st),
+      saveBg: this.canSave(st) ? this.PAL.acc : this.PAL.accMut,
+      saveCur: this.canSave(st) ? 'pointer' : 'not-allowed',
+      saveTx: () => this.setState(s => {
+        const sell = s.txKind === 'SELL' && !s.txEdit ? this.HOLD[+s.sellIdx] : null;
+        const row = { d: s.txDate, k: s.txKind, card: sell ? sell.card : s.txCard.trim(), tier: sell ? sell.tier : s.txTier, q: parseInt(s.txQty, 10) || 1, p: parseFloat(s.txPrice), note: s.txNote.trim(), v: false };
+        if (s.txEdit) return {
+          txOverrides: Object.assign({}, s.txOverrides, { [s.txEdit]: row }),
+          txOpen: false, txEdit: null, txCard: '', txPrice: '', txNote: '', sellIdx: '', txCardOk: false
+        };
+        row.id = 'a' + Date.now();
+        return {
+          added: [row].concat(s.added),
+          txOpen: false, tab: 'transactions', txCard: '', txPrice: '', txNote: '', sellIdx: '', txCardOk: false
+        };
+      })
+    };
+  }
+}
+</script>
+</body>
+</html>

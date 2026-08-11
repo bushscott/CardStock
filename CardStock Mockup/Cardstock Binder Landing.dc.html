@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="icon" href="brand/favicon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="anonymous">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+  html, body { margin: 0; padding: 0; background: #F1F1EC; }
+  a { color: #4A63D0; text-decoration: none; }
+  a:hover { color: #3A4FB8; text-decoration: underline; }
+  ::selection { background: rgba(74, 99, 208, 0.18); }
+</style>
+</helmet>
+<div style="font-family: Inter, sans-serif; color: #1C1C1E;">
+
+  <nav data-screen-label="Nav" style="position: sticky; top: 0; z-index: 50; background: rgba(241, 241, 236, 0.92); backdrop-filter: blur(8px); border-bottom: 1px solid #E4E4E0;">
+    <div style="max-width: 1080px; margin: 0 auto; padding: 14px 40px; display: flex; align-items: center; justify-content: space-between; gap: 24px;">
+      <a href="Cardstock%20Landing.dc.html" style="display: flex; align-items: center; gap: 10px; color: inherit; text-decoration: none;">
+        <svg viewBox="0 0 32 32" fill="none" style="width: 24px; height: 24px;"><rect x="5.5" y="5.5" width="15" height="21" rx="2.5" stroke="#1C1C1E" stroke-width="2" transform="rotate(-12 13 16)"></rect><rect x="12" y="5.5" width="15" height="21" rx="2.5" fill="#FAFAF7" stroke="#1C1C1E" stroke-width="2"></rect><polyline points="15,21.5 17.5,17 19.5,18.5 23.5,12.5" stroke="#0E8A7B" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></polyline><circle cx="23.5" cy="12.5" r="1.7" fill="#0E8A7B"></circle></svg>
+        <span style="font-size: 18px; font-weight: 700; letter-spacing: -0.03em;">Cardstock</span>
+      </a>
+      <div style="display: flex; align-items: center; gap: 22px;">
+        <a href="Cardstock%20Landing.dc.html" style="font-size: 13.5px; font-weight: 500; color: #55555A;" style-hover="color: #4A63D0; text-decoration: none;">Overview</a>
+        <a href="Cardstock%20Screener%20Landing.dc.html" style="font-size: 13.5px; font-weight: 500; color: #55555A;" style-hover="color: #4A63D0; text-decoration: none;">Screener</a>
+        <a href="Cardstock%20Charts%20Landing.dc.html" style="font-size: 13.5px; font-weight: 500; color: #55555A;" style-hover="color: #4A63D0; text-decoration: none;">Charts</a>
+        <a href="Cardstock%20Account.dc.html" style="font-size: 13.5px; font-weight: 500; color: #55555A;" style-hover="color: #4A63D0; text-decoration: none;">Log in</a>
+        <a href="Cardstock%20Account.dc.html" style="font-size: 13.5px; font-weight: 600; color: #FFFFFF; background: #4A63D0; border-radius: 7px; padding: 8px 14px;" style-hover="background: #3A4FB8; color: #FFFFFF; text-decoration: none;">Sign up →</a>
+      </div>
+    </div>
+  </nav>
+
+  <section data-screen-label="Hero" style="overflow-x: clip;">
+    <div style="max-width: 1080px; margin: 0 auto; padding: 52px 40px 56px; display: grid; grid-template-columns: 1fr 1fr; gap: 48px; align-items: center;">
+      <div style="display: flex; flex-direction: column; gap: 20px;">
+        <div style="font-family: 'JetBrains Mono', monospace; font-size: 12px; font-weight: 500; letter-spacing: 0.08em; color: #4A63D0;">PRODUCT · BINDER</div>
+        <h1 style="font-size: 48px; font-weight: 800; letter-spacing: -0.03em; line-height: 1.06; margin: 0; max-width: 480px; text-wrap: pretty;">Your binder is a portfolio.</h1>
+        <p style="font-size: 17px; line-height: 1.6; color: #55555A; margin: 0; max-width: 460px; text-wrap: pretty;">Cost basis, unrealized P&amp;L, and performance against the market index — every card, every lot. Treat it like one.</p>
+        <div style="display: flex; align-items: center; gap: 18px;">
+          <a href="Cardstock%20Account.dc.html" style="font-size: 15px; font-weight: 600; color: #FFFFFF; background: #4A63D0; border-radius: 8px; padding: 11px 20px;" style-hover="background: #3A4FB8; color: #FFFFFF; text-decoration: none;">Sign up →</a>
+          <a href="Cardstock%20Landing.dc.html" style="font-size: 14px; font-weight: 600;">All of Cardstock →</a>
+        </div>
+      </div>
+      <div style="display: flex; justify-content: flex-end;">
+        <div style="width: 500px; max-width: 100%; background: #131316; border: 1px solid #2A2B2E; border-radius: 12px; box-shadow: 0 24px 48px rgba(28, 28, 30, 0.25); box-sizing: border-box; overflow: hidden; font-size: 13px; color: #F2F2EE;">
+          <div style="display: flex; gap: 0; border-bottom: 1px solid #2A2B2E;">
+            <div style="flex: 1; padding: 12px; border-right: 1px solid #232427;"><div style="font-size: 10.5px; font-weight: 600; letter-spacing: 0.05em; color: #B9B9B4; text-transform: uppercase;">Total value</div><div style="font-family: 'JetBrains Mono', monospace; font-size: 19px; font-weight: 700; margin-top: 3px;">$18,432</div></div>
+            <div style="flex: 1; padding: 12px; border-right: 1px solid #232427;"><div style="font-size: 10.5px; font-weight: 600; letter-spacing: 0.05em; color: #B9B9B4; text-transform: uppercase;">Unrealized</div><div style="font-family: 'JetBrains Mono', monospace; font-size: 19px; font-weight: 700; color: #46C08A; margin-top: 3px;">+$3,108</div><div style="font-family: 'JetBrains Mono', monospace; font-size: 11px; color: #46C08A; margin-top: 1px;">▲ +20.3%</div></div>
+            <div style="flex: 1; padding: 12px;"><div style="font-size: 10.5px; font-weight: 600; letter-spacing: 0.05em; color: #B9B9B4; text-transform: uppercase;">Vs market</div><div style="font-family: 'JetBrains Mono', monospace; font-size: 19px; font-weight: 700; color: #46C08A; margin-top: 3px;">+8.7</div><div style="font-family: 'JetBrains Mono', monospace; font-size: 11px; color: #B9B9B4; margin-top: 1px;">pp · 12M</div></div>
+          </div>
+          <div style="display: grid; grid-template-columns: 1.6fr 0.4fr 0.7fr 0.7fr 0.75fr; gap: 8px; padding: 6px 12px; border-bottom: 1px solid #2A2B2E; font-size: 10.5px; font-weight: 600; letter-spacing: 0.05em; color: #B9B9B4; text-transform: uppercase;">
+            <span>Position</span><span style="text-align: right;">Qty</span><span style="text-align: right;">Cost</span><span style="text-align: right;">Value</span><span style="text-align: right;">P&amp;L</span>
+          </div>
+          <div style="display: grid; grid-template-columns: 1.6fr 0.4fr 0.7fr 0.7fr 0.75fr; gap: 8px; padding: 8px 12px; border-bottom: 1px solid #232427; align-items: center;">
+            <div style="min-width: 0;"><div style="font-weight: 500; overflow: hidden; white-space: nowrap; text-overflow: ellipsis;">Umbreon VMAX (Alt Art)</div><div style="font-size: 11px; color: #B9B9B4;">PSA 10 · 2 lots</div></div>
+            <span style="font-family: 'JetBrains Mono', monospace; text-align: right;">2</span>
+            <span style="font-family: 'JetBrains Mono', monospace; text-align: right;">$2,410</span>
+            <span style="font-family: 'JetBrains Mono', monospace; text-align: right;">$2,972</span>
+            <span style="font-family: 'JetBrains Mono', monospace; font-size: 12px; color: #46C08A; text-align: right;">+$562</span>
+          </div>
+          <div style="display: grid; grid-template-columns: 1.6fr 0.4fr 0.7fr 0.7fr 0.75fr; gap: 8px; padding: 8px 12px; border-bottom: 1px solid #232427; align-items: center;">
+            <div style="min-width: 0;"><div style="font-weight: 500; overflow: hidden; white-space: nowrap; text-overflow: ellipsis;">Charizard Holo</div><div style="font-size: 11px; color: #B9B9B4;">Base Set · Grade 9 · 1 lot</div></div>
+            <span style="font-family: 'JetBrains Mono', monospace; text-align: right;">1</span>
+            <span style="font-family: 'JetBrains Mono', monospace; text-align: right;">$4,850</span>
+            <span style="font-family: 'JetBrains Mono', monospace; text-align: right;">$6,120</span>
+            <span style="font-family: 'JetBrains Mono', monospace; font-size: 12px; color: #46C08A; text-align: right;">+$1,270</span>
+          </div>
+          <div style="display: grid; grid-template-columns: 1.6fr 0.4fr 0.7fr 0.7fr 0.75fr; gap: 8px; padding: 8px 12px; border-bottom: 1px solid #232427; align-items: center;">
+            <div style="min-width: 0;"><div style="font-weight: 500; overflow: hidden; white-space: nowrap; text-overflow: ellipsis;">Blastoise Holo</div><div style="font-size: 11px; color: #B9B9B4;">Base Set 2 · Grade 9 · 1 lot</div></div>
+            <span style="font-family: 'JetBrains Mono', monospace; text-align: right;">1</span>
+            <span style="font-family: 'JetBrains Mono', monospace; text-align: right;">$342</span>
+            <span style="font-family: 'JetBrains Mono', monospace; text-align: right;">$318</span>
+            <span style="font-family: 'JetBrains Mono', monospace; font-size: 12px; color: #D0655E; text-align: right;">−$24</span>
+          </div>
+          <div style="display: grid; grid-template-columns: 1.6fr 0.4fr 0.7fr 0.7fr 0.75fr; gap: 8px; padding: 8px 12px; align-items: center;">
+            <div style="min-width: 0;"><div style="font-weight: 500; overflow: hidden; white-space: nowrap; text-overflow: ellipsis;">Giratina V (Alt Art)</div><div style="font-size: 11px; color: #B9B9B4;">Lost Origin · PSA 10 · 1 lot</div></div>
+            <span style="font-family: 'JetBrains Mono', monospace; text-align: right;">1</span>
+            <span style="font-family: 'JetBrains Mono', monospace; text-align: right;">$690</span>
+            <span style="font-family: 'JetBrains Mono', monospace; text-align: right;">$845</span>
+            <span style="font-family: 'JetBrains Mono', monospace; font-size: 12px; color: #46C08A; text-align: right;">+$155</span>
+          </div>
+          <div style="display: flex; justify-content: space-between; align-items: center; padding: 8px 12px; border-top: 1px solid #2A2B2E; background: #0F0F11;">
+            <span style="font-family: 'JetBrains Mono', monospace; font-size: 11px; color: #B9B9B4;">14 positions · 6 sets · cost $15,324</span>
+            <span style="font-family: 'JetBrains Mono', monospace; font-size: 11px; color: #46C08A;">▲ +$412 1M</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section data-screen-label="Features" style="border-top: 1px solid #E4E4E0;">
+    <div style="max-width: 1080px; margin: 0 auto; padding: 36px 40px 56px;">
+      <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 20px;">
+        <div style="background: #FFFFFF; border: 1px solid #E4E4E0; border-radius: 10px; padding: 24px; display: flex; flex-direction: column; gap: 12px;">
+          <svg viewBox="0 0 64 40" style="width: 64px; height: 40px;"><rect x="8" y="22" width="10" height="12" rx="2" fill="#E4E4E0"></rect><rect x="22" y="14" width="10" height="20" rx="2" fill="#E4E4E0"></rect><rect x="36" y="8" width="10" height="26" rx="2" fill="#4A63D0"></rect></svg>
+          <h3 style="font-size: 17px; font-weight: 650; margin: 0;">Cost basis &amp; P&amp;L</h3>
+          <p style="font-size: 14px; line-height: 1.55; color: #55555A; margin: 0;">Every position carries its lots: what you paid, when, and what it's worth at the latest close. Unrealized and realized, per card and in total.</p>
+          <div style="font-family: 'JetBrains Mono', monospace; font-size: 11.5px; color: #4A63D0;">lots · cost · P&amp;L</div>
+        </div>
+        <div style="background: #FFFFFF; border: 1px solid #E4E4E0; border-radius: 10px; padding: 24px; display: flex; flex-direction: column; gap: 12px;">
+          <svg viewBox="0 0 64 40" style="width: 64px; height: 40px;"><polyline points="6,30 20,26 34,20 48,12 58,8" fill="none" stroke="#4A63D0" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"></polyline><polyline points="6,32 20,30 34,27 48,23 58,21" fill="none" stroke="#E4E4E0" stroke-width="2.5" stroke-dasharray="4 3" stroke-linecap="round"></polyline></svg>
+          <h3 style="font-size: 17px; font-weight: 650; margin: 0;">Vs the market</h3>
+          <p style="font-size: 14px; line-height: 1.55; color: #55555A; margin: 0;">Your binder and the market index, both set to 100 at your first transaction. One number tells you if your eye beats the average — in percentage points.</p>
+          <div style="font-family: 'JetBrains Mono', monospace; font-size: 11.5px; color: #4A63D0;">+8.7 pp · 12M</div>
+        </div>
+        <div style="background: #FFFFFF; border: 1px solid #E4E4E0; border-radius: 10px; padding: 24px; display: flex; flex-direction: column; gap: 12px;">
+          <svg viewBox="0 0 64 40" style="width: 64px; height: 40px;"><rect x="8" y="6" width="48" height="7" rx="2" fill="#E4E4E0"></rect><rect x="8" y="17" width="48" height="7" rx="2" fill="#E4E4E0"></rect><rect x="8" y="28" width="30" height="7" rx="2" fill="#4A63D0"></rect></svg>
+          <h3 style="font-size: 17px; font-weight: 650; margin: 0;">A real ledger</h3>
+          <p style="font-size: 14px; line-height: 1.55; color: #55555A; margin: 0;">Buys, sells, and corrections live in a transaction history that's preserved, never silently edited — the same standard we hold our market data to.</p>
+          <div style="font-family: 'JetBrains Mono', monospace; font-size: 11.5px; color: #4A63D0;">transactions · export CSV</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <footer data-screen-label="Footer" style="background: #0F0F11; border-top: 1px solid #232427;">
+    <div style="max-width: 1080px; margin: 0 auto; padding: 56px 40px 28px;">
+      <div style="display: grid; grid-template-columns: 1.4fr 1fr; gap: 32px;">
+        <div style="display: flex; flex-direction: column; gap: 14px;">
+          <div style="display: flex; align-items: center; gap: 10px;">
+            <svg viewBox="0 0 32 32" fill="none" style="width: 26px; height: 26px;"><rect x="5.5" y="5.5" width="15" height="21" rx="2.5" stroke="#ECECE6" stroke-width="2" transform="rotate(-12 13 16)"></rect><rect x="12" y="5.5" width="15" height="21" rx="2.5" fill="#0F0F11" stroke="#ECECE6" stroke-width="2"></rect><polyline points="15,21.5 17.5,17 19.5,18.5 23.5,12.5" stroke="#3FBFAD" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></polyline><circle cx="23.5" cy="12.5" r="1.7" fill="#3FBFAD"></circle></svg>
+            <span style="font-size: 19px; font-weight: 700; letter-spacing: -0.03em; color: #F2F2EE;">Cardstock</span>
+          </div>
+          <p style="font-size: 14.5px; line-height: 1.65; color: #9A9A96; margin: 0; max-width: 340px;">Precise numbers over adjectives. No hype, no exclamation marks. We treat cardboard with the analytical rigor everyone in your life says it doesn't deserve. The market suggests otherwise.</p>
+        </div>
+        <div style="display: flex; flex-direction: column; gap: 10px;">
+          <div style="font-family: 'JetBrains Mono', monospace; font-size: 11px; letter-spacing: 0.06em; color: #B9B9B4;">PRODUCT</div>
+          <a href="Cardstock%20Screener%20Landing.dc.html" style="font-size: 13.5px; color: #B9B9B4;" style-hover="color: #8C9BF2; text-decoration: none;">Screener</a>
+          <a href="Cardstock%20Charts%20Landing.dc.html" style="font-size: 13.5px; color: #B9B9B4;" style-hover="color: #8C9BF2; text-decoration: none;">Charts</a>
+          <a href="Cardstock%20Binder%20Landing.dc.html" style="font-size: 13.5px; color: #B9B9B4;" style-hover="color: #8C9BF2; text-decoration: none;">Binder</a>
+          <a href="Cardstock%20About%20Data.dc.html" style="font-size: 13.5px; color: #B9B9B4;" style-hover="color: #8C9BF2; text-decoration: none;">About the data</a>
+        </div>
+      </div>
+      <div style="display: flex; justify-content: space-between; gap: 16px; flex-wrap: wrap; border-top: 1px solid #232427; margin-top: 40px; padding-top: 18px;">
+        <span style="font-family: 'JetBrains Mono', monospace; font-size: 11px; color: #B9B9B4;">CDSTK · fan-made · not affiliated with Nintendo, The Pokémon Company, or Creatures Inc.</span>
+        <span style="display: inline-flex; gap: 14px; align-items: baseline;"><a href="Cardstock%20Legal.dc.html#privacy" style="font-family: 'JetBrains Mono', monospace; font-size: 11px; color: #B9B9B4;" style-hover="color: #8C9BF2; text-decoration: none;">Privacy</a><a href="Cardstock%20Legal.dc.html#terms" style="font-family: 'JetBrains Mono', monospace; font-size: 11px; color: #B9B9B4;" style-hover="color: #8C9BF2; text-decoration: none;">Terms</a><span style="font-family: 'JetBrains Mono', monospace; font-size: 11px; color: #B9B9B4;">© 2026 Cardstock</span></span>
+      </div>
+    </div>
+  </footer>
+</div>
+</x-dc>
+</body>
+</html>

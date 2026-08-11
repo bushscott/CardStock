@@ -1,0 +1,483 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="icon" href="./brand/favicon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="anonymous">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Inter+Tight:wght@600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<script src="./image-slot.js"></script>
+<style>
+  html, body { margin: 0; padding: 0; background: var(--bg, var(--bg, #FAFAF7)); }
+  body { font-family: 'Inter', system-ui, sans-serif; color: var(--ink, #1C1C1E); }
+  a { color: var(--acc, #4A63D0); text-decoration: none; }
+  a:hover { color: var(--accH, #3A4FB8); text-decoration: underline; }
+  *:focus-visible { outline: 2px solid var(--acc, #4A63D0); outline-offset: 1px; border-radius: 2px; }
+  image-slot[placeholder=" "]::part(empty) { opacity: 0; }
+  @media (prefers-reduced-motion: reduce) { * { animation-duration: 0.01ms !important; } }
+
+  :root[data-cvd="1"] { --pos: #0B69A8; --neg2: #D55E00; }
+
+  :root[data-theme="dark"] { color-scheme: dark; --bg: #161614; --card: #1E1E1C; --ink: #E9E9E5; --mut: #B4B4AE; --mut2: #A8A8A2; --mut3: #9A9A94; --mutbg: #2A2A27; --hov: #282825; --line: #33332F; --line2: #3E3E39; --line3: #4A4A44; --line4: #262623; --acc: #8C9BF2; --accH: #AAB6F6; --btn: #4A63D0; --warn: #D6A54A; --warnInk: #D6A54A; --tooltipBg: rgba(30, 30, 28, 0.95); --accBg: #252B44; --accMut: #3A4570; }
+  :root[data-theme="dark"]:not([data-cvd="1"]) { --pos: #4CC08D; --pos2: #4CC08D; --neg: #E57B7B; --neg2: #E57B7B; --neg3: #E57B7B; }
+  :root[data-theme="dark"][data-cvd="1"] { --pos: #58A9E6; --pos2: #58A9E6; --neg: #F5924E; --neg2: #F5924E; --neg3: #E8874D; }
+  :root[data-theme="dark"] { --logoTeal: #3FBFAD; }
+</style>
+<script src="./cardstock-search.js"></script>
+<script>if(localStorage.getItem('cardstock-cvd')==='1')document.documentElement.setAttribute('data-cvd','1');if(localStorage.getItem('cardstock-theme')==='dark')document.documentElement.setAttribute('data-theme','dark');</script>
+</helmet>
+<div data-screen-label="Card" style="min-height: 100vh; display: flex; flex-direction: column; font-size: 15px;">
+
+  <nav style="height: 48px; background: var(--card, #FFFFFF); border-bottom: 1px solid var(--line, #E4E4E0); display: flex; align-items: center; gap: 24px; padding: 0 20px; position: sticky; top: 0; z-index: 20;">
+    <div style="display: flex; align-items: center; gap: 10px;">
+      <a href="Cardstock Home.dc.html" aria-label="Cardstock home" style="display: flex; align-items: center; gap: 10px; color: inherit; text-decoration: none;"><svg width="24" height="24" viewBox="0 0 32 32" fill="none" aria-hidden="true" style="flex: 0 0 auto;"><rect x="5.5" y="5.5" width="15" height="21" rx="2.5" style="stroke: var(--ink, #1C1C1E);" stroke-width="2" transform="rotate(-12 13 16)"></rect><rect x="12" y="5.5" width="15" height="21" rx="2.5" style="fill: var(--card, #FFFFFF); stroke: var(--ink, #1C1C1E);" stroke-width="2"></rect><polyline points="15,21.5 17.5,17 19.5,18.5 23.5,12.5" style="stroke: var(--logoTeal, #0E8A7B);" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" fill="none"></polyline><circle cx="23.5" cy="12.5" r="1.7" style="fill: var(--logoTeal, #0E8A7B);"></circle></svg>
+      <span style="font-family: 'Inter', sans-serif; font-weight: 700; font-size: 18px; letter-spacing: -0.03em; color: var(--ink, #1C1C1E);">Cardstock</span></a>
+      </div>
+    <div style="display: flex; gap: 2px; height: 100%;">
+      <a href="Cardstock Home.dc.html" style="display: flex; align-items: center; padding: 0 12px; font-weight: 500; font-size: 15px; color: var(--mut, #5B5B57); border-bottom: 2px solid transparent; margin-bottom: -1px;">Home</a>
+      <a href="Cardstock Screener.dc.html" style="display: flex; align-items: center; padding: 0 12px; font-weight: 500; font-size: 15px; color: var(--mut, #5B5B57); border-bottom: 2px solid transparent; margin-bottom: -1px;">Screener</a>
+      <a href="Cardstock Charts.dc.html" style="display: flex; align-items: center; padding: 0 12px; font-weight: 500; font-size: 15px; color: var(--mut, #5B5B57); border-bottom: 2px solid transparent; margin-bottom: -1px;">Charts</a>
+      <a href="Cardstock Binder.dc.html" style="display: flex; align-items: center; padding: 0 12px; font-weight: 500; font-size: 15px; color: var(--mut, #5B5B57); border-bottom: 2px solid transparent; margin-bottom: -1px;">Binder</a>
+      <a href="Cardstock Browse.dc.html" style="display: flex; align-items: center; padding: 0 12px; font-weight: 500; font-size: 15px; color: var(--mut, #5B5B57); border-bottom: 2px solid transparent; margin-bottom: -1px;">Browse</a>
+    </div>
+    <div style="flex: 1;"></div>
+    <cardstock-search></cardstock-search>
+    <a href="Cardstock Profile.dc.html" aria-label="Account" title="Profile & settings" style="display: flex; align-items: center; justify-content: center; width: 28px; height: 28px; border-radius: 50%; border: 1px solid var(--line, #E4E4E0); background: var(--mutbg, #F3F3EE); color: var(--mut, #5B5B57); font-weight: 600; font-size: 14px; text-decoration: none; flex-shrink: 0;">O</a>
+  </nav>
+
+  <main style="flex: 1; max-width: 1480px; width: 100%; box-sizing: border-box; margin: 0 auto; padding: 14px 20px 28px 20px; display: flex; flex-direction: column; gap: 16px;">
+
+    <div style="font-size: 13.5px; color: var(--mut2, #6B6B66);"><a href="Cardstock Browse.dc.html" style="color: var(--mut, #5B5B57);">Browse</a> › <a href="Cardstock Set.dc.html" style="color: var(--mut, #5B5B57);">Evolving Skies</a> › <span style="color: var(--ink, #1C1C1E);">Umbreon VMAX (Alt Art)</span></div>
+
+    <section style="background: var(--card, #FFFFFF); border: 1px solid var(--line, #E4E4E0); border-radius: 10px; padding: 16px; display: flex; gap: 18px;">
+      <div onClick="{{ openArt }}" title="Click to enlarge" style="width: 217px; height: 300px; flex-shrink: 0; cursor: zoom-in;">
+        <image-slot id="art-umbreon" shape="rounded" radius="6" placeholder="card art 325×450"></image-slot>
+      </div>
+      <div style="flex: 1; min-width: 0; display: flex; flex-direction: column; justify-content: space-between; gap: 12px;">
+        <div style="display: flex; align-items: flex-start; gap: 12px;">
+          <div style="min-width: 0;">
+            <h1 style="font-family: 'Inter Tight', sans-serif; font-weight: 700; font-size: 26px; letter-spacing: -0.01em; margin: 0;">Umbreon VMAX (Alt Art)</h1>
+            <div style="font-size: 14.5px; color: var(--mut, #5B5B57); margin-top: 3px;"><a href="Cardstock Set.dc.html">Evolving Skies</a> · 215/203 · <a href="Cardstock Character.dc.html">Umbreon</a></div>
+          </div>
+          <div style="flex: 1;"></div>
+          <a href="Cardstock Charts.dc.html" style="display: inline-flex; align-items: center; background: var(--btn, var(--acc, #4A63D0)); color: #FFFFFF; border-radius: 6px; height: 29px; padding: 0 12px; font-size: 13.5px; font-weight: 600; flex-shrink: 0;" style-hover="background: var(--accH, #3A4FB8); color: #FFFFFF; text-decoration: none;">Open in Charts →</a>
+          <div data-watch-pop="1" style="position: relative; flex-shrink: 0;">
+            <button onClick="{{ toggleWatch }}" title="Follow this card on a watchlist — you pick which signals it tracks in Charts" style="background: {{ watchBg }}; border: 1px solid {{ watchBd }}; border-radius: 6px; height: 29px; padding: 0 11px; font-family: 'Inter', sans-serif; font-size: 13.5px; font-weight: 500; color: {{ watchFg }}; cursor: pointer; transition: background 0.15s, color 0.15s;" style-hover="background: {{ watchHoverBg }};">{{ watchLabel }} ▾</button>
+            <sc-if value="{{ watchOpen }}" hint-placeholder-val="{{ false }}">
+              <div data-watch-pop="1" style="position: absolute; top: 33px; right: 0; z-index: 60; background: var(--card, #FFFFFF); border: 1px solid var(--line, #E4E4E0); border-radius: 8px; box-shadow: 0 8px 24px rgba(20, 19, 26, 0.12); padding: 6px; min-width: 190px;">
+                <sc-for list="{{ watchLists }}" as="wl" hint-placeholder-count="3">
+                  <button onClick="{{ wl.pick }}" title="Add this card to this watchlist" style="display: flex; align-items: center; gap: 8px; width: 100%; background: none; border: none; border-radius: 5px; padding: 6px 8px; font-family: 'Inter', sans-serif; font-size: 13.5px; color: var(--ink, #1C1C1E); cursor: pointer; text-align: left;" style-hover="background: var(--hov, #F6F6F2);"><span style="width: 15px; height: 15px; border: 1.5px solid {{ wl.boxBd }}; border-radius: 4px; background: {{ wl.boxBg }}; color: #FFFFFF; font-size: 11px; line-height: 13px; text-align: center; flex-shrink: 0;">{{ wl.check }}</span><span style="flex: 1;">{{ wl.name }}</span><span style="font-family: 'JetBrains Mono', monospace; font-size: 11.5px; color: var(--mut2, #6B6B66);">{{ wl.count }}</span></button>
+                </sc-for>
+                <div style="border-top: 1px solid var(--line4, #F0F0EC); margin: 5px 2px;"></div>
+                <button onClick="{{ newList }}" title="Create another watchlist" style="display: block; width: 100%; background: none; border: none; border-radius: 5px; padding: 6px 8px; font-family: 'Inter', sans-serif; font-size: 13px; color: var(--acc, #4A63D0); cursor: pointer; text-align: left;" style-hover="background: var(--hov, #F6F6F2);">+ New list…</button>
+              </div>
+            </sc-if>
+          </div>
+          <button onClick="{{ addBinder }}" title="Log a purchase of this card — opens the binder transaction form" style="background: {{ binderBg }}; border: 1px solid {{ binderBd }}; border-radius: 6px; height: 29px; padding: 0 11px; font-family: 'Inter', sans-serif; font-size: 13.5px; font-weight: 500; color: {{ binderFg }}; cursor: pointer; flex-shrink: 0; transition: background 0.15s, color 0.15s;" style-hover="background: {{ binderHoverBg }};">{{ binderLabel }}</button>
+        </div>
+        <div style="display: grid; grid-template-columns: repeat(6, 1fr); gap: 8px;">
+          <sc-for list="{{ tierStrip }}" as="t" hint-placeholder-count="6">
+            <div title="{{ t.tip }}" style="background: var(--bg, var(--bg, #FAFAF7)); border: 1px solid var(--line, #E4E4E0); border-radius: 8px; padding: 9px 11px;">
+              <div style="font-size: 11px; font-weight: 600; letter-spacing: 0.06em; color: var(--mut2, #6B6B66); text-transform: uppercase; white-space: nowrap;">{{ t.label }}</div>
+              <div style="font-family: 'JetBrains Mono', monospace; font-size: 18px; font-weight: 700; margin-top: 3px;">{{ t.price }}</div>
+              <div style="font-family: 'JetBrains Mono', monospace; font-size: 12px; color: {{ t.chgFg }}; margin-top: 1px;">{{ t.chg }} 30d</div>
+            </div>
+          </sc-for>
+        </div>
+        <div style="display: flex; gap: 4px; flex-wrap: wrap;">
+          <sc-for list="{{ sigChips }}" as="sg" hint-placeholder-count="2">
+            <span title="{{ sg.tip }}" style="display: inline-flex; align-items: center; gap: 3px; font-family: 'JetBrains Mono', monospace; font-size: 11.5px; font-weight: 500; padding: 1px 6px; border-radius: 4px; background: {{ sg.bg }}; color: {{ sg.fg }}; border: 1px solid {{ sg.bd }}; cursor: help;">{{ sg.i }} {{ sg.t }}</span>
+          </sc-for>
+        </div>
+      </div>
+    </section>
+
+    <sc-if value="{{ artOpen }}" hint-placeholder-val="{{ false }}">
+      <div onClick="{{ closeArt }}" style="position: fixed; inset: 0; background: rgba(20, 19, 26, 0.55); z-index: 200; display: flex; align-items: center; justify-content: center; cursor: zoom-out;">
+        <div onClick="{{ stopClick }}" style="position: relative; width: min(62vh, 78vw); aspect-ratio: 325 / 450; cursor: default;">
+          <image-slot id="art-umbreon" shape="rounded" radius="10" placeholder="card art 325×450"></image-slot>
+          <button onClick="{{ closeArt }}" title="Close the full-size art" aria-label="Close" style="position: absolute; top: -14px; right: -14px; width: 30px; height: 30px; border-radius: 50%; background: var(--card, #FFFFFF); border: 1px solid var(--line, #E4E4E0); color: var(--ink, #1C1C1E); font-size: 15px; line-height: 1; cursor: pointer; box-shadow: 0 2px 8px rgba(20, 19, 26, 0.2); display: flex; align-items: center; justify-content: center;" style-hover="background: var(--mutbg, #F3F3EE);">✕</button>
+        </div>
+      </div>
+    </sc-if>
+
+    <section style="background: var(--card, #FFFFFF); border: 1px solid var(--line, #E4E4E0); border-radius: 10px; padding: 14px 16px;">
+      <div style="display: flex; align-items: baseline; gap: 14px; margin-bottom: 8px; flex-wrap: wrap;">
+        <h2 style="font-family: 'Inter Tight', sans-serif; font-weight: 600; font-size: 17px; margin: 0;">Price · 12M · monthly</h2>
+        <sc-for list="{{ legend }}" as="lg" hint-placeholder-count="3">
+          <button onClick="{{ lg.toggle }}" title="{{ lg.tip }}" style="display: inline-flex; align-items: center; gap: 5px; font-family: 'JetBrains Mono', monospace; font-size: 12.5px; color: var(--mut, #5B5B57); background: none; border: none; padding: 0; cursor: pointer; opacity: {{ lg.op }};" style-hover="color: var(--ink, #1C1C1E);"><span style="width: 14px; height: 2.5px; background: {{ lg.c }}; display: inline-block; border-radius: 1px;"></span>{{ lg.l }}</button>
+        </sc-for>
+        <div style="flex: 1;"></div>
+        <a href="Cardstock Charts.dc.html" style="font-size: 13px;">open in Charts →</a>
+      </div>
+      <div style="display: flex; gap: 8px;">
+        <div style="position: relative; width: 44px; flex-shrink: 0;">
+          <span style="position: absolute; right: 0; top: 2px; font-family: 'JetBrains Mono', monospace; font-size: 10.5px; color: var(--mut2, #6B6B66);">{{ pcYMax }}</span>
+          <span style="position: absolute; right: 0; bottom: 2px; font-family: 'JetBrains Mono', monospace; font-size: 10.5px; color: var(--mut2, #6B6B66);">{{ pcYMin }}</span>
+        </div>
+        <div onMouseMove="{{ pcMove }}" onMouseLeave="{{ pcOut }}" style="position: relative; cursor: crosshair; flex: 1; min-width: 0;">
+          <svg width="100%" height="230" viewBox="0 0 800 230" preserveAspectRatio="none" style="display: block;">
+            <line x1="0" y1="115" x2="800" y2="115" style="stroke: var(--line4, var(--line4, #F0F0EC));" vector-effect="non-scaling-stroke"></line>
+            <sc-for list="{{ pcSeries }}" as="ps" hint-placeholder-count="3">
+              <polyline points="{{ ps.solid }}" fill="none" stroke="{{ ps.c }}" stroke-width="{{ ps.w }}" vector-effect="non-scaling-stroke"></polyline>
+              <polyline points="{{ ps.dash }}" fill="none" stroke="{{ ps.c }}" stroke-width="{{ ps.w }}" stroke-dasharray="4 4" vector-effect="non-scaling-stroke"></polyline>
+            </sc-for>
+          </svg>
+          <div title="Aug is month-to-date — the point firms up as the month's sales land, and finalizes when the month closes" style="position: absolute; left: 100%; top: {{ pcHollowTop }}%; width: 8px; height: 8px; border-radius: 50%; background: var(--card, #FFFFFF); border: 1.5px solid var(--acc, #4A63D0); transform: translate(-50%, -50%); box-sizing: border-box;"></div>
+          <sc-if value="{{ pcHovShow }}" hint-placeholder-val="{{ false }}">
+            <div style="position: absolute; top: 0; bottom: 0; left: {{ pcHovLeft }}%; width: 1px; background: rgba(28, 28, 30, 0.22); pointer-events: none;"></div>
+            <div style="position: absolute; top: 8px; left: 8px; background: var(--tooltipBg, rgba(255, 255, 255, 0.95)); border: 1px solid var(--line, #E4E4E0); border-radius: 6px; padding: 5px 9px; pointer-events: none; box-shadow: 0 4px 12px rgba(20, 19, 26, 0.08);">
+              <div style="font-family: 'JetBrains Mono', monospace; font-size: 11px; color: var(--mut2, #6B6B66);">{{ pcHovMonth }}</div>
+              <sc-for list="{{ pcHovRows }}" as="hr" hint-placeholder-count="3">
+                <div style="font-family: 'JetBrains Mono', monospace; font-size: 12.5px; font-weight: {{ hr.w }}; color: {{ hr.c }};">{{ hr.l }} {{ hr.v }}</div>
+              </sc-for>
+            </div>
+          </sc-if>
+        </div>
+      </div>
+      <div style="display: flex; justify-content: space-between; margin-top: 4px; margin-left: 52px;">
+        <span style="font-family: 'JetBrains Mono', monospace; font-size: 10.5px; color: var(--mut2, #6B6B66);">Aug ’25</span>
+        <span style="font-family: 'JetBrains Mono', monospace; font-size: 10.5px; color: var(--mut2, #6B6B66);">Jan ’26</span>
+        <span style="font-family: 'JetBrains Mono', monospace; font-size: 10.5px; color: var(--mut2, #6B6B66);">Jul ’26</span>
+      </div>
+    </section>
+
+    <section style="background: var(--card, #FFFFFF); border: 1px solid var(--line, #E4E4E0); border-radius: 10px;">
+      <div style="display: flex; align-items: center; gap: 10px; padding: 13px 16px 10px 16px;">
+        <h2 style="font-family: 'Inter Tight', sans-serif; font-weight: 600; font-size: 17px; margin: 0;">Sales ledger</h2>
+        <div style="display: flex; gap: 4px; flex-wrap: wrap;">
+          <sc-for list="{{ lgChipsA }}" as="b" hint-placeholder-count="2">
+            <button onClick="{{ b.pick }}" title="{{ b.tip }}" style="background: {{ b.bg }}; color: {{ b.fg }}; border: 1px solid {{ b.bd }}; border-radius: 5px; height: 24px; padding: 0 9px; font-family: 'JetBrains Mono', monospace; font-size: 12px; font-weight: 600; cursor: pointer;">{{ b.label }}</button>
+          </sc-for>
+          <div data-lg-pop="1" onMouseLeave="{{ closeLgPops }}" style="position: relative;">
+            <button onClick="{{ lgTensChip.pick }}" title="Filter the ledger to other graders’ 10s — click to pick individual graders" style="background: {{ lgTensChip.bg }}; color: {{ lgTensChip.fg }}; border: 1px solid {{ lgTensChip.bd }}; border-radius: 5px; height: 24px; padding: 0 9px; font-family: 'JetBrains Mono', monospace; font-size: 12px; font-weight: 600; cursor: pointer;">{{ lgTensChip.label }}</button>
+            <sc-if value="{{ lgTensOpen }}" hint-placeholder-val="{{ false }}">
+              <div style="position: absolute; top: 26px; left: 0; z-index: 50; background: var(--card, #FFFFFF); border: 1px solid var(--line, #E4E4E0); border-radius: 8px; box-shadow: 0 8px 24px rgba(20, 19, 26, 0.13); padding: 8px 9px; min-width: 240px;">
+                <div style="font-size: 10.5px; font-weight: 600; letter-spacing: 0.07em; color: var(--mut2, #6B6B66); text-transform: uppercase; margin-bottom: 5px;">Other graders’ 10s</div>
+                <div style="display: flex; flex-wrap: wrap; gap: 4px;">
+                  <sc-for list="{{ lgTenSubChips }}" as="ts" hint-placeholder-count="7">
+                    <button onClick="{{ ts.pick }}" title="{{ ts.tip }}" style="background: {{ ts.bg }}; color: {{ ts.fg }}; border: 1px solid {{ ts.bd }}; border-radius: 4px; height: 22px; padding: 0 7px; font-family: 'JetBrains Mono', monospace; font-size: 11.5px; font-weight: 600; cursor: pointer;">{{ ts.label }}</button>
+                  </sc-for>
+                </div>
+              </div>
+            </sc-if>
+          </div>
+          <sc-for list="{{ lgChipsB }}" as="b" hint-placeholder-count="4">
+            <button onClick="{{ b.pick }}" title="{{ b.tip }}" style="background: {{ b.bg }}; color: {{ b.fg }}; border: 1px solid {{ b.bd }}; border-radius: 5px; height: 24px; padding: 0 9px; font-family: 'JetBrains Mono', monospace; font-size: 12px; font-weight: 600; cursor: pointer;">{{ b.label }}</button>
+          </sc-for>
+          <div data-lg-pop="1" onMouseLeave="{{ closeLgPops }}" style="position: relative;">
+            <button onClick="{{ lgLowsChip.pick }}" title="Filter the ledger to grades 1–6 — click to pick individual grades" style="background: {{ lgLowsChip.bg }}; color: {{ lgLowsChip.fg }}; border: 1px solid {{ lgLowsChip.bd }}; border-radius: 5px; height: 24px; padding: 0 9px; font-family: 'JetBrains Mono', monospace; font-size: 12px; font-weight: 600; cursor: pointer;">{{ lgLowsChip.label }}</button>
+            <sc-if value="{{ lgLowsOpen }}" hint-placeholder-val="{{ false }}">
+              <div style="position: absolute; top: 26px; left: 0; z-index: 50; background: var(--card, #FFFFFF); border: 1px solid var(--line, #E4E4E0); border-radius: 8px; box-shadow: 0 8px 24px rgba(20, 19, 26, 0.13); padding: 8px 9px; min-width: 240px;">
+                <div style="font-size: 10.5px; font-weight: 600; letter-spacing: 0.07em; color: var(--mut2, #6B6B66); text-transform: uppercase; margin-bottom: 5px;">Grades 1–6</div>
+                <div style="display: flex; flex-wrap: wrap; gap: 4px;">
+                  <sc-for list="{{ lgLowSubChips }}" as="ls" hint-placeholder-count="6">
+                    <button onClick="{{ ls.pick }}" title="{{ ls.tip }}" style="background: {{ ls.bg }}; color: {{ ls.fg }}; border: 1px solid {{ ls.bd }}; border-radius: 4px; height: 22px; padding: 0 7px; font-family: 'JetBrains Mono', monospace; font-size: 11.5px; font-weight: 600; cursor: pointer;">{{ ls.label }}</button>
+                  </sc-for>
+                </div>
+              </div>
+            </sc-if>
+          </div>
+          <button onClick="{{ lgRawChip.pick }}" title="{{ lgRawChip.tip }}" style="background: {{ lgRawChip.bg }}; color: {{ lgRawChip.fg }}; border: 1px solid {{ lgRawChip.bd }}; border-radius: 5px; height: 24px; padding: 0 9px; font-family: 'JetBrains Mono', monospace; font-size: 12px; font-weight: 600; cursor: pointer;">{{ lgRawChip.label }}</button>
+        </div>
+        <div style="flex: 1;"></div>
+        <span style="font-family: 'JetBrains Mono', monospace; font-size: 12.5px; color: var(--mut, #5B5B57);">{{ ledgerCount }}</span>
+      </div>
+      <div style="display: grid; grid-template-columns: {{ lgGridCols }}; gap: 8px; padding: 7px 16px; border-top: 1px solid var(--line, #E4E4E0); border-bottom: 1px solid var(--line, #E4E4E0); font-size: 11.5px; font-weight: 600; letter-spacing: 0.05em; color: var(--mut2, #6B6B66); text-transform: uppercase; background: var(--bg, var(--bg, #FAFAF7));">
+        <sc-for list="{{ lgCols }}" as="lc" hint-placeholder-count="6">
+          <div style="display: flex; align-items: center; min-width: 0;"><span onClick="{{ lc.sort }}" title="Click to sort" style="flex: 1; text-align: center; overflow: hidden; white-space: nowrap; cursor: pointer;" style-hover="color: var(--acc, #4A63D0);">{{ lc.name }}{{ lc.arrow }}</span><span onMouseDown="{{ lc.rs }}" title="Drag to resize" style="cursor: col-resize; color: var(--line3, #C9C9C4); padding: 2px 3px; margin-right: -6px; flex-shrink: 0;" style-hover="color: var(--acc, #4A63D0);">│</span></div>
+        </sc-for>
+      </div>
+      <sc-if value="{{ hasSales }}" hint-placeholder-val="{{ true }}">
+        <sc-for list="{{ ledgerRows }}" as="r" hint-placeholder-count="10">
+          <div style="border-bottom: 1px solid var(--line4, #F0F0EC);">
+            <sc-if value="{{ r.isSale }}" hint-placeholder-val="{{ true }}">
+              <div style="display: grid; grid-template-columns: {{ lgGridCols }}; gap: 8px; padding: 6px 16px; align-items: center;">
+                <span style="font-family: 'JetBrains Mono', monospace; font-size: 12.5px; color: var(--mut, #5B5B57); text-align: center;">{{ r.date }}</span>
+                <span style="font-family: 'JetBrains Mono', monospace; font-size: 12.5px; text-align: center;">{{ r.bucket }}</span>
+                <span style="text-align: center;"><span title="{{ r.listedTip }}" style="font-family: 'JetBrains Mono', monospace; font-size: 13.5px; font-weight: 700; text-decoration-line: underline; text-decoration-style: dotted; text-decoration-color: transparent; text-decoration-thickness: 2px; text-underline-offset: 3px; border-bottom: {{ r.listedLine }}; cursor: {{ r.listedCur }};">{{ r.price }}</span></span>
+                <span style="font-family: 'JetBrains Mono', monospace; font-size: 12.5px; color: var(--mut, #5B5B57); text-align: center;">{{ r.src }}</span>
+                <span style="font-size: 13px; color: var(--mut, #5B5B57); white-space: nowrap; overflow: hidden; text-overflow: ellipsis;" title="{{ r.title }}">{{ r.title }}</span>
+              </div>
+            </sc-if>
+          </div>
+        </sc-for>
+      </sc-if>
+      <sc-if value="{{ noSales }}" hint-placeholder-val="{{ false }}">
+        <div style="padding: 26px 16px; text-align: center; font-size: 13.5px; color: var(--mut2, #6B6B66);">No sales observed in this grade — that's a true zero: our scrapers visited and found none, not "no data".</div>
+      </sc-if>
+    </section>
+
+    <div style="display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 16px;">
+      <section style="background: var(--card, #FFFFFF); border: 1px solid var(--line, #E4E4E0); border-radius: 10px; padding: 14px 16px;">
+        <div style="display: flex; align-items: baseline; gap: 10px;">
+          <h2 style="font-family: 'Inter Tight', sans-serif; font-weight: 600; font-size: 17px; margin: 0;">Population · current census</h2>
+          <span style="font-size: 12.5px; color: var(--mut2, #6B6B66);">PSA + CGC · as of 2026-07-30</span>
+        </div>
+        <div style="display: flex; align-items: flex-end; gap: 14px; height: 150px; margin-top: 14px;">
+          <sc-for list="{{ popBars }}" as="p" hint-placeholder-count="5">
+            <div style="flex: 1; display: flex; flex-direction: column; justify-content: flex-end; align-items: center; gap: 4px; height: 100%;">
+              <span style="font-family: 'JetBrains Mono', monospace; font-size: 11.5px; color: var(--mut, #5B5B57);">{{ p.n }}</span>
+              <div title="{{ p.tip }}" style="width: 100%; height: {{ p.h }}px; background: {{ p.bg }}; border-radius: 3px 3px 0 0;"></div>
+              <span style="font-size: 11px; color: var(--mut2, #6B6B66); white-space: nowrap;">{{ p.label }}</span>
+            </div>
+          </sc-for>
+        </div>
+        <div style="font-size: 12.5px; color: var(--mut2, #6B6B66); margin-top: 10px;">Gem rate <span style="font-family: 'JetBrains Mono', monospace; color: var(--mut, #5B5B57);">27.3%</span> — of the last 90 days of PSA submissions, the share that came back 10. Drifting <span style="font-family: 'JetBrains Mono', monospace; color: var(--pos, #157A50);">−0.4pp / 90d</span> (harder to gem = supply of fresh 10s slowing).</div>
+      </section>
+      <section style="background: var(--card, #FFFFFF); border: 1px solid var(--line, #E4E4E0); border-radius: 10px; padding: 14px 16px;">
+        <div style="display: flex; align-items: baseline; gap: 10px;">
+          <h2 style="font-family: 'Inter Tight', sans-serif; font-weight: 600; font-size: 17px; margin: 0;">Grading activity · PSA 10 slabs added</h2>
+          <span title="Census history begins Jan 2026 — 7 observations so far; deltas need two" style="font-family: 'JetBrains Mono', monospace; font-size: 11px; font-weight: 600; letter-spacing: 0.06em; color: var(--warnInk, #8F6614); background: rgba(176, 127, 26, 0.12); border-radius: 3px; padding: 1px 5px; cursor: help;">7 OBS</span>
+        </div>
+        <div style="display: flex; align-items: flex-end; gap: 10px; height: 150px; margin-top: 14px;">
+          <sc-for list="{{ deltaBars }}" as="d" hint-placeholder-count="7">
+            <div style="flex: 1; display: flex; flex-direction: column; justify-content: flex-end; align-items: center; gap: 4px; height: 100%; position: relative;">
+              <span style="font-family: 'JetBrains Mono', monospace; font-size: 11.5px; color: var(--mut, #5B5B57);">{{ d.n }}</span>
+              <div title="{{ d.tip }}" style="width: 100%; height: {{ d.h }}px; background: {{ d.bg }}; border-radius: 3px 3px 0 0; box-sizing: border-box; border: {{ d.bd }};"></div>
+              <span style="font-size: 11px; color: var(--mut2, #6B6B66); white-space: nowrap;">{{ d.label }}</span>
+            </div>
+          </sc-for>
+        </div>
+        <div style="font-size: 12.5px; color: var(--mut2, #6B6B66); margin-top: 10px;">Pace <span style="font-family: 'JetBrains Mono', monospace; color: var(--mut, #5B5B57);">+58 / mo</span> and rising — <span style="font-family: 'JetBrains Mono', monospace; color: var(--mut, #5B5B57);">331</span> new 10s since Jan, growing the census <span style="font-family: 'JetBrains Mono', monospace; color: var(--neg2, #D64545);">+29%</span> in 7 months (fresh supply working against the price).</div>
+      </section>
+    </div>
+
+    <div style="display: flex; align-items: center; gap: 16px; padding: 9px 14px; background: var(--mutbg, #F3F3EE); border: 1px solid var(--line, #E4E4E0); border-radius: 8px; font-size: 12.5px; color: var(--mut, #5B5B57);">
+      <span title="Opening a card page triggers a fresh scrape — the ledger and prices you see include sales up to right now">Sales &amp; prices refreshed <span style="font-family: 'JetBrains Mono', monospace;">just now</span></span>
+      <span>·</span>
+      <span title="Population data comes from PSA/CGC on their own publishing schedule — it can't be scraped on demand">Census as of <span style="font-family: 'JetBrains Mono', monospace;">2026-07-30</span></span>
+      <div style="flex: 1;"></div>
+    </div>
+
+  </main>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="">
+class Component extends DCLogic {
+  PAL = (() => { const d = localStorage.getItem('cardstock-theme') === 'dark', c = localStorage.getItem('cardstock-cvd') === '1';
+    const s = d ? (c ? {pos:'#58A9E6',pos2:'#58A9E6',neg:'#F5924E',neg2:'#F5924E',neg3:'#E8874D',posBg:a=>'rgba(0,114,178,'+a+')',negBg:a=>'rgba(213,94,0,'+a+')'}
+                     : {pos:'#4CC08D',pos2:'#4CC08D',neg:'#E57B7B',neg2:'#E57B7B',neg3:'#E57B7B',posBg:a=>'rgba(24,158,99,'+a+')',negBg:a=>'rgba(214,69,69,'+a+')'})
+              : (c ? {pos:'#0B69A8',pos2:'#0072B2',neg:'#CC5F00',neg2:'#D55E00',neg3:'#B34E00',posBg:a=>'rgba(0,114,178,'+a+')',negBg:a=>'rgba(213,94,0,'+a+')'}
+                   : {pos:'#157A50',pos2:'#189E63',neg:'#C13A3A',neg2:'#D64545',neg3:'#A93838',posBg:a=>'rgba(24,158,99,'+a+')',negBg:a=>'rgba(214,69,69,'+a+')'});
+    const ch = d ? {bg:'#161614',card:'#1E1E1C',ink:'#E9E9E5',mut:'#B4B4AE',mut2:'#A8A8A2',mut3:'#9A9A94',mutbg:'#2A2A27',hov:'#282825',line:'#33332F',line2:'#3E3E39',line3:'#4A4A44',line4:'#262623',acc:'#8C9BF2',accH:'#AAB6F6',btn:'#4A63D0',accBg:'#252B44',accMut:'#3A4570',warn:'#D6A54A',warnInk:'#D6A54A'}
+               : {bg:'#FAFAF7',card:'#FFFFFF',ink:'#1C1C1E',mut:'#5B5B57',mut2:'#6B6B66',mut3:'#8F8F8A',mutbg:'#F3F3EE',hov:'#F6F6F2',line:'#E4E4E0',line2:'#D9D9D4',line3:'#C9C9C4',line4:'#F0F0EC',acc:'#4A63D0',accH:'#3A4FB8',btn:'#4A63D0',accBg:'#EEF1FB',accMut:'#B9C4E8',warn:'#8F6614',warnInk:'#8F6614'};
+    return Object.assign(ch, s); })();
+  state = { bucket: 'All', watch: false, binder: false, hov: null, watchOpen: false, watchIn: { 'Alt arts': true }, colW: { date: 96, bucket: 108, price: 92, listed: 84, src: 92 } };
+  componentDidMount() {
+    this._doc = (e) => {
+      if (!e.target.isConnected) return;
+      if (this.state.watchOpen && !e.target.closest('[data-watch-pop]')) this.setState({ watchOpen: false });
+      if ((this.state.lgTensOpen || this.state.lgLowsOpen) && !e.target.closest('[data-lg-pop]')) this.setState({ lgTensOpen: false, lgLowsOpen: false });
+    };
+    document.addEventListener('mousedown', this._doc);
+  }
+  componentWillUnmount() { document.removeEventListener('mousedown', this._doc); }
+  startResize(key) {
+    return (e) => {
+      e.preventDefault(); e.stopPropagation();
+      const startX = e.clientX, startW = this.state.colW[key];
+      const mv = (ev) => {
+        const w = Math.max(40, Math.min(420, startW + ev.clientX - startX));
+        this.setState(s => ({ colW: Object.assign({}, s.colW, { [key]: w }) }));
+      };
+      const up = () => { window.removeEventListener('mousemove', mv); window.removeEventListener('mouseup', up); };
+      window.addEventListener('mousemove', mv); window.addEventListener('mouseup', up);
+    };
+  }
+  constructor(props) {
+    super(props);
+    this.MONTHS = ['Aug \u201925','Sep \u201925','Oct \u201925','Nov \u201925','Dec \u201925','Jan \u201926','Feb \u201926','Mar \u201926','Apr \u201926','May \u201926','Jun \u201926','Jul \u201926'];
+    this.P10 = [1180,1150,1210,1195,1240,1265,1230,1290,1340,1372,1399,1486];
+    this.G9 = [700,692,705,710,718,726,715,738,760,772,790,842];
+    this.G95 = [822,810,828,834,845,858,848,874,902,928,955,1010];
+    this.G8 = [562,554,566,572,580,586,578,596,616,642,670,710];
+    this.G7 = [500,494,502,506,514,520,512,530,546,566,590,620];
+    this.RAW = [372,368,380,385,392,398,390,405,418,425,438,455];
+    this.SALES = [
+      { d: '2026-08-01', b: 'PSA 10', p: 1486, l: null, s: 'ebay', t: 'Umbreon VMAX 215/203 Alt Art PSA 10 GEM MINT Evolving Skies' },
+      { d: '2026-07-28', b: 'PSA 10', p: 1472, l: 1550, s: 'ebay', t: 'PSA 10 Umbreon VMAX Alt Art \u201CMoonbreon\u201D Evolving Skies 215/203' },
+      { d: '2026-07-26', b: 'Grade 9', p: 838, l: null, s: 'tcgplayer', t: 'Umbreon VMAX Alt Art PSA 9 MINT Evolving Skies' },
+      { d: '2026-07-22', b: 'Raw', p: 452, l: 479, s: 'ebay', t: 'Umbreon VMAX Alt Art 215/203 NM pack fresh \u2192 PSA ready' },
+      { d: '2026-07-19', b: 'PSA 10', p: 1455, l: null, s: 'goldin', t: 'Umbreon VMAX Evolving Skies Alt Art PSA 10 (Auction #4412)' },
+      { d: '2026-07-15', b: 'Grade 9.5', p: 1004, l: null, s: 'pwcc', t: 'Umbreon VMAX Alt Art CGC 9.5 Evolving Skies' },
+      { d: '2026-07-13', b: 'PSA 10', p: 1449, l: 1500, s: 'ebay', t: 'MOONBREON PSA 10!! Umbreon VMAX alt art no reserve' },
+      { d: '2026-07-08', b: 'Raw', p: 445, l: null, s: 'tcgplayer', t: 'Umbreon VMAX (Alternate Art Secret) — Near Mint' },
+      { d: '2026-06-30', b: 'Grade 9', p: 812, l: null, s: 'ebay', t: 'Umbreon VMAX Alt Art PSA 9 Evolving Skies 215/203' },
+      { d: '2026-06-21', b: 'Grade 8', p: 706, l: 740, s: 'ebay', t: 'Umbreon VMAX alt art PSA 8 NM-MT sharp corners' },
+      { d: '2026-06-14', b: 'PSA 10', p: 1421, l: null, s: 'heritage', t: 'Pokemon Umbreon VMAX #215 Evolving Skies PSA GEM MT 10' },
+      { d: '2026-06-05', b: 'Grade 9.5', p: 968, l: null, s: 'ebay', t: 'Umbreon VMAX Alt CGC 9.5 (subs 9.5/9.5/10/9.5)' },
+      { d: '2026-05-24', b: 'Raw', p: 431, l: 460, s: 'ebay', t: 'Umbreon V-MAX rainbow alt — see photos, small whitening back' },
+      { d: '2026-05-11', b: 'Grade 9', p: 795, l: null, s: 'tcgplayer', t: 'Umbreon VMAX Alt Art PSA 9' },
+      { d: '2026-04-19', b: 'PSA 10', p: 1388, l: null, s: 'ebay', t: 'Umbreon VMAX Alt Art PSA 10 Moonbreon 🌙 W/ sleeve' },
+      { d: '2026-03-28', b: 'PSA 10', p: 1355, l: 1400, s: 'ebay', t: 'PSA 10 Umbreon VMAX 215/203 alt art gem mint' }
+    ];
+    this.SEAMS = { 'PSA 10': '2026-03-14', 'Grade 9.5': '2026-05-11', 'Grade 9': '2026-04-02', 'Grade 8': '2026-06-02', 'Raw': '2026-03-20' };
+    this.BUCKETS = ['Raw', 'Grade 1', 'Grade 2', 'Grade 3', 'Grade 4', 'Grade 5', 'Grade 6', 'Grade 7', 'Grade 8', 'Grade 9', 'Grade 9.5', 'PSA 10', 'CGC 10', 'CGC 10 Prist.', 'TAG 10', 'ACE 10', 'SGC 10', 'BGS 10', 'BGS 10 Black'];
+    this.TIERS = [455, 180, 230, 290, 360, 440, 530, 620, 710, 842, 1010, 1486, 1180, 1650, 1210, 980, 1040, 1320, 2450];
+    this.CHG = ['+3.9%', '+0.4%', '\u22120.2%', '+0.6%', '+1.0%', '+0.8%', '+1.4%', '+1.2%', '+0.8%', '+3.7%', '+2.6%', '+6.2%', '+4.1%', '+5.0%', '+3.3%', '+2.1%', '+1.8%', '+4.8%', '+7.4%'];
+    this.TIER_COLORS = { 'Raw': this.PAL.mut2, 'Grade 1': '#A08D78', 'Grade 2': '#97906E', 'Grade 3': '#7F9668', 'Grade 4': '#6A9678', 'Grade 5': '#5E9490', 'Grade 6': '#578AA3', 'Grade 7': '#B0552E', 'Grade 8': '#2E7F78', 'Grade 9': this.PAL.warn, 'Grade 9.5': '#6E4DB8', 'PSA 10': this.PAL.acc, 'CGC 10': '#1F8FA8', 'CGC 10 Prist.': '#0F6E86', 'TAG 10': '#8646B8', 'ACE 10': '#C24B4B', 'SGC 10': '#5C6B9E', 'BGS 10': '#8A7139', 'BGS 10 Black': '#2B2D42' };
+    const CORE = { 'PSA 10': this.P10, 'Grade 9.5': this.G95, 'Grade 9': this.G9, 'Grade 8': this.G8, 'Grade 7': this.G7, 'Raw': this.RAW };
+    this.SER = this.BUCKETS.slice().reverse().filter(b => ['PSA 10', 'Grade 9.5', 'Grade 9', 'Grade 8', 'Grade 7', 'Raw'].includes(b)).map((b, n) => ({
+      k: b, l: b, c: this.TIER_COLORS[b],
+      arr: CORE[b] || this.P10.map((v, j) => Math.round(v * (this.TIERS[this.BUCKETS.indexOf(b)] / 1486) * (1 + 0.025 * Math.sin(j * 1.1 + n))))
+    }));
+    this.DEF_OFF = {};
+    this.SER.forEach(s => { if (s.k !== 'PSA 10' && s.k !== 'Grade 9' && s.k !== 'Raw') this.DEF_OFF[s.k] = true; });
+  }
+  money(n) { return '$' + Math.round(n).toLocaleString('en-US'); }
+  renderVals() {
+    const st = this.state;
+    const off = st.pcOff || this.DEF_OFF;
+    const SER = this.SER;
+    const visArrs = SER.filter(s2 => !off[s2.k]).map(s2 => s2.arr);
+    const all = [].concat.apply([], visArrs.length ? visArrs : [this.P10]);
+    const mn = Math.min.apply(null, all), mx = Math.max.apply(null, all);
+    const pts = (arr) => arr.map((v, k) => (k / 11 * 800).toFixed(1) + ',' + (222 - (v - mn) / (mx - mn) * 212).toFixed(1)).join(' ');
+    const yPct = (v) => (222 - (v - mn) / (mx - mn) * 212) / 230 * 100;
+    const hi = st.hov;
+    const hovHas = hi != null;
+    const pill = (on) => ({ bg: on ? this.PAL.acc : this.PAL.card, fg: on ? this.PAL.card : this.PAL.mut, bd: on ? this.PAL.acc : this.PAL.line });
+    const counts = {};
+    this.SALES.forEach(s => { counts[s.b] = (counts[s.b] || 0) + 1; });
+    const activeBuckets = Object.keys(st.bucketSel || {}).filter(k => (st.bucketSel || {})[k]);
+    const filtered = activeBuckets.length === 0 ? this.SALES : this.SALES.filter(s => activeBuckets.includes(s.b));
+    const rows = [];
+    filtered.forEach(s => rows.push({ isSale: true, isSeam: false, date: s.d, bucket: s.b, price: this.money(s.p), pRaw: s.p, hasListed: !!s.l, listedTip: s.l ? 'listed ' + this.money(s.l) + ' \u2192 sold ' + this.money(s.p) : '', listedLine: s.l ? '2px dotted #8F6614' : 'none', listedCur: s.l ? 'help' : 'default', src: s.s, title: s.t }));
+    const sk = st.sortKey || 'date', sd = st.sortDir || 'desc';
+    const gradeRank = (b) => this.BUCKETS.indexOf(b);
+    const cmp = (a, b) => {
+      let va, vb;
+      if (sk === 'date') { va = a.date; vb = b.date; }
+      else if (sk === 'price') { va = a.pRaw; vb = b.pRaw; }
+      else if (sk === 'bucket') { va = gradeRank(a.bucket); vb = gradeRank(b.bucket); }
+      else if (sk === 'src') { va = a.src; vb = b.src; }
+      else { va = a.title; vb = b.title; }
+      const r = va < vb ? -1 : va > vb ? 1 : (a.date < b.date ? -1 : 1);
+      return sd === 'asc' ? r : -r;
+    };
+    rows.sort(cmp);
+    const maxPop = 4020;
+    const popData = [
+      { g: 'PSA 8', n: 1244, psa: true }, { g: 'PSA 9', n: 3865, psa: true }, { g: 'PSA 10', n: 1479, psa: true },
+      { g: 'CGC 9', n: 402, psa: false }, { g: 'CGC 9.5', n: 618, psa: false }, { g: 'CGC 10', n: 187, psa: false }
+    ];
+    const deltas = [34, 41, 38, 52, 47, 61, 58];
+    const maxD = 61;
+    const dLabels = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul'];
+    return {
+      watchLabel: (() => { const n = Object.keys(st.watchIn).filter(k => st.watchIn[k]).length; return n ? 'Watching \u2713 ' + (n > 1 ? '(' + n + ')' : '') : '+ Watchlist'; })(),
+      watchBg: Object.values(st.watchIn).some(Boolean) ? this.PAL.posBg(0.10) : this.PAL.card, watchHoverBg: Object.values(st.watchIn).some(Boolean) ? this.PAL.posBg(0.10) : this.PAL.hov,
+      watchFg: Object.values(st.watchIn).some(Boolean) ? this.PAL.pos : this.PAL.ink, watchBd: Object.values(st.watchIn).some(Boolean) ? this.PAL.posBg(0.35) : this.PAL.line,
+      toggleWatch: () => this.setState(s => ({ watchOpen: !s.watchOpen })),
+      watchOpen: st.watchOpen,
+      watchLists: [{ n: 'Alt arts', c: 12 }, { n: 'Grails', c: 5 }, { n: 'Grading targets', c: 8 }].map(w => ({
+        name: w.n, count: String(w.c + (st.watchIn[w.n] ? 1 : 0) - (w.n === 'Alt arts' ? 1 : 0)),
+        check: st.watchIn[w.n] ? '\u2713' : '',
+        boxBg: st.watchIn[w.n] ? this.PAL.pos2 : this.PAL.card, boxBd: st.watchIn[w.n] ? this.PAL.pos2 : this.PAL.line3,
+        pick: () => this.setState(s => ({ watchIn: Object.assign({}, s.watchIn, { [w.n]: !s.watchIn[w.n] }) }))
+      })),
+      newList: () => { const n = prompt('New list name'); if (n) this.setState(s => ({ watchIn: Object.assign({}, s.watchIn, { [n]: true }) })); },
+      binderLabel: st.binder ? 'In binder \u2713' : '+ Binder',
+      binderBg: st.binder ? this.PAL.posBg(0.10) : this.PAL.card, binderHoverBg: st.binder ? this.PAL.posBg(0.10) : this.PAL.hov,
+      binderFg: st.binder ? this.PAL.pos : this.PAL.ink, binderBd: st.binder ? this.PAL.posBg(0.35) : this.PAL.line,
+      addBinder: () => this.setState(s => ({ binder: !s.binder })),
+      artOpen: !!st.artOpen,
+      openArt: () => this.setState({ artOpen: true }),
+      closeArt: () => this.setState({ artOpen: false }),
+      stopClick: (e) => e.stopPropagation(),
+      tierStrip: this.BUCKETS.map((b, i) => ({ b: b, i: i })).reverse().filter(({ b }) => ['PSA 10', 'Grade 9.5', 'Grade 9', 'Grade 8', 'Grade 7', 'Raw'].includes(b)).map(({ b, i }) => ({
+        label: b, price: this.money(this.TIERS[i]), chg: this.CHG[i],
+        chgFg: this.CHG[i].indexOf('+') === 0 ? this.PAL.pos : this.PAL.neg2,
+        tip: b + ' latest monthly price \u00B7 ' + this.CHG[i] + ' over 30 days'
+      })),
+      sigChips: [
+        { t: 'RS 94th', i: '\u25B2', tip: 'Relative strength vs market index, 3M: 94th percentile', bg: this.PAL.posBg(0.10), fg: this.PAL.pos, bd: this.PAL.posBg(0.3) },
+        { t: 'MACD +', i: '\u25B2', tip: 'MACD (3,6,4) above signal since May 2026', bg: this.PAL.posBg(0.10), fg: this.PAL.pos, bd: this.PAL.posBg(0.3) },
+        { t: 'Most active \u00B7 41 sales/30d', i: '\u25CF', tip: 'Most-active card on the market in the last 30 days', bg: this.PAL.mutbg, fg: this.PAL.mut, bd: this.PAL.line }
+      ],
+      legend: SER.map(g => ({
+        l: g.l, c: off[g.k] ? '#D8D8D3' : g.c, op: off[g.k] ? 0.45 : 1,
+        tip: off[g.k] ? 'Show ' + g.l : 'Hide ' + g.l + ' (y-axis rescales to what\u2019s visible)',
+        toggle: () => this.setState(s2 => {
+          const o = Object.assign({}, s2.pcOff || this.DEF_OFF);
+          if (o[g.k]) delete o[g.k]; else if (Object.keys(o).length < this.SER.length - 1) o[g.k] = true;
+          return { pcOff: o };
+        })
+      })),
+      pcSeries: SER.filter(g => !off[g.k]).map(g => ({ c: g.c, w: g.k === 'PSA 10' ? 2 : 1.5, solid: pts(g.arr.slice(0, 11)), dash: pts(g.arr).split(' ').slice(10).join(' ') })),
+      pcYMax: '$' + mx.toLocaleString('en-US'), pcYMin: '$' + mn.toLocaleString('en-US'),
+      pcHovRows: hovHas ? SER.filter(g => !off[g.k]).map(g => ({ l: g.l, c: g.c, v: this.money(g.arr[hi]), w: g.k === 'PSA 10' ? 700 : 400 })) : [],
+      pcHollowTop: yPct((SER.find(g => !off[g.k]) || SER[0]).arr[11]).toFixed(1),
+      pcMove: (e) => { const r = e.currentTarget.getBoundingClientRect(); const f = Math.max(0, Math.min(1, (e.clientX - r.left) / r.width)); const idx = Math.round(f * 11); if (idx !== this.state.hov) this.setState({ hov: idx }); },
+      pcOut: () => this.setState({ hov: null }),
+      pcHovShow: hovHas, pcHovLeft: hovHas ? (hi / 11 * 100).toFixed(2) : 0,
+      pcHovMonth: hovHas ? this.MONTHS[hi] : '',
+      pcHovP10: hovHas ? this.money(this.P10[hi]) : '', pcHovG9: hovHas ? this.money(this.G9[hi]) : '', pcHovRaw: hovHas ? this.money(this.RAW[hi]) : '',
+      ...(() => {
+        const TENS = ['CGC 10', 'CGC 10 Prist.', 'TAG 10', 'ACE 10', 'SGC 10', 'BGS 10', 'BGS 10 Black'];
+        const LOWS = ['Grade 6', 'Grade 5', 'Grade 4', 'Grade 3', 'Grade 2', 'Grade 1'];
+        const sum = (list) => list.reduce((a, b) => a + (counts[b] || 0), 0);
+        const sel = st.bucketSel || {};
+        const togSel = (b) => this.setState(s => {
+          const ns = Object.assign({}, s.bucketSel || {});
+          if (ns[b]) delete ns[b]; else ns[b] = true;
+          return { bucketSel: ns };
+        });
+        const chip = (b) => b === 'All'
+          ? Object.assign({ label: 'All', tip: 'Show sales from every grade', pick: () => this.setState({ bucketSel: {}, lgTensOpen: false, lgLowsOpen: false }) }, pill(activeBuckets.length === 0))
+          : Object.assign({ label: b, tip: (sel[b] ? 'Stop filtering the ledger to ' : 'Filter the ledger to ') + b + ' sales', pick: () => togSel(b) }, pill(!!sel[b]));
+        const group = (label, members, openKey) => {
+          const act = members.filter(b => sel[b]);
+          const p = pill(act.length > 0 || !!st[openKey]);
+          return Object.assign(p, {
+            label: (act.length ? act.join(', ') : label) + (st[openKey] ? ' \u25BE' : ' \u25B8'),
+            pick: () => this.setState(s => ({ [openKey]: !s[openKey], [openKey === 'lgTensOpen' ? 'lgLowsOpen' : 'lgTensOpen']: false }))
+          });
+        };
+        const sub = (b) => Object.assign({ label: b, pick: () => togSel(b) }, pill(!!sel[b]));
+        return {
+          lgChipsA: [chip('All'), chip('PSA 10')],
+          lgChipsB: [chip('Grade 9.5'), chip('Grade 9'), chip('Grade 8'), chip('Grade 7')],
+          lgTensChip: group('other 10s', TENS, 'lgTensOpen'),
+          lgLowsChip: group('Grade 1\u20136', LOWS, 'lgLowsOpen'),
+          lgRawChip: chip('Raw'),
+          lgTensOpen: !!st.lgTensOpen, lgLowsOpen: !!st.lgLowsOpen,
+          closeLgPops: () => { if (this.state.lgTensOpen || this.state.lgLowsOpen) this.setState({ lgTensOpen: false, lgLowsOpen: false }); },
+          lgTenSubChips: TENS.map(sub), lgLowSubChips: LOWS.map(sub)
+        };
+      })(),
+      ledgerCount: filtered.length + ' sales shown',
+      lgGridCols: ['date', 'bucket', 'price', 'src'].map(k => st.colW[k] + 'px').join(' ') + ' minmax(160px, 1fr)',
+      lgCols: [{ n: 'Date', k: 'date', s: 'date' }, { n: 'Grade bucket', k: 'bucket', s: 'bucket' }, { n: 'Realized', k: 'price', s: 'price' }, { n: 'Source', k: 'src', s: 'src' }, { n: 'Listing title', k: 'src', s: 'title' }].map((c, i) => ({
+        name: c.n, rs: this.startResize(c.k),
+        arrow: sk === c.s ? (sd === 'desc' ? ' \u25BE' : ' \u25B4') : '',
+        sort: () => this.setState(s2 => ({ sortKey: c.s, sortDir: s2.sortKey === c.s ? (s2.sortDir === 'desc' ? 'asc' : 'desc') : 'desc' }))
+      })),
+      ledgerRows: rows,
+      hasSales: filtered.length > 0, noSales: filtered.length === 0,
+      popBars: popData.map(p => ({
+        n: p.n.toLocaleString('en-US'), label: p.g,
+        h: Math.round(p.n / maxPop * 104) + 4,
+        bg: p.psa ? 'rgba(74, 99, 208, 0.55)' : 'rgba(138, 138, 134, 0.45)',
+        tip: p.g + ': ' + p.n.toLocaleString('en-US') + ' slabs in current census (' + (p.psa ? 'PSA' : 'CGC') + ')'
+      })),
+      deltaBars: deltas.map((n, i) => ({
+        n: '+' + n, label: dLabels[i],
+        h: Math.round(n / maxD * 104) + 4,
+        bg: 'rgba(74, 99, 208, 0.55)',
+        bd: 'none',
+        tip: '+' + n + ' new PSA 10 slabs in ' + dLabels[i] + ' 2026'
+      }))
+    };
+  }
+}
+</script>
+</body>
+</html>

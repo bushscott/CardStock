@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="icon" href="./brand/favicon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="anonymous">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Inter+Tight:wght@600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<script src="./image-slot.js"></script>
+<style>
+  html, body { margin: 0; padding: 0; background: var(--bg, var(--bg, #FAFAF7)); }
+  body { font-family: 'Inter', system-ui, sans-serif; color: var(--ink, #1C1C1E); }
+  a { color: var(--acc, #4A63D0); text-decoration: none; }
+  a:hover { color: var(--accH, #3A4FB8); text-decoration: underline; }
+  *:focus-visible { outline: 2px solid var(--acc, #4A63D0); outline-offset: 1px; border-radius: 2px; }
+  image-slot[placeholder=" "]::part(empty) { opacity: 0; }
+  @media (prefers-reduced-motion: reduce) { * { animation-duration: 0.01ms !important; } }
+
+  :root[data-cvd="1"] { --pos: #0B69A8; }
+
+  :root[data-theme="dark"] { color-scheme: dark; --bg: #161614; --card: #1E1E1C; --ink: #E9E9E5; --mut: #B4B4AE; --mut2: #A8A8A2; --mut3: #9A9A94; --mutbg: #2A2A27; --hov: #282825; --line: #33332F; --line2: #3E3E39; --line3: #4A4A44; --line4: #262623; --acc: #8C9BF2; --accH: #AAB6F6; --btn: #4A63D0; --warn: #D6A54A; --warnInk: #D6A54A; --tooltipBg: rgba(30, 30, 28, 0.95); --accBg: #252B44; --accMut: #3A4570; }
+  :root[data-theme="dark"]:not([data-cvd="1"]) { --pos: #4CC08D; --pos2: #4CC08D; --neg: #E57B7B; --neg2: #E57B7B; --neg3: #E57B7B; }
+  :root[data-theme="dark"][data-cvd="1"] { --pos: #58A9E6; --pos2: #58A9E6; --neg: #F5924E; --neg2: #F5924E; --neg3: #E8874D; }
+  :root[data-theme="dark"] { --logoTeal: #3FBFAD; }
+</style>
+<script src="./cardstock-search.js"></script>
+<script>if(localStorage.getItem('cardstock-cvd')==='1')document.documentElement.setAttribute('data-cvd','1');if(localStorage.getItem('cardstock-theme')==='dark')document.documentElement.setAttribute('data-theme','dark');</script>
+</helmet>
+<div data-screen-label="Set" style="min-height: 100vh; display: flex; flex-direction: column; font-size: 15px;">
+
+  <nav style="height: 48px; background: var(--card, #FFFFFF); border-bottom: 1px solid var(--line, #E4E4E0); display: flex; align-items: center; gap: 24px; padding: 0 20px; position: sticky; top: 0; z-index: 20;">
+    <div style="display: flex; align-items: center; gap: 10px;">
+      <a href="Cardstock Home.dc.html" aria-label="Cardstock home" style="display: flex; align-items: center; gap: 10px; color: inherit; text-decoration: none;"><svg width="24" height="24" viewBox="0 0 32 32" fill="none" aria-hidden="true" style="flex: 0 0 auto;"><rect x="5.5" y="5.5" width="15" height="21" rx="2.5" style="stroke: var(--ink, #1C1C1E);" stroke-width="2" transform="rotate(-12 13 16)"></rect><rect x="12" y="5.5" width="15" height="21" rx="2.5" style="fill: var(--card, #FFFFFF); stroke: var(--ink, #1C1C1E);" stroke-width="2"></rect><polyline points="15,21.5 17.5,17 19.5,18.5 23.5,12.5" style="stroke: var(--logoTeal, #0E8A7B);" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" fill="none"></polyline><circle cx="23.5" cy="12.5" r="1.7" style="fill: var(--logoTeal, #0E8A7B);"></circle></svg>
+      <span style="font-family: 'Inter', sans-serif; font-weight: 700; font-size: 18px; letter-spacing: -0.03em; color: var(--ink, #1C1C1E);">Cardstock</span></a>
+      </div>
+    <div style="display: flex; gap: 2px; height: 100%;">
+      <a href="Cardstock Home.dc.html" style="display: flex; align-items: center; padding: 0 12px; font-weight: 500; font-size: 15px; color: var(--mut, #5B5B57); border-bottom: 2px solid transparent; margin-bottom: -1px;">Home</a>
+      <a href="Cardstock Screener.dc.html" style="display: flex; align-items: center; padding: 0 12px; font-weight: 500; font-size: 15px; color: var(--mut, #5B5B57); border-bottom: 2px solid transparent; margin-bottom: -1px;">Screener</a>
+      <a href="Cardstock Charts.dc.html" style="display: flex; align-items: center; padding: 0 12px; font-weight: 500; font-size: 15px; color: var(--mut, #5B5B57); border-bottom: 2px solid transparent; margin-bottom: -1px;">Charts</a>
+      <a href="Cardstock Binder.dc.html" style="display: flex; align-items: center; padding: 0 12px; font-weight: 500; font-size: 15px; color: var(--mut, #5B5B57); border-bottom: 2px solid transparent; margin-bottom: -1px;">Binder</a>
+      <a href="Cardstock Browse.dc.html" style="display: flex; align-items: center; padding: 0 12px; font-weight: 600; font-size: 15px; color: var(--ink, #1C1C1E); border-bottom: 2px solid var(--acc, #4A63D0); margin-bottom: -1px;">Browse</a>
+    </div>
+    <div style="flex: 1;"></div>
+    <cardstock-search></cardstock-search>
+    <a href="Cardstock Profile.dc.html" aria-label="Account" title="Profile & settings" style="display: flex; align-items: center; justify-content: center; width: 28px; height: 28px; border-radius: 50%; border: 1px solid var(--line, #E4E4E0); background: var(--mutbg, #F3F3EE); color: var(--mut, #5B5B57); font-weight: 600; font-size: 14px; text-decoration: none; flex-shrink: 0;">O</a>
+  </nav>
+
+  <div style="height: 4px; background: linear-gradient(90deg, #2B2D42, #5C6B9E, #7E6BA8);"></div>
+
+  <main style="flex: 1; max-width: 1480px; width: 100%; box-sizing: border-box; margin: 0 auto; padding: 14px 20px 28px 20px; display: flex; flex-direction: column; gap: 14px;">
+
+    <div style="font-size: 13.5px; color: var(--mut2, #6B6B66);"><a href="Cardstock Browse.dc.html" style="color: var(--mut, #5B5B57);">Browse</a> › <span style="color: var(--ink, #1C1C1E);">Evolving Skies</span></div>
+
+    <section style="background: var(--card, #FFFFFF); border: 1px solid var(--line, #E4E4E0); border-radius: 10px; padding: 16px; display: flex; align-items: center; gap: 24px;">
+      <div style="min-width: 0;">
+        <div style="display: flex; align-items: center; gap: 10px;">
+          <h1 style="font-family: 'Inter Tight', sans-serif; font-weight: 700; font-size: 26px; letter-spacing: -0.01em; margin: 0;">Evolving Skies</h1>
+          <span style="font-family: 'JetBrains Mono', monospace; font-size: 11.5px; font-weight: 600; letter-spacing: 0.06em; color: var(--mut, #5B5B57); background: var(--mutbg, #F3F3EE); border: 1px solid var(--line, #E4E4E0); border-radius: 3px; padding: 1px 6px;">SWSH07</span>
+        </div>
+        <div style="font-size: 14px; color: var(--mut, #5B5B57); margin-top: 4px;"><span style="font-family: 'JetBrains Mono', monospace;">237</span> cards tracked · first sale observed <span style="font-family: 'JetBrains Mono', monospace;">Dec 2021</span></div>
+      </div>
+      <div style="flex: 1;"></div>
+      <div style="display: flex; align-items: center; gap: 18px;">
+        <div style="width: 220px;">
+          <svg width="100%" height="52" viewBox="0 0 220 52" preserveAspectRatio="none" style="display: block;">
+            <polyline points="{{ idxPts }}" fill="none" style="stroke: var(--acc, var(--acc, #4A63D0));" stroke-width="1.8" vector-effect="non-scaling-stroke"></polyline>
+          </svg>
+          <div style="font-size: 11px; color: var(--mut2, #6B6B66); text-align: center; margin-top: 2px;">set index · 12M</div>
+        </div>
+        <div style="text-align: right;">
+          <div style="font-family: 'JetBrains Mono', monospace; font-size: 15px; font-weight: 700; color: var(--pos, #157A50);">+4.1% <span style="font-size: 11.5px; font-weight: 600; color: var(--mut2, #6B6B66);">30D</span></div>
+          <div style="font-family: 'JetBrains Mono', monospace; font-size: 15px; font-weight: 700; color: var(--pos, #157A50); margin-top: 3px;">+9.7% <span style="font-size: 11.5px; font-weight: 600; color: var(--mut2, #6B6B66);">90D</span></div>
+        </div>
+      </div>
+    </section>
+
+    <div style="display: flex; align-items: center; gap: 10px;">
+      <div style="display: flex; border: 1px solid var(--line, #E4E4E0); border-radius: 6px; overflow: hidden; background: var(--card, #FFFFFF);">
+        <button onClick="{{ viewTerm }}" title="Terminal density — more rows, tighter type, every metric column" style="background: {{ vtBg }}; color: {{ vtFg }}; border: none; height: 28px; padding: 0 14px; font-family: 'JetBrains Mono', monospace; font-size: 13px; font-weight: 600; cursor: pointer;">terminal</button>
+        <button onClick="{{ viewBind }}" title="Binder density — fewer rows with card art" style="background: {{ vbBg }}; color: {{ vbFg }}; border: none; height: 28px; padding: 0 14px; font-family: 'JetBrains Mono', monospace; font-size: 13px; font-weight: 600; cursor: pointer;">binder</button>
+      </div>
+      <span style="font-size: 12.5px; color: var(--mut2, #6B6B66);">sort</span>
+      <div style="display: flex; gap: 4px;">
+        <sc-for list="{{ sorts }}" as="so" hint-placeholder-count="4">
+          <button onClick="{{ so.pick }}" title="{{ so.tip }}" style="background: {{ so.bg }}; color: {{ so.fg }}; border: 1px solid {{ so.bd }}; border-radius: 5px; height: 26px; padding: 0 10px; font-family: 'JetBrains Mono', monospace; font-size: 12px; font-weight: 600; cursor: pointer;">{{ so.label }}</button>
+        </sc-for>
+      </div>
+      <div style="flex: 1;"></div>
+      <span style="font-family: 'JetBrains Mono', monospace; font-size: 12.5px; color: var(--mut, #5B5B57);">{{ shownCount }}</span>
+    </div>
+
+    <sc-if value="{{ hasExcluded }}" hint-placeholder-val="{{ false }}">
+      <div style="display: flex; align-items: center; gap: 8px; padding: 8px 13px; background: rgba(176, 127, 26, 0.06); border: 1px solid rgba(176, 127, 26, 0.25); border-radius: 8px; font-size: 12.5px; color: var(--warnInk, #8F6614);">{{ excludedNote }}</div>
+    </sc-if>
+
+    <sc-if value="{{ isTerm }}" hint-placeholder-val="{{ true }}">
+      <section style="background: var(--card, #FFFFFF); border: 1px solid var(--line, #E4E4E0); border-radius: 10px;">
+        <div style="display: grid; grid-template-columns: {{ gridCols }}; gap: 8px; padding: 7px 16px; border-bottom: 1px solid var(--line, #E4E4E0); font-size: 11.5px; font-weight: 600; letter-spacing: 0.05em; color: var(--mut2, #6B6B66); text-transform: uppercase; background: var(--bg, var(--bg, #FAFAF7)); border-radius: 10px 10px 0 0;">
+          <sc-for list="{{ cols }}" as="c" hint-placeholder-count="6">
+            <div style="display: flex; align-items: center; min-width: 0;"><span onClick="{{ c.sort }}" title="{{ c.tip }}" style="flex: 1; text-align: center; overflow: hidden; white-space: nowrap; cursor: pointer;" style-hover="color: var(--acc, #4A63D0);">{{ c.name }}{{ c.arrow }}</span><span onMouseDown="{{ c.rs }}" title="Drag to resize" style="cursor: col-resize; color: var(--line3, #C9C9C4); padding: 2px 3px; margin-right: -6px; flex-shrink: 0;" style-hover="color: var(--acc, #4A63D0);">│</span></div>
+          </sc-for>
+        </div>
+        <sc-for list="{{ rows }}" as="r" hint-placeholder-count="12">
+          <div style="display: grid; grid-template-columns: {{ gridCols }}; gap: 8px; padding: 6px 16px; align-items: center; border-bottom: 1px solid var(--line4, #F0F0EC);">
+            <span style="font-size: 14px; font-weight: 500; text-align: center; overflow: hidden; white-space: nowrap; text-overflow: ellipsis;"><a href="Cardstock Card.dc.html" style="color: var(--ink, #1C1C1E);" style-hover="color: var(--acc, #4A63D0);">{{ r.name }}</a></span>
+            <span style="font-family: 'JetBrains Mono', monospace; font-size: 13.5px; font-weight: 700; text-align: center;">{{ r.price }}</span>
+            <span style="font-family: 'JetBrains Mono', monospace; font-size: 13px; text-align: center; color: {{ r.rocFg }};">{{ r.roc }}</span>
+            <span style="font-family: 'JetBrains Mono', monospace; font-size: 13px; text-align: center;">{{ r.rs }}</span>
+            <span title="{{ r.popTip }}" style="font-family: 'JetBrains Mono', monospace; font-size: 13px; text-align: center; color: {{ r.popFg }};">{{ r.pop }}</span>
+            <span style="font-family: 'JetBrains Mono', monospace; font-size: 13px; text-align: center; color: var(--mut, #5B5B57);">{{ r.vol }}</span>
+          </div>
+        </sc-for>
+      </section>
+    </sc-if>
+
+    <sc-if value="{{ isBind }}" hint-placeholder-val="{{ false }}">
+      <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 12px;">
+        <sc-for list="{{ tiles }}" as="tl" hint-placeholder-count="12">
+          <a href="Cardstock Card.dc.html" style="display: block; background: var(--card, #FFFFFF); border: 1px solid var(--line, #E4E4E0); border-radius: 8px; padding: 10px; color: var(--ink, #1C1C1E); text-decoration: none; transition: box-shadow 0.15s ease;" style-hover="box-shadow: 0 6px 20px rgba(20, 19, 26, 0.10); text-decoration: none; color: var(--ink, #1C1C1E);">
+            <div style="aspect-ratio: 325 / 450; border-radius: 5px; background: {{ tl.thumbBg }}; margin-bottom: 8px;">
+              <image-slot id="{{ tl.slotId }}" shape="rounded" radius="5" placeholder=" "></image-slot>
+            </div>
+            <div style="font-weight: 600; font-size: 13.5px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">{{ tl.name }}</div>
+            <div style="display: flex; justify-content: space-between; align-items: baseline; margin-top: 3px;">
+              <span style="font-family: 'JetBrains Mono', monospace; font-size: 13.5px; font-weight: 700;">{{ tl.price }}</span>
+              <span style="font-family: 'JetBrains Mono', monospace; font-size: 12px; color: {{ tl.rocFg }};">{{ tl.roc }}</span>
+            </div>
+          </a>
+        </sc-for>
+      </div>
+    </sc-if>
+
+    <div style="font-size: 12.5px; color: var(--mut2, #6B6B66);">Showing the set’s most-traded cards · prices are latest monthly PSA 10 · full roster ships with the real corpus</div>
+
+  </main>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="">
+class Component extends DCLogic {
+  PAL = (() => { const d = localStorage.getItem('cardstock-theme') === 'dark', c = localStorage.getItem('cardstock-cvd') === '1';
+    const s = d ? (c ? {pos:'#58A9E6',pos2:'#58A9E6',neg:'#F5924E',neg2:'#F5924E',neg3:'#E8874D',posBg:a=>'rgba(0,114,178,'+a+')',negBg:a=>'rgba(213,94,0,'+a+')'}
+                     : {pos:'#4CC08D',pos2:'#4CC08D',neg:'#E57B7B',neg2:'#E57B7B',neg3:'#E57B7B',posBg:a=>'rgba(24,158,99,'+a+')',negBg:a=>'rgba(214,69,69,'+a+')'})
+              : (c ? {pos:'#0B69A8',pos2:'#0072B2',neg:'#CC5F00',neg2:'#D55E00',neg3:'#B34E00',posBg:a=>'rgba(0,114,178,'+a+')',negBg:a=>'rgba(213,94,0,'+a+')'}
+                   : {pos:'#157A50',pos2:'#189E63',neg:'#C13A3A',neg2:'#D64545',neg3:'#A93838',posBg:a=>'rgba(24,158,99,'+a+')',negBg:a=>'rgba(214,69,69,'+a+')'});
+    const ch = d ? {bg:'#161614',card:'#1E1E1C',ink:'#E9E9E5',mut:'#B4B4AE',mut2:'#A8A8A2',mut3:'#9A9A94',mutbg:'#2A2A27',hov:'#282825',line:'#33332F',line2:'#3E3E39',line3:'#4A4A44',line4:'#262623',acc:'#8C9BF2',accH:'#AAB6F6',btn:'#4A63D0',accBg:'#252B44',accMut:'#3A4570',warn:'#D6A54A',warnInk:'#D6A54A'}
+               : {bg:'#FAFAF7',card:'#FFFFFF',ink:'#1C1C1E',mut:'#5B5B57',mut2:'#6B6B66',mut3:'#8F8F8A',mutbg:'#F3F3EE',hov:'#F6F6F2',line:'#E4E4E0',line2:'#D9D9D4',line3:'#C9C9C4',line4:'#F0F0EC',acc:'#4A63D0',accH:'#3A4FB8',btn:'#4A63D0',accBg:'#EEF1FB',accMut:'#B9C4E8',warn:'#8F6614',warnInk:'#8F6614'};
+    return Object.assign(ch, s); })();
+  constructor(props) {
+    super(props);
+    this.CARDS = [
+      { name: 'Umbreon VMAX (Alt Art)', price: 1486, roc: 14.2, rs: 94, pop: 6.2, vol: 41, acc: ['#2B2D42', '#5C6B9E'] },
+      { name: 'Rayquaza VMAX (Alt Art)', price: 940, roc: 6.1, rs: 78, pop: 3.1, vol: 22, acc: ['#3E5C4B', '#8CB89E'] },
+      { name: 'Espeon VMAX (Alt Art)', price: 668, roc: 9.8, rs: 85, pop: 2.4, vol: 18, acc: ['#7E6BA8', '#C9B8E8'] },
+      { name: 'Sylveon VMAX (Alt Art)', price: 655, roc: 7.2, rs: 81, pop: 1.8, vol: 15, acc: ['#C98BA8', '#EBD0DE'] },
+      { name: 'Glaceon VMAX (Alt Art)', price: 452, roc: 4.9, rs: 72, pop: 1.2, vol: 11, acc: ['#6B9BB8', '#C2DCE8'] },
+      { name: 'Leafeon VMAX (Alt Art)', price: 474, roc: 5.6, rs: 74, pop: 0.9, vol: 12, acc: ['#5C7A3E', '#A8C88C'] },
+      { name: 'Rayquaza V (Alt Art)', price: 560, roc: 3.8, rs: 66, pop: 2.0, vol: 14, acc: ['#3E5C4B', '#8CB89E'] },
+      { name: 'Umbreon V (Alt Art)', price: 512, roc: 8.4, rs: 83, pop: 2.8, vol: 17, acc: ['#2B2D42', '#5C6B9E'] },
+      { name: 'Dragonite V (Alt Art)', price: 391, roc: 2.2, rs: 58, pop: null, vol: 9, acc: ['#B0855C', '#E8CBA8'] },
+      { name: 'Sylveon V (Alt Art)', price: 302, roc: 1.9, rs: 55, pop: 1.5, vol: 10, acc: ['#C98BA8', '#EBD0DE'] },
+      { name: 'Espeon V (Alt Art)', price: 286, roc: 3.4, rs: 61, pop: 1.1, vol: 8, acc: ['#7E6BA8', '#C9B8E8'] },
+      { name: 'Glaceon V (Alt Art)', price: 238, roc: 0.8, rs: 48, pop: null, vol: 7, acc: ['#6B9BB8', '#C2DCE8'] },
+      { name: 'Leafeon V (Alt Art)', price: 214, roc: -1.4, rs: 39, pop: 0.7, vol: 6, acc: ['#5C7A3E', '#A8C88C'] },
+      { name: 'Duraludon VMAX', price: 88, roc: -2.6, rs: 28, pop: 0.4, vol: 4, acc: ['#8A9BB8', '#D6E0EC'] }
+    ];
+    this.IDX = [100, 101, 99, 103, 105, 104, 107, 109, 108, 111, 114, 118];
+  }
+  state = { view: 'terminal', sort: 'value', sortDir: 'desc', colW: { name: 230, price: 100, roc: 92, rs: 84, pop: 96, vol: 90 } };
+  startResize(key) {
+    return (e) => {
+      e.preventDefault();
+      const startX = e.clientX, startW = this.state.colW[key];
+      const move = (ev) => this.setState(s => ({ colW: Object.assign({}, s.colW, { [key]: Math.max(52, startW + ev.clientX - startX) }) }));
+      const up = () => { document.removeEventListener('mousemove', move); document.removeEventListener('mouseup', up); };
+      document.addEventListener('mousemove', move);
+      document.addEventListener('mouseup', up);
+    };
+  }
+  renderVals() {
+    const st = this.state;
+    const money = (n) => '$' + Math.round(n).toLocaleString('en-US');
+    const pct = (n) => (n >= 0 ? '+' : '\u2212') + Math.abs(n).toFixed(1) + '%';
+    const pill = (on) => ({ bg: on ? this.PAL.acc : this.PAL.card, fg: on ? this.PAL.card : this.PAL.mut, bd: on ? this.PAL.acc : this.PAL.line });
+    const sk = st.sort, sd = st.sortDir;
+    const val = (c) => sk === 'roc' ? c.roc : sk === 'rs' ? c.rs : sk === 'pop' ? c.pop : c.price;
+    const included = this.CARDS.filter(c => sk !== 'pop' || c.pop != null);
+    const excluded = this.CARDS.length - included.length;
+    const sorted = included.slice().sort((a, b) => (sd === 'asc' ? 1 : -1) * (val(a) - val(b)));
+    const mn = Math.min.apply(null, this.IDX), mx = Math.max.apply(null, this.IDX);
+    return {
+      idxPts: this.IDX.map((v, i) => (i / (this.IDX.length - 1) * 220).toFixed(1) + ',' + (48 - (v - mn) / (mx - mn) * 42).toFixed(1)).join(' '),
+      isTerm: st.view === 'terminal', isBind: st.view === 'binder',
+      viewTerm: () => this.setState({ view: 'terminal' }), viewBind: () => this.setState({ view: 'binder' }),
+      vtBg: st.view === 'terminal' ? this.PAL.acc : this.PAL.card, vtFg: st.view === 'terminal' ? this.PAL.card : this.PAL.mut,
+      vbBg: st.view === 'binder' ? this.PAL.acc : this.PAL.card, vbFg: st.view === 'binder' ? this.PAL.card : this.PAL.mut,
+      sorts: [{ k: 'value', l: 'value' }, { k: 'roc', l: 'ROC 3M' }, { k: 'rs', l: 'RS' }, { k: 'pop', l: 'pop \u0394' }].map(s => Object.assign({
+        label: s.l, tip: 'Sort by ' + s.l + (sk === s.k ? ' \u2014 click again to reverse the order' : ''),
+        pick: () => this.setState(s2 => ({ sort: s.k, sortDir: s2.sort === s.k ? (s2.sortDir === 'desc' ? 'asc' : 'desc') : 'desc' }))
+      }, pill(sk === s.k))),
+      shownCount: sorted.length + ' of 237 cards',
+      hasExcluded: excluded > 0 && sk === 'pop',
+      excludedNote: excluded + ' cards excluded from this sort \u2014 pop \u0394 60d needs two census observations and their first was Jul 2026. They\u2019ll join the sort next census.',
+      gridCols: 'minmax(' + st.colW.name + 'px, 1.4fr) ' + ['price', 'roc', 'rs', 'pop', 'vol'].map(k => st.colW[k] + 'px').join(' '),
+      cols: [
+        { n: 'Card', k: 'name', s: null, tip: 'Card name' },
+        { n: 'PSA 10', k: 'price', s: 'value', tip: 'Latest monthly PSA 10 price \u2014 click to sort' },
+        { n: 'ROC 3M', k: 'roc', s: 'roc', tip: '3-month rate of change \u2014 click to sort' },
+        { n: 'RS pct', k: 'rs', s: 'rs', tip: 'Relative strength vs market index, percentile \u2014 click to sort' },
+        { n: 'Pop \u0394 60d', k: 'pop', s: 'pop', tip: 'PSA 10 census growth over 60 days \u2014 click to sort' },
+        { n: 'Sales / mo', k: 'vol', s: null, tip: 'Observed sales per month, all tiers' }
+      ].map(c => ({
+        name: c.n, tip: c.tip, rs: this.startResize(c.k),
+        arrow: c.s && sk === c.s ? (sd === 'desc' ? ' \u25BE' : ' \u25B4') : '',
+        sort: c.s ? () => this.setState(s2 => ({ sort: c.s, sortDir: s2.sort === c.s ? (s2.sortDir === 'desc' ? 'asc' : 'desc') : 'desc' })) : () => {}
+      })),
+      rows: sorted.map(c => ({
+        name: c.name, price: money(c.price),
+        roc: pct(c.roc), rocFg: c.roc >= 0 ? this.PAL.pos : this.PAL.neg2,
+        rs: c.rs + 'th',
+        pop: c.pop == null ? '\u2014' : '+' + c.pop.toFixed(1) + '%',
+        popFg: c.pop == null ? this.PAL.mut3 : c.pop >= 5 ? this.PAL.neg2 : this.PAL.mut,
+        popTip: c.pop == null ? 'Census too young \u2014 first observation Jul 2026, deltas begin next census' : '+' + c.pop.toFixed(1) + '% PSA 10 census growth over 60 days',
+        vol: String(c.vol)
+      })),
+      tiles: sorted.map(c => ({
+        name: c.name, price: money(c.price),
+        roc: pct(c.roc), rocFg: c.roc >= 0 ? this.PAL.pos : this.PAL.neg2,
+        thumbBg: 'linear-gradient(160deg, ' + c.acc[0] + ', ' + c.acc[1] + ')',
+        slotId: 'art-' + c.name.toLowerCase().replace(/[^a-z0-9]+/g, '-')
+      }))
+    };
+  }
+}
+</script>
+</body>
+</html>

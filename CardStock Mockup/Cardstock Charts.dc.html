@@ -1,0 +1,928 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="icon" href="./brand/favicon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="anonymous">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Inter+Tight:wght@600;700&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+<script src="./image-slot.js"></script>
+<style>
+  html, body { margin: 0; padding: 0; background: var(--bg, var(--bg, #FAFAF7)); }
+  body { font-family: 'Inter', system-ui, sans-serif; color: var(--ink, #1C1C1E); }
+  a { color: var(--acc, #4A63D0); text-decoration: none; }
+  a:hover { color: var(--accH, #3A4FB8); text-decoration: underline; }
+  *:focus-visible { outline: 2px solid var(--acc, #4A63D0); outline-offset: 1px; border-radius: 2px; }
+
+  :root[data-cvd="1"] { --pos2: #0072B2; --neg2: #D55E00; }
+
+  :root[data-theme="dark"] { color-scheme: dark; --bg: #161614; --card: #1E1E1C; --ink: #E9E9E5; --mut: #B4B4AE; --mut2: #A8A8A2; --mut3: #9A9A94; --mutbg: #2A2A27; --hov: #282825; --line: #33332F; --line2: #3E3E39; --line3: #4A4A44; --line4: #262623; --acc: #8C9BF2; --accH: #AAB6F6; --btn: #4A63D0; --warn: #D6A54A; --warnInk: #D6A54A; --tooltipBg: rgba(30, 30, 28, 0.95); --accBg: #252B44; --accMut: #3A4570; }
+  :root[data-theme="dark"]:not([data-cvd="1"]) { --pos: #4CC08D; --pos2: #4CC08D; --neg: #E57B7B; --neg2: #E57B7B; --neg3: #E57B7B; }
+  :root[data-theme="dark"][data-cvd="1"] { --pos: #58A9E6; --pos2: #58A9E6; --neg: #F5924E; --neg2: #F5924E; --neg3: #E8874D; }
+  :root[data-theme="dark"] { --logoTeal: #3FBFAD; }
+</style>
+<script src="./cardstock-search.js"></script>
+<script>if(localStorage.getItem('cardstock-cvd')==='1')document.documentElement.setAttribute('data-cvd','1');if(localStorage.getItem('cardstock-theme')==='dark')document.documentElement.setAttribute('data-theme','dark');</script>
+</helmet>
+<div data-screen-label="Charts" style="height: 100vh; min-width: 1080px; overflow-x: auto; overflow-y: hidden; display: flex; flex-direction: column; font-size: 15px;">
+
+  <nav style="height: 48px; background: var(--card, #FFFFFF); border-bottom: 1px solid var(--line, #E4E4E0); display: flex; align-items: center; gap: 24px; padding: 0 20px; position: sticky; top: 0; z-index: 20;">
+    <div style="display: flex; align-items: center; gap: 10px;"><a href="Cardstock Home.dc.html" aria-label="Cardstock home" style="display: flex; align-items: center; gap: 10px; color: inherit; text-decoration: none;"><svg width="24" height="24" viewBox="0 0 32 32" fill="none" aria-hidden="true" style="flex: 0 0 auto;"><rect x="5.5" y="5.5" width="15" height="21" rx="2.5" style="stroke: var(--ink, #1C1C1E);" stroke-width="2" transform="rotate(-12 13 16)"></rect><rect x="12" y="5.5" width="15" height="21" rx="2.5" style="fill: var(--card, #FFFFFF); stroke: var(--ink, #1C1C1E);" stroke-width="2"></rect><polyline points="15,21.5 17.5,17 19.5,18.5 23.5,12.5" style="stroke: var(--logoTeal, #0E8A7B);" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" fill="none"></polyline><circle cx="23.5" cy="12.5" r="1.7" style="fill: var(--logoTeal, #0E8A7B);"></circle></svg><span style="font-family: 'Inter', sans-serif; font-weight: 700; font-size: 18px; letter-spacing: -0.03em; color: var(--ink, #1C1C1E);">Cardstock</span></a></div>
+    <div style="display: flex; gap: 2px; height: 100%;">
+      <a href="Cardstock Home.dc.html" style="display: flex; align-items: center; padding: 0 12px; font-weight: 500; font-size: 15px; color: var(--mut, #5B5B57); border-bottom: 2px solid transparent; margin-bottom: -1px;">Home</a>
+      <a href="Cardstock Screener.dc.html" style="display: flex; align-items: center; padding: 0 12px; font-weight: 500; font-size: 15px; color: var(--mut, #5B5B57); border-bottom: 2px solid transparent; margin-bottom: -1px;">Screener</a>
+      <a href="#" style="display: flex; align-items: center; padding: 0 12px; font-weight: 600; font-size: 15px; color: var(--ink, #1C1C1E); border-bottom: 2px solid var(--acc, #4A63D0); margin-bottom: -1px;">Charts</a>
+      <a href="Cardstock Binder.dc.html" style="display: flex; align-items: center; padding: 0 12px; font-weight: 500; font-size: 15px; color: var(--mut, #5B5B57); border-bottom: 2px solid transparent; margin-bottom: -1px;">Binder</a>
+      <a href="Cardstock Browse.dc.html" style="display: flex; align-items: center; padding: 0 12px; font-weight: 500; font-size: 15px; color: var(--mut, #5B5B57); border-bottom: 2px solid transparent; margin-bottom: -1px;">Browse</a>
+    </div>
+    <div style="flex: 1;"></div>
+    <cardstock-search style="flex: 0 1 280px; min-width: 110px; width: auto;"></cardstock-search>
+    <button onClick="{{ addWatch }}" title="{{ watchTip }}" style="display: inline-flex; align-items: center; justify-content: center; white-space: nowrap; background: {{ watchBg }}; color: {{ watchFg }}; border: 1px solid {{ watchBd }}; border-radius: 6px; height: 30px; padding: 0 12px; font-family: 'Inter', sans-serif; font-size: 14.5px; font-weight: 600; cursor: pointer; line-height: 1;">{{ watchLabel }}</button>
+    <div style="position: relative;">
+      <button onClick="{{ toggleViews }}" title="Saved views — a view remembers the grade tiers, indicators, resolution, and date range you have set. Applying one changes which signals are tracked." style="display: inline-flex; align-items: center; justify-content: center; white-space: nowrap; background: var(--card, #FFFFFF); color: var(--ink, #1C1C1E); border: 1px solid var(--line, #E4E4E0); border-radius: 6px; height: 30px; padding: 0 12px; font-family: 'Inter', sans-serif; font-size: 14.5px; font-weight: 500; cursor: pointer; line-height: 1;" style-hover="background: var(--hov, #F6F6F2);">{{ viewsLabel }}</button>
+      <sc-if value="{{ viewsOpen }}" hint-placeholder-val="{{ false }}">
+        <div role="menu" onMouseLeave="{{ closeViews }}" style="position: absolute; right: 0; top: 34px; z-index: 60; background: var(--card, #FFFFFF); border: 1px solid var(--line, #E4E4E0); border-radius: 6px; box-shadow: 0 6px 20px rgba(20, 19, 26, 0.12); min-width: 230px; padding: 4px;">
+          <sc-for list="{{ viewRows }}" as="vr" hint-placeholder-count="3">
+            <div role="menuitem" onClick="{{ vr.apply }}" style="display: flex; align-items: center; gap: 8px; cursor: pointer; padding: 6px 8px; border-radius: 4px;" style-hover="background: var(--hov, #F6F6F2);">
+              <span style="font-family: 'JetBrains Mono', monospace; font-size: 12.5px; color: var(--acc, #4A63D0); width: 12px;">{{ vr.check }}</span>
+              <span style="font-size: 14.5px; font-weight: 500; flex: 1;">{{ vr.name }}</span>
+              <sc-if value="{{ vr.def }}" hint-placeholder-val="{{ false }}"><span style="font-family: 'JetBrains Mono', monospace; font-size: 11px; font-weight: 600; color: var(--mut2, #6B6B66); background: var(--mutbg, #F3F3EE); padding: 1px 5px; border-radius: 3px;">DEFAULT</span></sc-if>
+              <button onClick="{{ vr.del }}" aria-label="Delete view" title="Delete view" style="background: none; border: none; cursor: pointer; color: var(--mut2, #6B6B66); font-size: 14px; padding: 2px 4px;" style-hover="color: var(--neg2, #D64545);">✕</button>
+            </div>
+          </sc-for>
+          <div style="height: 1px; background: var(--line, #E4E4E0); margin: 4px 0;"></div>
+          <button onClick="{{ saveCurrent }}" title="Save the current tiers, indicators, resolution, and date range as a named view" style="display: block; width: 100%; text-align: left; background: none; border: none; cursor: pointer; font-family: 'Inter', sans-serif; font-size: 14.5px; color: var(--acc, #4A63D0); font-weight: 600; padding: 6px 8px; border-radius: 4px;" style-hover="background: var(--hov, #F6F6F2);">+ Save current as new view</button>
+        </div>
+      </sc-if>
+    </div>
+    <a href="Cardstock Profile.dc.html" aria-label="Account" title="Profile & settings" style="display: flex; align-items: center; justify-content: center; width: 28px; height: 28px; border-radius: 50%; border: 1px solid var(--line, #E4E4E0); background: var(--mutbg, #F3F3EE); color: var(--mut, #5B5B57); font-weight: 600; font-size: 14px; text-decoration: none; flex-shrink: 0;">O</a>
+  </nav>
+
+  <div style="flex: 1; display: flex; align-items: stretch; min-height: 0;">
+
+    <sc-if value="{{ leftOpen }}" hint-placeholder-val="{{ true }}">
+    <aside aria-label="Indicators" style="width: 272px; flex-shrink: 0; background: var(--card, #FFFFFF); border-right: 1px solid var(--line, #E4E4E0); overflow-y: auto; padding: 14px 14px 20px 14px; box-sizing: border-box; box-shadow: {{ panelShadow }}; transition: box-shadow 0.7s;">
+      <div style="display: flex; gap: 12px;">
+        <div style="width: 96px; height: 133px; flex-shrink: 0; border-radius: 6px; background: linear-gradient(160deg, #5C63B8, #3E4489); box-shadow: 0 4px 14px rgba(20, 19, 26, 0.18); transition: transform 0.15s ease, box-shadow 0.15s ease; transform-origin: left top;" style-hover="transform: scale(2.2); z-index: 40; position: relative; box-shadow: 0 12px 36px rgba(20, 19, 26, 0.3);">
+          <image-slot id="art-umbreon" shape="rounded" radius="6" placeholder=" "></image-slot>
+        </div>
+        <div style="min-width: 0;">
+          <div style="font-weight: 600; font-size: 15.5px; line-height: 1.25;"><a href="Cardstock Card.dc.html" style="color: var(--ink, #1C1C1E);" style-hover="color: var(--acc, #4A63D0);">Umbreon VMAX (Alt Art)</a></div>
+          <div style="font-size: 13px; color: var(--mut2, #6B6B66); margin-top: 2px;"><a href="Cardstock Set.dc.html" style="font-size: 13px; color: var(--mut, #5B5B57);">Evolving Skies</a> · 215/203</div>
+          <div style="font-family: 'JetBrains Mono', monospace; font-size: 14px; font-weight: 700; margin-top: 4px;">{{ curPrice }} <span style="color: var(--pos2, #189E63); font-weight: 500;">{{ cur1m }}</span></div>
+        </div>
+      </div>
+      <div style="display: flex; flex-wrap: wrap; gap: 4px; margin-top: 10px;">
+        <sc-for list="{{ tierRow1 }}" as="tc" hint-placeholder-count="2">
+          <button onClick="{{ tc.toggle }}" title="{{ tc.tip }}" style="display: inline-flex; align-items: center; gap: 4px; font-family: 'JetBrains Mono', monospace; font-size: 12px; font-weight: 600; padding: 3px 7px; border-radius: 4px; cursor: pointer; border: 1px solid {{ tc.bd }}; background: {{ tc.bg }}; color: {{ tc.fg }};"><span style="width: 7px; height: 7px; border-radius: 2px; background: {{ tc.dot }};"></span>{{ tc.name }}</button>
+        </sc-for>
+        <button onClick="{{ tensGroupChip.toggle }}" title="Show or hide every grader’s 10 at once — click the caret to pick individual graders" style="display: inline-flex; align-items: center; gap: 4px; font-family: 'JetBrains Mono', monospace; font-size: 12px; font-weight: 600; padding: 3px 7px; border-radius: 4px; cursor: pointer; border: 1px solid {{ tensGroupChip.bd }}; background: {{ tensGroupChip.bg }}; color: {{ tensGroupChip.fg }};"><span style="width: 7px; height: 7px; border-radius: 2px; background: {{ tensGroupChip.dot }};"></span>{{ tensGroupChip.name }}</button>
+      </div>
+      <sc-if value="{{ tensOpenV }}" hint-placeholder-val="{{ false }}">
+        <div style="margin: 2px 0 0 10px; padding: 7px 9px; border-left: 2px solid var(--line2, #D9D9D4); background: var(--hov, #F6F6F2); border-radius: 0 6px 6px 0;">
+          <div style="font-size: 10.5px; font-weight: 600; letter-spacing: 0.07em; color: var(--mut2, #6B6B66); text-transform: uppercase; margin-bottom: 5px;">Other graders’ 10s</div>
+          <div style="display: flex; flex-wrap: wrap; gap: 4px;">
+            <sc-for list="{{ tenSubChips }}" as="ts" hint-placeholder-count="7">
+              <button onClick="{{ ts.toggle }}" title="{{ ts.tip }}" style="display: inline-flex; align-items: center; gap: 4px; font-family: 'JetBrains Mono', monospace; font-size: 11.5px; font-weight: 600; padding: 2px 6px; border-radius: 4px; cursor: pointer; border: 1px solid {{ ts.bd }}; background: {{ ts.bg }}; color: {{ ts.fg }};"><span style="width: 6px; height: 6px; border-radius: 2px; background: {{ ts.dot }};"></span>{{ ts.name }}</button>
+            </sc-for>
+          </div>
+        </div>
+      </sc-if>
+      <div style="display: flex; flex-wrap: wrap; gap: 4px; margin-top: 4px;">
+        <sc-for list="{{ tierRow2 }}" as="tc" hint-placeholder-count="5">
+          <button onClick="{{ tc.toggle }}" title="{{ tc.tip }}" style="display: inline-flex; align-items: center; gap: 4px; font-family: 'JetBrains Mono', monospace; font-size: 12px; font-weight: 600; padding: 3px 7px; border-radius: 4px; cursor: pointer; border: 1px solid {{ tc.bd }}; background: {{ tc.bg }}; color: {{ tc.fg }};"><span style="width: 7px; height: 7px; border-radius: 2px; background: {{ tc.dot }};"></span>{{ tc.name }}</button>
+        </sc-for>
+        <button onClick="{{ lowsGroupChip.toggle }}" title="Show or hide grades 1–6 at once — click the caret to pick individual grades" style="display: inline-flex; align-items: center; gap: 4px; font-family: 'JetBrains Mono', monospace; font-size: 12px; font-weight: 600; padding: 3px 7px; border-radius: 4px; cursor: pointer; border: 1px solid {{ lowsGroupChip.bd }}; background: {{ lowsGroupChip.bg }}; color: {{ lowsGroupChip.fg }};"><span style="width: 7px; height: 7px; border-radius: 2px; background: {{ lowsGroupChip.dot }};"></span>{{ lowsGroupChip.name }}</button>
+        <button onClick="{{ rawChip.toggle }}" title="Show or hide ungraded (raw) prices" style="display: inline-flex; align-items: center; gap: 4px; font-family: 'JetBrains Mono', monospace; font-size: 12px; font-weight: 600; padding: 3px 7px; border-radius: 4px; cursor: pointer; border: 1px solid {{ rawChip.bd }}; background: {{ rawChip.bg }}; color: {{ rawChip.fg }};"><span style="width: 7px; height: 7px; border-radius: 2px; background: {{ rawChip.dot }};"></span>{{ rawChip.name }}</button>
+      </div>
+      <sc-if value="{{ lowsOpenV }}" hint-placeholder-val="{{ false }}">
+        <div style="margin: 2px 0 0 10px; padding: 7px 9px; border-left: 2px solid var(--line2, #D9D9D4); background: var(--hov, #F6F6F2); border-radius: 0 6px 6px 0;">
+          <div style="font-size: 10.5px; font-weight: 600; letter-spacing: 0.07em; color: var(--mut2, #6B6B66); text-transform: uppercase; margin-bottom: 5px;">Grades 1–6</div>
+          <div style="display: flex; flex-wrap: wrap; gap: 4px;">
+            <sc-for list="{{ lowSubChips }}" as="ls" hint-placeholder-count="6">
+              <button onClick="{{ ls.toggle }}" title="{{ ls.tip }}" style="display: inline-flex; align-items: center; gap: 4px; font-family: 'JetBrains Mono', monospace; font-size: 11.5px; font-weight: 600; padding: 2px 6px; border-radius: 4px; cursor: pointer; border: 1px solid {{ ls.bd }}; background: {{ ls.bg }}; color: {{ ls.fg }};"><span style="width: 6px; height: 6px; border-radius: 2px; background: {{ ls.dot }};"></span>{{ ls.name }}</button>
+            </sc-for>
+          </div>
+        </div>
+      </sc-if>
+
+      <div style="font-size: 12px; color: var(--mut2, #6B6B66); margin-top: 8px; line-height: 1.45; min-height: 31px;">{{ tierNotice }}</div>
+      <sc-for list="{{ groups }}" as="g" hint-placeholder-count="6">
+        <div style="margin-top: 16px;">
+          <div onClick="{{ g.toggle }}" role="button" tabindex="0" style="font-size: 12px; font-weight: 600; letter-spacing: 0.08em; color: var(--mut2, #6B6B66); text-transform: uppercase; padding-bottom: 5px; border-bottom: 1px solid var(--line4, #F0F0EC); display: flex; justify-content: space-between; cursor: pointer; user-select: none;" style-hover="color: var(--mut, #5B5B57);"><span><span style="display: inline-block; width: 12px;">{{ g.chev }}</span>{{ g.name }}</span><span style="font-weight: 500;">{{ g.note }}</span></div>
+          <sc-if value="{{ g.open }}" hint-placeholder-val="{{ true }}">
+          <sc-for list="{{ g.rows }}" as="r" hint-placeholder-count="3">
+            <div style="padding: 6px 0 2px 0;">
+              <sc-if value="{{ r.isToggle }}" hint-placeholder-val="{{ true }}">
+                <div style="display: flex; align-items: center; gap: 8px;">
+                  <button onClick="{{ r.toggle }}" aria-label="{{ r.name }}" title="{{ r.tip }}" style="width: 26px; height: 15px; border-radius: 8px; border: none; cursor: pointer; padding: 2px; background: {{ r.swBg }}; display: flex; flex-shrink: 0;"><span style="width: 11px; height: 11px; border-radius: 50%; background: var(--card, #FFFFFF); transform: translateX({{ r.swX }}px); transition: transform 0.12s;"></span></button>
+                  <span title="{{ r.tip }}" style="font-size: 14.5px; font-weight: 500; flex: 1; min-width: 0; cursor: help; text-decoration: underline dotted rgba(138, 138, 134, 0.55); text-underline-offset: 3px;">{{ r.name }}</span>
+                  <span style="font-family: 'JetBrains Mono', monospace; font-size: 11px; font-weight: 600; color: {{ r.badgeFg }}; background: {{ r.badgeBg }}; padding: 1px 5px; border-radius: 3px; white-space: nowrap;">{{ r.badge }}</span>
+                </div>
+                <sc-if value="{{ r.hasWarn }}" hint-placeholder-val="{{ false }}">
+                  <div style="margin: 4px 0 2px 34px; font-size: 12px; color: var(--warnInk, #8F6614); background: rgba(176, 127, 26, 0.08); border: 1px solid rgba(176, 127, 26, 0.22); border-radius: 4px; padding: 3px 6px;">▲ {{ r.warnTxt }}</div>
+                </sc-if>
+                <sc-if value="{{ r.showParams }}" hint-placeholder-val="{{ false }}">
+                  <div style="display: flex; gap: 8px; padding: 5px 0 3px 34px; flex-wrap: wrap;">
+                    <sc-for list="{{ r.params }}" as="p" hint-placeholder-count="2">
+                      <label style="display: flex; align-items: center; gap: 4px; font-family: 'JetBrains Mono', monospace; font-size: 12px; color: var(--mut2, #6B6B66);">{{ p.label }}<input type="number" value="{{ p.val }}" onChange="{{ p.set }}" min="{{ p.min }}" max="{{ p.max }}" style="width: 42px; height: 22px; border: 1px solid var(--line, #E4E4E0); border-radius: 4px; background: var(--bg, var(--bg, #FAFAF7)); font-family: 'JetBrains Mono', monospace; font-size: 12.5px; color: var(--ink, #1C1C1E); padding: 0 4px; box-sizing: border-box;"></input></label>
+                    </sc-for>
+                  </div>
+                </sc-if>
+              </sc-if>
+              <sc-if value="{{ r.isReadout }}" hint-placeholder-val="{{ false }}">
+                <div style="display: flex; justify-content: space-between; align-items: baseline; gap: 8px; padding-left: 34px;">
+                  <span title="{{ r.tip }}" style="font-size: 14px; color: var(--mut, #5B5B57); cursor: help; text-decoration: underline dotted rgba(138, 138, 134, 0.55); text-underline-offset: 3px;">{{ r.name }}</span>
+                  <span style="font-family: 'JetBrains Mono', monospace; font-size: 13px; font-weight: 600; color: {{ r.valFg }}; white-space: nowrap;">{{ r.val }}</span>
+                </div>
+              </sc-if>
+              <sc-if value="{{ r.isLocked }}" hint-placeholder-val="{{ false }}">
+                <div style="padding-left: 34px; opacity: 0.62;">
+                  <div style="display: flex; justify-content: space-between; align-items: baseline; gap: 8px;">
+                    <span title="{{ r.tip }}" style="font-size: 14px; color: var(--mut, #5B5B57); cursor: help; text-decoration: underline dotted rgba(138, 138, 134, 0.55); text-underline-offset: 3px;">{{ r.name }}</span>
+                    <span style="font-family: 'JetBrains Mono', monospace; font-size: 11px; font-weight: 600; color: var(--mut2, #6B6B66); background: var(--mutbg, #F3F3EE); padding: 1px 5px; border-radius: 3px;">LOCKED</span>
+                  </div>
+                  <div style="font-size: 12px; color: var(--mut2, #6B6B66); margin-top: 1px;">{{ r.note }}</div>
+                  <sc-if value="{{ r.hasProg }}" hint-placeholder-val="{{ false }}">
+                    <div style="display: flex; align-items: center; gap: 6px; margin-top: 4px;">
+                      <div style="flex: 1; height: 3px; background: var(--line4, #F0F0EC); border-radius: 2px; overflow: hidden;"><div style="height: 100%; width: {{ r.progPct }}; background: var(--warn, #8F6614); border-radius: 2px;"></div></div>
+                      <span style="font-family: 'JetBrains Mono', monospace; font-size: 11px; color: var(--mut2, #6B6B66); white-space: nowrap;">{{ r.progTxt }}</span>
+                    </div>
+                  </sc-if>
+                  <sc-if value="{{ r.anyway }}" hint-placeholder-val="{{ false }}">
+                    <a href="#" onClick="{{ r.force }}" title="Force-enables this pane now and burns a permanent LOW CONFIDENCE badge into it — the badge does not clear until the data threshold is truly met" style="font-size: 12px;">show anyway →</a>
+                  </sc-if>
+                </div>
+              </sc-if>
+            </div>
+          </sc-for>
+          </sc-if>
+        </div>
+      </sc-for>
+
+      <div style="margin-top: 16px;">
+        <div style="font-size: 12px; font-weight: 600; letter-spacing: 0.08em; color: var(--mut2, #6B6B66); text-transform: uppercase; padding-bottom: 5px; border-bottom: 1px solid var(--line4, #F0F0EC);">Compare</div>
+        <div style="display: flex; align-items: center; gap: 8px; padding: 8px 0 2px 0;">
+          <button onClick="{{ cmpToggle }}" aria-label="Market index" title="Draw the whole-market index alongside this card, so you can see whether a move is the card or the market" style="width: 26px; height: 15px; border-radius: 8px; border: none; cursor: pointer; padding: 2px; background: {{ cmpBg }}; display: flex; flex-shrink: 0;"><span style="width: 11px; height: 11px; border-radius: 50%; background: var(--card, #FFFFFF); transform: translateX({{ cmpX }}px); transition: transform 0.12s;"></span></button>
+          <span style="font-size: 14.5px; font-weight: 500; flex: 1;">Market index</span>
+          <span style="font-family: 'JetBrains Mono', monospace; font-size: 11.5px; color: var(--mut2, #6B6B66);">┄ grey</span>
+        </div>
+        <div style="display: flex; align-items: center; gap: 8px; padding: 6px 0 2px 0;">
+          <button onClick="{{ normToggle }}" aria-label="Normalize" title="Rebase every visible series to 100 at the start of the range — compares percentage moves instead of dollar prices" style="width: 26px; height: 15px; border-radius: 8px; border: none; cursor: pointer; padding: 2px; background: {{ normBg }}; display: flex; flex-shrink: 0;"><span style="width: 11px; height: 11px; border-radius: 50%; background: var(--card, #FFFFFF); transform: translateX({{ normX }}px); transition: transform 0.12s;"></span></button>
+          <span style="font-size: 14.5px; font-weight: 500; flex: 1;">Normalize (start = 100)</span>
+        </div>
+      </div>
+      <div style="margin-top: 18px; padding-top: 10px; border-top: 1px solid var(--line4, #F0F0EC); font-size: 12.5px; color: var(--mut2, #6B6B66);">
+        <a href="Cardstock About Data.dc.html" style="font-size: 12.5px; color: var(--mut, #5B5B57);">Why no candlesticks? → About our data</a>
+      </div>
+    </aside>
+    </sc-if>
+
+    <main style="flex: 1; min-width: 0; padding: 14px 18px 24px 18px; overflow-y: auto; box-sizing: border-box;">
+      <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 10px; flex-wrap: wrap;">
+        <button onClick="{{ togglePanel }}" title="Toggle indicator panel" style="background: var(--card, #FFFFFF); border: 1px solid var(--line, #E4E4E0); border-radius: 6px; height: 26px; width: 28px; cursor: pointer; color: var(--mut, #5B5B57); font-size: 14px; flex-shrink: 0;">{{ panelGlyph }}</button>
+        <span style="font-family: 'Inter Tight', sans-serif; font-size: 17.5px; font-weight: 700;">Price</span>
+        <span style="font-family: 'JetBrains Mono', monospace; font-size: 12.5px; color: var(--mut2, #6B6B66); white-space: nowrap;">{{ axisMode }}</span>
+        <div style="flex: 1;"></div>
+        <div style="display: flex; gap: 0; border: 1px solid var(--line, #E4E4E0); border-radius: 6px; overflow: hidden;">
+          <sc-for list="{{ resBtns }}" as="rz" hint-placeholder-count="3">
+            <button onClick="{{ rz.click }}" title="{{ rz.tip }}" style="background: {{ rz.bg }}; color: {{ rz.fg }}; border: none; border-right: 1px solid var(--line, #E4E4E0); height: 24px; width: 28px; font-family: 'JetBrains Mono', monospace; font-size: 12.5px; font-weight: 600; cursor: {{ rz.cur }};">{{ rz.label }}</button>
+          </sc-for>
+        </div>
+        <label style="display: flex; align-items: center; gap: 4px; font-family: 'JetBrains Mono', monospace; font-size: 12px; color: var(--mut2, #6B6B66);">from<input type="date" value="{{ fromVal }}" onChange="{{ setFrom }}" min="2021-08-01" max="2026-07-31" style="height: 24px; border: 1px solid var(--line, #E4E4E0); border-radius: 5px; background: var(--card, #FFFFFF); font-family: 'JetBrains Mono', monospace; font-size: 12.5px; color: var(--ink, #1C1C1E); padding: 0 4px;"></input></label>
+        <label style="display: flex; align-items: center; gap: 4px; font-family: 'JetBrains Mono', monospace; font-size: 12px; color: var(--mut2, #6B6B66);">to<input type="date" value="{{ toVal }}" onChange="{{ setTo }}" min="2021-08-01" max="2026-07-31" style="height: 24px; border: 1px solid var(--line, #E4E4E0); border-radius: 5px; background: var(--card, #FFFFFF); font-family: 'JetBrains Mono', monospace; font-size: 12.5px; color: var(--ink, #1C1C1E); padding: 0 4px;"></input></label>
+        <sc-for list="{{ rangeBtns }}" as="rb" hint-placeholder-count="3">
+          <button onClick="{{ rb.pick }}" title="{{ rb.tip }}" style="background: {{ rb.bg }}; color: {{ rb.fg }}; border: 1px solid {{ rb.bd }}; border-radius: 6px; height: 26px; padding: 0 10px; font-family: 'JetBrains Mono', monospace; font-size: 13px; font-weight: 600; cursor: pointer;">{{ rb.label }}</button>
+        </sc-for>
+        <button onClick="{{ tableToggle }}" title="Show the underlying monthly closes as a table" style="background: {{ tblBg }}; color: {{ tblFg }}; border: 1px solid var(--line, #E4E4E0); border-radius: 6px; height: 26px; padding: 0 10px; font-family: 'JetBrains Mono', monospace; font-size: 13px; cursor: pointer;">table</button>
+      </div>
+
+      <div style="display: flex; gap: 14px; flex-wrap: wrap; padding: 8px 12px; background: var(--card, #FFFFFF); border: 1px solid var(--line, #E4E4E0); border-radius: 8px; margin-bottom: 10px;">
+        <sc-for list="{{ stats }}" as="st" hint-placeholder-count="6">
+          <div style="display: flex; align-items: baseline; gap: 5px;">
+            <span style="font-size: 12px; font-weight: 600; letter-spacing: 0.05em; color: var(--mut2, #6B6B66); text-transform: uppercase;">{{ st.label }}</span>
+            <span style="font-family: 'JetBrains Mono', monospace; font-size: 14px; font-weight: 600; color: {{ st.fg }};">{{ st.val }}</span>
+          </div>
+        </sc-for>
+      </div>
+
+      <div style="position: relative; background: var(--card, #FFFFFF); border: 1px solid var(--line, #E4E4E0); border-radius: 8px; padding: 8px;">
+        <div style="display: flex; align-items: baseline; gap: 8px; padding: 2px 4px 8px 4px;">
+          <span style="font-family: 'Inter Tight', sans-serif; font-size: 15px; font-weight: 700;">{{ chartTitle }}</span>
+          <span style="font-family: 'JetBrains Mono', monospace; font-size: 11.5px; color: var(--mut2, #6B6B66);">{{ chartSub }}</span>
+        </div>
+        <div style="position: relative;"><svg viewBox="0 0 920 456" width="100%" style="display: block;" onMouseMove="{{ chartMove }}" onMouseLeave="{{ chartLeave }}">
+          <sc-for list="{{ yTicks }}" as="yt" hint-placeholder-count="4">
+            <line x1="64" y1="{{ yt.y }}" x2="906" y2="{{ yt.y }}" style="stroke: var(--line4, var(--line4, #F0F0EC));" stroke-width="1"></line>
+          </sc-for>
+          <sc-for list="{{ xTicks }}" as="xt" hint-placeholder-count="5">
+            <line x1="{{ xt.x }}" y1="14" x2="{{ xt.x }}" y2="432" style="stroke: var(--hov, var(--hov, #F6F6F2));" stroke-width="1"></line>
+          </sc-for>
+          <line x1="{{ rsX }}" y1="14" x2="{{ rsX }}" y2="432" style="stroke: var(--warn, var(--warn, #8F6614));" stroke-width="1" stroke-dasharray="3 3"></line>
+          <polygon points="{{ bollPts }}" fill="rgba(74, 99, 208, 0.06)"></polygon>
+          <polyline points="{{ idxPts }}" fill="none" style="stroke: var(--mut2, var(--mut2, #6B6B66));" stroke-width="1.2" stroke-dasharray="4 4"></polyline>
+          <sc-for list="{{ lines }}" as="ln" hint-placeholder-count="3">
+            <polyline points="{{ ln.pts }}" fill="none" stroke="{{ ln.color }}" stroke-width="{{ ln.w }}" stroke-dasharray="{{ ln.dash }}"></polyline>
+          </sc-for>
+          <sc-for list="{{ tris }}" as="tg">
+            <polygon points="{{ tg.pts }}" fill="{{ tg.fill }}"><title>{{ tg.tip }}</title></polygon>
+          </sc-for>
+          <sc-for list="{{ hollows }}" as="hp" hint-placeholder-count="2">
+            <circle cx="{{ hp.x }}" cy="{{ hp.y }}" r="3.5" style="fill: var(--card, #FFFFFF);" stroke="{{ hp.color }}" stroke-width="1.6"><title>current month still revising</title></circle>
+          </sc-for>
+          <line x1="{{ hoverX }}" y1="14" x2="{{ hoverX }}" y2="432" style="stroke: var(--line3, var(--line3, #C9C9C4));" stroke-width="1"></line>
+        </svg>
+        <sc-for list="{{ yTicks }}" as="ylb" hint-placeholder-count="4">
+          <div style="position: absolute; left: 6.74%; top: {{ ylb.t }}%; transform: translate(-100%, -50%); font-family: 'JetBrains Mono', monospace; font-size: 11.5px; color: var(--mut2, #6B6B66); pointer-events: none; white-space: nowrap;">{{ ylb.label }}</div>
+        </sc-for>
+        <sc-if value="{{ rsOn }}" hint-placeholder-val="{{ false }}">
+          <div style="position: absolute; left: {{ rsL }}%; top: 4%; transform: translateX(-100%); padding-right: 6px; font-family: 'JetBrains Mono', monospace; font-size: 11px; color: var(--warnInk, #8F6614); pointer-events: none; white-space: nowrap;">per-sale ledger begins · Jul ’26 →</div>
+        </sc-if>
+        <sc-for list="{{ xTicks }}" as="xlb" hint-placeholder-count="5">
+          <div style="position: absolute; left: {{ xlb.l }}%; top: 100%; transform: translate(-50%, -100%); font-family: 'JetBrains Mono', monospace; font-size: 11.5px; color: var(--mut2, #6B6B66); pointer-events: none;">{{ xlb.label }}</div>
+        </sc-for>
+        <sc-if value="{{ hasHover }}" hint-placeholder-val="{{ false }}">
+          <div style="position: absolute; top: 3.1%; left: 72px; background: var(--tooltipBg, rgba(255, 255, 255, 0.96)); border: 1px solid var(--line, #E4E4E0); border-radius: 6px; padding: 6px 9px; pointer-events: none; box-shadow: 0 3px 10px rgba(20, 19, 26, 0.08);">
+            <div style="font-family: 'JetBrains Mono', monospace; font-size: 12px; font-weight: 700; color: var(--mut, #5B5B57); margin-bottom: 3px;">{{ hoverMonth }}</div>
+            <sc-for list="{{ hoverRows }}" as="hr" hint-placeholder-count="2">
+              <div style="display: flex; align-items: center; gap: 6px; font-family: 'JetBrains Mono', monospace; font-size: 12px; padding: 1px 0;"><span style="width: 7px; height: 7px; border-radius: 50%; background: {{ hr.dot }}; flex-shrink: 0;"></span><span style="color: var(--mut2, #6B6B66); flex: 1; padding-right: 10px;">{{ hr.name }}</span><span style="font-weight: 600;">{{ hr.val }}</span></div>
+            </sc-for>
+          </div>
+        </sc-if>
+        </div>
+        
+      </div>
+
+      <sc-if value="{{ tableOpen }}" hint-placeholder-val="{{ false }}">
+        <div style="background: var(--card, #FFFFFF); border: 1px solid var(--line, #E4E4E0); border-radius: 8px; margin-top: 10px; padding: 10px 12px;">
+          <div style="font-size: 12px; font-weight: 600; letter-spacing: 0.05em; color: var(--mut2, #6B6B66); text-transform: uppercase; margin-bottom: 6px;">Last 12 months · visible tiers</div>
+          <div style="display: grid; grid-template-columns: 90px repeat({{ tblColCount }}, 1fr); gap: 4px 12px; font-family: 'JetBrains Mono', monospace; font-size: 12.5px;">
+            <span></span>
+            <sc-for list="{{ tblHead }}" as="th"><span style="font-weight: 700; color: {{ th.color }};">{{ th.name }}</span></sc-for>
+            <sc-for list="{{ tblRows }}" as="tr2">
+              <span style="color: var(--mut2, #6B6B66);">{{ tr2.m }}</span>
+              <sc-for list="{{ tr2.cells }}" as="td2"><span style="font-weight: 500;">{{ td2.v }}</span></sc-for>
+            </sc-for>
+          </div>
+        </div>
+      </sc-if>
+
+      <sc-for list="{{ panes }}" as="pn" hint-placeholder-count="1">
+        <div style="background: var(--card, #FFFFFF); border: 1px solid var(--line, #E4E4E0); border-radius: 8px; margin-top: 10px; padding: 8px;">
+          <div style="display: flex; align-items: baseline; gap: 8px; padding: 0 4px 6px 4px;">
+            <span style="font-family: 'Inter Tight', sans-serif; font-size: 15px; font-weight: 700;">{{ pn.title }}</span>
+            <span style="font-family: 'JetBrains Mono', monospace; font-size: 11.5px; color: var(--mut2, #6B6B66);">{{ pn.sub }}</span>
+            <sc-if value="{{ pn.badge }}" hint-placeholder-val="{{ false }}">
+              <span title="{{ pn.badgeTip }}" style="font-family: 'JetBrains Mono', monospace; font-size: 11px; font-weight: 700; color: var(--warnInk, #8F6614); background: rgba(176, 127, 26, 0.12); padding: 1px 6px; border-radius: 3px; cursor: help;">{{ pn.badge }}</span>
+            </sc-if>
+            <div style="flex: 1;"></div>
+            <span style="font-family: 'JetBrains Mono', monospace; font-size: 12px; font-weight: 600; color: var(--mut, #5B5B57); white-space: nowrap;">{{ pn.hoverTxt }}</span>
+            <button onClick="{{ pn.close }}" aria-label="Close pane" title="Remove this indicator pane — the indicator stays available in the panel" style="background: none; border: none; cursor: pointer; color: var(--mut2, #6B6B66); font-size: 15px; line-height: 1; padding: 2px 4px;">✕</button>
+          </div>
+          <div style="position: relative;"><svg viewBox="0 0 920 170" width="100%" style="display: block;" onMouseMove="{{ chartMove }}" onMouseLeave="{{ chartLeave }}">
+            <line x1="{{ pn.hx }}" y1="14" x2="{{ pn.hx }}" y2="156" style="stroke: var(--line3, var(--line3, #C9C9C4));" stroke-width="1"></line>
+            <sc-for list="{{ pn.regions }}" as="rg">
+              <rect x="{{ rg.x }}" y="14" width="{{ rg.w }}" height="142" fill="{{ rg.fill }}"><title>{{ rg.tip }}</title></rect>
+            </sc-for>
+            <sc-for list="{{ pn.yts }}" as="y2">
+              <line x1="64" y1="{{ y2.y }}" x2="906" y2="{{ y2.y }}" style="stroke: var(--hov, var(--hov, #F6F6F2));" stroke-width="1"></line>
+            </sc-for>
+            <sc-for list="{{ pn.hlines }}" as="hl">
+              <line x1="64" y1="{{ hl.y }}" x2="906" y2="{{ hl.y }}" style="stroke: var(--line, var(--line, #E4E4E0));" stroke-width="1" stroke-dasharray="{{ hl.dash }}"></line>
+            </sc-for>
+            <sc-for list="{{ pn.bars }}" as="br">
+              <rect x="{{ br.x }}" y="{{ br.y }}" width="{{ br.w }}" height="{{ br.h }}" fill="{{ br.fill }}"></rect>
+            </sc-for>
+            <sc-for list="{{ pn.lines }}" as="pl">
+              <polyline points="{{ pl.pts }}" fill="none" stroke="{{ pl.color }}" stroke-width="1.4" stroke-dasharray="{{ pl.dash }}"></polyline>
+            </sc-for>
+            <sc-for list="{{ pn.vlines }}" as="vl">
+              <line x1="{{ vl.x }}" y1="14" x2="{{ vl.x }}" y2="156" stroke="{{ vl.color }}" stroke-width="1" stroke-dasharray="3 3"></line>
+            </sc-for>
+          </svg>
+          <sc-for list="{{ pn.yts }}" as="ylp">
+            <div style="position: absolute; left: 6.74%; top: {{ ylp.t }}%; transform: translate(-100%, -50%); font-family: 'JetBrains Mono', monospace; font-size: 11px; color: var(--mut2, #6B6B66); pointer-events: none; white-space: nowrap;">{{ ylp.label }}</div>
+          </sc-for>
+          <sc-for list="{{ pn.hlines }}" as="hlp">
+            <div style="position: absolute; left: 6.74%; top: {{ hlp.t }}%; transform: translate(-100%, -50%); font-family: 'JetBrains Mono', monospace; font-size: 11px; color: var(--mut2, #6B6B66); pointer-events: none; white-space: nowrap;">{{ hlp.label }}</div>
+          </sc-for>
+          <sc-for list="{{ pn.vlines }}" as="vlp">
+            <div style="position: absolute; left: {{ vlp.l }}%; top: 14%; margin-left: 5px; font-family: 'JetBrains Mono', monospace; font-size: 11px; color: {{ vlp.color }}; pointer-events: none; white-space: nowrap;">{{ vlp.label }}</div>
+          </sc-for>
+          <sc-for list="{{ pn.xt }}" as="xlp">
+            <div style="position: absolute; left: {{ xlp.l }}%; top: 100%; transform: translate(-50%, -100%); font-family: 'JetBrains Mono', monospace; font-size: 10.5px; color: #C0C0BB; pointer-events: none;">{{ xlp.label }}</div>
+          </sc-for>
+          </div>
+        </div>
+      </sc-for>
+      <div style="font-size: 12.5px; color: var(--mut2, #6B6B66); margin-top: 10px;">Up to 2 indicator panes at a time — enabling a third replaces the oldest. Triangles mark rule triggers on the price series; hover for the rule and forward returns.</div>
+    </main>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;defaultRange&quot;: {&quot;editor&quot;: &quot;enum&quot;, &quot;options&quot;: [&quot;1Y&quot;, &quot;3Y&quot;, &quot;All&quot;], &quot;default&quot;: &quot;3Y&quot;, &quot;tsType&quot;: &quot;string&quot;, &quot;section&quot;: &quot;Chart&quot;}, &quot;compareIndex&quot;: {&quot;editor&quot;: &quot;boolean&quot;, &quot;default&quot;: false, &quot;tsType&quot;: &quot;boolean&quot;, &quot;section&quot;: &quot;Chart&quot;}}">
+class Component extends DCLogic {
+  PAL = (() => { const d = localStorage.getItem('cardstock-theme') === 'dark', c = localStorage.getItem('cardstock-cvd') === '1';
+    const s = d ? (c ? {pos:'#58A9E6',pos2:'#58A9E6',neg:'#F5924E',neg2:'#F5924E',neg3:'#E8874D',posBg:a=>'rgba(0,114,178,'+a+')',negBg:a=>'rgba(213,94,0,'+a+')'}
+                     : {pos:'#4CC08D',pos2:'#4CC08D',neg:'#E57B7B',neg2:'#E57B7B',neg3:'#E57B7B',posBg:a=>'rgba(24,158,99,'+a+')',negBg:a=>'rgba(214,69,69,'+a+')'})
+              : (c ? {pos:'#0B69A8',pos2:'#0072B2',neg:'#CC5F00',neg2:'#D55E00',neg3:'#B34E00',posBg:a=>'rgba(0,114,178,'+a+')',negBg:a=>'rgba(213,94,0,'+a+')'}
+                   : {pos:'#157A50',pos2:'#189E63',neg:'#C13A3A',neg2:'#D64545',neg3:'#A93838',posBg:a=>'rgba(24,158,99,'+a+')',negBg:a=>'rgba(214,69,69,'+a+')'});
+    const ch = d ? {bg:'#161614',card:'#1E1E1C',ink:'#E9E9E5',mut:'#B4B4AE',mut2:'#A8A8A2',mut3:'#9A9A94',mutbg:'#2A2A27',hov:'#282825',line:'#33332F',line2:'#3E3E39',line3:'#4A4A44',line4:'#262623',acc:'#8C9BF2',accH:'#AAB6F6',btn:'#4A63D0',accBg:'#252B44',accMut:'#3A4570',warn:'#D6A54A',warnInk:'#D6A54A'}
+               : {bg:'#FAFAF7',card:'#FFFFFF',ink:'#1C1C1E',mut:'#5B5B57',mut2:'#6B6B66',mut3:'#8F8F8A',mutbg:'#F3F3EE',hov:'#F6F6F2',line:'#E4E4E0',line2:'#D9D9D4',line3:'#C9C9C4',line4:'#F0F0EC',acc:'#4A63D0',accH:'#3A4FB8',btn:'#4A63D0',accBg:'#EEF1FB',accMut:'#B9C4E8',warn:'#8F6614',warnInk:'#8F6614'};
+    return Object.assign(ch, s); })();
+  componentDidMount() {
+    if (location.hash === '#signals') {
+      this.setState({ leftOpen: true, panelGlow: true });
+      this._glowT = setTimeout(() => this.setState({ panelGlow: false }), 2600);
+    }
+  }
+  componentWillUnmount() { clearTimeout(this._glowT); }
+  state = {
+    tiers: { 'BGS 10 Black': false, 'BGS 10': false, 'SGC 10': false, 'ACE 10': false, 'TAG 10': false, 'CGC 10 Prist.': false, 'CGC 10': false, 'PSA 10': true, 'Grade 9.5': false, 'Grade 9': false, 'Grade 8': false, 'Grade 7': false, 'Grade 6': false, 'Grade 5': false, 'Grade 4': false, 'Grade 3': false, 'Grade 2': false, 'Grade 1': false, 'Raw': false },
+    inds: { ema: false, sma: false, macd: true, rsi: false, boll: false, z: false, rs: true, churn: false, vol: false, popd: false, d2: false, f3: false, g1: false, g2: false, g3: false, g4: false, seas: false, amihud: false, disp: false, dtl: false, e4: false, overhang: false, spread: false, arbev: false },
+    forced: {}, wlSaved: { rs: true, macd: true }, wlFlash: false, panelGlow: false,
+    paneOrder: ['macd'],
+    params: { emaFast: 3, emaSlow: 9, smaLen: 9, macdF: 3, macdS: 6, macdSig: 4, rsiLen: 6, bollK: 6, bollM: 2 },
+    range: null, cmp: null, norm: false, hoverI: null, leftOpen: true, tableOpen: false, watch: true,
+    viewsOpen: false, activeView: null, savedViews: [
+      { name: 'Trend workspace', isDefault: true, cfg: { tiers: { 'PSA 10': true }, inds: { ema: true, macd: true }, paneOrder: ['macd'], range: '3Y', cmp: false, norm: false } },
+      { name: 'Liquidity check', isDefault: false, cfg: { tiers: { 'PSA 10': true }, inds: { churn: true, vol: true }, paneOrder: ['churn', 'vol'], range: '1Y', cmp: false, norm: false } },
+      { name: 'vs Market', isDefault: false, cfg: { tiers: { 'PSA 10': true }, inds: { rs: true }, paneOrder: ['rs'], range: '3Y', cmp: true, norm: true } }
+    ]
+  };
+  applyView(v) {
+    const tiers = {}; Object.keys(this.state.tiers).forEach(t => tiers[t] = !!v.cfg.tiers[t]);
+    const inds = {}; Object.keys(this.state.inds).forEach(k => inds[k] = !!v.cfg.inds[k]);
+    this.setState({ tiers, inds, paneOrder: v.cfg.paneOrder.slice(), range: v.cfg.range, from: null, to: null, cmp: v.cfg.cmp, norm: v.cfg.norm, activeView: v.name, viewsOpen: false, stash: null });
+  }
+  saveCurrentView() {
+    const name = 'View ' + (this.state.savedViews.length + 1);
+    const v = { name, isDefault: false, cfg: { tiers: Object.assign({}, this.state.tiers), inds: Object.assign({}, this.state.inds), paneOrder: this.state.paneOrder.slice(), range: this.state.range ?? '3Y', cmp: !!this.state.cmp, norm: this.state.norm } };
+    this.setState({ savedViews: this.state.savedViews.concat([v]), activeView: name, viewsOpen: false });
+  }
+  deleteView(name) {
+    this.setState({ savedViews: this.state.savedViews.filter(v => v.name !== name), activeView: this.state.activeView === name ? null : this.state.activeView });
+  }
+  constructor(props) {
+    super(props);
+    this.N = 60;
+    this.TIER_COLORS = { 'PSA 10': this.PAL.acc, 'Grade 9.5': '#7A56C9', 'Grade 9': this.PAL.warn, 'Grade 8': '#4C8F8A', 'Grade 7': '#A96A4A', 'Raw': this.PAL.mut2, 'Grade 1': '#A08D78', 'Grade 2': '#97906E', 'Grade 3': '#7F9668', 'Grade 4': '#6A9678', 'Grade 5': '#5E9490', 'Grade 6': '#578AA3', 'CGC 10': '#1F8FA8', 'CGC 10 Prist.': '#0F6E86', 'TAG 10': '#8646B8', 'ACE 10': '#C24B4B', 'SGC 10': '#5C6B9E', 'BGS 10': '#8A7139', 'BGS 10 Black': '#2B2D42' };
+    this.MN = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+    const g = (i, b, r, w1, p1, w2, p2) => b * Math.exp(r * i) * (1 + w1 * Math.sin(i / 5.3 + p1) + w2 * Math.sin(i / 2.9 + p2) + 0.018 * Math.sin(i * 1.7));
+    this.S = {};
+    this.S['PSA 10'] = this.arr(i => g(i, 505, 0.0172, 0.09, 1.2, 0.05, 4.0));
+    this.S['Grade 9.5'] = this.arr(i => g(i, 330, 0.0165, 0.10, 2.0, 0.05, 1.1));
+    this.S['Grade 9'] = this.arr(i => g(i, 215, 0.0158, 0.09, 0.4, 0.06, 2.6));
+    this.S['Grade 8'] = this.arr(i => g(i, 152, 0.0150, 0.08, 3.1, 0.05, 0.4));
+    this.S['Grade 7'] = this.arr(i => g(i, 118, 0.0142, 0.08, 5.0, 0.05, 3.3));
+    this.S['Raw'] = this.arr(i => g(i, 102, 0.0160, 0.11, 4.2, 0.06, 5.2));
+    const XTRA = { 'Grade 1': 61, 'Grade 2': 78, 'Grade 3': 98, 'Grade 4': 122, 'Grade 5': 149, 'Grade 6': 180, 'CGC 10': 400, 'CGC 10 Prist.': 560, 'TAG 10': 410, 'ACE 10': 332, 'SGC 10': 353, 'BGS 10': 448, 'BGS 10 Black': 831 };
+    Object.keys(XTRA).forEach((t, n) => { this.S[t] = this.arr(i => g(i, XTRA[t], 0.0148 + 0.0004 * (n % 5), 0.08, n * 0.9, 0.05, n * 1.7)); });
+    this.IDX = this.arr(i => 100 * Math.exp(0.0085 * i) * (1 + 0.045 * Math.sin(i / 6.1 + 2.2) + 0.02 * Math.sin(i / 2.4)));
+    this.SEAM = 44;
+    this.RSEAM = 59;
+    this.CHURN = this.arr(i => i < this.SEAM ? null : 0.18 + 0.14 * (i - this.SEAM) / 15 + 0.07 * Math.sin(i / 1.9));
+    this.VOLC = this.arr(i => i < this.SEAM ? null : Math.max(1, Math.round(5 + 3.4 * Math.sin(i / 2.2 + 1) + (i - this.SEAM) * 0.35)));
+    this.POPD = this.arr(i => i < 53 ? null : [0.4, 0.6, 0.5, 0.9, 0.7, 1.1, 0.8][i - 53]);
+    this.SETIDX = this.arr(i => 100 * Math.exp(0.0102 * i) * (1 + 0.055 * Math.sin(i / 5.4 + 0.8) + 0.02 * Math.sin(i / 2.1 + 3)));
+    this.AMIHUD = this.arr(i => i < this.SEAM ? null : 0.9 - 0.25 * (i - this.SEAM) / 15 + 0.15 * Math.sin(i * 1.3));
+    this.DISP = this.arr(i => i < this.SEAM ? null : 0.16 + 0.06 * Math.sin(i / 2.1));
+    this.DTL = this.arr(i => i < this.SEAM ? null : 4.5 + 2.2 * Math.sin(i / 2.7 + 1));
+    this.E4G = this.arr(i => i < this.SEAM ? null : 8 + 4 * Math.sin(i / 3.1));
+    this.OVH = this.arr(i => i < 53 ? null : [3.1, 3.0, 3.2, 3.3, 3.2, 3.4, 3.3][i - 53]);
+    this.SEAS = this.arr(i => 1 + 0.045 * Math.sin(2 * Math.PI * (((7 + i) % 12) - 10) / 12));
+    this.SPREAD = this.arr(i => this.S['PSA 10'][i] / this.S['Raw'][i]);
+    this.ARBEV = this.arr(i => 0.46 * this.S['PSA 10'][i] + 0.54 * this.S['Grade 9'][i] - this.S['Raw'][i] - 45);
+  }
+  force(id) {
+    return (e) => {
+      if (e && e.preventDefault) e.preventDefault();
+      const forced = Object.assign({}, this.state.forced, { [id]: true });
+      this.setState({ forced }, () => this.toggleInd(id, true)());
+    };
+  }
+  suff(id) {
+    const M = {
+      rsi: 'slow on monthly data \u2014 can stay overbought through whole runs',
+      churn: 'only 16 post-seam months \u2014 medium confidence',
+      vol: 'only 16 post-seam months \u2014 medium confidence',
+      popd: 'only 7 census observations \u2014 low confidence',
+      d2: 'only 7 paired price+census months \u2014 low confidence',
+      seas: 'only 1/3 cycles observed \u2014 forced early',
+      amihud: '16/24 post-seam months \u2014 forced early',
+      disp: '3/8 sales per month \u2014 forced early',
+      dtl: '12% listed-price coverage \u2014 forced early',
+      e4: '1/5 venues with depth \u2014 forced early',
+      overhang: '7/12 census months \u2014 forced early',
+      g1: 'churn leg has 16 post-seam months \u2014 medium confidence',
+      g2: 'census leg has 7 observations \u2014 low confidence',
+      macd: this.state.params.macdS > 8 ? 'warmup consumes ' + (this.state.params.macdF + this.state.params.macdS) + ' of 60 months' : null,
+      ema: this.state.params.emaSlow > 12 ? 'slow window ' + this.state.params.emaSlow + 'M leaves few independent observations' : null
+    };
+    return M[id] || null;
+  }
+  arr(f) { const a = []; for (let i = 0; i < this.N; i++) a.push(f(i)); return a; }
+  mLabel(i) { const y = 2021 + Math.floor((7 + i) / 12), m = (7 + i) % 12; return this.MN[m] + ' \u2019' + String(y).slice(2); }
+  money(n) { return '$' + Math.round(n).toLocaleString('en-US'); }
+  ema(a, n) { const k = 2 / (n + 1); const o = [a[0]]; for (let i = 1; i < a.length; i++) o.push(a[i] * k + o[i - 1] * (1 - k)); return o; }
+  sma(a, n) { const o = []; for (let i = 0; i < a.length; i++) { if (i < n - 1) { o.push(null); continue; } let s = 0; for (let j = i - n + 1; j <= i; j++) s += a[j]; o.push(s / n); } return o; }
+  stdv(a, n) { const m = this.sma(a, n); const o = []; for (let i = 0; i < a.length; i++) { if (m[i] === null) { o.push(null); continue; } let s = 0; for (let j = i - n + 1; j <= i; j++) s += (a[j] - m[i]) ** 2; o.push(Math.sqrt(s / n)); } return o; }
+  rsi(a, n) { const o = []; let ag = 0, al = 0; for (let i = 0; i < a.length; i++) { if (i === 0) { o.push(null); continue; } const ch = a[i] - a[i - 1], gn = Math.max(ch, 0), ls = Math.max(-ch, 0); if (i <= n) { ag += gn / n; al += ls / n; o.push(i === n ? 100 - 100 / (1 + (al === 0 ? 100 : ag / al)) : null); } else { ag = (ag * (n - 1) + gn) / n; al = (al * (n - 1) + ls) / n; o.push(100 - 100 / (1 + (al === 0 ? 100 : ag / al))); } } return o; }
+  crosses(diff, from) { const ev = []; for (let i = Math.max(1, from); i < diff.length; i++) { if (diff[i - 1] !== null && diff[i] !== null && ((diff[i - 1] <= 0 && diff[i] > 0) || (diff[i - 1] >= 0 && diff[i] < 0))) ev.push({ i, up: diff[i] > 0 }); } return ev; }
+  fwd(a, i, k) { if (i + k >= a.length) return null; const v = a[i + k] / a[i] - 1; return (v >= 0 ? '+' : '\u2212') + Math.abs(v * 100).toFixed(1) + '%'; }
+  setP(key) { return (e) => { const v = parseInt(e.target.value, 10); if (!isNaN(v) && v > 0) this.setState(s => ({ params: Object.assign({}, s.params, { [key]: v }) })); }; }
+  toggleInd(id, isPane) {
+    return () => {
+      const on = !this.state.inds[id];
+      const inds = Object.assign({}, this.state.inds, { [id]: on });
+      let paneOrder = this.state.paneOrder.slice();
+      if (isPane) {
+        if (on) { paneOrder.push(id); if (paneOrder.length > 2) { const drop = paneOrder.shift(); inds[drop] = false; } }
+        else paneOrder = paneOrder.filter(p => p !== id);
+      }
+      if (on) {
+        const vis = Object.keys(this.state.tiers).filter(t => this.state.tiers[t]);
+        if (vis.length !== 1) return;
+      }
+      this.setState({ inds, paneOrder });
+    };
+  }
+  renderVals() {
+    const st = this.state, P = st.params;
+    const range = st.range ?? this.props.defaultRange ?? '3Y';
+    const cmp = st.cmp ?? (this.props.compareIndex ?? false);
+    const custom = !!(st.from || st.to);
+    const d2i = (s) => { const p = s.split('-').map(Number); return Math.max(0, Math.min(this.N - 1, (p[0] - 2021) * 12 + (p[1] - 8))); };
+    const i2d = (i) => { const y = 2021 + Math.floor((7 + i) / 12), m = (7 + i) % 12 + 1; return y + '-' + String(m).padStart(2, '0') + '-01'; };
+    let i1 = st.to ? d2i(st.to) : this.N - 1;
+    let i0 = st.from ? d2i(st.from) : (custom ? 0 : (range === '1Y' ? i1 - 11 : range === '3Y' ? i1 - 35 : range === '5Y' ? Math.max(0, i1 - 59) : 0));
+    if (i1 <= i0 + 2) { i0 = Math.max(0, i1 - 3); i1 = Math.min(this.N - 1, i0 + 3); }
+    const W = 920, L = 64, R = 14, T = 14, B = 24, H = 456;
+    const X = i => L + ((i - i0) / (i1 - i0)) * (W - L - R);
+    const visTiers = Object.keys(st.tiers).filter(t => st.tiers[t]);
+    const anchor = (st.anchor && visTiers.includes(st.anchor)) ? st.anchor : (visTiers.includes('PSA 10') ? 'PSA 10' : (visTiers[0] || 'PSA 10'));
+    this._anchor = anchor;
+    const norm = st.norm && cmp;
+    const TR = (tier) => norm ? (v, i) => v / this.S[tier][i0] * 100 : (v) => v;
+    const tf = {}; visTiers.forEach(t => tf[t] = TR(t));
+    if (!tf[anchor]) tf[anchor] = TR(anchor);
+    const idxScale = norm ? (v) => v / this.IDX[i0] * 100 : (v) => v / this.IDX[i0] * this.S[anchor][i0];
+    let lo = Infinity, hi = -Infinity;
+    const scan = (v) => { if (v < lo) lo = v; if (v > hi) hi = v; };
+    visTiers.forEach(t => { for (let i = i0; i <= i1; i++) scan(tf[t](this.S[t][i], i)); });
+    if (cmp) for (let i = i0; i <= i1; i++) scan(idxScale(this.IDX[i]));
+    const aS = this.S[anchor];
+    const emaF = st.inds.ema ? this.ema(aS, P.emaFast) : null;
+    const emaS = st.inds.ema ? this.ema(aS, P.emaSlow) : null;
+    const smaA = st.inds.sma ? this.sma(aS, P.smaLen) : null;
+    [emaF, emaS, smaA].forEach(a => { if (a) for (let i = i0; i <= i1; i++) { if (a[i] !== null) scan(TR(anchor)(a[i], i)); } });
+    let bollUp = null, bollDn = null;
+    if (st.inds.boll) {
+      const mid = this.sma(aS, P.bollK), sd = this.stdv(aS, P.bollK);
+      bollUp = mid.map((m, i) => m === null ? null : tf[anchor] ? TR(anchor)(m + P.bollM * sd[i], i) : null);
+      bollDn = mid.map((m, i) => m === null ? null : TR(anchor)(m - P.bollM * sd[i], i));
+      for (let i = Math.max(i0, P.bollK); i <= i1; i++) { if (bollUp[i] !== null) { scan(bollUp[i]); scan(bollDn[i]); } }
+    }
+    if (lo === Infinity) { lo = 0; hi = 1; }
+    const pad = (hi - lo) * 0.07; lo -= pad; hi += pad;
+    const Y = v => T + (1 - (v - lo) / (hi - lo)) * (H - T - B);
+    const pts = (a, tx) => { let s = ''; for (let i = i0; i <= i1; i++) { if (a[i] === null || a[i] === undefined) continue; s += X(i).toFixed(1) + ',' + Y(tx ? tx(a[i], i) : a[i]).toFixed(1) + ' '; } return s.trim(); };
+    const lines = visTiers.map(t => ({ pts: pts(this.S[t], tf[t]), color: this.TIER_COLORS[t], w: t === anchor ? 1.8 : 1.3, dash: 'none' }));
+    if (st.inds.ema) {
+      const cvd = localStorage.getItem('cardstock-cvd') === '1';
+      lines.push({ pts: pts(emaF, tf[anchor]), color: this.PAL.pos2, w: cvd ? 1.6 : 1, dash: cvd ? '2.5 3.5' : 'none' });
+      lines.push({ pts: pts(emaS, tf[anchor]), color: this.PAL.neg2, w: cvd ? 1.6 : 1, dash: cvd ? '9 4' : 'none' });
+    }
+    if (st.inds.sma) lines.push({ pts: pts(smaA, tf[anchor]), color: this.PAL.warn, w: 1, dash: '5 4' });
+    let bollPts = '';
+    if (st.inds.boll && bollUp) {
+      let up = '', dn = '';
+      for (let i = i0; i <= i1; i++) if (bollUp[i] !== null) up += X(i).toFixed(1) + ',' + Y(bollUp[i]).toFixed(1) + ' ';
+      for (let i = i1; i >= i0; i--) if (bollDn[i] !== null) dn += X(i).toFixed(1) + ',' + Y(bollDn[i]).toFixed(1) + ' ';
+      bollPts = (up + dn).trim();
+    }
+    const idxPts = cmp ? pts(this.IDX, (v) => idxScale(v)) : '';
+    const tris = [];
+    const addTris = (evs, mk) => evs.forEach(ev => {
+      if (ev.i < i0 + 1) return;
+      const x = X(ev.i), yv = Y(tf[anchor](aS[ev.i], ev.i));
+      const tip = mk(ev);
+      tris.push(ev.up
+        ? { pts: `${x.toFixed(1)},${(yv + 6).toFixed(1)} ${(x - 5).toFixed(1)},${(yv + 15).toFixed(1)} ${(x + 5).toFixed(1)},${(yv + 15).toFixed(1)}`, fill: this.PAL.pos2, tip }
+        : { pts: `${x.toFixed(1)},${(yv - 6).toFixed(1)} ${(x - 5).toFixed(1)},${(yv - 15).toFixed(1)} ${(x + 5).toFixed(1)},${(yv - 15).toFixed(1)}`, fill: this.PAL.neg2, tip });
+    });
+    if (st.inds.ema) {
+      const eF = this.ema(aS, P.emaFast), eS = this.ema(aS, P.emaSlow);
+      addTris(this.crosses(eF.map((v, i) => v - eS[i]), Math.max(P.emaSlow + 2, i0)), ev =>
+        `EMA ${P.emaFast}/${P.emaSlow} crossover ${ev.up ? '\u25B2' : '\u25BC'} \u2014 ${this.mLabel(ev.i)} \u00B7 ${this.money(aS[ev.i])} \u00B7 +3M ${this.fwd(aS, ev.i, 3) || 'n/a'} \u00B7 +6M ${this.fwd(aS, ev.i, 6) || 'n/a'}`);
+    }
+    if (st.inds.macd) {
+      const m = this.ema(aS, P.macdF).map((v, i) => v - this.ema(aS, P.macdS)[i]);
+      const sig = this.ema(m, P.macdSig);
+      addTris(this.crosses(m.map((v, i) => v - sig[i]), Math.max(P.macdF + P.macdS + 1, i0)), ev =>
+        `MACD (${P.macdF},${P.macdS},${P.macdSig}) ${ev.up ? 'crossed above' : 'crossed below'} signal \u2014 ${this.mLabel(ev.i)} \u00B7 ${this.money(aS[ev.i])} \u00B7 +3M ${this.fwd(aS, ev.i, 3) || 'n/a'} \u00B7 +6M ${this.fwd(aS, ev.i, 6) || 'n/a'}`);
+    }
+    const COMP = {
+      g1: [{ i: 58, up: true, tip: `Entered Quiet Accumulation \u2014 ${this.mLabel(58)} \u00B7 churn +140% vs 90d baseline \u00B7 price \u22120.4% 1M \u00B7 pop flat` }],
+      g2: [],
+      g3: [{ i: 48, up: true, tip: `Breakout confirmed \u2014 ${this.mLabel(48)} \u00B7 new 12M high on rising churn \u00B7 +3M ${this.fwd(aS, 48, 3) || 'n/a'} \u00B7 +6M ${this.fwd(aS, 48, 6) || 'n/a'}` }],
+      g4: [{ i: 55, up: true, tip: `Joined 3M RS Leaders \u2014 ${this.mLabel(55)} \u00B7 RS 91st percentile of corpus` }]
+    };
+    ['g1', 'g2', 'g3', 'g4'].forEach(id => { if (st.inds[id]) addTris(COMP[id], ev => ev.tip); });
+    const hollows = visTiers.map(t => ({ x: X(i1).toFixed(1), y: Y(tf[t](this.S[t][i1], i1)).toFixed(1), color: this.TIER_COLORS[t] }));
+    const yTicks = []; for (let k = 0; k < 5; k++) { const v = lo + (hi - lo) * k / 4; const y = Y(v); yTicks.push({ y: y.toFixed(1), ty: (y + 3.5).toFixed(1), t: (y / 456 * 100).toFixed(2), label: norm ? v.toFixed(0) : this.money(v) }); }
+    const xTicks = []; for (let i = i0; i <= i1; i++) { const m = (7 + i) % 12; if (m === 0 && i > i0) xTicks.push({ x: X(i).toFixed(1), l: (X(i) / 920 * 100).toFixed(2), label: String(2021 + Math.floor((7 + i) / 12)) }); }
+    if (i1 - i0 <= 14) { xTicks.length = 0; const step = i1 - i0 <= 6 ? 1 : 3; for (let i = i0; i <= i1; i += step) xTicks.push({ x: X(i).toFixed(1), l: (X(i) / 920 * 100).toFixed(2), label: this.mLabel(i) }); }
+    const hoverI = st.hoverI;
+    const hasHover = hoverI !== null && hoverI >= i0 && hoverI <= i1;
+    const hoverRows = hasHover ? visTiers.map(t => ({ name: t, dot: this.TIER_COLORS[t], val: this.money(this.S[t][hoverI]) })) : [];
+    if (hasHover && cmp) hoverRows.push({ name: 'MKT INDEX', dot: this.PAL.mut2, val: this.IDX[hoverI].toFixed(1) });
+    if (hasHover) {
+      if (st.inds.ema && emaF) {
+        hoverRows.push({ name: 'EMA ' + P.emaFast, dot: this.PAL.pos2, val: this.money(emaF[hoverI]) });
+        hoverRows.push({ name: 'EMA ' + P.emaSlow, dot: this.PAL.neg2, val: this.money(emaS[hoverI]) });
+      }
+      if (st.inds.sma && smaA && smaA[hoverI] !== null) hoverRows.push({ name: 'SMA ' + P.smaLen, dot: this.PAL.warn, val: this.money(smaA[hoverI]) });
+      if (st.inds.boll) {
+        const bm = this.sma(aS, P.bollK)[hoverI], bs = this.stdv(aS, P.bollK)[hoverI];
+        if (bm !== null) hoverRows.push({ name: 'BOLL \u00B1' + P.bollM + '\u03C3', dot: this.PAL.acc, val: this.money(bm - P.bollM * bs) + '\u2013' + this.money(bm + P.bollM * bs) });
+      }
+    }
+    const roc = (k) => aS[i1] / aS[i1 - k] - 1;
+    const fmtPct = (v) => (v >= 0 ? '+' : '\u2212') + Math.abs(v * 100).toFixed(1) + '%';
+    const sma6 = this.sma(aS, 6), sd6 = this.stdv(aS, 6);
+    const zNow = (aS[i1] - sma6[i1]) / sd6[i1];
+    let peak = 0; for (let i = 0; i <= i1; i++) peak = Math.max(peak, aS[i]);
+    const dd = aS[i1] / peak - 1;
+    const stats = [
+      { label: 'ROC 3M', val: fmtPct(roc(3)), fg: roc(3) >= 0 ? this.PAL.pos2 : this.PAL.neg2 },
+      { label: 'ROC 12M', val: fmtPct(roc(12)), fg: roc(12) >= 0 ? this.PAL.pos2 : this.PAL.neg2 },
+      { label: 'Drawdown', val: fmtPct(dd), fg: dd < -0.001 ? this.PAL.neg2 : this.PAL.mut },
+      { label: 'z vs 6M', val: (zNow >= 0 ? '+' : '\u2212') + Math.abs(zNow).toFixed(2), fg: Math.abs(zNow) > 1.5 ? this.PAL.warn : this.PAL.mut },
+      { label: 'Trend R\u00B2 12M', val: '0.87', fg: this.PAL.mut },
+      { label: 'RS pct 3M', val: '94th', fg: this.PAL.pos2 }
+    ];
+    const paneModels = { macd: this.paneMACD, rsi: this.paneRSI, z: this.paneZ, rs: this.paneRS, churn: this.paneChurn, vol: this.paneVol, popd: this.panePop, d2: this.paneD2, f3: this.paneF3, seas: this.paneSeas, amihud: this.paneAmihud, disp: this.paneDisp, dtl: this.paneDtl, e4: this.paneE4, overhang: this.paneOvh, spread: this.paneSpread, arbev: this.paneArb };
+    const panes = st.paneOrder.filter(id => st.inds[id]).map(id => {
+      const p = paneModels[id].call(this, i0, i1, X);
+      const w = this.suff(id);
+      const fz = this.state.forced && this.state.forced[id];
+      p.badge = fz ? 'LOW CONFIDENCE \u00B7 BURNED IN' : (w ? 'LOW CONFIDENCE' : ''); p.badgeTip = w || '';
+      p.yts = p.yts || []; p.xt = xTicks;
+      p.hx = hasHover ? X(hoverI).toFixed(1) : -20;
+      p.hoverTxt = hasHover && p.vf ? this.mLabel(hoverI) + ' \u00B7 ' + p.vf(hoverI) : '';
+      p.hlines = (p.hlines || []).map(h => Object.assign(h, { t: (parseFloat(h.y) / 170 * 100).toFixed(2) }));
+      p.yts = p.yts.filter(t => !p.hlines.some(hl => Math.abs(parseFloat(hl.t) - parseFloat(t.t)) < 11));
+      p.vlines = (p.vlines || []).map(v => Object.assign(v, { l: (parseFloat(v.x) / 920 * 100).toFixed(2) }));
+      return p;
+    });
+    const mkSwitch = (on) => ({ swBg: on ? this.PAL.acc : this.PAL.line2, swX: on ? 11 : 0 });
+    const row = (id, name, opts) => {
+      const o = opts || {}; const on = !!st.inds[id];
+      const warn = on ? this.suff(id) : null;
+      const blocked = !on && visTiers.length !== 1;
+      const sw = mkSwitch(on);
+      if (blocked) sw.swBg = '#EDEDE9';
+      return Object.assign({ isToggle: true, name, tip: blocked ? 'Show a single tier to enable indicators.' : (o.tip || ''), toggle: this.toggleInd(id, !!o.pane), showParams: on && !!o.params, params: o.params || [], badge: o.badge || '', badgeFg: o.badgeFg || this.PAL.mut2, badgeBg: o.badge ? this.PAL.mutbg : 'transparent', hasWarn: !!warn, warnTxt: warn || '' }, sw);
+    };
+    const readout = (name, val, valFg, tip) => ({ isReadout: true, name, val, valFg: valFg || this.PAL.ink, tip: tip || '' });
+    const locked = (name, note, tip, prog, progTxt, anyway) => ({ isLocked: true, name, note, tip: tip || '', hasProg: prog != null, progPct: prog != null ? (prog * 100).toFixed(0) + '%' : '0%', progTxt: progTxt || '', anyway: !!anyway });
+    const lockedOr = (id, name, note, tip, prog, progTxt) => Object.assign(
+      row(id, name, { pane: true, tip, badge: 'LOW DATA', badgeFg: this.PAL.warnInk, badgeBg: 'rgba(176,127,26,0.12)' }),
+      { hasWarn: true, warnTxt: note });
+    const np = (label, key, min, max) => ({ label, val: P[key], set: this.setP(key), min, max });
+    const groups = [
+      { name: 'Trend', note: '', rows: [
+        row('ema', 'EMA cross', { tip: 'Monthly data is fully sufficient \u2014 unaffected by the per-sale seam.', params: [np('fast', 'emaFast', 2, 12), np('slow', 'emaSlow', 3, 24)] }),
+        row('sma', 'SMA baseline', { tip: 'Monthly data is fully sufficient \u2014 unaffected by the per-sale seam.', params: [np('len', 'smaLen', 3, 24)] }),
+        row('macd', 'MACD', { tip: 'Monthly data is fully sufficient \u2014 re-tuned (3,6,4) for monthly bars.', pane: true, params: [np('f', 'macdF', 2, 12), np('s', 'macdS', 3, 24), np('sig', 'macdSig', 2, 12)] }),
+        readout('ROC 1M', fmtPct(roc(1)), roc(1) >= 0 ? this.PAL.pos2 : this.PAL.neg2, 'Monthly data is fully sufficient.'),
+        readout('Trend slope (12M)', '+2.1%/mo', this.PAL.pos2, 'Monthly data is fully sufficient.'),
+        lockedOr('seas', 'Seasonality overlay', 'unlocks after 3 observed cycles \u00B7 Nov 2027', 'Needs 3 full annual cycles at any resolution \u2014 per-sale data does not speed this up.', 0.33, '1/3 cycles')
+      ]},
+      { name: 'Momentum \u00B7 mean reversion', note: '', rows: [
+        row('rsi', 'RSI', { tip: 'Works on monthly; your per-sale ledger will later enable weekly RSI for faster exhaustion reads.', pane: true, params: [np('len', 'rsiLen', 3, 12)], badge: 'SLOW ON MONTHLY' }),
+        row('boll', 'Bollinger bands', { tip: 'Bands built on monthly averages understate true range \u2014 per-sale data will tighten them.', params: [np('k', 'bollK', 4, 12), np('m', 'bollM', 1, 3)] }),
+        row('z', 'z-score vs 6M MA', { tip: 'Monthly data is fully sufficient.', pane: true }),
+        readout('Drawdown from peak', fmtPct(dd), dd < -0.001 ? this.PAL.neg2 : this.PAL.mut, 'Monthly data is fully sufficient.')
+      ]},
+      { name: 'Relative', note: '', rows: [
+        row('rs', 'RS vs market index', { tip: 'Monthly indices are fully sufficient.', pane: true }),
+        row('f3', 'Set rotation (Evolving Skies)', { tip: 'Corpus-level monthly indices \u2014 unaffected by the per-sale seam.', pane: true, badge: 'CORPUS' }),
+        readout('RS percentile (3M)', '94th', this.PAL.pos2, 'Monthly data is fully sufficient.'),
+        readout('Beta vs index (24M)', '1.31', null, 'Monthly data is fully sufficient once 24 paired months exist.')
+      ]},
+      { name: 'Liquidity', note: 'post-seam', rows: [
+        row('churn', 'Churn 30d', { tip: 'Computed from your per-sale ledger \u2014 exists only after this card\u2019s seam and sharpens every month it runs.', pane: true, badge: 'POST-SEAM', badgeFg: this.PAL.warnInk, badgeBg: 'rgba(176,127,26,0.12)' }),
+        row('vol', 'Volume & count', { tip: 'Computed from your per-sale ledger \u2014 exists only post-seam; more months = better baselines.', pane: true, badge: 'POST-SEAM', badgeFg: this.PAL.warnInk, badgeBg: 'rgba(176,127,26,0.12)' }),
+        readout('Churn acceleration', '\u00D71.6 vs 90d', this.PAL.pos2, 'Per-sale ledger \u2014 needs a stable 90d baseline; improves fast post-seam.'),
+        lockedOr('amihud', 'Amihud illiquidity', 'needs 24 post-seam months \u00B7 ~Apr 2027', 'Pure per-sale signal \u2014 impossible on monthly history; your scraper is what unlocks it.', 16 / 24, '16/24 mo'),
+        lockedOr('disp', 'Price dispersion', 'needs \u22658 sales/mo in bucket', 'Pure per-sale signal \u2014 measures spread across individual sales in a month.', 3 / 8, '3/8 sales'),
+        lockedOr('dtl', 'Discount-to-list', 'listed price on 12% of rows', 'Unlocks as your scraper captures listed prices alongside realized prices.', 0.12, '12% rows'),
+        lockedOr('e4', 'Cross-marketplace gap', 'needs \u22655 sales/venue/window \u2014 eBay-only depth today', 'Unlocks as scraped sales accumulate per venue (goldin, heritage, pwcc\u2026).', 0.2, '1/5 venues')
+      ]},
+      { name: 'Supply', note: '2026+', rows: [
+        row('popd', 'Pop \u0394 monthly', { tip: 'Census snapshots, 2026+ \u2014 independent of the sales seam; confidence grows with each monthly observation. Newly unlocked \u2014 on probation until ~12 observations.', pane: true, badge: 'NEW \u00B7 7 OBS', badgeFg: this.PAL.acc, badgeBg: this.PAL.accBg }),
+        row('d2', 'Pop vs price divergence', { tip: 'Pairs monthly price with census growth \u2014 sharpens as census history accumulates post-2026.', pane: true, badge: 'NOVEL \u00B7 2026+', badgeFg: this.PAL.warnInk, badgeBg: 'rgba(176,127,26,0.12)' }),
+        readout('Gem rate', '46% \u00B7 drift \u22120.8pp', null, 'Census level readable today; drift needs months of census history.'),
+        lockedOr('overhang', 'Supply overhang', 'needs 12M of census history', 'Pop \u00F7 annual sales \u2014 needs both census history and a year of per-sale ledger.', 7 / 12, '7/12 mo')
+      ]},
+      { name: 'Valuation', note: '', rows: [
+        row('spread', 'Tier spread 10/raw', { tip: 'Six-tier monthly prices are sufficient; per-sale data adds real-time spread.', pane: true, badge: '4.8\u00D7 \u00B7 COMPRESSING', badgeFg: this.PAL.warnInk, badgeBg: 'rgba(176,127,26,0.12)' }),
+        row('arbev', 'Grading-arb EV raw\u219210', { tip: 'gem rate \u00D7 PSA 10 + (1\u2212gem) \u00D7 Grade 9 \u2212 raw \u2212 fees. Monthly tier prices are sufficient.', pane: true, badge: '+$118', badgeFg: this.PAL.pos, badgeBg: this.PAL.posBg(0.10) })
+      ]},
+      { name: 'Composites', note: 'multi-signal', rows: [
+        row('g1', 'Quiet Accumulation', { tip: 'Churn leg needs the per-sale ledger \u2014 this composite only fires post-seam and strengthens with ledger depth.', badge: 'ACTIVE \u00B7 JUN \u201926', badgeFg: this.PAL.pos, badgeBg: this.PAL.posBg(0.10) }),
+        row('g2', 'Supply Flood Watch', { tip: 'Census + spread legs \u2014 2026+ only; low confidence until census history builds.', badge: 'CLEAR', badgeFg: this.PAL.mut2, badgeBg: this.PAL.mutbg }),
+        row('g3', 'Breakout Confirmation', { tip: 'Price leg is monthly; the volume-confirmation leg uses your per-sale ledger post-seam.', badge: 'LAST \u00B7 AUG \u201925', badgeFg: this.PAL.mut2, badgeBg: this.PAL.mutbg }),
+        row('g4', '3M RS Leaders', { tip: 'Monthly indices are fully sufficient.', badge: 'MEMBER \u00B7 MAR \u201926', badgeFg: this.PAL.pos, badgeBg: this.PAL.posBg(0.10) })
+      ]}
+    ];
+    groups.forEach(g => {
+      const closed = !!(st.cg && st.cg[g.name]);
+      g.open = !closed; g.chev = closed ? '\u25B8' : '\u25BE';
+      g.toggle = () => this.setState(s => { const cg = Object.assign({}, s.cg); cg[g.name] = !cg[g.name]; return { cg }; });
+    });
+    const mkTier = (t, disp) => {
+      const on = st.tiers[t];
+      return { name: disp || t, tip: (on ? 'Hide ' : 'Show ') + (disp || t) + ' on the chart — the y-axis rescales to whatever is visible', dot: on ? this.TIER_COLORS[t] : this.PAL.line2, bg: on ? this.PAL.card : this.PAL.hov, bd: on ? this.TIER_COLORS[t] : this.PAL.line, fg: on ? this.PAL.ink : this.PAL.mut2,
+        toggle: () => {
+          const nt = Object.assign({}, st.tiers, { [t]: !on });
+          const upd = { tiers: nt };
+          const visCount = Object.values(nt).filter(v => v).length;
+          if (visCount !== 1 && Object.values(st.inds).some(v => v)) {
+            upd.stash = { inds: st.inds, paneOrder: st.paneOrder };
+            const inds = {}; Object.keys(st.inds).forEach(k => inds[k] = false);
+            upd.inds = inds; upd.paneOrder = [];
+          } else if (visCount === 1 && st.stash) {
+            upd.inds = st.stash.inds; upd.paneOrder = st.stash.paneOrder; upd.stash = null;
+          }
+          this.setState(upd);
+        } };
+    };
+    const TENS = ['CGC 10', 'CGC 10 Prist.', 'TAG 10', 'ACE 10', 'SGC 10', 'BGS 10', 'BGS 10 Black'];
+    const LOWS = ['Grade 6', 'Grade 5', 'Grade 4', 'Grade 3', 'Grade 2', 'Grade 1'];
+    const tenShort = (t) => t.replace(' 10', '').replace('Prist.', 'Pristine');
+    const mkGroup = (label, members, openKey) => {
+      const act = members.filter(t => st.tiers[t]);
+      const open = !!st[openKey];
+      return {
+        name: (act.length ? act.join(', ') : label) + (open ? ' \u25BE' : ' \u25B8'),
+        dot: act.length ? this.TIER_COLORS[act[0]] : this.PAL.line2,
+        bg: open || act.length ? this.PAL.card : this.PAL.hov, bd: act.length ? this.TIER_COLORS[act[0]] : this.PAL.line,
+        fg: act.length || open ? this.PAL.ink : this.PAL.mut2,
+        toggle: () => this.setState(s => ({ [openKey]: !s[openKey] }))
+      };
+    };
+    const mkSub = (t, disp, openKey) => {
+      const c = mkTier(t, disp), orig = c.toggle;
+      c.toggle = () => { orig(); this.setState({ [openKey]: false }); };
+      return c;
+    };
+    const tierRow1 = [mkTier('PSA 10')];
+    const tierRow2 = ['Grade 9.5', 'Grade 9', 'Grade 8', 'Grade 7'].map(t => mkTier(t));
+    const tensGroupChip = mkGroup('other 10s', TENS, 'tensOpen');
+    const lowsGroupChip = mkGroup('Grade 1\u20136', LOWS, 'lowsOpen');
+    const rawChip = mkTier('Raw');
+    const tenSubChips = TENS.map(t => mkSub(t, tenShort(t), 'tensOpen'));
+    const lowSubChips = LOWS.map(t => mkSub(t, t.replace('Grade ', ''), 'lowsOpen'));
+    const rangeBtns = ['1Y', '3Y', '5Y', 'All'].map(rname => { const act = !custom && range === rname; return { label: rname, tip: rname === 'All' ? 'Show all available history \u2014 begins where this card\u2019s data honestly starts' : 'Show the last ' + rname.replace('Y', ' year') + (rname === '1Y' ? '' : 's'), pick: () => this.setState({ range: rname, from: null, to: null }),
+      bg: act ? this.PAL.acc : this.PAL.card, fg: act ? this.PAL.card : this.PAL.mut, bd: act ? this.PAL.acc : this.PAL.line }; });
+    const visT = visTiers;
+    const tblRows = []; if (st.tableOpen) for (let i = i1 - 11; i <= i1; i++) tblRows.push({ m: this.mLabel(i), cells: visT.map(t => ({ v: this.money(this.S[t][i]) })) });
+    return {
+      leftOpen: st.leftOpen, togglePanel: () => this.setState({ leftOpen: !st.leftOpen }), panelGlyph: st.leftOpen ? '\u00AB' : '\u00BB',
+      curPrice: this.money(aS[i1]), cur1m: fmtPct(roc(1)),
+      viewsOpen: st.viewsOpen,
+      viewsLabel: st.activeView ? 'View: ' + st.activeView + ' \u25BE' : 'Views \u25BE',
+      toggleViews: () => this.setState({ viewsOpen: !st.viewsOpen }),
+      closeViews: () => this.setState({ viewsOpen: false }),
+      saveCurrent: () => this.saveCurrentView(),
+      viewRows: st.savedViews.map(v => ({
+        name: v.name, def: v.isDefault, active: st.activeView === v.name,
+        check: st.activeView === v.name ? '\u2713' : '',
+        apply: () => this.applyView(v),
+        del: (e) => { e.stopPropagation(); this.deleteView(v.name); }
+      })),
+      ...(() => {
+        const NONTRACK = ['sma', 'boll', 'dtl', 'seas'];
+        const on = (o) => Object.keys(o).filter(k => o[k] && !NONTRACK.includes(k)).sort();
+        const tkOn = on(st.inds), wlOn = on(st.wlSaved);
+        const dirty = st.watch && tkOn.join() !== wlOn.join();
+        const removing = st.watch && tkOn.length === 0;
+        const hot = !st.watch || dirty;
+        const names = tkOn.map(k => k.toUpperCase()).join(', ');
+        return {
+          watchLabel: !st.watch ? '+ Add to watchlist' : removing ? 'Remove from watchlist' : dirty ? 'Update watchlist' : st.wlFlash ? '\u2713 Watchlist updated' : '\u2713 On watchlist',
+          watchBg: removing ? this.PAL.neg2 : hot ? this.PAL.acc : this.PAL.card, watchFg: (removing || hot) ? this.PAL.card : st.wlFlash ? this.PAL.pos2 : this.PAL.mut, watchBd: removing ? this.PAL.neg2 : hot ? this.PAL.acc : this.PAL.line,
+          watchTip: !st.watch ? 'Adds this card (PSA 10) to your watchlist \u2014 the indicators enabled in the left panel become its tracked chips (display-only overlays like SMA and Bollinger don\u2019t count).'
+            : removing ? 'All tracked signals are off \u2014 click to remove this card (PSA 10) from your watchlist.'
+            : dirty ? 'Enabled signals changed (' + (names || 'none') + ') \u2014 save to update this card\u2019s watchlist chips.'
+            : 'On your watchlist, tracking ' + (names || 'nothing') + '. The enabled indicators ARE the tracked set \u2014 toggle in the left panel, then save here.',
+          addWatch: () => { const s = this.state; if (removing) { this.setState({ watch: false, wlSaved: {}, wlFlash: false }); return; } if (!s.watch || dirty) { const wl = {}; Object.keys(s.inds).forEach(k => { if (s.inds[k] && !NONTRACK.includes(k)) wl[k] = true; }); this.setState({ watch: true, wlSaved: wl, wlFlash: true }); clearTimeout(this._wlT); this._wlT = setTimeout(() => this.setState({ wlFlash: false }), 2200); } }
+        };
+      })(),
+      panelShadow: st.panelGlow ? 'inset 0 0 0 2px #4A63D0' : 'none',
+      tierRow1, tierRow2, tensGroupChip, lowsGroupChip, rawChip, groups, stats, rangeBtns,
+      tensOpenV: !!st.tensOpen, lowsOpenV: !!st.lowsOpen, tenSubChips, lowSubChips,
+      tierNotice: Object.values(st.inds).some(v => v)
+        ? 'Indicators analyze ' + anchor + ' \u2014 adding another tier switches indicators off.'
+        : (visTiers.length > 1 ? 'Indicators disabled while multiple tiers are shown \u2014 keep one tier to enable.' : (visTiers.length === 0 ? 'No tier selected \u2014 pick one to chart.' : '')),
+      axisMode: (norm ? 'indexed \u00B7 start = 100' : 'USD \u00B7 monthly avg') + ' \u00B7 ' + (i1 - i0 + 1) + ' pts',
+      fromVal: i2d(i0), toVal: i2d(i1),
+      resBtns: [
+        { label: 'M', tip: 'Monthly bars \u2014 current resolution', bg: this.PAL.acc, fg: this.PAL.card, bd: this.PAL.acc, cur: 'pointer', click: () => {} },
+        { label: 'W', tip: 'Weekly bars \u2014 unlocks after ~6 months of per-sale ledger (~Jan 2027)', bg: this.PAL.hov, fg: this.PAL.mut3, bd: this.PAL.line, cur: 'not-allowed', click: () => {} },
+        { label: 'D', tip: 'Daily bars \u2014 unlocks after ~12 months of per-sale ledger on liquid cards', bg: this.PAL.hov, fg: this.PAL.mut3, bd: this.PAL.line, cur: 'not-allowed', click: () => {} }
+      ],
+      setFrom: (e) => this.setState({ from: e.target.value || null }),
+      setTo: (e) => this.setState({ to: e.target.value || null }),
+      cmpToggle: () => this.setState({ cmp: !cmp }), cmpBg: cmp ? this.PAL.acc : this.PAL.line2, cmpX: cmp ? 11 : 0,
+      normToggle: () => this.setState({ norm: !st.norm }), normBg: norm ? this.PAL.acc : this.PAL.line2, normX: norm ? 11 : 0,
+      tableToggle: () => this.setState({ tableOpen: !st.tableOpen }), tblBg: st.tableOpen ? this.PAL.accBg : this.PAL.card, tblFg: st.tableOpen ? this.PAL.acc : this.PAL.mut,
+      tableOpen: st.tableOpen, tblColCount: visT.length, tblHead: visT.map(t => ({ name: t, color: this.TIER_COLORS[t] })), tblRows,
+      chartTitle: 'Price history \u00B7 ' + (visTiers.length === 1 ? anchor : visTiers.length === 0 ? 'no tier selected' : visTiers.length + ' tiers'),
+      chartSub: this.mLabel(i0) + ' \u2013 ' + this.mLabel(i1),
+      yTicks, xTicks, lines, bollPts, idxPts, tris, hollows,
+      rsX: this.RSEAM >= i0 && this.RSEAM <= i1 ? X(this.RSEAM).toFixed(1) : -20,
+      rsL: (X(Math.min(Math.max(this.RSEAM, i0), i1)) / 920 * 100).toFixed(2),
+      rsOn: this.RSEAM >= i0 && this.RSEAM <= i1,
+      hoverX: hasHover ? X(hoverI).toFixed(1) : -20, hasHover,
+      hoverMonth: hasHover ? this.mLabel(hoverI) : '', hoverRows,
+      chartMove: (e) => {
+        const r = e.currentTarget.getBoundingClientRect();
+        const px = (e.clientX - r.left) / r.width * 920;
+        const i = Math.round(i0 + (px - 64) / (920 - 64 - 14) * (i1 - i0));
+        const ci = Math.max(i0, Math.min(i1, i));
+        if (ci !== st.hoverI) this.setState({ hoverI: ci });
+      },
+      chartLeave: () => this.setState({ hoverI: null }),
+      panes
+    };
+  }
+  paneScaffold(vals, i0, i1, X, fmt) {
+    let lo = Infinity, hi = -Infinity;
+    vals.forEach(a => { for (let i = i0; i <= i1; i++) { const v = a[i]; if (v === null || v === undefined) continue; if (v < lo) lo = v; if (v > hi) hi = v; } });
+    if (lo === Infinity) { lo = 0; hi = 1; }
+    if (hi === lo) hi = lo + 1;
+    const pad = (hi - lo) * 0.12; lo -= pad; hi += pad;
+    const Y = v => 14 + (1 - (v - lo) / (hi - lo)) * 142;
+    const pts = (a) => { let s = ''; for (let i = i0; i <= i1; i++) { if (a[i] === null || a[i] === undefined) continue; s += X(i).toFixed(1) + ',' + Y(a[i]).toFixed(1) + ' '; } return s.trim(); };
+    const yt = (f) => [0.88, 0.12].map(k => { const v = lo + (hi - lo) * k; const y = Y(v); return { y: y.toFixed(1), ty: (y + 3).toFixed(1), t: (y / 170 * 100).toFixed(2), label: f(v) }; });
+    return { Y, pts, lo, hi, yt, fmt: fmt || (v => v.toFixed(1)) };
+  }
+  closePane(id) { return () => this.setState(s => ({ inds: Object.assign({}, s.inds, { [id]: false }), paneOrder: s.paneOrder.filter(p => p !== id) })); }
+  paneMACD(i0, i1, X) {
+    const P = this.state.params, aS = this.S[this._anchor || 'PSA 10'];
+    const m = this.ema(aS, P.macdF).map((v, i) => v - this.ema(aS, P.macdS)[i]);
+    const sig = this.ema(m, P.macdSig);
+    const hist = m.map((v, i) => v - sig[i]);
+    const sc = this.paneScaffold([m, sig, hist], i0, i1, X);
+    const bw = Math.max(2, (860 / (i1 - i0)) * 0.5);
+    const bars = []; for (let i = i0; i <= i1; i++) { const h = hist[i]; const y0 = sc.Y(0), y = sc.Y(h); bars.push({ x: Math.max(66, X(i) - bw / 2).toFixed(1), y: Math.min(y0, y).toFixed(1), w: bw.toFixed(1), h: Math.max(0.5, Math.abs(y0 - y)).toFixed(1), fill: h >= 0 ? this.PAL.posBg(0.4) : this.PAL.negBg(0.4) }); }
+    return { vf: (i) => 'MACD ' + m[i].toFixed(1) + ' \u00B7 sig ' + sig[i].toFixed(1) + ' \u00B7 hist ' + hist[i].toFixed(1), title: 'MACD', sub: `(${P.macdF},${P.macdS},${P.macdSig}) \u00B7 ${this._anchor || 'PSA 10'}`, close: this.closePane('macd'),
+      regions: [], bars, hlines: [{ y: sc.Y(0).toFixed(1), ty: (sc.Y(0) + 3).toFixed(1), label: '0', dash: 'none' }],
+      lines: [{ pts: sc.pts(m), color: this.PAL.acc, dash: 'none' }, { pts: sc.pts(sig), color: this.PAL.warn, dash: localStorage.getItem('cardstock-cvd') === '1' ? '4 3' : 'none' }], vlines: [], yts: sc.yt(v => '$' + v.toFixed(0)) };
+  }
+  paneRSI(i0, i1, X) {
+    const P = this.state.params;
+    const r = this.rsi(this.S[this._anchor || 'PSA 10'], P.rsiLen);
+    const sc = this.paneScaffold([[0, 100]], 0, 1, () => 0);
+    const Y = v => 14 + (1 - v / 100) * 142;
+    const pts = (a) => { let s = ''; for (let i = i0; i <= i1; i++) { if (a[i] === null) continue; s += X(i).toFixed(1) + ',' + Y(a[i]).toFixed(1) + ' '; } return s.trim(); };
+    return { vf: (i) => r[i] === null ? 'warming up' : 'RSI ' + r[i].toFixed(1), title: 'RSI', sub: `(${P.rsiLen}) \u00B7 bands 80/20 \u00B7 ${this._anchor || 'PSA 10'}`, close: this.closePane('rsi'),
+      regions: [], bars: [],
+      hlines: [{ y: Y(80).toFixed(1), ty: (Y(80) + 3).toFixed(1), label: '80', dash: '4 3' }, { y: Y(20).toFixed(1), ty: (Y(20) + 3).toFixed(1), label: '20', dash: '4 3' }],
+      lines: [{ pts: pts(r), color: this.PAL.acc, dash: 'none' }], vlines: [] };
+  }
+  paneZ(i0, i1, X) {
+    const aS = this.S[this._anchor || 'PSA 10'];
+    const m = this.sma(aS, 6), sd = this.stdv(aS, 6);
+    const z = aS.map((v, i) => m[i] === null ? null : (v - m[i]) / sd[i]);
+    const sc = this.paneScaffold([z, [1.5, -1.5]], i0, i1, X);
+    return { vf: (i) => z[i] === null ? 'warming up' : 'z ' + (z[i] >= 0 ? '+' : '\u2212') + Math.abs(z[i]).toFixed(2), title: 'z-score vs 6M MA', sub: 'stretched beyond \u00B11.5 \u00B7 ' + (this._anchor || 'PSA 10'), close: this.closePane('z'),
+      regions: [], bars: [],
+      hlines: [{ y: sc.Y(1.5).toFixed(1), ty: (sc.Y(1.5) + 3).toFixed(1), label: '+1.5', dash: '4 3' }, { y: sc.Y(0).toFixed(1), ty: (sc.Y(0) + 3).toFixed(1), label: '0', dash: 'none' }, { y: sc.Y(-1.5).toFixed(1), ty: (sc.Y(-1.5) + 3).toFixed(1), label: '\u22121.5', dash: '4 3' }],
+      lines: [{ pts: sc.pts(z), color: this.PAL.acc, dash: 'none' }], vlines: [] };
+  }
+  paneRS(i0, i1, X) {
+    const aS = this.S[this._anchor || 'PSA 10'];
+    const rs = aS.map((v, i) => (v / aS[i0]) / (this.IDX[i] / this.IDX[i0]) * 100);
+    const sc = this.paneScaffold([rs, [100]], i0, i1, X);
+    return { vf: (i) => 'RS ' + rs[i].toFixed(1), title: 'RS vs market index', sub: 'ratio \u00D7 100 \u00B7 above 100 = outperforming', close: this.closePane('rs'),
+      regions: [], bars: [],
+      hlines: [{ y: sc.Y(100).toFixed(1), ty: (sc.Y(100) + 3).toFixed(1), label: '100', dash: '4 3' }],
+      lines: [{ pts: sc.pts(rs), color: this.PAL.acc, dash: 'none' }], vlines: [], yts: sc.yt(v => v.toFixed(0)) };
+  }
+  paneChurn(i0, i1, X) {
+    const sc = this.paneScaffold([this.CHURN], i0, i1, X);
+    const seamX = this.SEAM >= i0 ? X(this.SEAM) : null;
+    return { vf: (i) => this.CHURN[i] === null ? 'pre-seam' : this.CHURN[i].toFixed(2) + ' sales/day', title: 'Churn 30d', sub: 'sales/day \u00B7 PSA 10 bucket \u00B7 post-seam', close: this.closePane('churn'),
+      regions: [], bars: [], hlines: [],
+      lines: [{ pts: sc.pts(this.CHURN), color: this.PAL.acc, dash: 'none' }], yts: sc.yt(v => v.toFixed(2) + '/d'),
+      vlines: seamX !== null ? [{ x: seamX.toFixed(1), tx: (seamX + 5).toFixed(1), color: this.PAL.warn, label: 'seam \u00B7 Apr \u201925' }] : [] };
+  }
+  paneVol(i0, i1, X) {
+    const sc = this.paneScaffold([this.VOLC], i0, i1, X);
+    const bw = Math.max(2, (860 / (i1 - i0)) * 0.55);
+    const bars = []; for (let i = Math.max(i0, this.SEAM); i <= i1; i++) { const y = sc.Y(this.VOLC[i]); bars.push({ x: Math.max(66, X(i) - bw / 2).toFixed(1), y: y.toFixed(1), w: bw.toFixed(1), h: (156 - y).toFixed(1), fill: 'rgba(74,99,208,0.45)' }); }
+    const seamX = this.SEAM >= i0 ? X(this.SEAM) : null;
+    return { vf: (i) => this.VOLC[i] === null ? 'pre-seam' : this.VOLC[i] + ' sales', title: 'Volume & count', sub: 'observed sales/mo \u00B7 PSA 10 \u00B7 post-seam', close: this.closePane('vol'),
+      regions: [], bars, hlines: [], yts: sc.yt(v => v.toFixed(0)),
+      lines: [],
+      vlines: seamX !== null ? [{ x: seamX.toFixed(1), tx: (seamX + 5).toFixed(1), color: this.PAL.warn, label: 'seam \u00B7 Apr \u201925' }] : [] };
+  }
+  paneD2(i0, i1, X) {
+    const aS = this.S[this._anchor || 'PSA 10'];
+    const div = this.arr(i => { if (i < 54 || this.POPD[i] === null) return null; const rocP = (aS[i] / aS[i - 1] - 1) * 100; return rocP - this.POPD[i]; });
+    const sc = this.paneScaffold([div, [0]], i0, i1, X);
+    const bw = Math.max(3, (860 / (i1 - i0)) * 0.55);
+    const bars = []; for (let i = Math.max(i0, 54); i <= i1; i++) { if (div[i] === null) continue; const y = sc.Y(div[i]), y0 = sc.Y(0); bars.push({ x: Math.max(66, X(i) - bw / 2).toFixed(1), y: Math.min(y, y0).toFixed(1), w: bw.toFixed(1), h: Math.max(0.5, Math.abs(y0 - y)).toFixed(1), fill: div[i] >= 0 ? this.PAL.posBg(0.5) : this.PAL.negBg(0.5) }); }
+    return { vf: (i) => div[i] === null || div[i] === undefined ? 'pre-census' : (div[i] >= 0 ? '+' : '\u2212') + Math.abs(div[i]).toFixed(1) + 'pp', title: 'Pop vs price divergence', sub: 'price ROC 1M \u2212 pop growth \u00B7 red = supply flooding \u00B7 2026+', close: this.closePane('d2'),
+      regions: [], bars, hlines: [{ y: sc.Y(0).toFixed(1), ty: (sc.Y(0) + 3).toFixed(1), label: '0', dash: 'none' }], lines: [], vlines: [], yts: sc.yt(v => v.toFixed(1) + 'pp') };
+  }
+  paneF3(i0, i1, X) {
+    const rot = this.arr(i => (this.SETIDX[i] / this.SETIDX[i0]) / (this.IDX[i] / this.IDX[i0]) * 100);
+    const sc = this.paneScaffold([rot, [100]], i0, i1, X);
+    return { vf: (i) => 'ratio ' + rot[i].toFixed(1), title: 'Set rotation \u00B7 Evolving Skies', sub: 'set index vs market \u00D7 100 \u00B7 above 100 = money rotating in', close: this.closePane('f3'),
+      regions: [], bars: [],
+      hlines: [{ y: sc.Y(100).toFixed(1), ty: (sc.Y(100) + 3).toFixed(1), label: '100', dash: '4 3' }],
+      lines: [{ pts: sc.pts(rot), color: this.PAL.acc, dash: 'none' }], vlines: [], yts: sc.yt(v => v.toFixed(0)) };
+  }
+  paneSeas(i0, i1, X) {
+    const sc = this.paneScaffold([this.SEAS, [1]], i0, i1, X);
+    return { vf: (i) => 'factor ' + this.SEAS[i].toFixed(3), title: 'Seasonality', sub: 'seasonal factor \u00B7 1 observed cycle \u00B7 illustrative', close: this.closePane('seas'),
+      regions: [], bars: [], hlines: [{ y: sc.Y(1).toFixed(1), ty: (sc.Y(1) + 3).toFixed(1), label: '1.0', dash: '4 3' }],
+      lines: [{ pts: sc.pts(this.SEAS), color: this.PAL.acc, dash: 'none' }], vlines: [], yts: sc.yt(v => v.toFixed(2)) };
+  }
+  paneAmihud(i0, i1, X) {
+    const sc = this.paneScaffold([this.AMIHUD], i0, i1, X);
+    const seamX = this.SEAM >= i0 ? X(this.SEAM) : null;
+    return { vf: (i) => this.AMIHUD[i] === null ? 'pre-seam' : 'impact ' + this.AMIHUD[i].toFixed(2) + '%/$1k', title: 'Amihud illiquidity', sub: 'price impact per $1k volume \u00B7 post-seam', close: this.closePane('amihud'),
+      regions: [], bars: [], hlines: [],
+      lines: [{ pts: sc.pts(this.AMIHUD), color: this.PAL.acc, dash: 'none' }],
+      vlines: seamX !== null ? [{ x: seamX.toFixed(1), tx: (seamX + 5).toFixed(1), color: this.PAL.warn, label: 'seam \u00B7 Apr \u201925' }] : [], yts: sc.yt(v => v.toFixed(2)) };
+  }
+  paneDisp(i0, i1, X) {
+    const sc = this.paneScaffold([this.DISP], i0, i1, X);
+    const seamX = this.SEAM >= i0 ? X(this.SEAM) : null;
+    return { vf: (i) => this.DISP[i] === null ? 'pre-seam' : '\u03C3/\u03BC ' + this.DISP[i].toFixed(2), title: 'Price dispersion', sub: '\u03C3/\u03BC of realized prices in bucket \u00B7 post-seam', close: this.closePane('disp'),
+      regions: [], bars: [], hlines: [],
+      lines: [{ pts: sc.pts(this.DISP), color: this.PAL.acc, dash: 'none' }],
+      vlines: seamX !== null ? [{ x: seamX.toFixed(1), tx: (seamX + 5).toFixed(1), color: this.PAL.warn, label: 'seam \u00B7 Apr \u201925' }] : [], yts: sc.yt(v => v.toFixed(2)) };
+  }
+  paneDtl(i0, i1, X) {
+    const sc = this.paneScaffold([this.DTL], i0, i1, X);
+    const seamX = this.SEAM >= i0 ? X(this.SEAM) : null;
+    return { vf: (i) => this.DTL[i] === null ? 'pre-seam' : this.DTL[i].toFixed(1) + '% below list', title: 'Discount-to-list', sub: 'avg % below listed price \u00B7 rows with list price only', close: this.closePane('dtl'),
+      regions: [], bars: [], hlines: [],
+      lines: [{ pts: sc.pts(this.DTL), color: this.PAL.acc, dash: 'none' }],
+      vlines: seamX !== null ? [{ x: seamX.toFixed(1), tx: (seamX + 5).toFixed(1), color: this.PAL.warn, label: 'seam \u00B7 Apr \u201925' }] : [], yts: sc.yt(v => v.toFixed(1) + '%') };
+  }
+  paneE4(i0, i1, X) {
+    const sc = this.paneScaffold([this.E4G], i0, i1, X);
+    const seamX = this.SEAM >= i0 ? X(this.SEAM) : null;
+    return { vf: (i) => this.E4G[i] === null ? 'pre-seam' : 'auction +' + this.E4G[i].toFixed(1) + '% vs eBay', title: 'Cross-marketplace gap', sub: 'auction-house premium vs eBay \u00B7 post-seam', close: this.closePane('e4'),
+      regions: [], bars: [], hlines: [],
+      lines: [{ pts: sc.pts(this.E4G), color: this.PAL.acc, dash: 'none' }],
+      vlines: seamX !== null ? [{ x: seamX.toFixed(1), tx: (seamX + 5).toFixed(1), color: this.PAL.warn, label: 'seam \u00B7 Apr \u201925' }] : [], yts: sc.yt(v => v.toFixed(1) + '%') };
+  }
+  paneOvh(i0, i1, X) {
+    const sc = this.paneScaffold([this.OVH, [0]], i0, i1, X);
+    const bw = Math.max(3, (860 / (i1 - i0)) * 0.55);
+    const bars = []; for (let i = Math.max(i0, 53); i <= i1; i++) { if (this.OVH[i] === null) continue; const y = sc.Y(this.OVH[i]); bars.push({ x: Math.max(66, X(i) - bw / 2).toFixed(1), y: y.toFixed(1), w: bw.toFixed(1), h: (156 - y).toFixed(1), fill: 'rgba(176,127,26,0.5)' }); }
+    return { vf: (i) => this.OVH[i] === null ? 'pre-census' : this.OVH[i].toFixed(1) + ' yrs of supply', title: 'Supply overhang', sub: 'pop \u00F7 annualized sales \u00B7 2026+', close: this.closePane('overhang'),
+      regions: [], bars, hlines: [], lines: [], vlines: [], yts: sc.yt(v => v.toFixed(1) + 'y') };
+  }
+  paneSpread(i0, i1, X) {
+    const sc = this.paneScaffold([this.SPREAD], i0, i1, X);
+    return { vf: (i) => this.SPREAD[i].toFixed(2) + '\u00D7', title: 'Tier spread', sub: 'PSA 10 \u00F7 raw \u00B7 falling = compressing', close: this.closePane('spread'),
+      regions: [], bars: [], hlines: [],
+      lines: [{ pts: sc.pts(this.SPREAD), color: this.PAL.warn, dash: 'none' }], vlines: [], yts: sc.yt(v => v.toFixed(1) + '\u00D7') };
+  }
+  paneArb(i0, i1, X) {
+    const sc = this.paneScaffold([this.ARBEV, [0]], i0, i1, X);
+    return { vf: (i) => (this.ARBEV[i] >= 0 ? '+$' : '\u2212$') + Math.abs(this.ARBEV[i]).toFixed(0) + ' EV', title: 'Grading-arb EV', sub: 'gem\u00D7PSA10 + (1\u2212gem)\u00D7G9 \u2212 raw \u2212 fees \u00B7 above 0 = grade it', close: this.closePane('arbev'),
+      regions: [], bars: [],
+      hlines: [{ y: sc.Y(0).toFixed(1), ty: (sc.Y(0) + 3).toFixed(1), label: '$0', dash: '4 3' }],
+      lines: [{ pts: sc.pts(this.ARBEV), color: this.PAL.pos2, dash: 'none' }], vlines: [], yts: sc.yt(v => (v >= 0 ? '$' : '\u2212$') + Math.abs(v).toFixed(0)) };
+  }
+  panePop(i0, i1, X) {
+    const sc = this.paneScaffold([this.POPD, [0]], i0, i1, X);
+    const bw = Math.max(3, (860 / (i1 - i0)) * 0.55);
+    const bars = []; for (let i = Math.max(i0, 53); i <= i1; i++) { const y = sc.Y(this.POPD[i]); const y0 = sc.Y(0); bars.push({ x: Math.max(66, X(i) - bw / 2).toFixed(1), y: Math.min(y, y0).toFixed(1), w: bw.toFixed(1), h: Math.max(0.5, Math.abs(y0 - y)).toFixed(1), fill: 'rgba(176,127,26,0.5)' }); }
+    const rx = 55 >= i0 ? X(55) : null;
+    return { vf: (i) => this.POPD[i] === null ? 'pre-census' : '+' + this.POPD[i].toFixed(1) + '%', title: 'Pop \u0394 monthly', sub: 'PSA+CGC census growth % \u00B7 2026+', close: this.closePane('popd'),
+      regions: rx !== null ? [{ x: (rx - bw).toFixed(1), w: (bw * 2).toFixed(1), fill: 'rgba(176,127,26,0.10)', tip: 'restatement window \u2014 grader republished Mar 2026 census' }] : [],
+      bars, hlines: [{ y: sc.Y(0).toFixed(1), ty: (sc.Y(0) + 3).toFixed(1), label: '0', dash: 'none' }], lines: [], vlines: [], yts: sc.yt(v => v.toFixed(1) + '%') };
+  }
+}
+</script>
+</body>
+</html>

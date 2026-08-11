@@ -1,0 +1,628 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="icon" href="./brand/favicon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="anonymous">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Inter+Tight:wght@600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<script src="./image-slot.js"></script>
+<style>
+  html, body { margin: 0; padding: 0; background: var(--bg, var(--bg, #FAFAF7)); }
+  body { font-family: 'Inter', system-ui, sans-serif; color: var(--ink, #1C1C1E); }
+  a { color: var(--acc, #4A63D0); text-decoration: none; }
+  a:hover { color: var(--accH, #3A4FB8); text-decoration: underline; }
+  *:focus-visible { outline: 2px solid var(--acc, #4A63D0); outline-offset: 1px; border-radius: 2px; }
+  image-slot[placeholder=" "]::part(empty) { opacity: 0; }
+  @keyframes peekIn { from { transform: translateX(18px); } to { transform: translateX(0); } }
+  @keyframes ticker { from { transform: translateX(0); } to { transform: translateX(-50%); } }
+  @media (prefers-reduced-motion: reduce) { * { animation-duration: 0.01ms !important; } }
+
+  :root[data-cvd="1"] { --pos: #0B69A8; --pos2: #0072B2; --neg: #CC5F00; --neg2: #D55E00; --posBg10: rgba(0,114,178,0.1); --negBg08: rgba(213,94,0,0.08); --negBg10: rgba(213,94,0,0.1); }
+
+  :root[data-theme="dark"] { color-scheme: dark; --bg: #161614; --card: #1E1E1C; --ink: #E9E9E5; --mut: #B4B4AE; --mut2: #A8A8A2; --mut3: #9A9A94; --mutbg: #2A2A27; --hov: #282825; --line: #33332F; --line2: #3E3E39; --line3: #4A4A44; --line4: #262623; --acc: #8C9BF2; --accH: #AAB6F6; --btn: #4A63D0; --warn: #D6A54A; --warnInk: #D6A54A; --tooltipBg: rgba(30, 30, 28, 0.95); --accBg: #252B44; --accMut: #3A4570; }
+  :root[data-theme="dark"]:not([data-cvd="1"]) { --pos: #4CC08D; --pos2: #4CC08D; --neg: #E57B7B; --neg2: #E57B7B; --neg3: #E57B7B; }
+  :root[data-theme="dark"][data-cvd="1"] { --pos: #58A9E6; --pos2: #58A9E6; --neg: #F5924E; --neg2: #F5924E; --neg3: #E8874D; }
+  :root[data-theme="dark"] { --logoTeal: #3FBFAD; }
+</style>
+<script src="./cardstock-search.js"></script>
+<script>if(localStorage.getItem('cardstock-cvd')==='1')document.documentElement.setAttribute('data-cvd','1');if(localStorage.getItem('cardstock-theme')==='dark')document.documentElement.setAttribute('data-theme','dark');</script>
+</helmet>
+<div data-screen-label="Home" style="min-height: 100vh; display: flex; flex-direction: column; font-size: 15px;">
+
+  <nav style="height: 48px; background: var(--card, #FFFFFF); border-bottom: 1px solid var(--line, #E4E4E0); display: flex; align-items: center; gap: 24px; padding: 0 20px; position: sticky; top: 0; z-index: 20;">
+    <div style="display: flex; align-items: center; gap: 10px;">
+      <a href="Cardstock Home.dc.html" aria-label="Cardstock home" style="display: flex; align-items: center; gap: 10px; color: inherit; text-decoration: none;"><svg width="24" height="24" viewBox="0 0 32 32" fill="none" aria-hidden="true" style="flex: 0 0 auto;"><rect x="5.5" y="5.5" width="15" height="21" rx="2.5" style="stroke: var(--ink, #1C1C1E);" stroke-width="2" transform="rotate(-12 13 16)"></rect><rect x="12" y="5.5" width="15" height="21" rx="2.5" style="fill: var(--card, #FFFFFF); stroke: var(--ink, #1C1C1E);" stroke-width="2"></rect><polyline points="15,21.5 17.5,17 19.5,18.5 23.5,12.5" style="stroke: var(--logoTeal, #0E8A7B);" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" fill="none"></polyline><circle cx="23.5" cy="12.5" r="1.7" style="fill: var(--logoTeal, #0E8A7B);"></circle></svg>
+      <span style="font-family: 'Inter', sans-serif; font-weight: 700; font-size: 18px; letter-spacing: -0.03em; color: var(--ink, #1C1C1E);">Cardstock</span></a>
+      </div>
+    <div style="display: flex; gap: 2px; height: 100%;">
+      <a href="#" style="display: flex; align-items: center; padding: 0 12px; font-weight: 600; font-size: 15px; color: var(--ink, #1C1C1E); border-bottom: 2px solid var(--acc, #4A63D0); margin-bottom: -1px;">Home</a>
+      <a href="Cardstock Screener.dc.html" style="display: flex; align-items: center; padding: 0 12px; font-weight: 500; font-size: 15px; color: var(--mut, #5B5B57); border-bottom: 2px solid transparent; margin-bottom: -1px;">Screener</a>
+      <a href="Cardstock Charts.dc.html" style="display: flex; align-items: center; padding: 0 12px; font-weight: 500; font-size: 15px; color: var(--mut, #5B5B57); border-bottom: 2px solid transparent; margin-bottom: -1px;">Charts</a>
+      <a href="Cardstock Binder.dc.html" style="display: flex; align-items: center; padding: 0 12px; font-weight: 500; font-size: 15px; color: var(--mut, #5B5B57); border-bottom: 2px solid transparent; margin-bottom: -1px;">Binder</a>
+      <a href="Cardstock Browse.dc.html" style="display: flex; align-items: center; padding: 0 12px; font-weight: 500; font-size: 15px; color: var(--mut, #5B5B57); border-bottom: 2px solid transparent; margin-bottom: -1px;">Browse</a>
+    </div>
+    <div style="flex: 1;"></div>
+    <cardstock-search></cardstock-search>
+    <a href="Cardstock Profile.dc.html" aria-label="Account" title="Profile & settings" style="display: flex; align-items: center; justify-content: center; width: 28px; height: 28px; border-radius: 50%; border: 1px solid var(--line, #E4E4E0); background: var(--mutbg, #F3F3EE); color: var(--mut, #5B5B57); font-weight: 600; font-size: 14px; text-decoration: none; flex-shrink: 0;">O</a>
+  </nav>
+
+  <div style="height: 36px; background: var(--card, #FFFFFF); border-bottom: 1px solid var(--line, #E4E4E0); display: flex; align-items: stretch; font-family: 'JetBrains Mono', monospace; font-size: 14px;">
+    <div style="display: flex; align-items: center; gap: 6px; padding: 0 12px 0 20px; border-right: 1px solid var(--line, #E4E4E0); flex-shrink: 0;">
+      <span style="color: var(--mut2, #6B6B66); font-size: 12.5px; letter-spacing: 0.06em;">MARKET</span>
+      <select value="{{ win }}" onChange="{{ setWin }}" aria-label="Stats window" style="font-family: 'JetBrains Mono', monospace; font-size: 14px; font-weight: 500; color: var(--ink, #1C1C1E); background: transparent; border: none; cursor: pointer; padding: 2px 0;">
+        <option value="30d">30d</option>
+        <option value="7d">7d</option>
+        <option value="90d">90d</option>
+      </select>
+    </div>
+    <div style="flex: 1; overflow: hidden; position: relative;">
+      <div style="display: flex; width: max-content; height: 36px; align-items: center; animation: ticker 45s linear infinite;" style-hover="animation-play-state: paused;">
+        <div style="display: flex; align-items: center; gap: 28px; padding: 0 14px 0 20px;">
+          <sc-for list="{{ ticks }}" as="it" hint-placeholder-count="10">
+            <span style="color: var(--mut, #5B5B57); white-space: nowrap;">{{ it.l }} <span style="color: var(--ink, #1C1C1E);">{{ it.n }}</span> <span style="font-weight: 500; color: {{ it.c }};">{{ it.v }}</span> <span style="color: var(--mut2, #6B6B66);">{{ it.x }}</span></span>
+          </sc-for>
+        </div>
+        <div style="display: flex; align-items: center; gap: 28px; padding: 0 14px 0 20px;" aria-hidden="true">
+          <sc-for list="{{ ticks }}" as="it" hint-placeholder-count="10">
+            <span style="color: var(--mut, #5B5B57); white-space: nowrap;">{{ it.l }} <span style="color: var(--ink, #1C1C1E);">{{ it.n }}</span> <span style="font-weight: 500; color: {{ it.c }};">{{ it.v }}</span> <span style="color: var(--mut2, #6B6B66);">{{ it.x }}</span></span>
+          </sc-for>
+        </div>
+      </div>
+      <div style="position: absolute; top: 0; left: 0; bottom: 0; width: 24px; background: linear-gradient(90deg, var(--card, #FFFFFF), transparent); pointer-events: none;"></div>
+      <div style="position: absolute; top: 0; right: 0; bottom: 0; width: 24px; background: linear-gradient(270deg, var(--card, #FFFFFF), transparent); pointer-events: none;"></div>
+    </div>
+  </div>
+
+  <main style="flex: 1; display: flex; flex-direction: column; gap: 16px; padding: 16px 20px; max-width: 1480px; width: 100%; box-sizing: border-box; margin: 0 auto;">
+
+    <section aria-label="Watchlist" style="order: 2; background: var(--card, #FFFFFF); border: 1px solid var(--line, #E4E4E0); border-radius: 8px;">
+      <div style="display: flex; align-items: center; gap: 4px; padding: 10px 12px 0 12px; border-bottom: 1px solid var(--line, #E4E4E0);">
+        <span title="Single cards you follow, each tracking the combination of signals you pinned for it. Chips show each signal's current state. Edit a row's tracked signals in Charts (⋯ → Open full chart)." style="font-family: 'Inter Tight', sans-serif; font-size: 17.5px; font-weight: 700; color: var(--ink, #1C1C1E); margin-right: 12px; padding-bottom: 10px; cursor: default;">Watchlist</span>
+        <sc-for list="{{ tabs }}" as="tb" hint-placeholder-count="2">
+          <button onClick="{{ tb.pick }}" title="{{ tb.tip }}" style="background: none; border: none; cursor: pointer; font-family: 'Inter', sans-serif; font-size: 15px; padding: 0 10px 10px 10px; font-weight: {{ tb.weight }}; color: {{ tb.fg }}; border-bottom: 2px solid {{ tb.bd }}; margin-bottom: -1px;">{{ tb.name }} <span style="font-family: 'JetBrains Mono', monospace; font-size: 12.5px; color: var(--mut2, #6B6B66);">{{ tb.count }}</span></button>
+        </sc-for>
+        <button style="background: none; border: none; cursor: pointer; font-size: 15px; color: var(--mut2, #6B6B66); padding: 0 8px 10px 8px;" title="Create another watchlist — rows can be moved between lists">+ new list</button>
+      </div>
+      <div style="position: sticky; top: 48px; z-index: 10; background: var(--card, #FFFFFF); display: grid; grid-template-columns: {{ gridCols }}; gap: 6px; padding: 6px 12px; border-bottom: 1px solid var(--line, #E4E4E0); font-size: 12.5px; font-weight: 600; letter-spacing: 0.05em; color: var(--mut2, #6B6B66); text-transform: uppercase; align-items: stretch;">
+        <span></span>
+        <div style="display: flex; align-items: center; min-width: 0;"><span style="flex: 1; text-align: center; overflow: hidden; white-space: nowrap;">Card</span><span onMouseDown="{{ rsCard }}" title="Drag to resize" style="cursor: col-resize; color: var(--line3, #C9C9C4); padding: 2px 3px; margin-right: -6px; flex-shrink: 0;" style-hover="color: var(--acc, #4A63D0);">│</span></div>
+        <div style="display: flex; align-items: center; min-width: 0;"><span style="flex: 1; text-align: center; overflow: hidden; white-space: nowrap;">Tier</span><span onMouseDown="{{ rsTier }}" title="Drag to resize" style="cursor: col-resize; color: var(--line3, #C9C9C4); padding: 2px 3px; margin-right: -6px; flex-shrink: 0;" style-hover="color: var(--acc, #4A63D0);">│</span></div>
+        <div style="display: flex; align-items: center; min-width: 0;"><span style="flex: 1; text-align: center; overflow: hidden; white-space: nowrap;">Price</span><span onMouseDown="{{ rsPrice }}" title="Drag to resize" style="cursor: col-resize; color: var(--line3, #C9C9C4); padding: 2px 3px; margin-right: -6px; flex-shrink: 0;" style-hover="color: var(--acc, #4A63D0);">│</span></div>
+        <div style="display: flex; align-items: center; min-width: 0;"><span style="flex: 1; text-align: center; overflow: hidden; white-space: nowrap;">1M %</span><span onMouseDown="{{ rsChg }}" title="Drag to resize" style="cursor: col-resize; color: var(--line3, #C9C9C4); padding: 2px 3px; margin-right: -6px; flex-shrink: 0;" style-hover="color: var(--acc, #4A63D0);">│</span></div>
+        <div style="display: flex; align-items: center; min-width: 0;"><span style="flex: 1; text-align: center; overflow: hidden; white-space: nowrap;">12M</span><span onMouseDown="{{ rsSpark }}" title="Drag to resize" style="cursor: col-resize; color: var(--line3, #C9C9C4); padding: 2px 3px; margin-right: -6px; flex-shrink: 0;" style-hover="color: var(--acc, #4A63D0);">│</span></div>
+        <span title="The signals you pinned for this card in Charts — chips show each one's current state. Edit via ⋯ → Open full chart." style="align-self: center; cursor: default;">Tracked signals <span style="color: var(--mut2, #6B6B66);">· set in Charts</span></span>
+        <span></span>
+      </div>
+      <sc-for list="{{ rows }}" as="row" hint-placeholder-count="8">
+        <div role="button" tabindex="0" onClick="{{ row.open }}" draggable="{{ row.drag }}" onDragStart="{{ row.onDragStart }}" onDragOver="{{ row.onDragOver }}" onDrop="{{ row.onDrop }}" onDragEnd="{{ row.onDragEnd }}" style="display: grid; grid-template-columns: {{ gridCols }}; gap: 6px; align-items: center; padding: 7px 12px; min-height: 66px; border-bottom: 1px solid var(--line4, #F0F0EC); cursor: pointer; background: {{ row.rowBg }}; opacity: {{ row.rowOpacity }}; box-shadow: inset 0 2px 0 {{ row.dropBd }};" style-hover="background: var(--hov, #F6F6F2);">
+          <div onMouseEnter="{{ row.pvIn }}" onMouseLeave="{{ pvOut }}" style="width: 48px; height: 66px; border-radius: 4px; background: {{ row.thumbBg }}; position: relative;">
+            <image-slot id="{{ row.slotId }}" shape="rounded" radius="4" placeholder=" "></image-slot>
+          </div>
+          <div style="min-width: 0;">
+            <div style="font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">{{ row.name }}</div>
+            <div style="font-size: 12.5px; color: var(--mut2, #6B6B66); white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">{{ row.set }}</div>
+          </div>
+          <span style="font-family: 'JetBrains Mono', monospace; font-size: 12.5px; color: var(--mut, #5B5B57); text-align: center;">{{ row.tier }}</span>
+          <span style="font-family: 'JetBrains Mono', monospace; font-size: 14.5px; font-weight: 700; text-align: center;">{{ row.price }}</span>
+          <span style="font-family: 'JetBrains Mono', monospace; font-size: 14px; text-align: center; color: {{ row.chgColor }};">{{ row.chgTxt }}</span>
+          <svg width="100%" height="18" viewBox="0 0 64 18" preserveAspectRatio="none" aria-hidden="true"><polygon points="{{ row.sparkFill }}" fill="{{ row.sparkFillColor }}"></polygon><polyline points="{{ row.spark }}" fill="none" stroke="{{ row.chgColor }}" stroke-width="1.25"></polyline></svg>
+          <div style="display: flex; gap: 4px; flex-wrap: wrap; min-width: 0; overflow: hidden;">
+            <sc-for list="{{ row.chips }}" as="c" hint-placeholder-count="2">
+              <span title="{{ c.tip }}" style="display: inline-flex; align-items: center; gap: 3px; font-family: 'JetBrains Mono', monospace; font-size: 11.5px; font-weight: 500; padding: 1px 6px; border-radius: 4px; white-space: nowrap; background: {{ c.bg }}; color: {{ c.fg }};">{{ c.i }} {{ c.t }}</span>
+            </sc-for>
+          </div>
+          <div style="position: relative;">
+            <button aria-label="Row actions" title="More actions for this card" onClick="{{ row.toggleMenu }}" style="background: none; border: none; cursor: pointer; color: var(--mut2, #6B6B66); font-size: 16px; padding: 2px;">⋯</button>
+            <sc-if value="{{ row.menuOpen }}" hint-placeholder-val="{{ false }}">
+              <div role="menu" onMouseLeave="{{ row.closeMenu }}" style="position: absolute; right: 0; top: 22px; z-index: 40; background: var(--card, #FFFFFF); border: 1px solid var(--line, #E4E4E0); border-radius: 6px; box-shadow: 0 6px 20px rgba(20, 19, 26, 0.12); min-width: 190px; padding: 4px; text-align: left;">
+                <button role="menuitem" onClick="{{ row.goChart }}" title="Opens Charts with this row's tracked signals pinned — any pin changes save back to this row via Update watchlist." style="display: block; width: 100%; text-align: left; background: none; border: none; cursor: pointer; font-family: 'Inter', sans-serif; font-size: 14.5px; color: var(--ink, #1C1C1E); padding: 6px 8px; border-radius: 4px;" style-hover="background: var(--hov, #F6F6F2);">Open full chart</button>
+                <button role="menuitem" onClick="{{ row.goCard }}" style="display: block; width: 100%; text-align: left; background: none; border: none; cursor: pointer; font-family: 'Inter', sans-serif; font-size: 14.5px; color: var(--ink, #1C1C1E); padding: 6px 8px; border-radius: 4px;" style-hover="background: var(--hov, #F6F6F2);" title="Full reference page — every grade tier, the sales ledger, and census data">Open card page</button>
+                <button role="menuitem" onClick="{{ row.closeMenu }}" style="display: block; width: 100%; text-align: left; background: none; border: none; cursor: pointer; font-family: 'Inter', sans-serif; font-size: 14.5px; color: var(--ink, #1C1C1E); padding: 6px 8px; border-radius: 4px;" style-hover="background: var(--hov, #F6F6F2);" title="Log a purchase of this card — opens the binder transaction form">Add to binder</button>
+                <div style="height: 1px; background: var(--line, #E4E4E0); margin: 4px 0;"></div>
+                <button role="menuitem" onClick="{{ row.closeMenu }}" style="display: block; width: 100%; text-align: left; background: none; border: none; cursor: pointer; font-family: 'Inter', sans-serif; font-size: 14.5px; color: var(--ink, #1C1C1E); padding: 6px 8px; border-radius: 4px;" style-hover="background: var(--hov, #F6F6F2);" title="Move this row to another watchlist — its tracked signals come with it">Move to list…</button>
+                <button role="menuitem" onClick="{{ row.closeMenu }}" style="display: block; width: 100%; text-align: left; background: none; border: none; cursor: pointer; font-family: 'Inter', sans-serif; font-size: 14.5px; color: var(--neg2, #D64545); padding: 6px 8px; border-radius: 4px;" style-hover="background: var(--negBg08, rgba(214, 69, 69, 0.08));" title="Stop following this card — its tracked signals are forgotten">Remove from watchlist</button>
+              </div>
+            </sc-if>
+          </div>
+        </div>
+      </sc-for>
+      <div style="padding: 8px 12px; font-size: 12.5px; color: var(--mut2, #6B6B66); display: flex; justify-content: space-between; align-items: center; gap: 12px;">
+        <span title="Chip color = the signal's current state, not its identity. Colored means it hit; grey means nothing to report." style="display: inline-flex; align-items: center; gap: 6px; cursor: default; flex-wrap: wrap;">
+          <span style="color: var(--pos, #157A50); background: var(--posBg10, rgba(24,158,99,0.10)); border-radius: 4px; padding: 0 5px; font-family: 'JetBrains Mono', monospace; font-size: 11px; font-weight: 600;">▲ hit bullish</span>
+          <span style="color: var(--neg, #C13A3A); background: var(--negBg10, rgba(214,69,69,0.10)); border-radius: 4px; padding: 0 5px; font-family: 'JetBrains Mono', monospace; font-size: 11px; font-weight: 600;">▼ hit bearish</span>
+          <span style="color: var(--warnInk, #8F6614); background: rgba(176,127,26,0.12); border-radius: 4px; padding: 0 5px; font-family: 'JetBrains Mono', monospace; font-size: 11px; font-weight: 600;">– caution</span>
+          <span style="color: var(--mut2, #6B6B66); background: var(--mutbg, #F3F3EE); border-radius: 4px; padding: 0 5px; font-family: 'JetBrains Mono', monospace; font-size: 11px; font-weight: 600;">– quiet · ◌ soon</span>
+        </span>
+        <span style="white-space: nowrap;">↑↓ rows · Enter peek · / search</span>
+      </div>
+    </section>
+
+    <div style="order: 1; display: grid; grid-template-columns: minmax(0, 3fr) minmax(0, 2fr); gap: 16px; align-items: stretch;">
+
+      <section aria-label="Screen activity" style="background: var(--card, #FFFFFF); border: 1px solid var(--line, #E4E4E0); border-radius: 8px; overflow: hidden;">
+        <div style="display: flex; align-items: baseline; justify-content: space-between; padding: 10px 12px; border-bottom: 1px solid var(--line, #E4E4E0);">
+          <span title="Cards that entered or exited one of your screens when the data refreshed. Manage screens in the Screener." style="font-family: 'Inter Tight', sans-serif; font-size: 17.5px; font-weight: 700; color: var(--ink, #1C1C1E); cursor: default;">Screen activity</span>
+          <span style="font-size: 12.5px; color: var(--mut2, #6B6B66);">7 since your last visit · 1 unlock · <a href="Cardstock Screener.dc.html" style="font-size: 12.5px;">your screens →</a></span>
+        </div>
+        <sc-for list="{{ feed }}" as="f" hint-placeholder-count="6">
+          <div role="button" tabindex="0" onClick="{{ f.open }}" style="display: flex; gap: 10px; padding: 8px 12px; border-bottom: 1px solid var(--line4, #F0F0EC); cursor: pointer; align-items: baseline;" style-hover="background: var(--hov, #F6F6F2);">
+            <span style="font-family: 'JetBrains Mono', monospace; font-size: 12.5px; width: 12px; flex-shrink: 0; color: {{ f.fg }};">{{ f.i }}</span>
+            <div style="min-width: 0; flex: 1;">
+              <div style="display: flex; gap: 6px; align-items: baseline; flex-wrap: wrap;">
+                <span style="font-weight: 500;">{{ f.name }}</span>
+                <span style="font-size: 14px; font-weight: 600; color: {{ f.fg }};">{{ f.rule }}</span>
+              </div>
+              <div style="font-size: 13px; color: var(--mut, #5B5B57); margin-top: 1px;">{{ f.ev }}</div>
+            </div>
+            <span style="font-family: 'JetBrains Mono', monospace; font-size: 12px; color: var(--mut2, #6B6B66); flex-shrink: 0;">{{ f.t }}</span>
+          </div>
+        </sc-for>
+      </section>
+
+      <section aria-label="Binder P&amp;L" style="background: var(--card, #FFFFFF); border: 1px solid var(--line, #E4E4E0); border-radius: 8px; padding: 12px; display: flex; flex-direction: column; justify-content: space-between;">
+        <div style="display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 10px;">
+          <span style="font-family: 'Inter Tight', sans-serif; font-size: 17.5px; font-weight: 700; color: var(--ink, #1C1C1E);">Binder</span>
+          <a href="Cardstock Binder.dc.html#performance" style="font-size: 12.5px;">Performance →</a>
+        </div>
+        <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px;">
+          <div>
+            <div style="font-size: 12.5px; color: var(--mut2, #6B6B66);">Total value</div>
+            <div style="font-family: 'JetBrains Mono', monospace; font-size: 25.5px; font-weight: 700;">$18,432</div>
+          </div>
+          <div>
+            <div style="font-size: 12.5px; color: var(--mut2, #6B6B66);">Unrealized</div>
+            <div style="font-family: 'JetBrains Mono', monospace; font-size: 25.5px; font-weight: 700; color: var(--pos2, #189E63);">+$3,108</div>
+            <div style="font-family: 'JetBrains Mono', monospace; font-size: 12.5px; color: var(--pos2, #189E63);">▲ +20.3%</div>
+          </div>
+          <div>
+            <div style="font-size: 12.5px; color: var(--mut2, #6B6B66);">vs market index</div>
+            <div style="font-family: 'JetBrains Mono', monospace; font-size: 25.5px; font-weight: 700; color: var(--pos2, #189E63);">+8.7<span style="font-size: 14px;"> pp</span></div>
+            <div style="font-family: 'JetBrains Mono', monospace; font-size: 12.5px; color: var(--mut2, #6B6B66);">trailing 12M</div>
+          </div>
+        </div>
+        <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px; margin-top: 12px; padding-top: 10px; border-top: 1px solid var(--line4, #F0F0EC);">
+          <div>
+            <div style="font-size: 12.5px; color: var(--mut2, #6B6B66);">Positions</div>
+            <div style="font-family: 'JetBrains Mono', monospace; font-size: 15px; font-weight: 600;">14 <span style="font-weight: 400; color: var(--mut2, #6B6B66);">across 6 sets</span></div>
+          </div>
+          <div>
+            <div style="font-size: 12.5px; color: var(--mut2, #6B6B66);">Cost basis</div>
+            <div style="font-family: 'JetBrains Mono', monospace; font-size: 15px; font-weight: 600;">$15,324</div>
+          </div>
+          <div>
+            <div style="font-size: 12.5px; color: var(--mut2, #6B6B66);">1M change</div>
+            <div style="font-family: 'JetBrains Mono', monospace; font-size: 15px; font-weight: 600; color: var(--pos2, #189E63);">▲ +$412</div>
+          </div>
+        </div>
+        <div style="display: flex; flex-direction: column; gap: 4px; margin-top: 12px; padding-top: 10px; border-top: 1px solid var(--line4, #F0F0EC);">
+          <div style="display: flex; justify-content: space-between; font-size: 14px;">
+            <span style="color: var(--mut2, #6B6B66);">Best position</span>
+            <span style="font-weight: 500;">Umbreon VMAX (Alt Art) <span style="font-family: 'JetBrains Mono', monospace; color: var(--pos2, #189E63); font-weight: 600;">▲ +42%</span></span>
+          </div>
+          <div style="display: flex; justify-content: space-between; font-size: 14px;">
+            <span style="color: var(--mut2, #6B6B66);">Worst position</span>
+            <span style="font-weight: 500;">Blastoise Holo <span style="font-family: 'JetBrains Mono', monospace; color: var(--neg2, #D64545); font-weight: 600;">▼ −8%</span></span>
+          </div>
+          <div style="display: flex; justify-content: space-between; font-size: 14px;">
+            <span style="color: var(--mut2, #6B6B66);">Largest holding</span>
+            <span style="font-weight: 500;">Charizard Holo Base <span style="font-family: 'JetBrains Mono', monospace; color: var(--mut, #5B5B57); font-weight: 600;">31% of value</span></span>
+          </div>
+        </div>
+        <svg width="100%" viewBox="0 0 300 48" preserveAspectRatio="none" style="display: block; margin-top: 10px;" aria-hidden="true">
+          <polygon points="0,48 0,38 25,36 50,37 75,33 100,30 125,31 150,27 175,24 200,25 225,20 250,16 275,14 300,10 300,48" fill="rgba(74, 99, 208, 0.07)"></polygon>
+          <polyline points="0,40 25,39 50,40 75,38 100,36 125,37 150,35 175,34 200,35 225,33 250,31 275,31 300,29" fill="none" style="stroke: var(--mut2, var(--mut2, #6B6B66));" stroke-width="1" stroke-dasharray="3 3"></polyline>
+          <polyline points="0,38 25,36 50,37 75,33 100,30 125,31 150,27 175,24 200,25 225,20 250,16 275,14 300,10" fill="none" style="stroke: var(--acc, var(--acc, #4A63D0));" stroke-width="1.5"></polyline>
+        </svg>
+        <div style="display: flex; gap: 12px; margin-top: 6px; font-size: 12px; color: var(--mut2, #6B6B66); font-family: 'JetBrains Mono', monospace;">
+          <span><span style="color: var(--acc, #4A63D0);">—</span> portfolio</span>
+          <span><span style="color: var(--mut2, #6B6B66);">┄</span> market index</span>
+          <span style="margin-left: auto;">12M · normalized</span>
+        </div>
+      </section>
+
+      <sc-if value="{{ hasPeek }}" hint-placeholder-val="{{ false }}">
+        <aside role="dialog" aria-label="Card peek" style="position: fixed; top: 96px; right: 20px; bottom: 16px; width: 480px; max-width: calc(100vw - 40px); z-index: 50; background: var(--card, #FFFFFF); border: 1px solid var(--line, #E4E4E0); border-top: 3px solid {{ peek.accent }}; border-radius: 8px; box-shadow: 0 8px 28px rgba(20, 19, 26, 0.10); z-index: 10; display: flex; flex-direction: column; overflow: auto; animation: peekIn 0.16s ease-out;">
+          <div style="display: flex; align-items: center; justify-content: space-between; padding: 10px 12px; border-bottom: 1px solid var(--line, #E4E4E0); position: sticky; top: 0; background: var(--card, #FFFFFF); z-index: 2;">
+            <div style="min-width: 0;">
+              <span style="font-weight: 600; font-size: 16px;">{{ peek.name }}</span>
+              <span style="font-size: 14px; color: var(--mut2, #6B6B66); margin-left: 8px;">{{ peek.set }}</span>
+            </div>
+            <button onClick="{{ closePeek }}" aria-label="Close peek" title="Close the preview — the watchlist stays as it is" style="background: none; border: none; cursor: pointer; color: var(--mut, #5B5B57); font-size: 18.5px; line-height: 1; padding: 4px 6px;">✕</button>
+          </div>
+          <div style="padding: 12px; display: flex; flex-direction: column; gap: 12px;">
+            <div style="display: flex; gap: 12px;">
+              <div style="width: 178px; height: 246px; flex-shrink: 0;">
+                <image-slot id="{{ peek.slotId }}" shape="rounded" radius="4" placeholder="card art"></image-slot>
+              </div>
+              <div style="flex: 1; min-width: 0;">
+                <div style="font-size: 12.5px; font-weight: 600; letter-spacing: 0.06em; color: var(--mut2, #6B6B66); text-transform: uppercase; margin-bottom: 4px;">Current prices</div>
+                <sc-for list="{{ peek.tiers }}" as="tr" hint-placeholder-count="6">
+                  <div style="display: flex; justify-content: space-between; padding: 2px 0; border-bottom: 1px solid var(--line4, #F0F0EC); font-size: 14px;">
+                    <span style="color: {{ tr.fg }}; font-weight: {{ tr.weight }};">{{ tr.label }}</span>
+                    <span style="font-family: 'JetBrains Mono', monospace; font-weight: {{ tr.weight }}; color: {{ tr.fg }};">{{ tr.price }}</span>
+                  </div>
+                </sc-for>
+              </div>
+            </div>
+            <div>
+              <div style="display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 4px;">
+                <span style="font-size: 12.5px; font-weight: 600; letter-spacing: 0.06em; color: var(--mut2, #6B6B66); text-transform: uppercase;">12M · {{ peek.tier }} · tracked signals</span>
+                <a href="Cardstock Charts.dc.html#signals" style="font-size: 12.5px;">edit →</a>
+              </div>
+              <svg width="100%" viewBox="0 0 320 130" style="display: block; border: 1px solid var(--line4, #F0F0EC); border-radius: 6px; background: var(--card, #FFFFFF);">
+                <line x1="34" y1="12" x2="312" y2="12" style="stroke: var(--line4, var(--line4, #F0F0EC));" stroke-width="1"></line>
+                <line x1="34" y1="61" x2="312" y2="61" style="stroke: var(--line4, var(--line4, #F0F0EC));" stroke-width="1"></line>
+                <line x1="34" y1="110" x2="312" y2="110" style="stroke: var(--line4, var(--line4, #F0F0EC));" stroke-width="1"></line>
+                <text x="30" y="15" text-anchor="end" font-family="JetBrains Mono, monospace" font-size="10.5" style="fill: var(--mut2, var(--mut2, #6B6B66));">{{ peek.yMax }}</text>
+                <text x="30" y="113" text-anchor="end" font-family="JetBrains Mono, monospace" font-size="10.5" style="fill: var(--mut2, var(--mut2, #6B6B66));">{{ peek.yMin }}</text>
+                <text x="34" y="126" font-family="JetBrains Mono, monospace" font-size="10.5" style="fill: var(--mut2, var(--mut2, #6B6B66));">Aug ’25</text>
+                <text x="312" y="126" text-anchor="end" font-family="JetBrains Mono, monospace" font-size="10.5" style="fill: var(--mut2, var(--mut2, #6B6B66));">Jul ’26</text>
+                <polyline points="{{ peek.line }}" fill="none" style="stroke: var(--acc, var(--acc, #4A63D0));" stroke-width="1.5"></polyline>
+                <sc-for list="{{ peek.tris }}" as="tg">
+                  <polygon points="{{ tg.pts }}" fill="{{ tg.fill }}"><title>{{ tg.tip }}</title></polygon>
+                </sc-for>
+                <circle cx="{{ peek.lx }}" cy="{{ peek.ly }}" r="3" style="fill: var(--card, #FFFFFF); stroke: var(--acc, #4A63D0);" stroke-width="1.5"><title>current month still revising</title></circle>
+              </svg>
+              <div style="font-size: 13px; color: var(--mut, #5B5B57); margin-top: 4px;">{{ peek.summary }}</div>
+              <div style="display: flex; gap: 4px; flex-wrap: wrap; margin-top: 6px;">
+                <sc-for list="{{ peek.chips }}" as="pc" hint-placeholder-count="2">
+                  <span title="{{ pc.tip }}" style="display: inline-flex; align-items: center; gap: 3px; font-family: 'JetBrains Mono', monospace; font-size: 11.5px; font-weight: 500; padding: 1px 6px; border-radius: 4px; background: {{ pc.bg }}; color: {{ pc.fg }};">{{ pc.i }} {{ pc.t }}</span>
+                </sc-for>
+              </div>
+            </div>
+            <div>
+              <div style="font-size: 12.5px; font-weight: 600; letter-spacing: 0.06em; color: var(--mut2, #6B6B66); text-transform: uppercase; margin-bottom: 4px;">Last 5 sales · {{ peek.tier }}</div>
+              <sc-for list="{{ peek.sales }}" as="s" hint-placeholder-count="5">
+                <div style="display: grid; grid-template-columns: 92px 64px 1fr 70px; gap: 8px; padding: 3px 0; border-bottom: 1px solid var(--line4, #F0F0EC); font-size: 13px; align-items: baseline;">
+                  <span style="font-family: 'JetBrains Mono', monospace; color: var(--mut, #5B5B57);">{{ s.date }}</span>
+                  <span style="font-family: 'JetBrains Mono', monospace; color: var(--mut2, #6B6B66);">{{ s.grade }}</span>
+                  <span style="color: var(--mut2, #6B6B66); font-size: 12.5px;">{{ s.src }}</span>
+                  <span style="font-family: 'JetBrains Mono', monospace; text-align: right; font-weight: 500;">{{ s.price }}</span>
+                </div>
+              </sc-for>
+            </div>
+            <div style="display: flex; justify-content: space-between; font-size: 14px; padding: 6px 8px; background: var(--mutbg, #F3F3EE); border-radius: 6px;">
+              <span style="color: var(--mut, #5B5B57);">Population Δ</span>
+              <span style="font-family: 'JetBrains Mono', monospace; color: var(--mut, #5B5B57);">{{ peek.popD }}</span>
+            </div>
+            <div style="display: flex; gap: 8px;">
+              <a href="Cardstock Charts.dc.html" style="flex: 1; display: flex; align-items: center; justify-content: center; background: var(--btn, var(--acc, #4A63D0)); color: #FFFFFF; border-radius: 6px; height: 30px; font-family: 'Inter', sans-serif; font-size: 14.5px; font-weight: 600; text-decoration: none;" style-hover="background: var(--accH, #3A4FB8); color: #FFFFFF; text-decoration: none;">Open full chart →</a>
+              <button style="background: var(--card, #FFFFFF); color: var(--ink, #1C1C1E); border: 1px solid var(--line, #E4E4E0); border-radius: 6px; height: 30px; padding: 0 10px; font-family: 'Inter', sans-serif; font-size: 14.5px; font-weight: 500; cursor: pointer;" style-hover="background: var(--hov, #F6F6F2);" title="Full reference page — every grade tier, the sales ledger, and census data">Card page</button>
+              <button style="background: var(--card, #FFFFFF); color: var(--ink, #1C1C1E); border: 1px solid var(--line, #E4E4E0); border-radius: 6px; height: 30px; padding: 0 10px; font-family: 'Inter', sans-serif; font-size: 14.5px; font-weight: 500; cursor: pointer;" style-hover="background: var(--hov, #F6F6F2);" title="Open this card in Charts with its tracked signals pinned, ready to change">Edit signals</button>
+            </div>
+          </div>
+        </aside>
+      </sc-if>
+    </div>
+  </main>
+
+  <footer style="border-top: 1px solid var(--line, #E4E4E0); padding: 10px 20px; display: flex; justify-content: space-between; align-items: center; font-size: 13px; color: var(--mut2, #6B6B66);">
+    <div style="display: flex; gap: 14px;">
+      <a href="Cardstock About Data.dc.html" style="font-size: 13px; color: var(--mut, #5B5B57);">About our data</a>
+      <a href="Cardstock Legal.dc.html#privacy" style="font-size: 13px; color: var(--mut, #5B5B57);">Privacy</a>
+      <a href="Cardstock Legal.dc.html#terms" style="font-size: 13px; color: var(--mut, #5B5B57);">Terms</a>
+    </div>
+    <span style="font-family: 'JetBrains Mono', monospace; font-size: 12px;">101,882 cards · 4.2M sales observed</span>
+  </footer>
+  <sc-if value="{{ hasPv }}" hint-placeholder-val="{{ false }}">
+    <div style="position: fixed; left: {{ pvX }}px; top: {{ pvY }}px; width: 164px; height: 226px; border-radius: 8px; background: {{ pvBg }}; box-shadow: 0 14px 40px rgba(20, 19, 26, 0.35); z-index: 100; pointer-events: none;">
+      <image-slot id="{{ pvSlot }}" shape="rounded" radius="8" placeholder=" "></image-slot>
+    </div>
+  </sc-if>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="">
+class Component extends DCLogic {
+  PAL = (() => { const d = localStorage.getItem('cardstock-theme') === 'dark', c = localStorage.getItem('cardstock-cvd') === '1';
+    const s = d ? (c ? {pos:'#58A9E6',pos2:'#58A9E6',neg:'#F5924E',neg2:'#F5924E',neg3:'#E8874D',posBg:a=>'rgba(0,114,178,'+a+')',negBg:a=>'rgba(213,94,0,'+a+')'}
+                     : {pos:'#4CC08D',pos2:'#4CC08D',neg:'#E57B7B',neg2:'#E57B7B',neg3:'#E57B7B',posBg:a=>'rgba(24,158,99,'+a+')',negBg:a=>'rgba(214,69,69,'+a+')'})
+              : (c ? {pos:'#0B69A8',pos2:'#0072B2',neg:'#CC5F00',neg2:'#D55E00',neg3:'#B34E00',posBg:a=>'rgba(0,114,178,'+a+')',negBg:a=>'rgba(213,94,0,'+a+')'}
+                   : {pos:'#157A50',pos2:'#189E63',neg:'#C13A3A',neg2:'#D64545',neg3:'#A93838',posBg:a=>'rgba(24,158,99,'+a+')',negBg:a=>'rgba(214,69,69,'+a+')'});
+    const ch = d ? {bg:'#161614',card:'#1E1E1C',ink:'#E9E9E5',mut:'#B4B4AE',mut2:'#A8A8A2',mut3:'#9A9A94',mutbg:'#2A2A27',hov:'#282825',line:'#33332F',line2:'#3E3E39',line3:'#4A4A44',line4:'#262623',acc:'#8C9BF2',accH:'#AAB6F6',btn:'#4A63D0',accBg:'#252B44',accMut:'#3A4570',warn:'#D6A54A',warnInk:'#D6A54A'}
+               : {bg:'#FAFAF7',card:'#FFFFFF',ink:'#1C1C1E',mut:'#5B5B57',mut2:'#6B6B66',mut3:'#8F8F8A',mutbg:'#F3F3EE',hov:'#F6F6F2',line:'#E4E4E0',line2:'#D9D9D4',line3:'#C9C9C4',line4:'#F0F0EC',acc:'#4A63D0',accH:'#3A4FB8',btn:'#4A63D0',accBg:'#EEF1FB',accMut:'#B9C4E8',warn:'#8F6614',warnInk:'#8F6614'};
+    return Object.assign(ch, s); })();
+  state = { tab: 0, focusIdx: -1, peekId: null, win: '30d', menuIdx: null, pv: null, colW: { card: 220, tier: 52, price: 76, chg: 52, spark: 68 } };
+  startResize(key) {
+    return (e) => {
+      e.preventDefault(); e.stopPropagation();
+      const startX = e.clientX, startW = this.state.colW[key];
+      const mv = (ev) => {
+        const w = Math.max(36, Math.min(420, startW + ev.clientX - startX));
+        this.setState(s => ({ colW: Object.assign({}, s.colW, { [key]: w }) }));
+      };
+      const up = () => { document.removeEventListener('mousemove', mv); document.removeEventListener('mouseup', up); document.body.style.cursor = ''; document.body.style.userSelect = ''; };
+      document.body.style.cursor = 'col-resize';
+      document.body.style.userSelect = 'none';
+      document.addEventListener('mousemove', mv);
+      document.addEventListener('mouseup', up);
+    };
+  }
+  constructor(props) {
+    super(props);
+    this.CHIP = {
+      gain: { fg: this.PAL.pos, bg: this.PAL.posBg(0.10) },
+      loss: { fg: this.PAL.neg, bg: this.PAL.negBg(0.10) },
+      warn: { fg: this.PAL.warnInk, bg: 'rgba(176,127,26,0.12)' },
+      muted: { fg: this.PAL.mut2, bg: this.PAL.mutbg }
+    };
+    this.cards = [
+      { id: 'umbreon', name: 'Umbreon VMAX (Alt Art)', set: 'Evolving Skies · 215/203', tier: 'PSA 10',
+        series: [1180,1150,1210,1195,1240,1265,1230,1290,1340,1372,1399,1486],
+        tiers: [455,620,710,842,1010,1486], popD: '+1.8% (60d)',
+        tris: [{i:4,d:'up',tip:'MACD (3,6,4) crossed above signal — Dec 2025. Price then $1,240; +3M +2.0%, +6M +12.1%'},{i:8,d:'up',tip:'EMA 3/9 crossover ▲ — Apr 2026. Price then $1,340; +3M +9.0% so far'}],
+        chips: [{t:'RS 94th',s:'gain',i:'▲',tip:'Relative strength vs market index, 3M: 94th percentile'},{t:'MACD +',s:'gain',i:'▲',tip:'MACD (3,6,4) above signal since May 2026'}] },
+      { id: 'zardex', name: 'Charizard ex SAR', set: 'Obsidian Flames · 234/197', tier: 'PSA 10',
+        series: [345,338,330,352,341,336,328,335,342,331,319,312],
+        tiers: [68,102,138,196,244,312], popD: '+3.1% (60d)',
+        tris: [{i:3,d:'up',tip:'z-score crossed −1.5 → reverting — Nov 2025'},{i:9,d:'down',tip:'EMA 3/9 crossover ▼ — May 2026'}],
+        chips: [{t:'RSI 71',s:'warn',i:'–',tip:'RSI(6) = 71.3 — above 70; monthly RSI >70 often continuation'},{t:'Churn ×1.6',s:'gain',i:'▲',tip:'Churn 30d is 1.6× churn 90d — attention building'}] },
+      { id: 'lugia', name: 'Lugia V (Alt Art)', set: 'Silver Tempest · 186/195', tier: 'PSA 10',
+        series: [402,410,398,415,430,441,435,452,448,455,461,478],
+        tiers: [142,205,258,318,392,478], popD: '+1.2% (60d)',
+        tris: [{i:7,d:'up',tip:'EMA 3/9 crossover ▲ — Mar 2026. Price then $452; +3M +1.9%'}],
+        chips: [{t:'z +1.62',s:'gain',i:'▲',tip:'z-score vs 6M MA = +1.62 — stretched above trend'},{t:'MACD –',s:'muted',i:'–',tip:'MACD (3,6,4): between crossings — tracked, currently quiet'}] },
+      { id: 'zardbase', name: 'Charizard Holo', set: 'Base Set Unlimited · 4/102', tier: 'PSA 9',
+        series: [2380,2405,2390,2440,2410,2455,2470,2490,2465,2500,2510,2540],
+        tiers: [420,760,1140,2540,4300,7900], popD: '+2.4% (60d)',
+        tris: [],
+        chips: [{t:'Pop Δ +2.4%',s:'warn',i:'–',tip:'PSA 9 population grew 2.4% in 60 days — supply watch'}] },
+      { id: 'giratina', name: 'Giratina V (Alt Art)', set: 'Lost Origin · 186/196', tier: 'PSA 10',
+        series: [690,678,702,695,688,700,712,706,724,745,772,845],
+        tiers: [236,342,415,520,648,845], popD: '+0.6% (60d)',
+        tris: [{i:10,d:'up',tip:'Entered Quiet Accumulation — Jun 2026. churn +140%, price flat'}],
+        chips: [{t:'Quiet Accum',s:'gain',i:'◆',tip:'Composite: churn accel + flat price + flat pop'},{t:'Churn +140%',s:'gain',i:'▲',tip:'30d churn vs 90d baseline'}] },
+      { id: 'blastoise', name: 'Blastoise Holo', set: 'Base Set Unlimited · 2/102', tier: 'PSA 8',
+        series: [740,752,730,725,718,704,712,698,706,712,724,680],
+        tiers: [210,410,680,1280,2050,3600], popD: '+5.1% (60d)',
+        tris: [{i:5,d:'down',tip:'EMA 3/9 crossover ▼ — Jan 2026. Price then $704; +3M +0.3%, +6M −3.4%'},{i:11,d:'down',tip:'Entered Supply Flood Watch — Jul 2026'}],
+        chips: [{t:'EMA 3/9 ▼',s:'loss',i:'▼',tip:'Fast EMA below slow since Jan 2026'},{t:'Pop Δ +5.1%',s:'warn',i:'–',tip:'Population growing faster than absorption'}] },
+      { id: 'rayquaza', name: 'Rayquaza VMAX (Alt Art)', set: 'Evolving Skies · 218/203', tier: 'PSA 10',
+        series: [980,1002,995,1030,1048,1041,1065,1080,1075,1092,1088,1120],
+        tiers: [345,505,610,742,905,1120], popD: '+1.5% (60d)',
+        tris: [{i:6,d:'up',tip:'EMA 3/9 crossover ▲ — Feb 2026. Price then $1,065; +3M +2.5%'}],
+        chips: [{t:'RS 84th',s:'warn',i:'–',tip:'Relative strength fell to 84th percentile (was 91st)'}] },
+      { id: 'iono', name: 'Iono SAR', set: 'Paldea Evolved · 269/193', tier: 'PSA 10',
+        series: [230,224,218,221,215,209,212,206,204,201,201,198],
+        tiers: [52,78,96,124,158,198], popD: 'first observed 2026-07-30 — deltas begin next observation',
+        tris: [],
+        chips: [{t:'Churn — 12d',s:'muted',i:'◌',tip:'Unlocks in ~12 days — sales history for this grade begins 2026-06-12'}] },
+      { id: 'gengar', name: 'Gengar Holo', set: 'Fossil Unlimited · 5/62', tier: 'Raw',
+        series: [128,132,130,136,139,135,141,138,142,140,143,145],
+        tiers: [145,235,320,520,780,1450], popD: '+0.9% (60d)',
+        tris: [],
+        chips: [{t:'Arb EV +$62',s:'gain',i:'▲',tip:'gem rate × PSA 10 + (1−gem) × PSA 9 − raw − fees'}] },
+      { id: 'espeon', name: 'Espeon VMAX (Alt Art)', set: 'Evolving Skies · 270/203', tier: 'Raw',
+        series: [265,272,268,280,285,290,286,295,301,298,305,310],
+        tiers: [310,455,540,660,800,1050], popD: '+1.1% (60d)',
+        tris: [],
+        chips: [{t:'Arb EV +$118',s:'gain',i:'▲',tip:'gem rate × PSA 10 + (1−gem) × PSA 9 − raw − fees'}] },
+      { id: 'zardv', name: 'Charizard V (Alt Art)', set: 'Brilliant Stars · 154/172', tier: 'Raw',
+        series: [230,236,228,240,246,242,250,247,252,249,251,255],
+        tiers: [255,370,440,560,690,905], popD: '+1.4% (60d)',
+        tris: [],
+        chips: [{t:'Arb EV +$74',s:'gain',i:'▲',tip:'gem rate × PSA 10 + (1−gem) × PSA 9 − raw − fees'}] }
+    ];
+    this.lists = [
+      { name: 'Main', ids: ['umbreon','zardex','lugia','zardbase','giratina','blastoise','rayquaza','iono'] },
+      { name: 'Grading candidates', ids: ['gengar','espeon','zardv'] }
+    ];
+    this.feedData = [
+      { id: 'giratina', rule: 'Entered “Quiet Accumulation”', ev: 'churn 30d +140% vs 90d · price −0.4% 1M · pop flat', t: '2h ago', s: 'gain', i: '▲' },
+      { id: 'umbreon', rule: 'Entered “Alt-art momentum”', ev: 'EMA 3/9 crossed bullish — fast 1,401 above slow 1,352', t: '6h ago', s: 'gain', i: '▲' },
+      { id: 'zardex', rule: 'Entered “RSI overheat watch”', ev: 'RSI(6) now 71.3 — monthly RSI above 70 often continues', t: '14h ago', s: 'warn', i: '–' },
+      { id: 'blastoise', rule: 'Entered “Supply Flood Watch”', ev: 'pop Δ 60d +5.1% · spread compressing · ROC 3M −3.8%', t: '1d ago', s: 'loss', i: '▼' },
+      { id: 'rayquaza', rule: 'Exited “3M RS Leaders”', ev: 'RS fell to 84th percentile (was 91st)', t: '2d ago', s: 'warn', i: '▼' },
+      { id: 'lugia', rule: 'Entered “Stretched above mean”', ev: 'z-score +1.62 vs 6-month mean — crossed +1.5', t: '2d ago', s: 'gain', i: '▲' },
+      { id: 'iono', rule: 'Indicator unlocked: Churn 30d', ev: 'per-sale ledger reached 30 days for PSA 10 — starts LOW CONFIDENCE', t: '3d ago', s: 'warn', i: '◆' }
+    ];
+    this.TIER_LABELS = ['Raw','Grade 7','Grade 8','Grade 9','Grade 9.5','PSA 10'];
+    this.ACCENTS = {
+      umbreon: ['#5C63B8','#3E4489'], zardex: ['#E8823F','#C05A1F'], lugia: ['#7FA3C9','#54789E'],
+      zardbase: ['#D66A4A','#A83E28'], giratina: ['#B09A62','#7E6C3E'], blastoise: ['#5E93C7','#39699B'],
+      rayquaza: ['#57B183','#2F8257'], iono: ['#D57AB8','#A94E8C'], gengar: ['#8A67C2','#5E4295'],
+      espeon: ['#B393DD','#8465B3'], zardv: ['#D9975A','#A9662C']
+    };
+  }
+  money(n) { return '$' + n.toLocaleString('en-US'); }
+  tickerItems(win) {
+    const G = this.PAL.pos2, L = this.PAL.neg2, K = this.PAL.ink;
+    const D = {
+      '7d': [
+        { l: 'SALES', v: '9,644 ▲ +12%', c: G }, { l: 'VOLUME', v: '$498K ▲ +8%', c: G },
+        { l: 'BREADTH', v: '54% advancing', c: G }, { l: 'INDEX', v: '▲ +2.4%', c: G, x: '30d' },
+        { l: 'VINTAGE', v: '62% of $ vol', c: K }, { l: 'GRADING', v: '+1,080 slabs · gem 45%', c: K },
+        { l: 'MEDIAN SALE', v: '$78 ▼ −2%', c: L }, { l: 'VENUE', v: 'ebay 84% · auction 9% · tcgp 7%', c: K },
+        { l: 'NEW 12M HIGHS', v: '▲ 214', c: G, x: '30d' }, { l: 'MEDIAN ROC', v: '▲ +0.3%', c: G },
+        { l: 'TOP WINNER', n: 'Espeon Gold Star', v: '▲ +18%', c: G }, { l: 'TOP LOSER', n: 'Blastoise Holo PSA 8', v: '▼ −9%', c: L },
+        { l: 'TOP SALE', v: '$18,500', c: K, n: 'Lugia 1st Ed PSA 10', x: 'goldin' },
+        { l: 'MOST ACTIVE', n: 'Umbreon VMAX (Alt Art)', v: '41 sales', c: K },
+        { l: 'HOT SET', n: 'Neo Genesis', v: '▲ +4.1%', c: G }, { l: 'CHARACTER LEADER', n: 'Charizard', v: '▲ +3.2%', c: G }
+      ],
+      '30d': [
+        { l: 'SALES', v: '41,208 ▲ +9%', c: G }, { l: 'VOLUME', v: '$2.1M ▲ +11%', c: G },
+        { l: 'BREADTH', v: '58% advancing', c: G }, { l: 'INDEX', v: '▲ +2.4%', c: G, x: '30d' },
+        { l: 'VINTAGE', v: '58% of $ vol', c: K }, { l: 'GRADING', v: '+4,120 slabs · gem 46%', c: K },
+        { l: 'MEDIAN SALE', v: '$84 ▼ −3%', c: L }, { l: 'VENUE', v: 'ebay 82% · auction 11% · tcgp 7%', c: K },
+        { l: 'NEW 12M HIGHS', v: '▲ 214', c: G, x: '30d' }, { l: 'MEDIAN ROC', v: '▲ +1.4%', c: G },
+        { l: 'TOP WINNER', n: 'Espeon Gold Star', v: '▲ +14%', c: G }, { l: 'TOP LOSER', n: 'Blastoise Holo PSA 8', v: '▼ −6.1%', c: L },
+        { l: 'TOP SALE', v: '$18,500', c: K, n: 'Lugia 1st Ed PSA 10', x: 'goldin' },
+        { l: 'MOST ACTIVE', n: 'Charizard ex SAR', v: '214 sales', c: K },
+        { l: 'HOT SET', n: 'Evolving Skies', v: '▲ +4.8%', c: G }, { l: 'CHARACTER LEADER', n: 'Giratina', v: '▲ +6.2%', c: G }
+      ],
+      '90d': [
+        { l: 'SALES', v: '122,750 ▲ +6%', c: G }, { l: 'VOLUME', v: '$6.4M ▲ +14%', c: G },
+        { l: 'BREADTH', v: '63% advancing', c: G }, { l: 'INDEX', v: '▲ +2.4%', c: G, x: '30d' },
+        { l: 'VINTAGE', v: '55% of $ vol', c: K }, { l: 'GRADING', v: '+12,930 slabs · gem 47%', c: K },
+        { l: 'MEDIAN SALE', v: '$88 ▲ +2%', c: G }, { l: 'VENUE', v: 'ebay 83% · auction 10% · tcgp 7%', c: K },
+        { l: 'NEW 12M HIGHS', v: '▲ 214', c: G, x: '30d' }, { l: 'MEDIAN ROC', v: '▲ +3.9%', c: G },
+        { l: 'TOP WINNER', n: 'Giratina V (Alt Art)', v: '▲ +18.6%', c: G }, { l: 'TOP LOSER', n: 'Charizard ex SAR', v: '▼ −8.9%', c: L },
+        { l: 'TOP SALE', v: '$24,200', c: K, n: 'Charizard 1st Ed PSA 9', x: 'pwcc' },
+        { l: 'MOST ACTIVE', n: 'Charizard ex SAR', v: '640 sales', c: K },
+        { l: 'HOT SET', n: 'Lost Origin', v: '▲ +11.2%', c: G }, { l: 'CHARACTER LEADER', n: 'Giratina', v: '▲ +12.8%', c: G }
+      ]
+    };
+    return D[win] || D['30d'];
+  }
+  spark(series) {
+    const min = Math.min(...series), max = Math.max(...series), r = (max - min) || 1;
+    return series.map((v, i) => ((i / (series.length - 1)) * 63).toFixed(1) + ',' + (16 - ((v - min) / r) * 14 + 1).toFixed(1)).join(' ');
+  }
+  card(id) { return this.cards.find(c => c.id === id); }
+  chg(c) { return c.series[11] / c.series[10] - 1; }
+  chgTxt(v) { return (v >= 0 ? '+' : '−') + Math.abs(v * 100).toFixed(1) + '%'; }
+  styledChips(c) { return c.chips.map(ch => Object.assign({}, ch, this.CHIP[ch.s])); }
+  sales(c) {
+    const dates = ['Jul 28, 2026','Jul 24, 2026','Jul 19, 2026','Jul 11, 2026','Jul 02, 2026'];
+    const srcs = ['ebay','pwcc','ebay','goldin','ebay'];
+    const mults = [0.996, 1.018, 0.972, 1.005, 0.958];
+    const p = c.series[11];
+    return dates.map((d, i) => ({ date: d, grade: c.tier, price: this.money(Math.round(p * mults[i])), src: srcs[i] }));
+  }
+  buildPeek(id) {
+    const c = this.card(id);
+    if (!c) return null;
+    const W = 320, L = 34, R = 8, T = 12, B = 20, H = 130;
+    const s = c.series;
+    const min = Math.min(...s), max = Math.max(...s), r = (max - min) || 1;
+    const X = i => L + (i / (s.length - 1)) * (W - L - R);
+    const Y = v => T + (1 - (v - min) / r) * (H - T - B);
+    const line = s.map((v, i) => X(i).toFixed(1) + ',' + Y(v).toFixed(1)).join(' ');
+    const tris = (c.tris || []).map(t => {
+      const x = X(t.i), y = Y(s[t.i]);
+      return t.d === 'up'
+        ? { pts: `${x.toFixed(1)},${(y + 5).toFixed(1)} ${(x - 4).toFixed(1)},${(y + 12).toFixed(1)} ${(x + 4).toFixed(1)},${(y + 12).toFixed(1)}`, fill: this.PAL.pos2, tip: t.tip }
+        : { pts: `${x.toFixed(1)},${(y - 5).toFixed(1)} ${(x - 4).toFixed(1)},${(y - 12).toFixed(1)} ${(x + 4).toFixed(1)},${(y - 12).toFixed(1)}`, fill: this.PAL.neg2, tip: t.tip };
+    });
+    const chg3 = s[11] / s[8] - 1;
+    const ma6 = s.slice(6).reduce((a, b) => a + b, 0) / 6;
+    const summary = `${c.tier} ${chg3 >= 0 ? 'up' : 'down'} ${Math.abs(chg3 * 100).toFixed(0)}% over 3 months, ${s[11] > ma6 ? 'above' : 'below'} its 6-month average.`;
+    return {
+      id: c.id, name: c.name, set: c.set, tier: c.tier, slotId: 'art-' + c.id,
+      accent: this.ACCENTS[c.id][0],
+      tiers: this.TIER_LABELS.map((lb, i) => ({
+        label: lb, price: this.money(c.tiers[i]),
+        fg: lb === c.tier ? this.PAL.ink : this.PAL.mut, weight: lb === c.tier ? 600 : 400
+      })),
+      line, tris,
+      lx: X(11).toFixed(1), ly: Y(s[11]).toFixed(1),
+      yMax: max.toLocaleString('en-US'), yMin: min.toLocaleString('en-US'),
+      summary, chips: this.styledChips(c), sales: this.sales(c), popD: c.popD
+    };
+  }
+  componentDidMount() {
+    this.kd = (e) => {
+      const tag = (e.target.tagName || '').toLowerCase();
+      if (tag === 'input' || tag === 'textarea') { if (e.key === 'Escape') e.target.blur(); return; }
+      if (e.key === 'Escape') { this.setState(this.state.menuIdx !== null ? { menuIdx: null } : { peekId: null }); }
+      else if (e.key === 'ArrowDown' || e.key === 'ArrowUp') {
+        e.preventDefault();
+        const ids = this.lists[this.state.tab].ids;
+        let i = this.state.focusIdx + (e.key === 'ArrowDown' ? 1 : -1);
+        i = Math.max(0, Math.min(ids.length - 1, i));
+        const st = { focusIdx: i };
+        if (this.state.peekId) st.peekId = ids[i];
+        this.setState(st);
+      }
+      else if (e.key === 'Enter') {
+        const ids = this.lists[this.state.tab].ids;
+        if (this.state.focusIdx >= 0) this.setState({ peekId: ids[this.state.focusIdx] });
+      }
+    };
+    document.addEventListener('keydown', this.kd);
+    this.docClick = (e) => {
+      if (this.state.menuIdx !== null && !e.target.closest('[role="menu"]') && (e.target.getAttribute && e.target.getAttribute('aria-label') !== 'Row actions')) {
+        this.setState({ menuIdx: null });
+      }
+    };
+    document.addEventListener('click', this.docClick);
+  }
+  componentWillUnmount() { document.removeEventListener('keydown', this.kd); document.removeEventListener('click', this.docClick); }
+  renderVals() {
+    const list = this.lists[this.state.tab];
+    const dragIdx = this.state.dragIdx, overIdx = this.state.overIdx;
+    const rows = list.ids.map((id, ix) => {
+      const c = this.card(id);
+      const v = this.chg(c);
+      const ac = this.ACCENTS[id];
+      const sp = this.spark(c.series);
+      return {
+        name: c.name, set: c.set, tier: c.tier, price: this.money(c.series[11]),
+        chgTxt: this.chgTxt(v), chgColor: v >= 0 ? this.PAL.pos2 : this.PAL.neg2,
+        thumbBg: `linear-gradient(160deg, ${ac[0]}, ${ac[1]})`, letter: c.name.charAt(0), slotId: 'art-' + id,
+        pvIn: (e) => {
+          const r = e.currentTarget.getBoundingClientRect();
+          const row = e.currentTarget.closest('[role="button"]');
+          const tbl = row.parentElement.getBoundingClientRect();
+          const hdr = row.parentElement.firstElementChild.getBoundingClientRect();
+          const minY = Math.max(8, hdr.bottom + 4);
+          const maxY = Math.min(window.innerHeight - 234, tbl.bottom - 230);
+          const y = Math.max(minY, Math.min(maxY, r.top + r.height / 2 - 113));
+          this.setState({ pv: { slot: 'art-' + id, bg: `linear-gradient(160deg, ${ac[0]}, ${ac[1]})`, x: r.right + 10, y } });
+        },
+        spark: sp, sparkFill: `0,17 ${sp} 63,17`,
+        sparkFillColor: v >= 0 ? this.PAL.posBg(0.12) : this.PAL.negBg(0.10),
+        rowBg: this.state.focusIdx === ix ? this.PAL.accBg : 'transparent',
+        chips: this.styledChips(c),
+        open: () => this.setState({ peekId: id, focusIdx: ix, menuIdx: null }),
+        drag: true,
+        rowOpacity: dragIdx === ix ? 0.35 : 1,
+        dropBd: overIdx === ix && dragIdx !== null && dragIdx !== ix ? this.PAL.acc : 'transparent',
+        onDragStart: (e) => { e.dataTransfer.effectAllowed = 'move'; e.dataTransfer.setData('text/plain', String(ix)); this.setState({ dragIdx: ix, menuIdx: null, peekId: null }); },
+        onDragOver: (e) => { e.preventDefault(); e.dataTransfer.dropEffect = 'move'; if (this.state.overIdx !== ix) this.setState({ overIdx: ix }); },
+        onDrop: (e) => {
+          e.preventDefault(); e.stopPropagation();
+          const from = this.state.dragIdx;
+          if (from !== null && from !== ix) { const ids = this.lists[this.state.tab].ids; const m = ids.splice(from, 1)[0]; ids.splice(ix, 0, m); }
+          this.setState({ dragIdx: null, overIdx: null, focusIdx: -1 });
+        },
+        onDragEnd: () => this.setState({ dragIdx: null, overIdx: null }),
+        menuOpen: this.state.menuIdx === ix,
+        toggleMenu: (e) => { e.stopPropagation(); this.setState({ menuIdx: this.state.menuIdx === ix ? null : ix }); },
+        closeMenu: (e) => { e.stopPropagation(); this.setState({ menuIdx: null }); },
+        goChart: (e) => { e.stopPropagation(); location.href = 'Cardstock Charts.dc.html'; },
+        goCard: (e) => { e.stopPropagation(); location.href = 'Cardstock Card.dc.html'; }
+      };
+    });
+    const tabs = this.lists.map((l, i) => ({
+      name: l.name, count: l.ids.length,
+      tip: i === this.state.tab ? 'Showing \u201C' + l.name + '\u201D \u2014 ' + l.ids.length + (l.ids.length === 1 ? ' card' : ' cards') : 'Switch to \u201C' + l.name + '\u201D \u2014 ' + l.ids.length + (l.ids.length === 1 ? ' card' : ' cards'),
+      weight: i === this.state.tab ? 600 : 500,
+      fg: i === this.state.tab ? this.PAL.ink : this.PAL.mut,
+      bd: i === this.state.tab ? this.PAL.acc : 'transparent',
+      pick: () => this.setState({ tab: i, focusIdx: -1, peekId: null })
+    }));
+    const feed = this.feedData.map(f => {
+      const c = this.card(f.id);
+      const ac = this.ACCENTS[f.id];
+      return {
+        name: c.name, rule: f.rule, ev: f.ev, t: f.t, i: f.i,
+        thumbBg: `linear-gradient(160deg, ${ac[0]}, ${ac[1]})`, letter: c.name.charAt(0),
+        fg: this.CHIP[f.s].fg,
+        open: () => this.setState({ peekId: f.id })
+      };
+    });
+    const peek = this.state.peekId ? this.buildPeek(this.state.peekId) : null;
+    return {
+      tabs, rows, feed,
+      peek, hasPeek: !!peek,
+      closePeek: () => this.setState({ peekId: null }),
+      gridCols: `48px ${this.state.colW.card}px ${this.state.colW.tier}px ${this.state.colW.price}px ${this.state.colW.chg}px ${this.state.colW.spark}px minmax(0, 1fr) 18px`,
+      rsCard: this.startResize('card'), rsTier: this.startResize('tier'), rsPrice: this.startResize('price'), rsChg: this.startResize('chg'), rsSpark: this.startResize('spark'),
+      win: this.state.win,
+      setWin: (e) => this.setState({ win: e.target.value }),
+      hasPv: !!this.state.pv, pvSlot: this.state.pv ? this.state.pv.slot : '', pvBg: this.state.pv ? this.state.pv.bg : '', pvX: this.state.pv ? this.state.pv.x : 0, pvY: this.state.pv ? this.state.pv.y : 0,
+      pvOut: () => this.setState({ pv: null }),
+      ticks: this.tickerItems(this.state.win)
+    };
+  }
+}
+</script>
+</body>
+</html>

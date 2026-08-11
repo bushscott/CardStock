@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="icon" href="./brand/favicon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="anonymous">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Inter+Tight:wght@600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  html, body { margin: 0; padding: 0; background: var(--bg, #FAFAF7); }
+  body { font-family: 'Inter', system-ui, sans-serif; }
+  a { color: var(--acc, #4A63D0); text-decoration: none; }
+  a:hover { color: var(--accH, #3A4FB8); text-decoration: underline; }
+  *:focus-visible { outline: 2px solid var(--acc, #4A63D0); outline-offset: 1px; border-radius: 2px; }
+  :root[data-theme="dark"] { color-scheme: dark; --bg: #161614; --card: #1E1E1C; --ink: #E9E9E5; --mut: #B4B4AE; --mut2: #A8A8A2; --mut3: #9A9A94; --mutbg: #2A2A27; --hov: #282825; --line: #33332F; --line2: #3E3E39; --line4: #262623; --acc: #8C9BF2; --accH: #AAB6F6; --btn: #4A63D0; --warn: #D6A54A; --warnInk: #D6A54A; --logoTeal: #3FBFAD; }
+</style>
+<script src="./cardstock-search.js"></script>
+<script>if(localStorage.getItem('cardstock-cvd')==='1')document.documentElement.setAttribute('data-cvd','1');if(localStorage.getItem('cardstock-theme')==='dark')document.documentElement.setAttribute('data-theme','dark');</script>
+</helmet>
+<div data-screen-label="Privacy &amp; Terms" style="min-height: 100vh; background: var(--bg, #FAFAF7); color: var(--ink, #1C1C1E); font-family: 'Inter', system-ui, sans-serif; font-size: 15px; display: flex; flex-direction: column;">
+
+  <nav style="height: 48px; background: var(--card, #FFFFFF); border-bottom: 1px solid var(--line, #E4E4E0); display: flex; align-items: center; gap: 24px; padding: 0 20px; position: sticky; top: 0; z-index: 20;">
+    <div style="display: flex; align-items: center; gap: 10px;"><a href="Cardstock Home.dc.html" aria-label="Cardstock home" style="display: flex; align-items: center; gap: 10px; color: inherit; text-decoration: none;"><svg width="24" height="24" viewBox="0 0 32 32" fill="none" aria-hidden="true" style="flex: 0 0 auto;"><rect x="5.5" y="5.5" width="15" height="21" rx="2.5" style="stroke: var(--ink, #1C1C1E);" stroke-width="2" transform="rotate(-12 13 16)"></rect><rect x="12" y="5.5" width="15" height="21" rx="2.5" style="fill: var(--card, #FFFFFF); stroke: var(--ink, #1C1C1E);" stroke-width="2"></rect><polyline points="15,21.5 17.5,17 19.5,18.5 23.5,12.5" style="stroke: var(--logoTeal, #0E8A7B);" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" fill="none"></polyline><circle cx="23.5" cy="12.5" r="1.7" style="fill: var(--logoTeal, #0E8A7B);"></circle></svg><span style="font-family: 'Inter', sans-serif; font-weight: 700; font-size: 18px; letter-spacing: -0.03em; color: var(--ink, #1C1C1E);">Cardstock</span></a></div>
+    <div style="display: flex; gap: 2px; height: 100%;">
+      <a href="Cardstock Home.dc.html" style="display: flex; align-items: center; padding: 0 12px; font-weight: 500; font-size: 15px; color: var(--mut, #5B5B57); border-bottom: 2px solid transparent; margin-bottom: -1px;">Home</a>
+      <a href="Cardstock Screener.dc.html" style="display: flex; align-items: center; padding: 0 12px; font-weight: 500; font-size: 15px; color: var(--mut, #5B5B57); border-bottom: 2px solid transparent; margin-bottom: -1px;">Screener</a>
+      <a href="Cardstock Charts.dc.html" style="display: flex; align-items: center; padding: 0 12px; font-weight: 500; font-size: 15px; color: var(--mut, #5B5B57); border-bottom: 2px solid transparent; margin-bottom: -1px;">Charts</a>
+      <a href="Cardstock Binder.dc.html" style="display: flex; align-items: center; padding: 0 12px; font-weight: 500; font-size: 15px; color: var(--mut, #5B5B57); border-bottom: 2px solid transparent; margin-bottom: -1px;">Binder</a>
+      <a href="Cardstock Browse.dc.html" style="display: flex; align-items: center; padding: 0 12px; font-weight: 500; font-size: 15px; color: var(--mut, #5B5B57); border-bottom: 2px solid transparent; margin-bottom: -1px;">Browse</a>
+    </div>
+    <div style="flex: 1;"></div>
+    <cardstock-search></cardstock-search>
+    <a href="Cardstock Profile.dc.html" aria-label="Account" title="Profile &amp; settings" style="display: flex; align-items: center; justify-content: center; width: 28px; height: 28px; border-radius: 50%; border: 1px solid var(--line, #E4E4E0); background: var(--mutbg, #F3F3EE); color: var(--mut, #5B5B57); font-weight: 600; font-size: 14px; text-decoration: none; flex-shrink: 0;">O</a>
+  </nav>
+
+  <div style="width: 100%; max-width: 820px; margin: 0 auto; padding: 32px 24px 80px; box-sizing: border-box;">
+    <h1 style="font-family: 'Inter Tight', sans-serif; font-size: 27px; font-weight: 700; margin: 0 0 6px;">Privacy &amp; Terms</h1>
+    <div style="font-size: 14.5px; color: var(--mut2, #6B6B66); margin-bottom: 18px;">Short, in plain language, and true. Last updated August 2026.</div>
+
+    <div style="display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 28px;">
+      <a href="#privacy" style="font-size: 13px; font-weight: 600; border: 1px solid var(--line, #E4E4E0); border-radius: 99px; padding: 4px 12px; background: var(--card, #FFFFFF);">Privacy</a>
+      <a href="#terms" style="font-size: 13px; font-weight: 600; border: 1px solid var(--line, #E4E4E0); border-radius: 99px; padding: 4px 12px; background: var(--card, #FFFFFF);">Terms of use</a>
+    </div>
+
+    <section id="privacy" style="scroll-margin-top: 62px; background: var(--card, #FFFFFF); border: 1px solid var(--line, #E4E4E0); border-radius: 8px; padding: 20px 22px; margin-bottom: 14px;">
+      <h2 style="font-family: 'Inter Tight', sans-serif; font-size: 18.5px; font-weight: 700; margin: 0 0 10px;">Privacy</h2>
+      <div style="font-size: 14.5px; line-height: 1.6; color: var(--mut, #5B5B57);">
+        <p style="margin: 0 0 10px;"><strong style="color: var(--ink, #1C1C1E);">What we store.</strong> Your account email, your binder (positions, cost basis, transactions), your watchlists and saved screens, and display preferences (theme, color-vision mode). That's the list.</p>
+        <p style="margin: 0 0 10px;"><strong style="color: var(--ink, #1C1C1E);">What we don't do.</strong> We don't sell or share your data, run ads, or use third-party trackers. Analytics are limited to aggregate, anonymous usage counts. Your binder is visible to you alone; no aggregate we publish can be traced back to a person's holdings.</p>
+        <p style="margin: 0 0 10px;"><strong style="color: var(--ink, #1C1C1E);">Cookies &amp; local storage.</strong> We use local storage for sign-in sessions and preferences — nothing that follows you around the web.</p>
+        <p style="margin: 0;"><strong style="color: var(--ink, #1C1C1E);">Deletion.</strong> Delete your account from Profile &amp; settings and everything above is removed within 30 days. Export your binder as CSV first if you want a copy.</p>
+      </div>
+    </section>
+
+    <section id="terms" style="scroll-margin-top: 62px; background: var(--card, #FFFFFF); border: 1px solid var(--line, #E4E4E0); border-radius: 8px; padding: 20px 22px;">
+      <h2 style="font-family: 'Inter Tight', sans-serif; font-size: 18.5px; font-weight: 700; margin: 0 0 10px;">Terms of use</h2>
+      <div style="font-size: 14.5px; line-height: 1.6; color: var(--mut, #5B5B57);">
+        <p style="margin: 0 0 10px;"><strong style="color: var(--ink, #1C1C1E);">Not financial advice.</strong> Cardstock describes what the market did, not what it will do. Signals, screens, and backtests are research tools; decisions and their outcomes are yours.</p>
+        <p style="margin: 0 0 10px;"><strong style="color: var(--ink, #1C1C1E);">Data accuracy.</strong> We work hard on data quality (see <a href="Cardstock About Data.dc.html">About our data</a>), but sales records and census reports contain errors upstream of us. The service is provided as-is, without warranty of accuracy or availability.</p>
+        <p style="margin: 0 0 10px;"><strong style="color: var(--ink, #1C1C1E);">Fair use.</strong> Your account is for you. Don't scrape at volume, resell our data, or probe other users' information. We may suspend accounts that do.</p>
+        <p style="margin: 0 0 10px;"><strong style="color: var(--ink, #1C1C1E);">Intellectual property.</strong> Cardstock is a fan-made project, not affiliated with, endorsed by, or sponsored by Nintendo, The Pokémon Company, Creatures Inc., or any grading company or marketplace. Pokémon names and card references are used for identification only; all trademarks belong to their owners.</p>
+        <p style="margin: 0;"><strong style="color: var(--ink, #1C1C1E);">Changes.</strong> If these terms change materially, we'll say so on this page and date it — no silent edits. That's how we treat charts, and how we treat this.</p>
+      </div>
+    </section>
+  </div>
+</div>
+</x-dc>
+</body>
+</html>
