@@ -1,0 +1,25 @@
+[Unit]
+Description=CardStock API
+After=network-online.target postgresql.service
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=cardstock
+WorkingDirectory=/opt/cardstock/api
+ExecStart=/opt/cardstock/api/CardStock.Api
+Restart=always
+RestartSec=10
+Environment=ASPNETCORE_ENVIRONMENT=Production
+Environment=ASPNETCORE_URLS=http://0.0.0.0:5180
+
+# Hardening, per D-037. MemoryMax matters most: this box also runs the crawler
+# and PostgreSQL, and the web tier must not be able to starve either.
+NoNewPrivileges=true
+ProtectSystem=strict
+ProtectHome=true
+PrivateTmp=true
+MemoryMax=2G
+
+[Install]
+WantedBy=multi-user.target
