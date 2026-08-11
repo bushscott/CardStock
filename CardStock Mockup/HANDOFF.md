@@ -6,6 +6,27 @@ Last updated 2026-08-10.
 
 ---
 
+> ## ⚠ Provenance — read before relying on any number here
+>
+> This document was written by Claude Design, which built the prototypes but **never had access to the database**. It is **first-hand about the design** — screens, routes, spec deltas, conventions — and **second-hand about the data**. Every data claim in it was relayed, not observed.
+>
+> **The rule:** trust this document where it describes itself. Verify it against `../../PokemonInvestBatch` wherever it describes the data. §5 is the section to distrust; §2, §3, §6 and §7 describe the prototypes and are self-verifying — open the HTML.
+>
+> **Errors confirmed 2026-08-10, every one a data claim:**
+>
+> | Claim | Verdict |
+> |---|---|
+> | §1, §5 — per-sale ledger Apr 2025, census Jan 2026 | **False.** Both begin at each card's first visit, late Jul 2026. Corrected in place; see the note under §5 |
+> | §5 — listed prices "~12% of rows" | **Contradicted.** `DESIGN_NOTES.md:46` measured 4.4% — 143,062 of 3,265,910 sales |
+> | §5 — venue depth "eBay-only today" | **Contradicted.** `DATA_MODEL.md:102,:227` document five sources: ebay, tcgplayer, goldin, heritage, pwcc |
+> | §4 — "below 10 the buckets are grader-agnostic" | **Contradicted.** ADR-0005 states the interface must *not* imply the pooled figure is company-neutral; it is PSA-dominated |
+> | §5 — "annual cycles 1 of 3" | Unverified |
+> | §6 — card imagery is placeholder slots | **Correct.** Describes the prototypes, and its licensing framing is right. Do not "fix" this |
+>
+> **Downstream consequence.** `DISPLAY_VOCABULARY.md`'s locked-row progress ratios were computed from §5's false dates and overstate readiness by roughly 15 months — "16/24 mo" where the truth is nearer 1/24. **No unlock countdown, progress bar, or LOCKED copy should be implemented until those constants are recalibrated.** Tracked as D-032 in `../DECISIONS.md`, which is the live register for all of this.
+
+---
+
 ## 1. What Cardstock is
 
 A market-data application for the Pokémon card aftermarket: price history, a screener, charts with backtesting, and a binder that treats a collection as a portfolio. Fan-made, not affiliated with Nintendo / The Pokémon Company / Creatures Inc.
