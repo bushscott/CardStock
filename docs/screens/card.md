@@ -413,8 +413,20 @@ Derivations that check out against the seed:
 - **`+29%`** = `331 / (currentPsa10Pop − 331)` = `331 / (1479 − 331)` = 28.8% → **+29%** ✓ — growth of the PSA 10 census over the window, rounded to a whole percent. Depends on the population panel's PSA 10 count (:368).
 - **`7 months`** = `deltas.length` (and equals the `7 OBS` badge).
 - **`+58 / mo`** = `deltas[last]` = 58, **not** the mean (which is 47.3). "Pace" = the most recent month's delta.
-- **`and rising`** — a trend qualifier; the branch condition is not expressed in code. See §7 OQ-9.
+- **`and rising`** — trend qualifier.
 - **`+29%`** is coloured `var(--neg2, #D64545)` — **red**, because supply growth is bearish. Parenthetical `(fresh supply working against the price)`.
+
+**Branch rules — `DESIGN_NOTES.md:53`, and every one of them reproduces the seeded output exactly** (value space at `DISPLAY_VOCABULARY.md:70`). Build all of them:
+
+| Element | Rule | Check against the seed |
+|---|---|---|
+| `+N / mo` | **Latest month's delta** | `deltas[6] = 58` ✓ |
+| Pace word | **recent 3-month average vs prior 3-month average** → `rising` / `steady` / `slowing` | recent `(47+61+58)/3 = 55.3` > prior `(41+38+52)/3 = 43.7` → **rising** ✓ |
+| `+X% in Y months` | **new slabs ÷ census at window start**; `Y` = number of months in the window | `331 / (1479 − 331) = 28.8%` → `+29%`, `Y = 7` ✓ |
+| Parenthetical | census growth **> 2%/mo** → `(fresh supply working against the price)`, red; **else** → `(supply nearly frozen — scarcity intact)`, green | `29% / 7 = 4.1%/mo` > 2% → **red, supply pressure** ✓ |
+| **LOW DATA degrade** | **< 2 census observations** → the whole line degrades to `census history too young to compute pace` | not exercised in the seed; the `N OBS` badge tooltip states the same rule ("deltas need two", :237) |
+
+3 pace words × 2 parentheticals + the LOW DATA degrade = **7 possible sentences**. No free text.
 
 **Sign convention across the two panels is deliberately inverted relative to the number's sign**: a negative gem-rate drift is green, a positive census-growth number is red. Both are coloured by *market meaning*, not by arithmetic sign.
 
@@ -551,6 +563,22 @@ Both toggle buttons animate with `transition: background 0.15s, color 0.15s` (:7
 | **Focus visible** | Keyboard focus (:21) | `outline: 2px solid var(--acc); outline-offset: 1px; border-radius: 2px`. |
 
 **Four elements are theme-blind** — they use hard-coded colours that do not switch: the Realized-cell amber `#8F6614` (:352), the hidden-legend grey `#D8D8D3` (:406), the population/delta bar fills `rgba(74,99,208,.55)` and `rgba(138,138,134,.45)` (:468, :474), and the chart's four fixed tier hexes (:325). See §7 OQ-7.
+
+### 4.11 Data-sufficiency states (app-wide vocabulary; only one is exercised here)
+
+`DISPLAY_VOCABULARY.md:55` defines the complete render set — **every metric on every surface is in exactly one of five states**:
+
+| State | Presentation | On this screen |
+|---|---|---|
+| **OK** | renders plain | Everything except the grading-activity panel. |
+| **LOW DATA** | amber badge `N OBS`; tooltip states the floor rule and what improves it | **The only one implemented** — the `7 OBS` badge (:237). |
+| **LOCKED** | control disabled, countdown copy ("unlocks ~Mar 2027 — needs 60 post-seam days") | **Not present.** No control on this screen is disabled. |
+| **UNDEFINED window** | gaps render as **gaps, never zeros** | **Not present**, and the chart has no gap handling at all — `pts()` (:342) maps every index unconditionally. |
+| **UNSTABLE FIT** | badge; beta on thin history | **Not present.** |
+
+**This matters more than it looks.** `DECISIONS.md:22` (D-001) establishes that per-sale and census history begin at each card's own first crawler visit in **late Jul 2026**, ragged, never a shared date; `DECISIONS.md:33` calls the consequence *"the largest scope fact in the project"* — every liquidity and supply indicator is LOCKED for 6–12 months of calendar time. `DECISIONS.md:309` (D-033) adds a floor: **no post-seam metric counts observations before 2026-09-01.**
+
+So the realistic launch-day Card page is **not** the seeded one. It shows: a full 12-month price chart and tier strip (monthly history backfills to ~Dec 2020 on first visit — `DECISIONS.md:37`, D-002), a **very short or empty** sales ledger, and a census panel with **one observation** and no deltas at all. **Build the degraded paths first; the seeded density is fiction.** The three states this screen does not implement — LOCKED, UNDEFINED, UNSTABLE FIT — are the ones a real card will spend its first year in. See OQ-20.
 
 ---
 
@@ -698,6 +726,7 @@ Registered in `componentDidMount` (:273–:280), removed in `componentWillUnmoun
 - **R-31.** All numerics render in **JetBrains Mono**; all prose in Inter; all headings in Inter Tight 600/700.
 - **R-32.** Negative percentages use **U+2212 MINUS** (`−`), not a hyphen (:324, :232). Month labels use **U+2019** (`’`) (:296). Arrows are U+25B2/U+25CF (chips), U+25BE/U+25B4 (sort), U+25B8/U+25BE (group chips), U+2192 (listed tooltip), U+2713 (check).
 - **R-33.** Dates render as **`YYYY-MM-DD`** everywhere (ledger rows :202, census as-of :221/:255) — never localised.
+- **R-36. The `Listing title` cell must be HTML-encoded.** `DECISIONS.md:119` (D-029) names this exact column as where it bites. The seeded titles already contain smart quotes, an em dash, an arrow, and an emoji (:304–:319); they are raw marketplace text and are hostile input. It renders in two places — the cell text and the `title` attribute (:206) — and both need encoding. `CARDSTOCK_UI_SPEC_v1.md:220` flags the same requirement (*"title (**HTML-encoded**)"*).
 
 **Runtime**
 
@@ -710,7 +739,7 @@ Registered in `componentDidMount` (:273–:280), removed in `componentWillUnmoun
 
 | # | Question | Why it is open |
 |---|---|---|
-| **OQ-1** | **What is the route?** | The prototype is a flat file with no routing. Inbound links are filenames. Needs a decision — e.g. `/card/{id}` vs `/{set}/{number}` vs a slug — plus how the breadcrumb, set link, and character link derive their targets. Nothing in the HTML constrains this. |
+| **OQ-1** | **Confirm the route is `/card/{id}`.** | Documented at `HANDOFF.md:76` and `CARDSTOCK_UI_SPEC_v1.md:119`/`:217`, but **Tier 2/3 and unverifiable from the HTML** — the prototype has no routing and no inbound link carries an id. Also undecided: what `{id}` is (the DB key? a slug?), and how the breadcrumb, set link, and character link derive their targets. |
 | **OQ-2** | **What does the Binder button actually do?** | Its tooltip says "opens the binder transaction form" (:82) but the handler only flips a boolean (:390). The real behaviour — navigate to Binder, open a modal form, capture quantity/price/date — is unspecified here. Check `Cardstock Binder.dc.html`. |
 | **OQ-3** | **What are seam markers supposed to look like, and when do they render?** | `SEAMS` holds a date per grade (:321) and rows carry `isSeam` (:352), but nothing renders them and no sort-mode gate exists. The brief says "only in date sort" — **the HTML does not implement that, or anything else**. Another prototype (Charts?) may show the intended treatment; otherwise this needs a design decision before build. |
 | **OQ-4** | **What happens when a chart's visible series are all flat?** | `mx === mn` makes `(v−mn)/(mx−mn)` produce `NaN` and the polylines vanish (:342). Real single-tier views of a stable card will hit this. Needs a defined fallback (e.g. pad the range). |
@@ -718,7 +747,7 @@ Registered in `componentDidMount` (:273–:280), removed in `componentWillUnmoun
 | **OQ-6** | **Is the `Listing title` column meant to be resizable?** | Its grip is keyed `'src'` (:458) so it resizes Source, and its track is `minmax(160px, 1fr)` which `colW` cannot address. Either the grip should be removed from column 5 or the track should become fixed-width. |
 | **OQ-7** | **Should the hard-coded colours be theme-aware?** | The Realized amber `#8F6614` (:352) is the *light* `--warnInk`; dark theme uses `#D6A54A` (:27). Also hard-coded: the hidden-legend grey `#D8D8D3` (:406) and both bar fills (:468, :474). Contrast in dark mode is unverified. |
 | **OQ-8** | **Lightbox accessibility.** | No Escape handler, no focus trap, no `role="dialog"`/`aria-modal`, no scroll lock, and focus is not restored to the thumbnail on close (:101–:108). Add or accept? |
-| **OQ-9** | **What are the other branches of the two summary sentences?** | Both are hard-coded prose (:232, :248). The HTML shows exactly one branch each: *falling* gem rate (green, "harder to gem = supply of fresh 10s slowing") and *rising* census (red, "fresh supply working against the price"). The rising-gem-rate, flat, and shrinking-census wordings do not exist anywhere in this file. Also unspecified: the threshold for the qualifier "and rising", and what renders when `N OBS < 2` (the badge tooltip implies deltas are then impossible). |
+| **OQ-9** | ~~What are the other branches of the two summary sentences?~~ **ANSWERED** — `DESIGN_NOTES.md:52` and `:53`, transcribed into §3.8 and §3.9. Every threshold, branch, and degrade string is specified there and reproduces the seeded output exactly. **Remaining sliver:** the gem-rate *flat* band is `±0.1pp` (`:52`) while the gem-rate *chip* elsewhere fires at `≥0.3pp` (`DISPLAY_VOCABULARY.md:32`) — confirm those are deliberately different thresholds. |
 | **OQ-10** | **What was `d.bd` for?** | Every activity bar sets `border: 'none'` yet the markup keeps `box-sizing: border-box; border: {{ d.bd }}` (:243, :475). Most plausibly an outlined treatment for the current partial month, mirroring the chart's hollow dot — unconfirmed. |
 | **OQ-11** | **Does the "+ New list…" flow belong here?** | It uses a native `prompt()` (:386) and the created list never appears in the popover because `watchLists` is a fixed array (:380). Real behaviour and the real create-list UI are undefined. |
 | **OQ-12** | **Where do the signal chips come from, and how many can there be?** | Three are hard-coded (:400–:404) with no source, window, or overflow rule. RS is "vs market index, 3M"; MACD is "(3,6,4)"; "Most active" is a market-wide ranking. None of these are in the scraper's eight tables as such — all are derived. Wrapping is allowed (:93) but there is no cap. |

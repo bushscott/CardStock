@@ -369,6 +369,49 @@ All lines read directly 2026-08-10. Owner asked for this to be tracked, 2026-08-
 
 ---
 
+### D-049 — 🚩 The LOCKED row form is dead code. The lock UI D-038 ships was never prototyped
+Direct extraction of `Cardstock Charts.dc.html`, 2026-08-10: `locked()` (`:595`) and `force()` (`:403`) have **zero call sites**. No LOCKED chip, no disabled switch, no progress bar, and no working "show anyway →" ever renders.
+
+All six rows the docs call "locked" are built by `lockedOr` (`:596–598`), which returns **an ordinary pane-opening toggle** with a `LOW DATA` badge and a permanent amber note — and **silently discards the progress ratios passed to it** (`:607`, `:625–628`, `:634`). `DISPLAY_VOCABULARY.md:145,157,158,160,164` documents those ratios; none reaches the screen.
+
+The burn-in machinery is real but orphaned: `state.forced` gates a `LOW CONFIDENCE · BURNED IN` pane badge and is never set or cleared by any reachable path.
+
+**This corrects D-032.** I wrote that the wrong ratios were "user-visible progress bars overstating readiness." In the prototype they are not visible at all — the error lives in `DISPLAY_VOCABULARY.md`, not on screen. The recalibration to the D-033 floor is still required, but it is a documentation fix plus a **build**, not a repair of something working.
+
+**And it puts real weight behind D-038.** Shipping "the full UI with locks visible" means building lock UI that Tier 1 does not contain: the disabled control, the countdown, the progress ratio, and the burn-in override are design intent captured only in `DISPLAY_VOCABULARY.md`, with orphaned scaffolding in Charts. That is net-new work, not a port. It should be scoped as such.
+
+**Also settled:** Charts has **31** rows — 24 toggles + 7 readouts — not the 32 in `HANDOFF.md:73` nor the 29 in `DESIGN_NOTES.md:6`. `DISPLAY_VOCABULARY.md` §10 already lists 31 and is right.
+
+**Two hardcoded seams in the chart code:** `SEAM` = Apr '25 driving the liquidity panes, and `RSEAM` = Jul '26 on the price chart (`:388–398`, `:227`, `:245`). The second is roughly right by accident; the first is D-001's disproved date wired into rendering logic. Adds to D-048's inventory.
+
+---
+
+### D-050 — Brand tokens: the app and the brand package disagree, and five WCAG failures are undocumented
+Direct extraction of `Cardstock Brand System.dc.html`, `brand/brand-tokens.css`, and the app pages, 2026-08-10.
+
+**Two token systems exist and no prototype links the brand package.** `brand/brand-tokens.css` is standalone; the app carries light values as `var(--x, #LITERAL)` inline fallbacks plus a four-branch `PAL` object (`Cardstock Home.dc.html:323–330`), with only dark and colorblind declared in per-page helmet styles. **There is no `:root` light block anywhere.** A Blazor rebuild must invert this — declare the union once, globally.
+
+**Colorblind mode is confirmed hue-only**, four independent ways in code. The one addition beyond hue: Charts dashes the MACD signal line under CVD (`:791`) — redundant encoding, which strengthens rather than violates the rule.
+
+**WCAG — one documented failure, five not:**
+
+| Token | Value | Ratio | Status |
+|---|---|---|---|
+| `--muted` | `#8A8A86` | 3.31–3.47 | The known issue. **Already fixed in the app** (`--mut2` → `#6B6B66`, 5.36) but **still failing in the brand package** |
+| `--neg` CVD | `#CC5F00` | 3.86–4.04 | **Undocumented** — colorblind mode makes negative text fail in light theme |
+| `--neg2` CVD | `#D55E00` | 3.70–3.87 | Undocumented |
+| `--pos2` | `#189E63` | 3.29–3.44 | Undocumented, 6 text usages |
+| `--neg2` | `#D64545` | 4.19–4.38 | Undocumented, 7 text usages |
+| `--brand-foil` | `#9A7B2D` | 3.83–4.00 | Undocumented, 11px badge text |
+
+Items 3–5 disappear if all text routes through `--pos`/`--neg` rather than the graphic tokens. `--mut3` `#8F8F8A` passes only because it has zero text usages — that demotion is load-bearing and must survive the rebuild. Dark theme has no failures.
+
+**Note the irony to avoid repeating:** `DESIGN_NOTES.md:26` still records the contrast pass as deferred; it shipped 2026-08-10 and the old value has zero occurrences in app pages. The same file self-contradicts on the accent (`:26` vs `:136`) — the real values are `#4A63D0` / `#3A4FB8`.
+
+**No `prefers-color-scheme` anywhere** — a first visit is always light, regardless of OS setting.
+
+---
+
 ### D-048 — 🚩 The false data claims are baked into prototype *copy*, not just the markdown docs
 This is the consolidation that matters for the rebuild. D-001's disproved dates are not confined to `HANDOFF.md` — they are written into the prototypes themselves, which means correcting the documents does not fix the product.
 
