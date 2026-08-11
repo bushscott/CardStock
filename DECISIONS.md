@@ -48,13 +48,15 @@ The one data series that is not thin.
 
 **Notes:** This is **not** the whole picture, per owner. There are three separate grade vocabularies and only the price series is limited to six:
 
-| Surface | Tiers | Source |
+| Domain | Granularity | Authority |
 |---|---|---|
-| Price series | 6 | `price_months.tier` |
-| Sales ledger | 19 | `sales.grade_tier` |
-| Binder holding | user-entered, arbitrarily specific | the user |
+| Price series — Card tier strip, Charts, Screener price filters | **6** | `price_months.tier` (verified, `PriceTier.cs:10–18`) |
+| Sales ledger — Card page ledger, grade chips, sort rank | **19** | `sales.grade_tier` (verified, `GradeTierVocabulary.cs`) |
+| Binder — transactions and personal collection | **118** | the user (verified, `Cardstock Binder.dc.html:368–377`) |
 
-The UI's 19 tiers are legitimate wherever they describe a *sale* or a *holding*. The limit binds only where the UI plots or filters on a **price series**. See D-012 for the live question this raises.
+**Granularity increasing toward the personal domain is correct, not a defect.** Owner, 2026-08-10: "we go into more detail in the binder page with transactions and personal collection." A user who owns a BGS 10 Black Label should record exactly that; forcing a coarser entry would make the product lie about their own collection. Each vocabulary is right for its domain.
+
+**So the problem is a mapping function, not a data gap** — and it runs one direction only: a 118-label holding must map *down* to one of 6 price series to be valued. Nothing needs to map upward. See D-012, which is that function's specification.
 
 ---
 
@@ -564,7 +566,17 @@ The line reads: *"Seams: liquidity seam Apr '25 (churn/vol panes), resolution se
 ### D-011 — Public URL, or private portfolio piece?
 The single answer that most reorders everything downstream. Private (Tailscale / localhost / screen-share) drops image licensing, provenance rewrites, rate limiting, and residential-exposure concerns off the critical path entirely. Public gates all of them.
 
-### D-012 — How is a binder holding valued when its tier has no price series?
+### D-012 — Specify the tier→price mapping function for Binder holdings
+**Reframed 2026-08-10.** This is not "which tiers are missing." It is: *given a holding recorded at any of the Binder's 118 labels, what price series values it, and what happens for the 93 with none?* See D-003 — the Binder being the most granular surface is correct by design.
+
+Three honest options for the unmapped 93, none of which may invent precision (D-022):
+1. **Pool to the nearest backed tier** — a CGC 9.5 already pools to `Grade9Half` correctly, so this is only novel for grades 1–6 and the non-PSA 10s. Must be disclosed, never silent.
+2. **Show the holding unvalued** — render the position with no market value and a stated reason.
+3. **Exclude from portfolio totals** — with a visible count, in the spirit of the Screener's "N cards hidden" pattern.
+
+Whatever is chosen applies identically to cost basis, P&L, and the vs-index comparison, and must be visible on both the table and gallery views — which currently disagree (see below).
+
+
 **Corrected 2026-08-10.** My earlier framing used "CGC 9.5" as the example. That was wrong: the source pools grading companies for grades 1–9.5 and splits only at 10 (ADR-0005), so a CGC 9.5 **does** have a price series — the pooled `Grade9Half`. See D-022.
 
 The tiers genuinely without a price series are:
