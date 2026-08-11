@@ -166,6 +166,77 @@ Read directly 2026-08-10, to be mirrored per D-018–D-021.
 
 ## Decided
 
+### D-071 — ✅ ADR-0001 is built and running. The boundary is enforced by Postgres, not convention
+Implemented 2026-08-11 on branch `first-slice`. Every claim below was checked by direct query after
+the fact, not inferred from the code.
+
+**The write boundary, tested as `cardstock_app` against the live database:**
+
+| Statement | Result |
+|---|---|
+| `SELECT` on `cards` / `sets` / `price_months` | **91,570 · 788 · 10,352,706 rows** |
+| `INSERT INTO public.sets` | `ERROR: permission denied for table sets` |
+| `UPDATE public.cards` | `ERROR: permission denied for table cards` |
+| `DELETE FROM public.sales` | `ERROR: permission denied for table sales` |
+| `CREATE TABLE public.…` | `ERROR: permission denied for schema public` |
+| `CREATE TABLE cardstock.…` | `ERROR: permission denied for schema cardstock` |
+| `INSERT`/`DELETE` in `cardstock.users` | succeeds |
+
+The last two rows matter together: the runtime role holds full DML in its own schema and **no DDL
+anywhere**, so it cannot migrate even the tables it owns.
+
+**`ToView` proved itself.** The scaffolded `20260811203346_InitialCreate` contains exactly two
+`CreateTable` calls, both `schema: "cardstock"`, and the string `"public"` appears nowhere in it —
+with all five crawler tables present in the model. `MigrationContentTests` now asserts this
+permanently.
+
+**The history tables did not collide.** `to_regclass('cardstock.__cardstock_migrations_history')`
+resolves; `to_regclass('public.__cardstock_migrations_history')` is null. This is the override
+earning its keep — `HasDefaultSchema` alone would have put CardStock's rows in the crawler's table.
+
+**The crawler was unaffected**, still visiting cards and writing rows throughout. Connection usage
+peaked at 5 of 100.
+
+**First real data figures for the project**, replacing every estimate used in design: **91,570
+cards**, **788 sets**, **10,352,706 price-month rows**, database 2.3 GB, disk 210 GB free.
+
+---
+
+### D-072 — `ALTER DEFAULT PRIVILEGES` merges into the crawler's existing ACL row. Now Verified
+Carried as **Inferred** when ADR-0001 was written; confirmed by query 2026-08-11.
+
+```
+SELECT defaclrole::regrole, defaclnamespace::regnamespace, defaclacl FROM pg_default_acl;
+ pokemon_owner | public | {pokemon_app=ar/pokemon_owner,cardstock_app=r/pokemon_owner}
+```
+
+CardStock's future-table read grant lives **inside `pokemon_owner`'s own row**, not a separate one.
+
+**Consequence, and it is a real trap:** `DROP OWNED BY pokemon_owner`, or rebuilding the Pi from the
+crawler's `postgres-setup.sql`, silently removes CardStock's access to tables created by future
+crawler migrations. The symptom appears weeks later as `permission denied for table X` on a table
+nobody remembers adding. The verification query is recorded in `ops/cardstock-postgres-setup.sql`.
+
+---
+
+### D-073 — Test databases live on the Pi; there is no local Postgres
+Owner, 2026-08-11: *"we're not installing Postgres locally… that's where database development is
+going to be."*
+
+Integration tests build and drop a `cardstock_test_<guid>` database per test on the Pi over the LAN,
+as `cardstock_tester`. Verified this works without touching the Pi's configuration: `pg_hba.conf`
+already carries `host all all 192.168.0.0/24 scram-sha-256` and `listen_addresses = '*'`.
+
+**Consequence for ordering:** `ops/cardstock-postgres-setup.sql` must run *before* any integration
+test can execute, because it creates `cardstock_tester`. CI is unaffected — it uses its own
+`postgres:15` service container.
+
+**Worth knowing:** the `ToView` write guarantee is proven in a database owned by `cardstock_tester`,
+which holds **none** of the production grants. A grant-only defence would pass that test for the
+wrong reason.
+
+---
+
 ### D-065 — 🔒 Schema separation and migration ownership → **ADR-0001**
 Owner, 2026-08-11. One `pokemon` database; the scraper keeps `public`; CardStock owns a `cardstock`
 schema under `cardstock_owner`. Scraper tables are mapped in EF as **views**, never tables. Foreign
