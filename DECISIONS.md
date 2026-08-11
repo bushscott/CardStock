@@ -371,6 +371,21 @@ All lines read directly 2026-08-10. Owner asked for this to be tracked, 2026-08-
 
 ---
 
+### D-059 — Legal and licensing posture is deferred; accuracy is not
+Owner, 2026-08-10: *"this is just a portfolio piece. If I ever sell it, I'll have to contact a lawyer about all the law stuff… I'll worry about that shit in the future."*
+
+**Deferred, and future sessions should stop raising it:** data licensing, terms-of-service exposure, card-image copyright, republication risk, and any negotiation with the source. These are revisited **if and when the project is commercialised**, with a lawyer, not before. The survey's risk register raised several of these at length; they are noted and parked.
+
+**Explicitly NOT deferred — the distinction that matters:** the 22 false claims in D-046 are not a licensing problem. They are factually wrong. "Sale counts back to August 2023" describes data that has never existed at any point, from any source. Correcting them is correctness work, identical whether this stays a portfolio piece forever or not.
+
+**Consequence for the About Data rewrite (D-5 in the register):** the page **names pricecharting.com**. Chosen not for legal caution but because it is the *simpler* option — the alternative requires writing careful euphemisms that stay truthful without naming anything, which is more effort and is precisely how the page got into trouble originally. One sentence settles it.
+
+**And it serves the stated goal.** Success criterion #1 is a portfolio/interview piece. An About Data page that states plainly where the data comes from, what is derived versus observed, and what cannot be known is a **stronger** artifact than a vague one — arguably the best single piece of evidence of engineering judgment in the project.
+
+**Related items that stay open because they are engineering, not law:** D-010 (images exist on disk; whether to serve them is still a build decision), D-017 (backups), D-037 (the security checklist).
+
+---
+
 ### D-058 — Marketing gets its own URL prefix; the app keeps the clean names
 Owner, 2026-08-10. Resolves D-1 / D-045 — the marketing/app route collision.
 
