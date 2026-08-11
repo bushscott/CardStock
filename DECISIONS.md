@@ -182,6 +182,40 @@ Series get labelled honestly; indicators unlock as depth accrues.
 
 ---
 
+### D-011 — CardStock ships publicly with open signup
+Owner, 2026-08-10, answering the deployment question during brainstorming. Resolves the largest open scope question.
+
+**What this turns on:** auth is required and non-optional; a tunnel (Cloudflare or equivalent) rather than port-forwarding a residential connection; per-user rate limiting in front of `express-visit` (D-024 — the worker's guardrails bound load on the *source site*, nothing bounds how often a user can trigger one); card-image **licensing becomes a live question**, because serving is distribution where storing was not (D-010); and the accuracy of public claims on About Data and Legal becomes a real exposure rather than a stylistic concern.
+
+**And it makes render mode the highest-stakes decision in the build** — concurrency is precisely where Interactive Server on a residential Pi is weakest. See D-013, now materially sharpened by D-035.
+
+---
+
+### D-034 — The auth model has been decided three different ways; today's answer settles it
+**Receipts, read directly 2026-08-10:**
+- `uploads/PROJECT_LOG.md:105` — "**Multi-user**, open **free signup**, **email + password** auth. ✅ decided"
+- `uploads/PROJECT_LOG.md:254` — "**Open public signup REVERSED → invite-only.** Registration behind an invite code (friends only); **no verification emails**; minimal password reset… (Supersedes branch-1b open-signup decision)"
+- `HANDOFF.md` §4, Added since the spec — "Email + password auth with transactional email (verify / reset / email-change only)"
+
+So the log reversed open signup to invite-only, then the prototypes were built with open account creation *and* verification email — contradicting the reversal.
+
+**Resolution:** D-011 supersedes `PROJECT_LOG.md:254`. Open signup stands, which means **the built prototypes are already correct** and the invite-only entry is the outlier. Nothing in `Cardstock Account.dc.html` needs rework on this axis.
+
+**Carried forward from `:254` regardless:** the schema stays multi-tenant from day one — `user_id` on every user-facing table — so commercialisation is a config change, not a rewrite. That rationale is unaffected by the signup decision.
+
+---
+
+### D-035 — 🚩 The spec's stack choice rests on an assumption D-011 just voided
+`uploads/CARDSTOCK_UI_SPEC_v1.md:47`, read directly 2026-08-10: *"**Hosting:** Raspberry Pi fleet (16 GB, quad-core), **~1 concurrent user expected.**"*
+
+Line 46 chooses **Interactive Server** rendering in the same breath. That choice was sound *for one user*. Interactive Server holds a stateful SignalR circuit and a server-side render tree per connection and round-trips every interaction — so its cost scales with concurrent visitors, on a box already running Postgres and a continuous crawler.
+
+With D-011 (public, open signup), "~1 concurrent user expected" is no longer an assumption anyone can rely on. **The premise under the stack decision is void, so the decision has to be re-made rather than inherited.** D-005 fixes Blazor; it does not fix the render mode.
+
+Note also the word **"fleet"** — the spec implies more than one Pi. Whether the web app shares a box with the scraper is unresolved and determines whether the loopback intake API (D-024) is reachable at all.
+
+---
+
 ### D-033 — Sufficiency floor: no post-seam metric counts observations before 2026-09-01
 Owner, 2026-08-10. **Resolves D-032.**
 
