@@ -25,6 +25,26 @@ CardStock has no data of its own. Everything it renders comes from a separate, a
 
 Eight tables in three groups: a mutable catalog (`sets`, `cards`), an append-only record (`price_months`, `populations`, `sales`), and a crawler diary (`visits`, `fingerprints`, `parse_failures`).
 
+### The ownership rule — this is a hard architectural boundary
+
+Each codebase migrates and writes **only its own tables**. CardStock may `SELECT` freely from the scraper's tables. CardStock must never `INSERT`, `UPDATE`, `DELETE`, or migrate them. Anything that changes scraper state goes over HTTP to the worker, which owns those writes. Verified: `docs/adr/0006`, Consequences — "sibling apps speak HTTP to the worker, never SQL to its tables."
+
+### The intake API — built for this app
+
+The worker hosts a minimal HTTP API in-process, and ADR-0006 was written anticipating CardStock: *"The product this scraper feeds is a trading website. Its web application… will live on the same Raspberry Pi, read the same Postgres, and sometimes need a card's data refreshed ahead of its normal turn."*
+
+| Route | Semantics |
+|---|---|
+| `POST /cards/{id}/refresh-request` | Fire-and-forget. Stamps `cards.refresh_requested_at`, returns 202. Card takes the next crawl slot unless a burn-window-due card owns it. 404 unknown · 409 delisted/not-a-card |
+| `POST /cards/{id}/express-visit` | Synchronous. Runs the visit immediately, bypassing the polite gate, holds the response until commit. 200 parsed · 502 upstream · 422 refused · 504 timeout |
+| `GET /healthz` | Liveness |
+
+**Bound to `127.0.0.1` only. No auth, no TLS** — trust comes from the bind address (`ScraperOptions.cs:65`, `Intake/IntakeApi.cs:19–30`).
+
+**The consequence that constrains the frontend:** a browser cannot reach a loopback endpoint on the Pi. Any CardStock code that calls these endpoints must run **server-side, on that machine**. This is a live constraint on the render-mode decision — see D-013 and D-014.
+
+Express guardrails already exist (single-flight, 10 s spacing floor, same-card coalescing, and the express fetch stamps the polite gate so the scheduled lane re-spaces around it), so worst-case extra site load is bounded to one request per spacing floor.
+
 Durable pointers, so this never has to be re-derived:
 
 | What | Where |

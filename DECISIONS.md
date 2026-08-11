@@ -80,6 +80,22 @@ The source reports one "Grade 8" figure covering every grading company, splittin
 
 ---
 
+### D-024 — A loopback intake API already exists, and it was built for CardStock
+**Receipts:** `../PokemonInvestBatch/docs/adr/0006-localhost-intake-api-and-express-visits.md` (Accepted 2026-08-09), read in full; `src/PokemonInvestBatch.Worker/Intake/IntakeApi.cs:19–30` (three routes); `src/PokemonInvestBatch.Worker/ScraperOptions.cs:65` (`IntakeAddress = "127.0.0.1"`). Both read directly 2026-08-10.
+
+Routes: `POST /cards/{id}/refresh-request` (202, fire-and-forget, takes the next crawl slot unless a burn-window-due card owns it), `POST /cards/{id}/express-visit` (synchronous, bypasses the polite gate, 200/502/422/504), `GET /healthz`.
+
+**The ADR names this product explicitly** — "The product this scraper feeds is a trading website. Its web application… will live on the same Raspberry Pi, read the same Postgres." The integration was designed for, not retrofitted.
+
+**Two hard consequences:**
+
+1. **The ownership rule.** CardStock reads the scraper's tables freely and writes none of them. Mutations go over HTTP. "Sibling apps speak HTTP to the worker, never SQL to its tables."
+2. **Loopback binding constrains the frontend.** A browser cannot reach `127.0.0.1` on the Pi. Any code calling these endpoints must run server-side on that machine. This bears directly on D-013 and D-014.
+
+**Corrects an earlier claim.** The initial survey flagged express-visit as "an unthrottled outbound amplifier… up to 8,640 fetches/day if scripted." That overstated it: single-flight (at most one express visit in flight, ever), a 10 s spacing floor, same-card coalescing, and `PoliteGate.RecordFetchNow()` are all in place, and the ADR bounds worst case at "one request per spacing floor." The residual concern the ADR itself names is narrower — express can still poke the site once per spacing floor *during a three-strike pause*, with a "refuse express during the pause" toggle noted as the follow-up.
+
+---
+
 ### D-023 — The sibling repo's engineering conventions, verified
 Read directly 2026-08-10, to be mirrored per D-018–D-021.
 
@@ -165,6 +181,15 @@ So the open question is narrower and sharper: a user owns a BGS 10 Black. It has
 
 ### D-013 — Render mode: Interactive Server, WebAssembly, Auto, or per-component?
 Coupled to D-014. Interactive Server holds a SignalR circuit per visitor and round-trips every interaction to a residential Pi — weakest exactly where success criterion #1 ("a hiring manager clicks a link") lives. WebAssembly moves the C# into the browser, which cannot open a Postgres connection, forcing D-014 to be yes.
+
+**Sharpened by D-024:** the browser also cannot reach the worker's loopback intake API. So under WebAssembly, *both* data reads and express-visit calls need a server-side component on the Pi — the browser can only talk to that component. Under Interactive Server the app is already server-side and can call `127.0.0.1` directly. This makes render mode and read-API a single decision, not two.
+
+### D-025 — Which CardStock scenarios call which intake endpoint?
+Owner, 2026-08-10: "there are specific scenarios where cardstock are going to use these endpoints." Open — the scenarios need enumerating and mapping to `refresh-request` (fire-and-forget) vs `express-visit` (synchronous, gate-bypassing).
+
+**Known so far:** `CardStock Mockup/DESIGN_NOTES.md:54` already specifies one — *"card page visits trigger a fresh scrape"*, with the footer reading "Sales & prices refreshed just now." That is `express-visit` semantics: synchronous, user is waiting.
+
+**Needs deciding alongside it:** whether a public deployment (D-011) requires per-user rate limiting in front of express-visit. The worker's guardrails bound load on the *source site*, but nothing bounds how often an authenticated user can trigger one.
 
 ### D-014 — Does a read API exist?
 No longer blocked by the spec (see D-005). Forced by WebAssembly; optional under Interactive Server. Still 100% .NET either way — an ASP.NET Core project doing the EF Core query.
