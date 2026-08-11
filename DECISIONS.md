@@ -369,6 +369,62 @@ All lines read directly 2026-08-10. Owner asked for this to be tracked, 2026-08-
 
 ---
 
+### D-048 — 🚩 The false data claims are baked into prototype *copy*, not just the markdown docs
+This is the consolidation that matters for the rebuild. D-001's disproved dates are not confined to `HANDOFF.md` — they are written into the prototypes themselves, which means correcting the documents does not fix the product.
+
+**Inventory so far, all verified by direct extraction 2026-08-10:**
+
+| Surface | Lines | Wrong claim |
+|---|---|---|
+| Marketing (3 pages) | `Landing:202,235,236`; `Charts Landing:45,74–75,113`; `Screener Landing:92` | "Apr '25 seam" (D-044) |
+| About Data | `:52,69,71,72` + 18 more | Apr 2025 seam, Aug 2023 history, sale counts (D-046) |
+| Screener | `:505,511` | "census begins Jan 2026", "ledger begins Apr 2025" |
+| Screener | `:490,494,548,552–554,774` | "Apr '27", "7/12", "Jan '26 — 7 obs", `7 OBS` — the D-032 ratios |
+| Screener | `:491,550` | "~12% of rows" for listed-price coverage; the real figure is 4.4% (D-031) |
+
+**This is the standing exception to D-040.** The rule says the prototypes are absolute truth and the HTML wins. That holds for *what the design is* — layout, states, interactions, copy tone. It does **not** hold for *what the data is*, where `../PokemonInvestBatch` is the authority. Where a prototype states a fact about the data, it can be wrong, and here it is.
+
+**Consequence:** the copy correction is a cross-cutting workstream over the prototypes and every derived spec — not a documentation edit. Every date, ratio, and coverage percentage in user-facing copy must be re-derived from the 2026-09-01 floor (D-033) before anything ships, per D-038 shipping locks everywhere.
+
+**Also settled by this pass:** the Screener has **28** filter metrics — not the 27 in `HANDOFF.md:72`, nor the 29 in `DESIGN_NOTES.md:7`. `DISPLAY_VOCABULARY.md`'s own table already lists 28 while its prose says 27.
+
+---
+
+### D-046 — 🚩🚩 The About Data page is substantially false, and it is the page whose entire job is being true
+Direct audit of `Cardstock About Data.dc.html`, 2026-08-10: **22 claims FALSE, 13 UNVERIFIABLE, 1 required statement missing.** This is the page the design points to whenever a metric is omitted, locked, or caveated — Tier 1 exclusions are "omitted from the app entirely. One 'About our data' page explains why." If it is wrong, the honesty framework has no floor under it.
+
+**The organising concept is false.** "The April 2025 seam" is the page's central structure and appears at `:52`, `:69`, `:71`, `:72`. D-001 disproved it — the seam is per-card, ragged, and begins late Jul 2026.
+
+**Selected FALSE claims, each with the receipt against it:**
+
+| Claim | Line | Why it's false |
+|---|---|---|
+| "Before April 2025 our archive holds… **sale counts**" | `:71` | `DATA_MODEL.md:481–482` — historical sales volume is "unavailable from source, permanently" |
+| "monthly aggregates back to **August 2023**" | `:71` | `price_months` backfills to **~Dec 2020** (D-002). Understates the one genuinely deep series by ~32 months |
+| "From April 2025 forward we keep **every individual transaction**" | `:71` | The source keeps ~30-row bucket windows and discards older rows forever (`DATA_MODEL.md:102`) |
+| "Prices come from **realized sales only**" | `:62` | The plotted series is the source's own computed monthly average, not a transaction (D-003) |
+| "the seam is **drawn as a marker on charts**" | `:72` | It is ragged and per-card; a single marker cannot represent it |
+| "Sales data **refreshes daily**" | `:79` | Contradicted by the crawler's actual cadence |
+| "**footer stamp on every page**" | `:79` | Neither this page nor Legal has one |
+
+**The largest single exposure is framing, not any one line.** The page never names pricecharting.com, while using "our archive," "we keep," and "Excluded" throughout. It reads as first-party collection of a corpus that is 100% scraped from one third party — and it is the page a reader would consult specifically to learn provenance. Under D-011 (public signup) that is a public misrepresentation, and it also discards the attribution that would otherwise be the strongest mitigation if the source ever objected.
+
+**Missing:** the 2026-09-01 sufficiency floor (D-033) appears nowhere. With D-038 shipping locks across every screen, the page that explains them must state the floor and why it exists.
+
+**Verdict: this page needs rewriting from the data up, not editing.** Its structure encodes a fact pattern that does not exist.
+
+---
+
+### D-047 — Two previously-unverified flags are now confirmed present in `Cardstock Legal.dc.html`
+Both were recorded earlier with an explicit "I have not read that file." Both are now read directly, 2026-08-10.
+
+- **`:55` — "no third-party trackers"** and analytics "limited to aggregate, anonymous usage counts." D-037's concern is real: if the existing New Relic OTLP stack touches the web tier, this is false from day one. Also promises "no aggregate we publish can be traced back to a person's holdings" — a k-anonymity commitment with no mechanism behind it.
+- **`:57` — account data "removed within 30 days."** Confirms the D-043 Tier-1 conflict against `Cardstock Profile.dc.html:181`'s "immediately and permanently," and confirms the D-017 backup interaction.
+
+Unlike About Data, nothing on the Legal page is outright false today. The exposure is promises that are not yet true — which become false on launch unless the implementation matches them.
+
+---
+
 ### D-044 — 🚩 The marketing pages assert the false Apr '25 seam in 7 places
 The seam that D-001 disproved is stated as fact across three public marketing pages: `Cardstock Landing.dc.html:202, :235, :236`; `Cardstock Charts Landing.dc.html:45, :74–75, :113`; `Cardstock Screener Landing.dc.html:92`.
 

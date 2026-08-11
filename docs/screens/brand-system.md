@@ -153,6 +153,20 @@ Citations: light `brand/brand-tokens.css:5–18`, dark `:21–29`.
 Rules (`Cardstock Brand System.dc.html:101`, `:138`): assign in order, greys last; **no series line may borrow the ▲/▼ green–red**; the six are tuned from Okabe-Ito.
 There is **no CVD variant of the series palette** — the series colors already are the CVD-safe set. Verified: no `--series-*` appears under any `[data-cvd]` selector anywhere.
 
+**These six are not wired up.** `grep -- "--series-"` across all 17 prototypes returns **0 hits**. The one chart palette the app actually uses is `TIER_COLORS` in `Cardstock Charts.dc.html:375` — a 19-value grade-tier map, three of whose entries are aliases into `PAL`:
+
+| Tier | Color | Tier | Color | Tier | Color |
+|---|---|---|---|---|---|
+| PSA 10 | `PAL.acc` (`#4A63D0`/`#8C9BF2`) | Grade 6 | `#578AA3` | CGC 10 | `#1F8FA8` |
+| Grade 9.5 | `#7A56C9` | Grade 5 | `#5E9490` | CGC 10 Prist. | `#0F6E86` |
+| Grade 9 | `PAL.warn` (`#8F6614`/`#D6A54A`) | Grade 4 | `#6A9678` | TAG 10 | `#8646B8` |
+| Grade 8 | `#4C8F8A` | Grade 3 | `#7F9668` | ACE 10 | `#C24B4B` |
+| Grade 7 | `#A96A4A` | Grade 2 | `#97906E` | SGC 10 | `#5C6B9E` |
+| Raw | `PAL.mut2` (`#6B6B66`/`#A8A8A2`) | Grade 1 | `#A08D78` | BGS 10 | `#8A7139` |
+| | | | | BGS 10 Black | `#2B2D42` |
+
+`TIER_COLORS` is theme-aware only through its three `PAL` aliases; the 16 literal hexes are the same in light and dark, and have no CVD variant. Line weight encodes the anchor tier (`w: 1.8` anchor, `1.3` others, `Cardstock Charts.dc.html:496`).
+
 ### 2.7 Brand-specimen-only colors
 
 These appear in `Cardstock Brand System.dc.html` and nowhere in the app. Do not implement as product tokens.
@@ -560,7 +574,7 @@ WCAG 2.x AA: 4.5:1 normal text, 3:1 for ≥18.66px bold or ≥24px, 3:1 non-text
 |---|---|---|---|---|---|
 | `--neg` (CVD) | `#CC5F00` | **4.04** | **3.86** | **3.62** | **FAIL** — used as text 6× (`Cardstock Profile.dc.html:102`, `Cardstock Home.dc.html`, `Cardstock Account.dc.html`). This is a **new failure introduced by colorblind mode**: standard `--neg` `#C13A3A` passes at 5.34, its CVD replacement does not. |
 | `--neg2` (std) | `#D64545` | **4.38** | **4.19** | **3.93** | **FAIL (marginal)** — used as text 7× (`color: var(--neg2, #D64545)`) |
-| `--neg2` (CVD) | `#D55E00` | **3.87** | **3.70** | **3.47** | **FAIL** — `Cardstock Screener.dc.html:25`, `Cardstock Card.dc.html:24` etc. |
+| `--neg2` (CVD) | `#D55E00` | **3.87** | **3.70** | **3.47** | **FAIL** — `Cardstock Screener.dc.html:24`, `Cardstock Card.dc.html:25`, `Cardstock Browse.dc.html:25`, `Cardstock Charts.dc.html:23` |
 | `--pos2` (std) | `#189E63` | **3.44** | **3.29** | **3.09** | **FAIL** — used as text 6× (`color: var(--pos2, #189E63)`) |
 | `--pos2` (CVD) | `#0072B2` | 5.19 | 4.96 | 4.66 | pass |
 | `--mut3` | `#8F8F8A` | 3.25 | 3.11 | 2.92 | pass **as graphic only**; 0 text usages — compliant by demotion |
@@ -632,8 +646,8 @@ Items 2–6 are the reason `--pos`/`--neg` (text) and `--pos2`/`--neg2`/`--neg3`
 | 4 | Accent is `#3B5BD6`, hover `#2E49B8` | `DESIGN_NOTES.md:26` | Superseded by the brand pass: `--acc` `#4A63D0`, `--accH` `#3A4FB8` (`Cardstock Home.dc.html:329`). `DESIGN_NOTES.md:136` documents the swap but line 26 was never updated — the same file contradicts itself. |
 | 5 | `accent #3B5BD6→#7290EA · button #3B5BD6→#4A66D8` (dark) | `DISPLAY_VOCABULARY.md:78` | Dark `--acc` is `#8C9BF2`, dark `--btn` is `#4A63D0` (`Cardstock Home.dc.html:29`). Pre-brand-pass values. |
 | 6 | "gain #189E63, loss #D64545" as the state colors | `DESIGN_NOTES.md:26` | Those are `--pos2`/`--neg2`, the **graphic** hues. The text hues are `--pos` `#157A50` / `--neg` `#C13A3A` (`Cardstock Home.dc.html:327`). |
-| 7 | Six chart-series colors ship with the brand and the app owns them | `Cardstock Brand System.dc.html:101`, `:251` | **Not implemented.** No `--series-*` token is referenced by any app prototype; Charts keeps its own per-grade `TIER_COLORS`. `DESIGN_NOTES.md:133` admits it: *"NOT done: chart series recolor to brand 6-series palette."* |
-| 8 | Foil `#9A7B2D` is a live support color for grade premiums / PSA 10 | `Cardstock Brand System.dc.html:111–114`; `brand/brand-tokens.css:8` | **Unused in the app.** `DESIGN_NOTES.md:133`: *"Foil #9A7B2D unused in app so far (candidate: LOW CONFIDENCE badges — currently warn gold)."* LOW CONFIDENCE renders in `--warn` `#8F6614`. |
+| 7 | Six chart-series colors ship with the brand and the app owns them | `Cardstock Brand System.dc.html:101`, `:251` (*"chart series colors: app-owned"*) | **Not implemented.** `grep -- "--series-"` across all 17 prototypes = **0 hits**. Charts uses its own 19-value `TIER_COLORS` (`Cardstock Charts.dc.html:375`) instead. `DESIGN_NOTES.md:133` admits it: *"NOT done: chart series recolor to brand 6-series palette (TIER_COLORS in Charts keeps its per-grade hues)."* |
+| 8 | Foil `#9A7B2D` is a live support color for grade premiums / PSA 10 | `Cardstock Brand System.dc.html:111–114`; `brand/brand-tokens.css:8` | **Unused in the app.** `#9A7B2D` appears only on the specimen (3×) and `Cardstock Charts Landing.dc.html` (1×, marketing). Zero occurrences in any of the 12 app pages. `DESIGN_NOTES.md:133`: *"Foil #9A7B2D unused in app so far (candidate: LOW CONFIDENCE badges — currently warn gold)."* LOW CONFIDENCE renders in `--warn` `#8F6614`. |
 | 9 | Version is "v1.0 · Aug 2026" | `Cardstock Brand System.dc.html:33`, `:251` | `brand/brand-tokens.css:1` says **v1.1** (Aug 2026). The specimen page was not re-stamped when the tokens moved to 1.1 (the 1.1 change is teal → logo-only). |
 | 10 | Focus is a 3px ring at 22% indigo | `Cardstock Brand System.dc.html:192`; `brand/brand-tokens.css:9` | The app uses `outline: 2px solid var(--acc)` with `outline-offset: 1px` (`Cardstock Home.dc.html:21`). The 3px `box-shadow` ring appears only on the specimen's demo input. Two different focus treatments exist; the app's wins. |
 | 11 | Tokens ship as CSS custom properties with a `[data-theme="dark"]` block | `Cardstock Brand System.dc.html:245` | True of `brand-tokens.css`, but **no prototype links it.** The app declares dark/CVD in a per-page inline `<style>` and carries light values as `var()` fallbacks. There is no shared stylesheet at all. |
