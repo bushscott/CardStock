@@ -371,6 +371,51 @@ All lines read directly 2026-08-10. Owner asked for this to be tracked, 2026-08-
 
 ---
 
+### D-063 — 🔒 Architecture: WebAssembly client, stateless API, static marketing, .NET worker
+Owner, 2026-08-10. **Resolves D-013 (render mode), D-014 (read API), and D-016 (repo topology).** The last architectural blocker.
+
+| Tier | Choice |
+|---|---|
+| App (all authenticated screens) | **`InteractiveWebAssembly`** |
+| Marketing (`/product`, D-058) | **Static SSR** |
+| Between them | **A stateless minimal API** |
+| Alongside | **A .NET worker** (D-039) |
+
+**Solution structure**, mirroring the layering proven in `PokemonInvestBatch` (D-023):
+
+```
+src/  CardStock.Domain          (references nothing)
+      CardStock.Application     (use cases, DTOs, contracts)
+      CardStock.Infrastructure  (EF Core, Postgres, intake client)
+      CardStock.Api             (stateless, versioned)
+      CardStock.Web             (WASM client)
+      CardStock.Worker          (index, metrics, screen evaluation)
+tests/ one project per source project
+```
+
+**Why, in order of weight:**
+
+1. **Every app page is an interactive island** (owner, 2026-08-10). The prototypes settle this — drag-to-reorder and resizable columns on the watchlist, 24 toggles with parameter steppers on Charts, a two-level filter editor on Screener, modals and tabs on Binder. The "mostly static app" plan does not survive contact with them. Only marketing is genuinely static.
+2. **Interactive Server is stateful in the way enterprise architecture avoids.** A circuit per user holds server-side render-tree state, so the web tier cannot scale out without sticky sessions or a backplane, and a deploy breaks every open session. Owner's stated goal is to *"mimic an enterprise application."* Stateless API + client-held UI state is that shape by default.
+3. **Latency.** Under Interactive Server every toggle, filter, and tab switch round-trips to a residential uplink. WASM makes all of it local — network only when new data is genuinely needed.
+4. **The contract boundary is the demonstration.** DTOs distinct from domain models, versioned endpoints, OpenAPI — the most commonly probed thing in enterprise .NET review.
+5. **Rate limiting gets a natural seam.** D-062 requires an abuse-shape check; with an API that is ASP.NET Core's built-in rate limiter applied declaratively. Under Interactive Server it would be ad-hoc logic inside a component.
+6. **Testability.** The sibling repo already runs CI tests against a real Postgres service container; endpoint tests extend that pattern directly. Circuit tests do not.
+
+**What this forces:** the browser cannot reach the worker's loopback intake API (D-024, bound to `127.0.0.1`). **`express-visit` must be proxied through `CardStock.Api`**, which runs on the same box and can reach it. One extra hop, and the natural place to enforce D-062's limit.
+
+**What it costs, stated honestly:** more projects, a serialization layer, a WASM runtime download on first load, and harder debugging than a single server-rendered app. It also ships slower — which the owner explicitly removed from consideration, since the architecture story *is* the deliverable here.
+
+**Rejected:**
+- **`InteractiveServer`** — least code and the spec's original choice, and a legitimate enterprise pattern for *internal* LOB apps on a corporate LAN. Wrong for this one: public internet, residential uplink, unknown concurrency, on a box already running Postgres and a continuous crawler.
+- **`InteractiveAuto`** — every component must work both server- and client-rendered, so you build the API *and* the circuit code. Most work, and the payoff only appears at traffic this will not see.
+
+**Supersedes S-002** and `CARDSTOCK_UI_SPEC_v1.md:46` outright. `PROJECT_LOG.md:241` said *"final UI drives API decisions"* (D-042) — the UI is designed, so this is that ruling coming due rather than a reversal. `DATA_MODEL.md:472` has listed "web app read API — undesigned" as an open TODO naming this app as its consumer; that TODO is now answered.
+
+**Terminology note recorded because it caused confusion:** "stateless" describes the API tier only. Application state very much exists — holdings and watchlists in Postgres, identity in a cookie or token sent per request, UI state (open panes, column widths, active tab) in the browser. What is excluded is the *server* holding a session in its own memory. The practical payoff is deploying without disconnecting anyone.
+
+---
+
 ### D-062 — Express visits have no spacing floor. Rate limiting is now CardStock's job alone
 Owner removed the express spacing floor in `PokemonInvestBatch` on 2026-08-10, recorded there as **ADR-0008 — "express visits have no spacing floor."** Verified directly in the sibling repo: `ExpressSpacingSeconds` and `_lastExpressFetch` no longer appear anywhere in `src`.
 

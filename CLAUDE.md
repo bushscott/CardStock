@@ -70,6 +70,29 @@ Each spec's §8 (Contradictions) is the audit trail — when a decision resolves
 - **Blazor.** The frontend is a Blazor application. This is a .NET portfolio piece and the framework is not up for debate. Supporting processes are .NET console/worker apps.
 - **The existing Postgres database** in `../PokemonInvestBatch` is the data source. No new datastore.
 
+## Architecture — settled (D-063)
+
+| Tier | Choice |
+|---|---|
+| App — all authenticated screens | **`InteractiveWebAssembly`** |
+| Marketing — the `/product` prefix (D-058) | **Static SSR** |
+| Between them | **A stateless minimal API** |
+| Alongside | **A .NET worker** — index, metrics, screen evaluation (D-039) |
+
+```
+src/  CardStock.Domain          (references nothing)
+      CardStock.Application     (use cases, DTOs, contracts)
+      CardStock.Infrastructure  (EF Core, Postgres, intake client)
+      CardStock.Api             (stateless, versioned)
+      CardStock.Web             (WASM client)
+      CardStock.Worker
+tests/ one project per source project
+```
+
+**"Stateless" describes the API tier only.** State exists — holdings and watchlists in Postgres, identity in a cookie or token sent per request, UI state (open panes, column widths, active tab) in the browser. What is excluded is the *server* holding a session in its own memory, so a deploy never disconnects anyone.
+
+**Consequence:** the browser cannot reach the worker's loopback intake API. **`express-visit` is proxied through `CardStock.Api`**, which is also the natural place to enforce D-062's abuse-shape limit.
+
 Everything else in `CardStock Mockup/HANDOFF.md` is open for discussion.
 
 That includes the line most likely to be misread as a prohibition — `uploads/CARDSTOCK_UI_SPEC_v1.md:46`: *"Blazor Web App, Interactive Server rendering; components → services → Postgres directly (no HTTP API for the first-party UI; API design explicitly out of scope)."* Read directly 2026-08-10. That is a **scoping note about what that document covers, not an architectural ruling** — and the owner has since said so explicitly: an API is one of several solutions on the table. Render mode is likewise open. See D-013, D-014, S-002.
