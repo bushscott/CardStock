@@ -371,6 +371,45 @@ All lines read directly 2026-08-10. Owner asked for this to be tracked, 2026-08-
 
 ---
 
+### D-057 — Holdings at untracked tiers are valued from the last observed sale at that exact tier
+Owner, 2026-08-10. Resolves D-2 / D-012 — the tier→price mapping function.
+
+**A three-level ladder, first match wins:**
+
+| Level | Condition | Renders |
+|---|---|---|
+| **1** | The tier has a price series (the 6 in `price_months`) | Everything — value, chart, unrealized P&L, vs-index |
+| **2** | No series, but `sales` holds an observation at that exact tier for that card | "Last observed sale: **$X** · N days ago" — a real transaction, with its age stated |
+| **3** | Neither | Unvalued, excluded from portfolio totals with a visible count |
+
+**Pooling to a nearby tier was considered and rejected.** ADR-0005 pools grades 1–9.5 because *the source already pools them* — the pooled figure is an observation. Substituting here would be a different act: grades 1–6 → Grade 7 swaps in a materially higher grade, and non-PSA 10s → PSA 10 ignores the reason the source splits at 10 at all. Both err toward **flattering the holder's portfolio**, which is the worst direction for this product.
+
+**Level 2 is an observation, not an estimate** — the D-022 line. It reports a sale that happened, at the exact grade owned, and says when. It is *more* honest than pooling, because it never substitutes a different grade.
+
+**What level 2 cannot give:** history, a chart, unrealized P&L over time, or a vs-index comparison. It is a point, not a series, so the holding is excluded from anything time-based.
+
+**Scope is narrower than it first appears.** Cost basis is user-entered, so it always works — and a **closed** position reports real P&L at any tier, because both sides are user-entered. Only *open* positions at exotic tiers lose anything.
+
+**Retrieval is a plain indexed lookup — no title parsing.** `sales.grade_tier` is a first-class column (`DATA_MODEL.md:230`, `string(40)`, required, "21 distinct labels driven by the page's own selector") and `BGS 10 Black` is one of its values (verified, `GradeTierVocabulary.cs`). Index exists on `sales(card_id, sold_on)`.
+
+```sql
+SELECT price_cents, sold_on, source FROM sales
+WHERE card_id = :id AND grade_tier = :tier
+ORDER BY sold_on DESC LIMIT 1;
+```
+
+**Why it is this cheap:** the source splits by company *at* grade 10, so the exotic slabs are their own bucket labels. Below 10 it pools, and recovering the company there would need title mining — which ADR-0005 already rejected as unsupportable (<3% of cards qualify). The easy case is exactly the one needed.
+
+**Level 3 shrinks over time.** It means "this card has never had an observed sale at this tier," and the ledger is two weeks old (D-001). That is a countdown the sufficiency framework already knows how to express.
+
+**Two build requirements:**
+- **The gallery and table views must agree.** The gallery currently shows a value with no `EST` badge while the table badges the same holding (`Binder:99–102`, `:121`). Same holding, same honesty treatment, both places.
+- **`sales.title` is stored raw** (`DATA_MODEL.md:233` — "XSS is the render layer's concern, by design"). D-029 applies anywhere a level-2 value surfaces alongside its listing.
+
+**Spec updates queued:** `docs/screens/binder.md`, `docs/screens/card.md`.
+
+---
+
 ### D-056 — Plain `LOW CONFIDENCE` is abolished; it collapses into `LOW DATA`
 Owner, 2026-08-10. Resolves D-4 in the contradiction register.
 
