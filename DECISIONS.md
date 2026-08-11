@@ -80,14 +80,14 @@ The source reports one "Grade 8" figure covering every grading company, splittin
 
 ---
 
-### D-010 — Card images exist on disk. `HANDOFF.md:112` is wrong that they don't
-~3.6 GB of real photos at `{ImageDirectory}/{hash}/1600.jpg`, joined to cards via `cards.image_hash`, fetched hourly at 50/sweep.
+### D-010 — Card images exist on disk (~3.6 GB), and `HANDOFF.md` was right about them all along
+~3.6 GB of real photos at `{ImageDirectory}/{hash}/1600.jpg`, joined to cards via `cards.image_hash`, refreshed hourly at 50/sweep.
 
-**Receipts, read directly 2026-08-10:** `DATA_MODEL.md:292–295` ("Images — filesystem `{ImageDirectory}/{hash}/1600.jpg`… **~3.6 GB at full corpus**"), `:160` (`image_hash` column), `:325` (refresh cadence), `:105` (source CDN path).
+**Receipts, read directly 2026-08-10:** `DATA_MODEL.md:292–295` ("Images — filesystem `{ImageDirectory}/{hash}/1600.jpg`… **~3.6 GB at full corpus**"), `:160` (`image_hash` column), `:325` (refresh cadence), `:105` (source CDN path). `DATA_MODEL.md:464` anticipates this app serving them.
 
-`HANDOFF.md:112` calls imagery "100% placeholder slots… the largest open risk." The first half is factually wrong. **The licensing question is entirely separate and remains untouched** — no repo records reading any terms — so the risk may still be real for a different reason. See D-014's licensing sibling in D-019… tracked as part of D-011.
+**Correction, 2026-08-10 — my error, twice.** I twice reported that `HANDOFF.md` was "wrong that images exist." Re-reading it directly: line 114 sits under **"§6 Not built, deliberately"** and says *"Every card, set, and species image is a placeholder slot. This is the largest open risk, and it is a licensing question rather than a design one."* That describes the **prototypes**, where placeholder slots genuinely are what's there — and its second sentence is exactly right: the open question is licensing, not data. The document made no claim about the database. I read a section about unbuilt UI as a claim about storage and then repeated it. Nothing in `HANDOFF.md` §6 needs changing.
 
-**Notable:** `DATA_MODEL.md:464` anticipates this app serving them — "The web app that will read `sales`, `price_months`, `populations`, and **serve the images**."
+**What is genuinely open:** licensing. No repo records reading any terms of service, and storing is a different act from serving. Tracked under D-011.
 
 ---
 
@@ -195,6 +195,19 @@ No `.planning/` directory in this repo. Owner, 2026-08-10.
 ---
 
 ## Disputed
+
+### D-031 — Two more numbers in `HANDOFF.md` §5 contradict better sources
+The §5 data-dependency table carries at least two more values that disagree with documents closer to the data.
+
+**Listed-price coverage.** `HANDOFF.md` §5 says "~12% of rows." `DESIGN_NOTES.md:46` says *"production coverage is 4.4% (143,062 of 3,265,910 sales)"* — a precise count that reads like it came from a real query, and it was the basis for dropping the column from the Card page entirely. `DATA_MODEL.md:232` says only "most rows have none." **The 4.4% figure is the credible one; ~12% looks stale.** Not yet settled by a live query.
+
+**Venue depth.** `HANDOFF.md` §5 says "eBay-only today," gating the cross-marketplace-gap indicator. `DATA_MODEL.md:102` and `:227` both document five sources: **ebay, tcgplayer, goldin, heritage, pwcc**. The schema captures five; whether observed volume is effectively eBay-only is a distribution question a query would settle in seconds. As written, the gate may be locking an indicator that has data behind it.
+
+**Unverified in the same table:** "Annual cycles · 1 of 3."
+
+All read directly 2026-08-10. Raised, not corrected — these need a live query, not an edit.
+
+---
 
 ### D-009 — `DESIGN_NOTES.md:35` still specifies an "Apr '25 liquidity seam" that D-001 says cannot exist
 The line reads: *"Seams: liquidity seam Apr '25 (churn/vol panes), resolution seam Jul '26 amber dashed line on price chart."* Two seams, one of which has no data behind it.
