@@ -1,5 +1,19 @@
-# Cardstock — Design Notes (running log for Claude Design)
-Updated: 2026-08-10. **Engineering handoff index: HANDOFF.md** (screen inventory, spec deltas, data dependencies, what's deliberately not built). Spec: uploads/CARDSTOCK_UI_SPEC_v1.md (approved — don't re-litigate). Signal inventory: uploads/compass_artifact_*.md (29 = 25 atomic A1–F4 + 4 composites G1–G4). Project log: uploads/PROJECT_LOG.md.
+# CardStock — Design rationale (historical log, Jul–Aug 2026)
+
+> **What this is, and how much to trust it.** The running design log kept while the prototypes were built. Relocated here 2026-08-10 from `CardStock Mockup/DESIGN_NOTES.md` when that folder was cleared of markdown (D-054); **it is the only one of the original documents kept rather than retired.**
+>
+> **It earned that.** It proved the most reliable document in the set — its census summary-sentence branch rules reproduce the seeded arithmetic exactly, every threshold verified, which the Card page audit called *"the single most valuable doc find for the build"* (D-051). Where it describes a design ruling, believe it.
+>
+> **Two limits.** It is **not** a build reference — `docs/screens/*.md` is (D-040). And like every document written before 2026-08-10, its **claims about the data may be false**; `DESIGN_NOTES.md:35`'s "Apr '25 liquidity seam" is the known instance (D-009, D-001). Verify anything it says about the database against `../PokemonInvestBatch`.
+>
+> **Why it was kept.** The screen specs record *what* to build and `DECISIONS.md` records *why* for decisions made since. Neither holds the reasoning behind the July–August rulings — including the **rejected alternatives**, which is what stops a settled question being re-litigated. That content exists nowhere else.
+>
+> **It is frozen.** New rationale goes in `../DECISIONS.md` or `adr/`, not here. Nothing below this line has been edited.
+>
+> *Original header, now dangling, pointed at `HANDOFF.md`, `CARDSTOCK_UI_SPEC_v1.md`, the compass signal inventory, and `PROJECT_LOG.md`. The first two and the last were retired; the signal inventory survives as `signals.md`.*
+
+---
+
 
 ## Built pages
 - **Cardstock Home.dc.html** — nav, scrolling market ticker, watchlist, signals feed + binder card (row 1), peek panel (fixed right drawer), footer.

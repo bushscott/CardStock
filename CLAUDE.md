@@ -60,10 +60,12 @@ Extra tokens, extra time, and redundant checking are all explicitly acceptable c
 | `DECISIONS.md` | The ledger — every claim and decision, with status and a re-runnable receipt |
 | `docs/README.md` | Index and read order |
 | `docs/screens/*.md` | **The build reference**, one per screen |
-| `docs/brand.md` | Tokens across all three modes, typography, glyphs, theming, WCAG findings |
+| `docs/brand.md` | Tokens across all three modes, typography, glyphs, theming, WCAG findings, brand prohibitions |
+| `docs/signals.md` | All 29 indicators with formulas, caveats and priority, plus what cannot be honestly supported |
+| `docs/design-rationale.md` | Frozen Jul–Aug 2026 design log — the *why* and the rejected alternatives |
 | `docs/adr/` | Architecture decision records |
 | `docs/CONTRADICTIONS.md` | Temporary backlog register — **deletes itself when worked through** |
-| `CardStock Mockup/` | **Frozen prototypes. No markdown, by rule.** |
+| `CardStock Mockup/` | **Frozen prototypes. No markdown, by rule.** ✅ achieved 2026-08-10 |
 
 **The ledger records *why* and *when*. The screen specs record *what to build*.** A decision that changes a screen belongs in both.
 

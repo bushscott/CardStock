@@ -651,7 +651,24 @@ Owner, 2026-08-10: *"I want to end up with one location for updated non-contradi
 
 **Done:** `uploads/PROJECT_LOG.md` deleted (harvested as D-042); `brand-system.md` moved to `docs/brand.md`; `docs/README.md` written as the index.
 
-**Still to retire, each needing a harvest first:** `CARDSTOCK_UI_SPEC_v1.md`, the compass research artifact, both copies of `BRAND_BRIEF.md`, `uploads/Brand package creation/README.md`, `HANDOFF.md`, `DESIGN_NOTES.md`, `DISPLAY_VOCABULARY.md`, `BACKTEST_WARNINGS.md`.
+**✅ Completed 2026-08-10. `CardStock Mockup/` now contains zero markdown.** Ten files resolved:
+
+| File | Disposition |
+|---|---|
+| `uploads/PROJECT_LOG.md` | Deleted — harvested as D-042 |
+| `brand-package/BRAND_BRIEF.md` | Deleted — byte-identical duplicate, no harvest needed |
+| `BACKTEST_WARNINGS.md` | Deleted — all 15 checks harvested into `screens/screener.md` |
+| `BRAND_BRIEF.md` | Deleted — trade-dress prohibition, positioning and tone harvested into `brand.md` |
+| `uploads/Brand package creation/README.md` | Deleted — colour-separation rule, series assignment, logo rules and scales into `brand.md`; ticker/deck timings and the only responsive guidance into `screens/marketing.md` |
+| `HANDOFF.md` | Deleted — §7 conventions verified already covered; **§1's two honesty rules rescued into `CLAUDE.md`**, where they had never been stated |
+| `uploads/CARDSTOCK_UI_SPEC_v1.md` | Deleted — success criteria and persona into `CLAUDE.md`; the hiring-manager demo flow into D-064 |
+| `DISPLAY_VOCABULARY.md` | Deleted — verified fully superseded; `brand.md:156–160` carries the four-mode palette *more* completely, and view modes live across six screen specs |
+| `uploads/compass_artifact_*.md` | **Kept** → `docs/signals.md`. The most accurate document in the project — zero false seam dates, and it states that `[S1]` is a monthly average rather than OHLC, the exact fact About Data got wrong |
+| `DESIGN_NOTES.md` | **Kept** → `docs/design-rationale.md`, frozen |
+
+**Deviation from the original plan, recorded deliberately.** This entry said `DESIGN_NOTES.md`'s "rulings migrate to the screen specs and its reasoning to `docs/adr/`." The rulings did migrate. **The reasoning did not** — converting 167 lines of dated, dense rationale into ADRs is a large job with modest payoff, and the document is already good at its one function. It was relocated and frozen instead, with a header stating its authority and its two limits. If that reasoning is ever needed as formal ADRs, the source is there to convert.
+
+**Note on retired-file citations.** Several `docs/screens/*.md` §8 rows cite line numbers in files that no longer exist. The quoted claim is preserved verbatim in each row, and the files remain in git history — `git log --diff-filter=D --name-only` locates the deleting commit. The audit trail survives; only re-running a citation now requires git.
 
 **`docs/CONTRADICTIONS.md` is scaffolding and deletes itself** when its classes are worked through. Recorded in `docs/README.md` so a future reader does not preserve it out of caution.
 
