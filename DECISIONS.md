@@ -317,7 +317,7 @@ CardStock's own tables. `sales` and `populations` are a 2027 story no engineerin
 | Phase | What | Status |
 |---|---|---|
 | 0 | Walking skeleton: solution, CI, schema, deployed to the Pi | ✅ **Done** 2026-08-11 |
-| 1 | `price_months` read layer — change-only as-of semantics, encoded once, tested hard | **Next** |
+| 1 | `price_months` read layer — change-only as-of semantics, encoded once, tested hard. **Plus the 30-day sales read** — see below | **Next** |
 | 2 | Card page end to end, with real `LOCKED` / `LOW DATA` states | |
 | 3 | Worker: index construction first — nothing comparative exists without it | |
 | 4 | Binder — the owner's stated emotional centre, and it works on today's data | |
@@ -333,6 +333,31 @@ CardStock's own tables. `sales` and `populations` are a 2027 story no engineerin
 **Phase 1 is the next thing to start**, and it is where the correctness risk concentrates: absence
 means "unchanged", not "missing", and "latest" is `max(observed_at)` per key rather than the newest
 month.
+
+**Amended 2026-08-11 — Phase 1 also carries a 30-day sales read.** Owner: the tier strip's 30-day
+change *"should not be based on the monthly scrape data. It should be based on the past thirty days of
+sales."* Confirmed against `Cardstock Card.dc.html:398`, whose tooltip names no source at all, so
+nothing contradicted it; the chart's tooltip at `:132` independently supports the same split —
+*"the point firms up as the month's sales land."*
+
+So a single strip cell draws from **two tables**: price from `price_months`, change from `sales`.
+Splitting them across phases would ship a tier strip that cannot fill its own cells, so the sales read
+comes with Phase 1. It is one indexed lookup and the index already exists (`sales(card_id, sold_on)`,
+D-057).
+
+**Compute it from whatever sales exist, from day one.** Owner: *"just make it easy and do the average
+of the sales we do have, that way in 30 days we won't have wasted code."* The calculation returns
+**the sale count alongside the change**, so the cell wears the `N OBS` amber `LOW DATA` badge
+(`card.md` §4.11) until the count is healthy, and the same code path serves it forever. **No card can
+have 30 countable days until ~1 Oct 2026** — sales began ~2 weeks ago and D-033's floor discards
+everything before 2026-09-01 — so every strip cell ships in `LOW DATA` and improves on its own.
+
+**On "why not just finish one page at a time"** (owner asked, 2026-08-11, and the answer belongs
+here rather than in a conversation): the Card page **cannot be finished**. Its sales ledger and census
+panel need post-seam data that does not exist until 2027 (D-001), so a page-at-a-time order stalls on
+the very first page. What *can* be finished is every price surface on it, which is what Phases 1–2 are.
+"Phases" are this project's build order, not a superpowers mechanism — superpowers is
+brainstorm → plan → execute, applied to whatever chunk it is pointed at.
 
 ---
 
