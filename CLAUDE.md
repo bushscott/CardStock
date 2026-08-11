@@ -17,7 +17,13 @@ Everything else in `CardStock Mockup/HANDOFF.md` is open for discussion — incl
 
 ## Related repository — `../PokemonInvestBatch`
 
-CardStock has no data of its own. Everything it renders comes from a separate, already-running .NET 10 scraper that writes to Postgres. That repo is the authority on what data exists; this one is the authority on what the product does with it.
+CardStock has no data of its own. Everything it renders comes from a separate, already-running system in the sibling directory. **That repo is the authority on what data exists; this one is the authority on what the product does with it.**
+
+**What it is:** a .NET 10 batch worker that politely crawls pricecharting.com into PostgreSQL, running unattended on a Raspberry Pi under systemd. Four source projects in a strict one-directional layering — `Domain → Application → Infrastructure → Worker` — with six test projects beside them. It has been in continuous development since 2026-07-27 and is production-running.
+
+**How it stores things**, which shapes everything CardStock reads: history is **append-only and change-only** (ADR-0001). A row exists only when a value *changed*, so absence means "unchanged," not "missing," and a naive `WHERE month = X` returns nothing for most cards in most months. "Latest" means `max(observed_at)` per key, not the newest month. Any read layer that ignores this will compute plausible-looking wrong numbers.
+
+Eight tables in three groups: a mutable catalog (`sets`, `cards`), an append-only record (`price_months`, `populations`, `sales`), and a crawler diary (`visits`, `fingerprints`, `parse_failures`).
 
 Durable pointers, so this never has to be re-derived:
 
@@ -30,7 +36,13 @@ Durable pointers, so this never has to be re-derived:
 | Grade tier vocabulary (19 values) | `../PokemonInvestBatch/src/PokemonInvestBatch.Domain/Parsing/GradeTierVocabulary.cs` |
 | EF Core context — the 8 tables that exist | `../PokemonInvestBatch/src/…/PokemonDbContext.cs` |
 
-That repo also already carries CI (`.github/`), ADRs, `.editorconfig`, and `Directory.Build.props`. **Mirror its conventions rather than inventing new ones** — consistency across the two repos is itself part of the portfolio story. Confirm the specifics before copying; they have not been read into this project yet (see D-018–D-021).
+**Mirror its conventions rather than inventing new ones** — consistency across the two repos is itself part of the portfolio story. Verified 2026-08-10:
+
+- `Directory.Build.props` — `net10.0`, `Nullable=enable`, `ImplicitUsings=enable`, **`TreatWarningsAsErrors=true`**, `InvariantGlobalization=true`
+- `.editorconfig` — 4-space C#, 2-space for project/config files, LF, file-scoped namespaces at `warning`, explicit accessibility modifiers at `warning`
+- `.github/workflows/ci.yml` — restore → build → test → `dotnet format --verify-no-changes`, with a Postgres 15 service container pinned to the Pi's version because tests assert on generated SQL
+- `docs/adr/` — Michael Nygard format, numbered, **never edited after the fact**; a reversal gets a new ADR that supersedes the old one, and `README.md` holds the index table
+- `.slnx` solution format, `src/` and `tests/` folders, one test project per source project
 
 **Caution:** that repo's documentation is authoritative about the scraper but has already been shown to disagree with CardStock's design docs (see D-001). Verify across both, never from one.
 

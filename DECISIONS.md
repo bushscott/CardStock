@@ -67,6 +67,34 @@ Eight DbSets: `Sets, Cards, PriceMonths, Populations, Sales, Visits, Fingerprint
 
 ---
 
+### D-022 — Grade tiers are pooled below 10 and split by company only at 10, and no multiplier may approximate the rest
+The source reports one "Grade 8" figure covering every grading company, splitting by company only at grade 10.
+
+**Receipt:** `../PokemonInvestBatch/docs/adr/0005-pooled-grade-tiers.md`, Accepted 2026-08-04. Read directly 2026-08-10.
+
+**The evidence it records:** of "Grade 8" sales, 74.7% name PSA and 6.0% name CGC — ~91% of identifiable volume is PSA. CGC sells at ~0.68× PSA, dragging the blend down only 2–3%. Fewer than 3% of cards have two sales from each of two companies, so a per-card "CGC 8 price" would rest on zero or one sale.
+
+**The rejected alternative matters more than the decision.** A global multiplier ("CGC ≈ 0.68× pooled") was rejected *by the owner* as statistically dishonest: "it projects a corpus-wide median onto individual cards where it may not hold, and presents an estimate with the same confidence as an observation."
+
+**Binding consequence on the UI, stated in the ADR:** "The interface must not imply the pooled figure is company-neutral." `HANDOFF.md`:79 currently says "below 10 the buckets are grader-agnostic" — that phrasing asserts the neutrality the ADR forbids. Needs a wording fix; raised as part of D-012.
+
+---
+
+### D-023 — The sibling repo's engineering conventions, verified
+Read directly 2026-08-10, to be mirrored per D-018–D-021.
+
+| Concern | Convention | Receipt |
+|---|---|---|
+| Target / language | `net10.0`, nullable enabled, implicit usings, **warnings as errors**, invariant globalization | `Directory.Build.props` |
+| Style | 4-space C#, 2-space config, LF, file-scoped namespaces (warning), explicit accessibility (warning) | `.editorconfig` |
+| CI | restore → build → test → `dotnet format --verify-no-changes`, Postgres 15 service container pinned to the Pi's version | `.github/workflows/ci.yml` |
+| ADRs | Nygard format, numbered, **never edited after the fact** — reversals get a superseding ADR; index table in `docs/adr/README.md` | `docs/adr/README.md` |
+| Layout | `.slnx`, `src/` + `tests/`, strict `Domain → Application → Infrastructure → Worker`, one test project per source project | `PokemonInvestBatch.slnx` |
+
+**Note on the CI comment worth preserving:** the Postgres version is pinned because the tests assert on SQL the Npgsql provider generates — "a version drift here would pass in CI and fail in production, which is the one failure a test suite must not have."
+
+---
+
 ## Decided
 
 ### D-005 — Blazor is the frontend. Not up for debate
@@ -125,13 +153,23 @@ The line reads: *"Seams: liquidity seam Apr '25 (churn/vol panes), resolution se
 The single answer that most reorders everything downstream. Private (Tailscale / localhost / screen-share) drops image licensing, provenance rewrites, rate limiting, and residential-exposure concerns off the critical path entirely. Public gates all of them.
 
 ### D-012 — How is a binder holding valued when its tier has no price series?
-Owner's point in D-003: a user knows their slab is CGC 9.5. There is no CGC 9.5 price series and won't be. Mark it at the pooled Grade 9.5? At PSA 10 with a haircut? Show it unvalued? This affects cost basis, P&L, and the "vs market index" number — the product's stated emotional centre.
+**Corrected 2026-08-10.** My earlier framing used "CGC 9.5" as the example. That was wrong: the source pools grading companies for grades 1–9.5 and splits only at 10 (ADR-0005), so a CGC 9.5 **does** have a price series — the pooled `Grade9Half`. See D-022.
+
+The tiers genuinely without a price series are:
+- **Grades 1–6** — `price_months` carries only 7, 8, 9, 9.5 below 10 (D-003)
+- **Every non-PSA 10** — CGC 10, CGC 10 Pristine, BGS 10, BGS 10 Black, SGC 10, TAG 10, ACE 10. `price_months` has exactly one grade-10 tier and it is `Psa10`.
+
+So the open question is narrower and sharper: a user owns a BGS 10 Black. It has sales rows but no price series. Value it at PSA 10? At PSA 10 with a haircut? Leave it unvalued and exclude it from portfolio totals?
+
+**Strong steer from D-022:** the owner has already rejected exactly this move once. Applying a multiplier to approximate an unobserved company price was rejected as "statistically dishonest." Valuing a BGS 10 Black at `Psa10 × factor` is the same decision in a new place. Affects cost basis, P&L, and "vs market index" — the product's stated emotional centre.
 
 ### D-013 — Render mode: Interactive Server, WebAssembly, Auto, or per-component?
 Coupled to D-014. Interactive Server holds a SignalR circuit per visitor and round-trips every interaction to a residential Pi — weakest exactly where success criterion #1 ("a hiring manager clicks a link") lives. WebAssembly moves the C# into the browser, which cannot open a Postgres connection, forcing D-014 to be yes.
 
 ### D-014 — Does a read API exist?
 No longer blocked by the spec (see D-005). Forced by WebAssembly; optional under Interactive Server. Still 100% .NET either way — an ASP.NET Core project doing the EF Core query.
+
+**Relevant precedent, verified 2026-08-10:** an HTTP API already exists in the sibling repo — `docs/adr/0006-localhost-intake-api-and-express-visits.md`, "A localhost intake API, with express visits outside the polite gate." It is an *intake/command* surface, not a read surface, and it is loopback-only. So the question of whether CardStock gets a read API is still open, but HTTP plumbing and a decision precedent both already exist. **ADR-0006 has not been read in full** — do that before relying on any detail beyond its title.
 
 ### D-015 — Shape of the analytics / metric materialization tier
 Owner's instinct, 2026-08-10: a separate calculating process, "especially for things like screens." D-004 confirms nothing exists today. Open: what it computes, on what schedule, into what tables, and whether it lives in this repo or `PokemonInvestBatch`. Note the sufficiency framework means it must emit **states** (LOW DATA / LOCKED / UNSTABLE FIT) alongside values, not nulls.
