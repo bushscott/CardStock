@@ -371,6 +371,31 @@ All lines read directly 2026-08-10. Owner asked for this to be tracked, 2026-08-
 
 ---
 
+### D-058 — Marketing gets its own URL prefix; the app keeps the clean names
+Owner, 2026-08-10. Resolves D-1 / D-045 — the marketing/app route collision.
+
+**Rejected the alternative:** one URL resolved by login state (`/` serving Landing when logged out, Home when logged in). That is the common SaaS pattern and was my initial recommendation, but the owner chose separation.
+
+**The route map:**
+
+| | Route |
+|---|---|
+| App | `/` (Home) · `/screener` · `/charts` · `/binder` · `/browse` · `/card/{id}` · `/set/{id}` · `/character/{name}` · `/settings` |
+| Marketing | `/product` (Landing) · `/product/screener` · `/product/charts` · `/product/binder` |
+| Auth | `/signin` · `/create` · `/forgot` · `/reset` |
+
+A logged-out visitor hitting `/` redirects to `/product`.
+
+**The prefix name is provisional** — `/product` unless the owner prefers `/features`, `/about`, or another.
+
+**The advantage this has over auth-resolved roots, which I under-weighted when recommending against it:** the static/interactive boundary becomes a **URL prefix rather than a runtime auth check**. Every `/product/*` route is unconditionally static and cacheable, with no per-request branch deciding what to render. That simplifies both caching and the render-mode split (D-013), and it means a CDN or reverse proxy can serve marketing without consulting the app at all.
+
+**Consistent with the extraction findings:** the marketing pages are already light-only (0 `data-theme` occurrences) and carry no interactivity beyond a CSS-animated ticker — so they were never going to share the app's rendering path anyway. D-045 recorded that; separation makes it explicit rather than incidental.
+
+**Spec update queued:** `docs/screens/marketing.md` §1 identity, and every screen spec's route line.
+
+---
+
 ### D-057 — Holdings at untracked tiers are valued from the last observed sale at that exact tier
 Owner, 2026-08-10. Resolves D-2 / D-012 — the tier→price mapping function.
 
