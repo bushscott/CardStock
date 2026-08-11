@@ -369,6 +369,25 @@ All lines read directly 2026-08-10. Owner asked for this to be tracked, 2026-08-
 
 ---
 
+### D-051 — ✅ The Card page tier strip is 6 cells, and it matches the database exactly
+Direct extraction of `Cardstock Card.dc.html`, 2026-08-10. The strip is a literal `repeat(6, 1fr)` grid (`:84`) filtering the 19-value `BUCKETS` down to **PSA 10 / 9.5 / 9 / 8 / 7 / Raw** (`:395`).
+
+**This resolves a contradiction in CardStock's favour.** `HANDOFF.md:76` calls it a "19-tier strip" and is simply wrong; `DESIGN_NOTES.md:55` describes the six-tier arrangement correctly in every particular. And six is exactly what `price_months.tier` carries (D-003). **The Card page's price surfaces are a clean 1:1 with the data** — no gap, no approximation, nothing to reconcile.
+
+That is the strongest argument yet for the Card page as the first build (sub-project C): its tier strip, price chart, sales ledger, census bars, and images all have real backing data today, and it needs no market index, no metrics tier, and no auth.
+
+The 19 values still exist on this page — as ledger grade chips, filter chips, and sort rank — which is correct, because `sales.grade_tier` genuinely carries 19 values. Six for price series, nineteen for sales. Both right, in different places.
+
+**Also verified — a document that is correct.** The census summary-sentence branch rules at `DESIGN_NOTES.md:52–53` reproduce the seeded output arithmetic *exactly*, every threshold checked. After this many corrections it is worth recording that `DESIGN_NOTES.md` is largely reliable where it describes design rulings; the failures have been concentrated in data claims and in stale entries it never revisited.
+
+**Confirmed as specified:** the Listed-column drop, down to the dotted amber `#8F6614` border and the `listed X → sold Y` tooltip (`:204`, `:352`, `:457`); and the dashed-line + hollow-end-dot current-month treatment with no projection (`:414`, `:132`).
+
+**Not built, adding to the D-049 pattern:** seam markers render **nowhere** — `SEAMS` (`:321`) is dead data, `isSeam` is always false, and no markup branch exists. `DESIGN_NOTES.md:47` says they render in date sort while `:54` says they were removed; the HTML sides with `:54`, and the file contradicts itself.
+
+**Stale Tier 3 corrected:** `PROJECT_LOG.md:282` requires the card refresh be asynchronous. The prototype asserts synchronous, and `express-visit` (D-024) is synchronous by design. The log is wrong; sync stands. Feeds D-025.
+
+---
+
 ### D-049 — 🚩 The LOCKED row form is dead code. The lock UI D-038 ships was never prototyped
 Direct extraction of `Cardstock Charts.dc.html`, 2026-08-10: `locked()` (`:595`) and `force()` (`:403`) have **zero call sites**. No LOCKED chip, no disabled switch, no progress bar, and no working "show anyway →" ever renders.
 
@@ -509,6 +528,12 @@ Two prototypes state incompatible deletion policies. D-040 says the mockups are 
 Also verified in the same pass: `Cardstock Legal.dc.html:57` tells users to "export your binder as CSV first" — but the Profile page has **no export affordance** (0 occurrences). The Binder's CSV control exists but generates no file (`HANDOFF.md` §6). So the policy instructs a step the product cannot perform.
 
 **Needed:** one deletion policy, written once, reflected in both prototypes and whatever ships.
+
+**Second instance, found 2026-08-10 — tier colours.** `Cardstock Card.dc.html:325` and `Cardstock Charts.dc.html:375` assign **different colours to the same tiers** (9.5, 8, and 7 diverge). Code versus code, both Tier 1, same conflict class. A card viewed on its own page and the same card in the Charts playground would render its tiers in different colours.
+
+This one is more consequential than it sounds, because `HANDOFF.md` §7 states colour never carries meaning alone and every state pairs a hue with a glyph — a tier palette that changes between screens undermines the reader's ability to learn the mapping at all. Needs one palette, defined once, in the shared component library (D-050 makes the same argument about tokens).
+
+**Two instances now means this is a category, not an accident.** Every future Tier-1 conflict goes here rather than being silently resolved.
 
 ---
 
