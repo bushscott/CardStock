@@ -371,6 +371,28 @@ All lines read directly 2026-08-10. Owner asked for this to be tracked, 2026-08-
 
 ---
 
+### D-060 — ✅ About Data rewritten; all 22 false claims resolved
+Owner, 2026-08-10: *"Fix all the twenty two data issues."* Done — the corrected copy is in `docs/screens/about-data.md` under **"Corrected copy — build this."**
+
+**Not written into the prototype.** Per D-052 the mockups are frozen, so the spec is where the corrected page becomes true. The prototype's copy is superseded.
+
+**Every statement in the new copy carries a receipt** in a margin note — `DATA_MODEL.md` line numbers, ADR-0005, or a ledger entry. Nothing is asserted from memory.
+
+**Structural changes, not just corrections:**
+
+- **The page now names pricecharting.com** (D-059) and states the consequence most readers would miss: the individual sales are real transactions, but the **monthly price line is not built from them** — it is the source's own average, stored unaltered. That single distinction resolves §6.1, §6.10, and the framing problem in §6.0 at once.
+- **The seam is described as per-card**, with the collection start date given plainly (28 July 2026) and the ragged boundary explained rather than flattened into one line.
+- **Monthly prices are called out as the exception** — complete back to ~Dec 2020 regardless of first visit — which fixes the §6.6 error that *understated* the one genuinely deep series by 32 months.
+- **A "What we cannot know" section** replaces the false coverage claims: no historical sale counts, nothing older than the ~30-row bucket windows, no census before first visit, no grading company below grade 10.
+- **The 2026-09-01 floor is stated with its reason** — absent from the prototype entirely, and required by D-033 now that D-038 ships locks everywhere.
+- **Pooling is explained honestly**, including the 91% PSA figure and an explicit statement that no multiplier is applied — satisfying ADR-0005's instruction that the interface must not imply company-neutrality.
+
+**Seven claims were deleted rather than corrected**, because no true version exists: sale counts back to Aug 2023, the exclusion pipeline, daily refresh, the footer stamp on every page, the "under 5% of rows" figure, the English-language claim, and the April 2025 seam.
+
+**One build note carried forward, not copy:** the prototype promised "we mark the affected window on charts" for census restatements. D-046 §6.2 confirmed that marking is unbuilt — detection exists only as an operational alert. The promise is omitted from the copy; either build the annotation or leave the claim out.
+
+---
+
 ### D-059 — Legal and licensing posture is deferred; accuracy is not
 Owner, 2026-08-10: *"this is just a portfolio piece. If I ever sell it, I'll have to contact a lawyer about all the law stuff… I'll worry about that shit in the future."*
 

@@ -483,6 +483,136 @@ Per-row audit:
 
 ---
 
+## Corrected copy — build this
+
+Written 2026-08-10 to resolve the 22 FALSE and 13 UNVERIFIABLE claims in §6. **Every statement below is traceable to a receipt**; the receipt is given in the margin note after each block. The prototype's copy is superseded — build from here.
+
+Voice follows `HANDOFF.md` §1: precise numbers over adjectives, no hype, no exclamation marks.
+
+---
+
+### Where the numbers come from
+
+> Every price, sale, and population figure on Cardstock comes from **pricecharting.com**. We do not collect from marketplaces ourselves.
+>
+> Two things follow from that, and they matter when you read a chart:
+>
+> The **individual sales** we list are real completed transactions, recorded as PriceCharting reported them — date, venue, grade, and price.
+>
+> The **monthly price line is not built from those sales.** It is PriceCharting's own monthly average, which we store and chart unaltered. We do not recompute it, and its method is theirs, not ours.
+
+*Receipts: `DATA_MODEL.md:89` (all data from pricecharting.com); `:93–94`, `:186` (`price_cents` is the site's monthly average); `:217` (sales are one immutable row per completed sale). Source named per D-059.*
+
+---
+
+### What we hold, and from when
+
+> | | Covers | Begins |
+> |---|---|---|
+> | Monthly average prices | 6 grade tiers | **~December 2020**, complete for every card |
+> | Individual sales | 19 grade labels | The first time we visited that card |
+> | Population census | PSA and CGC only | The first time we visited that card |
+>
+> **Our sales and census history does not start on a single date.** It starts the first time we visited each card. We began collecting on 28 July 2026, and each card entered the record when its turn came — so the boundary sits in a different place for every card, and we draw it where it actually falls rather than pretending it is one line.
+>
+> Monthly prices are the exception. The first visit to a card retrieves its entire price chart at once, so that history is complete back to about December 2020 regardless of when we first saw it.
+
+*Receipts: `DATA_MODEL.md:373`, `:176–177` (backfilled to ~Dec 2020 on first visit); `:404` (first deployment 2026-07-28); `:397` (population history begins at first visit); `:204` (census is `psa` or `cgc` only); D-001; D-002; D-003.*
+
+---
+
+### What we cannot know
+
+> Some things are not missing from Cardstock — they do not exist anywhere, and no amount of collecting will produce them.
+>
+> **Sale counts before we started watching.** PriceCharting publishes no historical volume series. Nobody has this.
+>
+> **Sales older than roughly the last 30 in each grade bucket.** PriceCharting keeps a rolling window and discards what falls off it. Once a sale scrolls out, it is gone for everyone.
+>
+> **Census history before our first visit.** PriceCharting publishes a current snapshot with no history attached.
+>
+> **Which company graded a card below grade 10.** PriceCharting pools every grading company into a single figure for grades 1 through 9.5, and splits by company only at 10.
+
+*Receipts: `DATA_MODEL.md:113–115`, `:481–482` (historical volume permanently unavailable); `:101–102`, `:118–119` (~30-row bucket windows, discarded forever); `:104`, `:120–121` (current census snapshot only); ADR-0005.*
+
+---
+
+### On pooled grades
+
+> Below grade 10, a price covers every grading company at once — a "Grade 8" figure includes PSA, CGC, BGS and others together.
+>
+> About **91%** of the identifiable volume in those buckets is PSA, so the pooled figure tracks PSA closely. A CGC card of the same grade typically trades below it, by roughly a third at grade 8.
+>
+> We show the pooled number and label it as pooled. **We do not apply a multiplier to estimate a company-specific price** — that would present a guess with the same confidence as an observation.
+
+*Receipts: ADR-0005 (74.7% PSA / 6.0% CGC in Grade 8; ~91% of identifiable volume; CGC ≈ 0.68× PSA; multiplier rejected as statistically dishonest); D-022.*
+
+---
+
+### How fresh it is
+
+> Cards are visited continuously, one at a time, in priority order — not on a fixed schedule. A card that is selling quickly is visited sooner. A quiet card may go a month or more between visits.
+>
+> **Opening a card page triggers a fresh visit**, so a card page shows sales up to that moment.
+>
+> The **current month's price revises.** PriceCharting recalculates it as sales land, and we pick up the new figure on our next visit. It renders as a hollow, dashed point for exactly that reason. **Closed months never change** — once a month closes, its value is fixed permanently.
+
+*Receipts: `DATA_MODEL.md:322` (continuous, one card at a time); `:329–335` (priority queue, 30-day starvation floor); `:98–99` (closed months immutable server-side); `:189–191` (composite PK ends in `observed_at` because the current month revises); D-024 (`express-visit` on card open).*
+
+---
+
+### The floor
+
+> **No metric on Cardstock counts an observation recorded before 1 September 2026.**
+>
+> This is a deliberate cutoff, not the date our data begins. We were still stabilising the collector through August 2026, so we discard our own earliest observations rather than trust them. September 1st is the first date we are willing to stand behind.
+>
+> Every unlock countdown on this site is measured from that floor.
+
+*Receipt: D-033. **This section does not exist in the prototype and must be added** — D-046 §6.11 confirmed the floor appears nowhere in the file.*
+
+---
+
+### Honesty policy
+
+> **No projected or extrapolated points.** A partial month renders as partial, never as a forecast.
+>
+> **A metric below its sufficiency floor renders a state, not a number.** It will tell you which rule it failed and when it will pass.
+>
+> **When a grader restates a past census, we keep what we already recorded.** Restatements happen — PSA restated in June 2026 and one card's grade cell moved from 397 to 99,246. We write the new figures alongside the old ones. We never rewrite history.
+>
+> **Backtests start at the first date every filter in them could actually be computed**, not at the start of our records.
+
+*Receipts: `DATA_MODEL.md:209–213` (the PSA restatement and its magnitude, verbatim); Rule 1, append-only (ADR-0001); D-038; D-041.*
+
+> ⚠ **Build note, not copy:** the prototype also promised "we mark the affected window on charts." D-046 §6.2 confirmed that marking is **unbuilt** — detection exists only as an operational alert. Either build the chart annotation or do not make the promise. It is omitted above deliberately.
+
+---
+
+### Disclaimers
+
+Unchanged from the prototype, and verified accurate in §6.13 — fan-made, not affiliated with Nintendo, The Pokémon Company, Creatures Inc., any grading company or marketplace; nothing here is financial advice; signals describe the past, not the future.
+
+*One fix: the prototype's disclaimer at `:124` is narrower than the Legal page's at `Cardstock Legal.dc.html:67`. Use the Legal page's wording in both places.*
+
+---
+
+### Claims deliberately removed
+
+Not corrected — **deleted**, because no true version exists:
+
+| Removed | Why |
+|---|---|
+| "sale counts, back to August 2023" | The data has never existed (`DATA_MODEL.md:481`) |
+| "Excluded: bulk lots, ambiguous grade or damage notes…" | No exclusion pipeline exists — grep over the scraper returns no sale-content filtering |
+| "Sales data refreshes daily" | Contradicted by the 30-day starvation floor |
+| "the footer stamp on every page" | Neither this page nor Legal has a footer |
+| "Asking prices never enter an aggregate… under 5% of rows" | We did not compute the aggregate, and 5% has no receipt |
+| "English-language cards" | No language field exists anywhere in the scraper |
+| "the April 2025 seam" (×4) | Fifteen months before the collector's first commit |
+
+---
+
 ## 7. Open questions
 
 1. **What replaces "the April 2025 seam" in the UI?** D-001 makes the seam per-card. One marker per card is honest but complicates every chart; a single global marker at the D-033 floor (2026-09-01) is simpler and safe because it errs toward LOCKED (`DECISIONS.md:314`). Not decided — this is a design decision that must precede the copy rewrite.
