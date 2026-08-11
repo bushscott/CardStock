@@ -145,7 +145,7 @@ The largest class, needing no decisions. Counts by screen, detail in `docs/scree
 | `home.md` | 27 | `character.md` | 23 |
 | `card.md` | 21 + 11 corroborations | `binder.md` | 22 |
 | `charts.md` | 24 | `browse.md` | 20 |
-| `screener.md` | 24 | `brand-system.md` | 18 |
+| `screener.md` | 24 | `../brand.md` | 18 |
 | `set.md` | 17 | `account.md` / `profile.md` | 13 / 11 |
 | `marketing.md` | 14 | `shared-components.md` | 11 |
 

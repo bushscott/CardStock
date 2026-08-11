@@ -12,6 +12,25 @@ Extra tokens, extra time, and redundant checking are all explicitly acceptable c
 
 **A receipt covers only the sentence it supports.** The most likely way to break this rule is not to invent a claim outright — it is to quote something real and then write a generalization beside it, letting the citation lend credibility to a sentence it never covered. This has already happened once in this file: an accurate quote from ADR-0006 ("sibling apps speak HTTP to the worker, never SQL to its tables") sat next to an invented rule ("anything that changes scraper state goes over HTTP"), under a heading calling it a hard architectural boundary. Corrected 2026-08-10. If a sentence is broader than its receipt, it is a **Claim**, no matter what sits next to it.
 
+## Where things live
+
+**One documentation location: `docs/`.** Nothing authoritative lives outside it except the two control-plane files at this root.
+
+| Path | Holds |
+|---|---|
+| `CLAUDE.md` (this file) | Rules, hard constraints, document authority. At the root because Claude Code loads it from there |
+| `DECISIONS.md` | The ledger — every claim and decision, with status and a re-runnable receipt |
+| `docs/README.md` | Index and read order |
+| `docs/screens/*.md` | **The build reference**, one per screen |
+| `docs/brand.md` | Tokens across all three modes, typography, glyphs, theming, WCAG findings |
+| `docs/adr/` | Architecture decision records |
+| `docs/CONTRADICTIONS.md` | Temporary backlog register — **deletes itself when worked through** |
+| `CardStock Mockup/` | **Frozen prototypes. No markdown, by rule.** |
+
+**The ledger records *why* and *when*. The screen specs record *what to build*.** A decision that changes a screen belongs in both.
+
+**Do not add documentation anywhere else.** If a new document seems necessary, it almost certainly belongs as a section of an existing one — the reason this structure exists is that the project previously had eleven mutually contradictory markdown files across four directories.
+
 ## Document authority — which source wins
 
 Owner's ruling, 2026-08-10: **"The mockups and the PokemonInvestBatch scraper codebase are the absolute truth."** Everything else is derived and may be stale. When two sources disagree, the higher tier wins — do not average them, and do not pick the one that reads more confidently.
