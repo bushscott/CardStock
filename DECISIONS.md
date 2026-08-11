@@ -345,12 +345,35 @@ Splitting them across phases would ship a tier strip that cannot fill its own ce
 comes with Phase 1. It is one indexed lookup and the index already exists (`sales(card_id, sold_on)`,
 D-057).
 
-**Compute it from whatever sales exist, from day one.** Owner: *"just make it easy and do the average
-of the sales we do have, that way in 30 days we won't have wasted code."* The calculation returns
-**the sale count alongside the change**, so the cell wears the `N OBS` amber `LOW DATA` badge
-(`card.md` §4.11) until the count is healthy, and the same code path serves it forever. **No card can
-have 30 countable days until ~1 Oct 2026** — sales began ~2 weeks ago and D-033's floor discards
-everything before 2026-09-01 — so every strip cell ships in `LOW DATA` and improves on its own.
+**The definition, settled 2026-08-11.** It is a **percent change between two 30-day windows** —
+mean sale price over the last 30 days against mean sale price over the 30 days before that — not a
+single-window average. Owner chose this explicitly, and `Card.dc.html:398`'s *"{chg} **over** 30
+days"* reads as a change rather than a level, which is where he had drawn it from.
+
+```sql
+-- both windows in one pass; index sales(card_id, sold_on) already exists (D-057)
+SELECT grade_tier,
+       avg(price_cents) FILTER (WHERE sold_on >= current_date - 30) AS recent,
+       count(*)         FILTER (WHERE sold_on >= current_date - 30) AS recent_n,
+       avg(price_cents) FILTER (WHERE sold_on <  current_date - 30) AS prior,
+       count(*)         FILTER (WHERE sold_on <  current_date - 30) AS prior_n
+FROM sales
+WHERE card_id = :id AND sold_on >= current_date - 60
+GROUP BY grade_tier;
+```
+
+**The windows are hardcoded and never widen.** Owner: *"the query should build in that time period…
+eventually that query will work for only the latest thirty days."* Today it returns a handful of rows;
+in a year it returns a full window; the query is identical. No early-days special case to unpick later
+— which was the whole point of *"that way in 30 days we won't have wasted code."*
+
+**It returns both counts alongside the change**, so the cell wears the `N OBS` amber `LOW DATA` badge
+(`card.md` §4.11) until they are healthy, on the same code path that serves it forever.
+
+**Nothing is computable until ~1 Nov 2026.** Two 30-day windows need 60 countable days; D-033's floor
+discards everything before 2026-09-01. So every strip cell ships in `LOW DATA` and improves on its own
+without a deploy. Note this is a month later than a single window would have needed — the honest
+definition costs 30 days, and is worth it.
 
 **On "why not just finish one page at a time"** (owner asked, 2026-08-11, and the answer belongs
 here rather than in a conversation): the Card page **cannot be finished**. Its sales ledger and census
