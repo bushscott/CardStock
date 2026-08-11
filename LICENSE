@@ -1,0 +1,29 @@
+Copyright (c) 2026 Scott Bush. All rights reserved.
+
+This source is published so that it can be read, reviewed, and learned from.
+No permission is granted to use, copy, modify, distribute, or run it.
+
+That restriction is not about the code. It is about what the code is pointed
+at, and what it puts on a screen.
+
+This application has no data of its own. Every price, sale, and population
+count it displays was collected from a website run by real people who never
+asked to be scraped. Running a copy of this means pointing it at such an
+archive — either someone else's, or one you filled yourself by running a
+copy of the scraper, which is the thing that companion project asks you not
+to do. The front end inherits that responsibility at one remove; it does not
+escape it.
+
+There is a second reason, and it is the one that changes with this repo
+rather than the scraper. Storing someone's data is a private act. Serving it
+to the public is not. Card images and market figures shown to visitors are
+distribution, and the people whose data it is get a say in that which they
+never gave.
+
+None of this is a claim that the ideas are precious. The architecture, the
+sufficiency states, the decision ledger, the reasoning in docs/adr/ — take
+all of it, and ask me anything about any of it. Just don't stand up another
+copy pointed at their data.
+
+Fan-made. Not affiliated with, endorsed by, or connected to Nintendo, The
+Pokémon Company, Creatures Inc., GAME FREAK, or PriceCharting.

@@ -301,6 +301,20 @@ owners.
 All market data is scraped from a third-party source and is **not authoritative**. Nothing here is
 financial advice.
 
-## Licence
+## Licence — please read, please don't run
 
-All rights reserved. The source is here to be read and reviewed; it is not licensed for use.
+All rights reserved. The source is here to be read and reviewed; it is not licensed for use. See
+[LICENSE](LICENSE).
+
+That is deliberate, and it is not about protecting the code. This application has no data of its
+own — every figure it displays was collected from a website whose owners never asked to be scraped.
+Running a copy means pointing it at such an archive, either someone else's or one you filled by
+running a copy of the scraper, which
+[that project](https://github.com/bushscott/PokemonInvestBatch) asks you not to do.
+
+And storing someone's data is a private act where serving it to the public is not. Card images and
+market figures shown to visitors are distribution, and the people whose data it is never agreed to
+that.
+
+So take the ideas freely — the architecture, the sufficiency states, the ledger. Just don't stand up
+another copy pointed at their data.
