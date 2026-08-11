@@ -80,6 +80,55 @@ The source reports one "Grade 8" figure covering every grading company, splittin
 
 ---
 
+### D-010 — Card images exist on disk. `HANDOFF.md:112` is wrong that they don't
+~3.6 GB of real photos at `{ImageDirectory}/{hash}/1600.jpg`, joined to cards via `cards.image_hash`, fetched hourly at 50/sweep.
+
+**Receipts, read directly 2026-08-10:** `DATA_MODEL.md:292–295` ("Images — filesystem `{ImageDirectory}/{hash}/1600.jpg`… **~3.6 GB at full corpus**"), `:160` (`image_hash` column), `:325` (refresh cadence), `:105` (source CDN path).
+
+`HANDOFF.md:112` calls imagery "100% placeholder slots… the largest open risk." The first half is factually wrong. **The licensing question is entirely separate and remains untouched** — no repo records reading any terms — so the risk may still be real for a different reason. See D-014's licensing sibling in D-019… tracked as part of D-011.
+
+**Notable:** `DATA_MODEL.md:464` anticipates this app serving them — "The web app that will read `sales`, `price_months`, `populations`, and **serve the images**."
+
+---
+
+### D-027 — The scraper states a single-writer rule for its own tables
+"They still never write the scraper's tables directly — **the worker is the only SQL writer.**"
+
+**Receipt:** `DATA_MODEL.md:459–462`, read directly 2026-08-10. Corroborates ADR-0006 from a second document.
+
+**This is evidence, not a CardStock obligation** — see D-026. It is the scraper author's stated invariant, and stronger than I first characterised it, but adopting it as binding is still an open decision.
+
+---
+
+### D-028 — The read API is an explicit TODO in the scraper repo, not a prohibition
+Directly corroborates the owner's reading of S-002.
+
+**Receipts, read directly 2026-08-10:**
+- `DATA_MODEL.md:463–466` — "**Nobody else.** The market data — the entire point of the system — has no consumer yet. The web app that will read `sales`, `price_months`, `populations`, and serve the images does not exist; **its read API is undesigned.**"
+- `DATA_MODEL.md:472` — "**TODO (design): web app read API** — undesigned."
+
+So the sibling repo does not forbid a read API. It has one filed as outstanding design work and names this app as its consumer.
+
+---
+
+### D-029 — `sales.title` is stored raw and must be HTML-encoded at render
+A security requirement CardStock inherits, not an optional nicety. Listing titles come from marketplace sellers and are stored unescaped by design.
+
+**Receipt:** `DATA_MODEL.md:472–473` — "must HTML-encode `sales.title` at render (stored raw by design)." Read directly 2026-08-10.
+
+**Where it bites:** the Card page sales ledger renders a Listing-title column (`HANDOFF.md`:49, `DESIGN_NOTES.md`:47). Razor `@` output encodes by default, so the default path is safe — the risk is any `MarkupString`, `innerHTML` via JS interop, or tooltip/attribute injection. Worth a test, given D-005 makes Blazor certain.
+
+---
+
+### D-030 — There are eight tables, not nine. Thread resolved
+`DATA_MODEL.md` §3.1–3.8 document exactly eight tables, matching the eight `DbSet`s. §3.9 is "Non-database data" (the filesystem image store) and §3.10 is relationships.
+
+**Receipt:** `grep -nE "^### " DATA_MODEL.md`, run directly 2026-08-10.
+
+**Origin of the discrepancy:** the initial survey agent reported "nine tables in three groups," counting §3.9 — which is explicitly *not* a database table — as one. Both its count and its "three groups" taxonomy were its own phrasing, not the document's.
+
+---
+
 ### D-024 — A loopback intake API already exists, and it was built for CardStock
 **Receipts:** `../PokemonInvestBatch/docs/adr/0006-localhost-intake-api-and-express-visits.md` (Accepted 2026-08-09), read in full; `src/PokemonInvestBatch.Worker/Intake/IntakeApi.cs:19–30` (three routes); `src/PokemonInvestBatch.Worker/ScraperOptions.cs:65` (`IntakeAddress = "127.0.0.1"`). Both read directly 2026-08-10.
 
@@ -156,15 +205,6 @@ The line reads: *"Seams: liquidity seam Apr '25 (churn/vol panes), resolution se
 
 ---
 
-### D-010 — `HANDOFF.md:112` calls card imagery "100% placeholder slots… the largest open risk," but the images exist
-`DATA_MODEL.md:105–109` and §3.9 document ~3.6 GB of real photos at `{ImageDirectory}/{hash}/1600.jpg`, keyed by `cards.image_hash`, with finish-faithful variants per printing.
-
-**Unresolved:** the *data* clearly exists — but the licensing question is untouched, so the risk framing may still be right for the wrong reason. Owner has not ruled on whether to amend the doc.
-
-**Status of the receipt:** agent-reported from `DATA_MODEL.md`; **not yet opened directly.** Per D-007 this needs first-hand verification before it moves to Verified.
-
----
-
 ## Open
 
 ### D-011 — Public URL, or private portfolio piece?
@@ -186,6 +226,17 @@ Coupled to D-014. Interactive Server holds a SignalR circuit per visitor and rou
 
 **Sharpened by D-024:** the browser also cannot reach the worker's loopback intake API. So under WebAssembly, *both* data reads and express-visit calls need a server-side component on the Pi — the browser can only talk to that component. Under Interactive Server the app is already server-side and can call `127.0.0.1` directly. This makes render mode and read-API a single decision, not two.
 
+### D-026 — What access does CardStock have to the scraper's eight tables?
+Reading is certain. Writing is **undecided and deliberately left undecided.**
+
+Owner, 2026-08-10: *"CardStock will have to interact with PokemonInvestBatch tables, but I foresee it being only read. However, that is not something to make as a rule."*
+
+**Evidence that pulls toward read-only**, worth weight but not binding on CardStock: ADR-0006 Consequences — "sibling apps speak HTTP to the worker, never SQL to its tables," and it deliberately adds no new DB grants. That is how the scraper's author drew the line from his side.
+
+**Do not** design as though read-only were already a constraint, and **do not** assume write access is available. If a design needs to write, that is a decision to raise here, not a rule to break or a permission to assume.
+
+**Process note:** I twice wrote this into `CLAUDE.md` as a settled architectural boundary before it had been decided. Recorded there under "Expectations are not constraints."
+
 ### D-025 — Which CardStock scenarios call which intake endpoint?
 Owner, 2026-08-10: "there are specific scenarios where cardstock are going to use these endpoints." Open — the scenarios need enumerating and mapping to `refresh-request` (fire-and-forget) vs `express-visit` (synchronous, gate-bypassing).
 
@@ -205,7 +256,15 @@ Owner's instinct, 2026-08-10: a separate calculating process, "especially for th
 CardStock standalone talking to a read API? Grow `PokemonInvestBatch` to serve HTTP? Monorepo? Entangled with D-013, D-014, D-015 — likely one decision, not four.
 
 ### D-017 — Backups
-Claimed (unverified): `sales` and `populations` cannot be reconstructed if lost — the source publishes no history — while `price_months` is fully re-crawlable. If true, a nightly off-box dump of two tables is cheap insurance against losing the only irreplaceable asset in the project. **Needs first-hand verification per D-007.**
+**The irrecoverability half is now verified.** `DATA_MODEL.md:481–485`: "**Unavailable from source, permanently:** historical sales volume; sales beyond the bucket windows; pre-observation census history." And `:399`: population "History begins at each card's first visit (the site publishes no history)." Meanwhile `price_months` backfills whole on any visit (D-002), so it is fully re-crawlable.
+
+So the asymmetry is real: **`sales` and `populations` are the irreplaceable assets; `price_months` is not.**
+
+**And no backup exists.** `grep -riE "backup|pg_dump|wal|restore|snapshot"` across `ops/README.md`, `ops/*.sh`, and `DATA_MODEL.md` returns no backup strategy of any kind — the only hits are unrelated uses of "snapshot" (census) and "Deployment deltas." Run directly 2026-08-10.
+
+**Still open — the decision, not the facts:** whether to add an off-box dump of those two tables. This is the scraper repo's call, not CardStock's, but CardStock's differentiating indicators depend on both, so it belongs on the list. Owner has not ruled.
+
+**Note:** an off-box dump interacts with the 30-day account-deletion promise in `Cardstock Legal.dc.html` once user tables exist. Unverified — I have not read that file.
 
 ### D-018 — Code organization
 Owner, 2026-08-10: this is a portfolio piece, so structure is a deliverable, not an afterthought. Open: solution layout, project boundaries, where the Blazor app / read API / analytics worker each live, and how that reconciles with D-016 (repo topology).

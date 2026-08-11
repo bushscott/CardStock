@@ -8,6 +8,8 @@ Whether clarifying, designing, or debugging — **verify.** Do not relay a claim
 
 Extra tokens, extra time, and redundant checking are all explicitly acceptable costs (owner, 2026-08-10). Being wrong is not. When in doubt, check it again.
 
+**Expectations are not constraints.** An anticipated shape — "this will probably only ever read those tables" — is not a rule until the owner makes it one. Expectations belong in `DECISIONS.md` as **Open**, never in this file as a boundary. This has already happened twice, both times in the table-access section below, both times by me writing a reasonable inference under a heading that made it sound settled.
+
 **A receipt covers only the sentence it supports.** The most likely way to break this rule is not to invent a claim outright — it is to quote something real and then write a generalization beside it, letting the citation lend credibility to a sentence it never covered. This has already happened once in this file: an accurate quote from ADR-0006 ("sibling apps speak HTTP to the worker, never SQL to its tables") sat next to an invented rule ("anything that changes scraper state goes over HTTP"), under a heading calling it a hard architectural boundary. Corrected 2026-08-10. If a sentence is broader than its receipt, it is a **Claim**, no matter what sits next to it.
 
 ## Hard constraints
@@ -33,16 +35,15 @@ CardStock has no data of its own. Everything it renders comes from a separate, a
 
 Eight `DbSet`s (`Persistence/PokemonDbContext.cs:8–22`): `sets`, `cards` — mutable catalog; `price_months`, `populations`, `sales` — append-only history; `visits`, `fingerprints`, `parse_failures` — crawler bookkeeping. The three-way grouping is descriptive shorthand for reading convenience; `DATA_MODEL.md` does not use those terms.
 
-### The ownership rule — this is a hard architectural boundary
+### Table access — the expected shape, not a rule
 
-Each codebase migrates and writes **only its own tables**.
+**CardStock's own tables** — users, binders, holdings, transactions, watchlists, saved screens, and whatever else the product invents — belong to CardStock. It migrates and writes them directly.
 
-- **CardStock's own tables** (users, binders, holdings, transactions, watchlists, saved screens, and anything else the product invents) belong to CardStock. It migrates them and writes them directly. Normal EF Core, normal CRUD.
-- **The scraper's eight tables are read-only to CardStock.** `SELECT` freely. Never `INSERT`, `UPDATE`, `DELETE`, or migrate them.
+**The scraper's eight tables: reading is certain, writing is undecided.** The owner expects CardStock will only ever read them, and has deliberately declined to make that a rule (2026-08-10: *"I foresee it being only read. However, that is not something to make as a rule."*). So do not design around read-only as though it were a constraint, and do not assume write access is available either. Open decision — **D-026**.
 
-There is **no write path** into the scraper's tables — not SQL, and not HTTP either. The intake API below is not one; see the warning there.
+**What is verified is the sibling repo's position, not CardStock's obligation.** ADR-0006's Consequences say "sibling apps speak HTTP to the worker, never SQL to its tables," and note that it needs no new DB grants. That is real evidence of how the scraper's author drew the boundary and it deserves weight — but adopting it as binding on CardStock is a decision to make, not a fact to inherit.
 
-Verified: `docs/adr/0006`, Consequences — "sibling apps speak HTTP to the worker, never SQL to its tables."
+Separately and firmly: the intake API is not a write channel for this or anything else — see below.
 
 ### The intake API — built for this app
 
