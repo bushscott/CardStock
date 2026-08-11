@@ -6,6 +6,20 @@ A market-data terminal for the Pokémon card aftermarket. Design is complete; im
 
 A market-data application for the Pokémon card aftermarket: price history, a screener, charts with backtesting, and a binder that treats a collection as a portfolio. Fan-made, not affiliated with Nintendo, The Pokémon Company, or Creatures Inc.
 
+### Success criteria, ranked — these drive every priority
+
+1. **Portfolio piece.** A hiring manager clicks a link, spends 90 seconds, and is impressed. The first-90-seconds path gets polish priority.
+2. **Personal profit.** The owner finds cards via his own signals and the Binder proves he beat the market. **Backtest + Binder-vs-benchmark are the product's emotional centre.**
+3. **Someday sellable.** Deferred until proven — but the schema is multi-tenant from day one, so commercialisation is a config change, not a rewrite (D-034).
+
+### The persona
+
+**The finance-fluent card investor.** Treats Pokémon cards as an asset class and is already fluent in technical analysis. Wants to *tune parameters and compare results* — **the playground is the point, not an advanced mode.** Secondary visitor: the hiring manager, who never registers. **Deliberately underserved:** the finance-naive collector — not blocked, not designed for.
+
+Binding consequences: indicators use **real names**; parameters are **numeric inputs exposed by default**, never hidden behind an "advanced" door; **density over onboarding**; explainers only for this dataset's quirks.
+
+### The two rules
+
 The product's distinguishing commitment is **honesty about data**. Two rules follow from it, and nearly every design decision in `DECISIONS.md` traces back to one of them. Harvested from `HANDOFF.md` §1 before that file was retired (D-054); they existed nowhere else.
 
 ### 1. Never smooth over a discontinuity

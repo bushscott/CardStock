@@ -371,6 +371,26 @@ All lines read directly 2026-08-10. Owner asked for this to be tracked, 2026-08-
 
 ---
 
+### D-064 — Demo mode: the flow was designed, then cut, and is now wanted back
+Raised by the owner 2026-08-10 while reviewing something unrelated: *"I vetoed demo mode. But I need a way to put it back… I need a hiring manager to be able to just go to the website and play around. But I don't wanna give it away for free to everybody."*
+
+**It was already designed.** Harvested from `CARDSTOCK_UI_SPEC_v1.md` §2.3 before that file was retired — the only place it existed:
+
+> **The hiring-manager flow (criterion 1, explicitly designed).** Landing page → "View live demo" → dropped into a pre-seeded read-only account on **Home** (watchlists populated, signals firing, binder seeded) → most likely clicks: a watchlist row (peek panel), "Open full chart →" (trigger triangles), Screener preset (density), Binder (P&L-vs-index). Write actions show a quiet "Demo mode — sign in to save" nudge. **Total friction: zero clicks of signup.**
+
+Demo mode was then cut wholesale on 2026-08-10 (`HANDOFF.md` §4, "the marketing pages carry that story now"), and the owner has since reversed that.
+
+**Corrections to the original design, from what has been settled since:**
+- **Access is not public.** Owner, 2026-08-10: *"the marketing and landing pages is all they should be able to do."* Everything behind `/product` requires login. D-011 is open *signup*, not open *access*.
+- **Not one shared read-only account.** Owner proposed a pre-seeded user resetting nightly. Better: **per-session**, since the multi-tenant schema (D-034) makes a demo session just a `user_id` that expires. That removes collisions between concurrent visitors — a hiring manager should never watch their binder change under them — and removes the nightly reset job.
+- **Writes should probably work**, not be read-only. Logging a transaction is a core interaction, and the session is discarded anyway. The original "sign in to save" nudge was designed for a shared account that could not tolerate writes.
+- **Demo sessions must be excluded from usage stats**, or the numbers are meaningless.
+- **The removal was incomplete.** All 11 marketing CTAs still land on `Cardstock Account.dc.html:56`, which renders "Browse the demo →" (D-044). Whatever is built, that remnant needs reconciling rather than deleting.
+
+**Still open:** how a demo session is granted — an open "Try the demo" button on the landing page, or a token the owner hands out per application.
+
+---
+
 ### D-063 — 🔒 Architecture: WebAssembly client, stateless API, static marketing, .NET worker
 Owner, 2026-08-10. **Resolves D-013 (render mode), D-014 (read API), and D-016 (repo topology).** The last architectural blocker.
 
