@@ -166,6 +166,46 @@ Read directly 2026-08-10, to be mirrored per D-018–D-021.
 
 ## Decided
 
+### D-075 — The build sequence, and why it is ordered by data rather than by screen
+Owner approved 2026-08-11 (*"that sounds good"*). Recorded because it was agreed in conversation and
+existed nowhere else.
+
+**The ordering principle:** sort features by what data actually exists today, not by screen. Doing
+that produces a spine that cuts across six screens:
+
+| Works on today's data | Blocked until 2027 |
+|---|---|
+| Browse, Set, Card price chart | Card sales ledger, census |
+| Charts price and trend indicators | Charts liquidity and supply rows |
+| **Binder — holdings, cost basis, P&L** | Binder vs benchmark *(needs the index)* |
+| Home watchlist | Home feed *(needs the worker)* |
+| Screener price filters | Screener liquidity filters |
+
+Everything valuable that works **today** rides `price_months` (deep to ~Dec 2020, D-002) plus
+CardStock's own tables. `sales` and `populations` are a 2027 story no engineering shortens.
+
+| Phase | What | Status |
+|---|---|---|
+| 0 | Walking skeleton: solution, CI, schema, deployed to the Pi | ✅ **Done** 2026-08-11 |
+| 1 | `price_months` read layer — change-only as-of semantics, encoded once, tested hard | **Next** |
+| 2 | Card page end to end, with real `LOCKED` / `LOW DATA` states | |
+| 3 | Worker: index construction first — nothing comparative exists without it | |
+| 4 | Binder — the owner's stated emotional centre, and it works on today's data | |
+| 5+ | Screener, Charts, Home feed, demo mode (D-064), marketing and landing **last** | |
+
+**Two orderings that were argued and rejected:**
+- *Landing page first.* It has zero technical risk and zero data dependency, so it can be built at
+  any point — including last. It is the frame around a story that cannot be told yet, so building it
+  early means building it twice.
+- *Depth-first by screen.* The data does the sequencing; a screen-at-a-time order would repeatedly
+  hit the same 2027 wall in five different places.
+
+**Phase 1 is the next thing to start**, and it is where the correctness risk concentrates: absence
+means "unchanged", not "missing", and "latest" is `max(observed_at)` per key rather than the newest
+month.
+
+---
+
 ### D-074 — Cost basis is FIFO. This unblocks the Binder
 Owner, 2026-08-11: *"First in, first out."*
 

@@ -64,6 +64,15 @@ SELECT to_regclass('cardstock.__cardstock_migrations_history');  -- must NOT be 
 SELECT to_regclass('public.__cardstock_migrations_history');     -- must be null
 ```
 
+## 2a. Where the passwords are
+
+The three role passwords generated when `cardstock-postgres-setup.sql` was first run live in
+**`ops/credentials.local`**, which is gitignored and `chmod 600`. The committed `.sql` keeps its
+`CHANGE_ME` placeholders and is a template, not a record.
+
+The `cardstock_app` password also sits in `/opt/cardstock/api/appsettings.Production.json` on the Pi,
+owned by the `cardstock` service account and mode 600.
+
 ## 3. Running the tests
 
 Database development happens on the Pi; there is no local Postgres by decision
@@ -77,6 +86,20 @@ CARDSTOCK_TEST_DB="Host=192.168.0.56;Database=postgres;Username=cardstock_tester
 
 With `CARDSTOCK_TEST_DB` unset the database tests skip rather than fail, and the
 model guards still run. CI sets it to its own `postgres:15` service container.
+
+**If `dotnet test` appears to hang before any test runs**, it is MSBuild node
+contention rather than the database — observed 2026-08-11, twice, sitting in
+MSBuild for 7+ minutes with no testhost process and no test database created.
+The fix:
+
+```bash
+dotnet build-server shutdown && pkill -f MSBuild.dll
+dotnet build CardStock.slnx -c Release -m:1
+dotnet test CardStock.slnx -c Release --no-build -m:1
+```
+
+`-m:1` and a separate `--no-build` test step make it reliable. A run that reaches
+the tests at all completes in about a second.
 
 ### When the schema drift test fails
 
