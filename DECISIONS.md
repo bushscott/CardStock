@@ -89,7 +89,9 @@ Routes: `POST /cards/{id}/refresh-request` (202, fire-and-forget, takes the next
 
 **Two hard consequences:**
 
-1. **The ownership rule.** CardStock reads the scraper's tables freely and writes none of them. Mutations go over HTTP. "Sibling apps speak HTTP to the worker, never SQL to its tables."
+1. **The ownership rule.** Each codebase migrates and writes only its own tables. CardStock's own tables (users, binders, holdings, watchlists, saved screens) are CardStock's to write normally. The scraper's eight tables are **read-only** to CardStock — there is no write path into them, not SQL and not HTTP.
+
+   **Corrected 2026-08-10.** This entry originally read "Mutations go over HTTP," which was my generalization sitting next to a real quote, not something the quote said. The intake API is **not a write channel and not a CRUD surface** — both endpoints take a card id, accept no data, and exist for two specific scenarios. Owner: "those two endpoints exist for two very specific scenarios. They do not exist for normal CRUD operations for the database at large." The originating error is recorded in `CLAUDE.md` under the verify-everything rule, as the worked example of a receipt being stretched past what it covers.
 2. **Loopback binding constrains the frontend.** A browser cannot reach `127.0.0.1` on the Pi. Any code calling these endpoints must run server-side on that machine. This bears directly on D-013 and D-014.
 
 **Corrects an earlier claim.** The initial survey flagged express-visit as "an unthrottled outbound amplifier… up to 8,640 fetches/day if scripted." That overstated it: single-flight (at most one express visit in flight, ever), a 10 s spacing floor, same-card coalescing, and `PoliteGate.RecordFetchNow()` are all in place, and the ADR bounds worst case at "one request per spacing floor." The residual concern the ADR itself names is narrower — express can still poke the site once per spacing floor *during a three-strike pause*, with a "refuse express during the pause" toggle noted as the follow-up.
@@ -234,5 +236,7 @@ Owner, 2026-08-10. Open: format, numbering, and where they live (`docs/adr/` to 
 ### S-001 — `HANDOFF.md` §5: "Per-sale ledger (post-seam) · Apr 2025, per card" and "Census snapshots · Jan 2026"
 Replaced 2026-08-10 by D-001. The file now carries a dated correction note in §5.
 
-### S-002 — Spec §1.4: "no HTTP API for the first-party UI; API design explicitly out of scope"
-Relaxed by the owner 2026-08-10. See D-005, D-014.
+### S-002 — Spec: "no HTTP API for the first-party UI; API design explicitly out of scope"
+**Exact text, read directly 2026-08-10** — `CardStock Mockup/uploads/CARDSTOCK_UI_SPEC_v1.md:46`: *"Blazor Web App, Interactive Server rendering; components → services → Postgres directly (no HTTP API for the first-party UI; API design explicitly out of scope)."*
+
+**Not superseded so much as re-read correctly.** Owner, 2026-08-10: "I don't know why it says there can't be an API because an API is one of a couple solutions that we could implement." The parenthetical was a statement about what that document would and would not specify — not a ruling that an API is forbidden. Both the API question (D-014) and the render mode it names in the same breath (D-013) are open.
