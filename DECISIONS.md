@@ -371,6 +371,38 @@ All lines read directly 2026-08-10. Owner asked for this to be tracked, 2026-08-
 
 ---
 
+### D-053 — Account deletion is a bounded window matching backup rotation
+Owner, 2026-08-10. Resolves the C-1 Tier-1 conflict in D-043.
+
+**The `Cardstock Legal.dc.html:57` version wins** — data "removed within 30 days," with the number set to match actual backup rotation. `Cardstock Profile.dc.html:181, :191`'s "immediately and permanently… no recovery" is superseded and its copy must be rewritten.
+
+**Why the conflict resolves this way rather than by preference:** D-017 forces it. `sales` and `populations` cannot be rebuilt from any source, so off-box backups are mandatory. The moment they exist, "immediately and permanently" is unkeepable — a deleted row survives in last night's dump until that dump rotates out. A bounded window is the only promise a backed-up system can actually honour, so the alternative was not merely worse, it was false.
+
+**Two consequences to carry into the build:**
+- **The retention number and the backup rotation are one setting, not two.** If rotation changes, the privacy policy changes. Worth wiring so they cannot drift apart.
+- **`Legal:57` instructs a step the product cannot perform.** It tells users to "export your binder as CSV first," but Profile has no export affordance and the Binder's CSV control generates no file (`HANDOFF.md` §6, verified). Either build the export before launch or cut that sentence. Under D-011 this is a public instruction, so leaving it broken is not neutral.
+
+**Spec updates queued** (per the maintenance rule): `docs/screens/legal.md`, `docs/screens/profile.md`, `docs/screens/binder.md`.
+
+---
+
+### D-054 — One documentation location: `docs/`
+Owner, 2026-08-10: *"I want to end up with one location for updated non-contradictory docs, you decide how that happens."*
+
+**Decided.** `docs/` is the only documentation location. The repo root keeps exactly two control-plane files: `CLAUDE.md` (must be there — the harness loads it) and `DECISIONS.md` (kept there because relocating it would rewrite 117 cross-references for no clarity gain). `CardStock Mockup/` holds **no markdown, by rule**.
+
+**Target end state:** `CLAUDE.md` + `DECISIONS.md` + `docs/screens/*.md` + `docs/brand.md` + `docs/adr/`. One document per question — what are the rules, what did we decide, what do I build.
+
+**Done:** `uploads/PROJECT_LOG.md` deleted (harvested as D-042); `brand-system.md` moved to `docs/brand.md`; `docs/README.md` written as the index.
+
+**Still to retire, each needing a harvest first:** `CARDSTOCK_UI_SPEC_v1.md`, the compass research artifact, both copies of `BRAND_BRIEF.md`, `uploads/Brand package creation/README.md`, `HANDOFF.md`, `DESIGN_NOTES.md`, `DISPLAY_VOCABULARY.md`, `BACKTEST_WARNINGS.md`.
+
+**`docs/CONTRADICTIONS.md` is scaffolding and deletes itself** when its classes are worked through. Recorded in `docs/README.md` so a future reader does not preserve it out of caution.
+
+**Handle `DESIGN_NOTES.md` last and carefully.** It has proven the most reliable document in the set — its census branch rules reproduce the seeded arithmetic exactly (D-051), and the Card audit called that "the single most valuable doc find for the build." Its rulings migrate to the screen specs and its reasoning to `docs/adr/` before it goes.
+
+---
+
 ### D-052 — Tier colours become tokens across all three modes; the prototypes are frozen
 Owner, 2026-08-10, answering the first of the contradiction-queue decisions. Two decisions in one.
 
