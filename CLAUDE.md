@@ -52,10 +52,11 @@ Extra tokens, extra time, and redundant checking are all explicitly acceptable c
 
 ## Where things live
 
-**One documentation location: `docs/`.** Nothing authoritative lives outside it except the two control-plane files at this root.
+**One documentation location: `docs/`.** Nothing authoritative lives outside it except the two control-plane files at this root — `CLAUDE.md` and `DECISIONS.md`. `README.md` also sits at the root but is **derived, not authoritative**: it restates for a public audience what the documents below already establish, so when it disagrees with them it is the one that is wrong.
 
 | Path | Holds |
 |---|---|
+| `README.md` | The repo's front door, for a public audience. At the root because GitHub renders it there. Descriptive, never authoritative — every figure in it is sourced from below, and it is the one document written for people who have read none of the others |
 | `CLAUDE.md` (this file) | Rules, hard constraints, document authority. At the root because Claude Code loads it from there |
 | `DECISIONS.md` | The ledger — every claim and decision, with status and a re-runnable receipt |
 | `docs/README.md` | Index and read order |
