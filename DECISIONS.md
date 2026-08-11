@@ -196,6 +196,36 @@ No `.planning/` directory in this repo. Owner, 2026-08-10.
 
 ## Disputed
 
+### D-032 — 🚩 BLOCKING: every locked-row progress ratio in `DISPLAY_VOCABULARY.md` is wrong, and wrong in the direction that overstates readiness
+**Do not implement any unlock countdown, progress bar, or LOCKED-state copy until this is audited.**
+
+The §10 Charts inventory and §9 Screener cautions hard-code progress ratios and unlock dates. The arithmetic proves they were derived from `HANDOFF.md` §5's false dates (D-001):
+
+| Row | Says | Implied start | Reality |
+|---|---|---|---|
+| Amihud illiquidity (`:157`) | "24 post-seam months · ~Apr 2027 **(16/24 mo)**" | Apr 2025 — 16 months before today | Seam is late **Jul 2026** → ~**1/24**, unlocking ~**Jul 2028** |
+| Supply overhang (`:164`) | "12M census history **(7/12 mo)**" | Jan 2026 — 7 months before today | Census starts late **Jul 2026** → ~**1/12**, unlocking ~**Jul 2027** |
+| Amihud percentile (`:113`) | "Needs ~24 post-seam months (Apr '27)" | same | same |
+| Supply overhang caution (`:119`) | "7/12 so far" | same | same |
+
+Today is 2026-08-10. Apr 2025 → today is exactly 16 months; Jan 2026 → today is exactly 7. The ratios are not approximations — they are computed from the two dates D-001 disproved.
+
+**Why this is the most serious finding so far:** a user sees a progress bar reading "16/24 mo" and concludes the feature is two-thirds ready. It is roughly one twenty-fourth ready. The product whose entire differentiator is *never compute on insufficient data* would be **overstating data sufficiency inside its own honesty apparatus** — and doing it in the one place users are told to trust.
+
+**`DISPLAY_VOCABULARY.md` also contradicts itself twice**, independent of the seam problem:
+- **Discount-to-list coverage:** `:36` says "4.4% coverage"; `:159` says "listed price on **12%** of rows." Same file. See D-031 — 4.4% is the credible figure.
+- **Seasonality unlock:** `:36` says "corpus-locked until ~**Nov 2028**"; `:145` says "3 observed cycles · **Nov 2027** (1/3)." Same file, one year apart.
+
+**Also needs a query:** `:160` "Cross-marketplace gap — ≥5 sales/venue/window **(1/5 venues)**" assumes eBay-only, while `DATA_MODEL.md:102,:227` document five sources. Same issue as D-031.
+
+**Scope of the audit:** §2 (the five sufficiency states), §9 (Screener filter cautions), §10 (Charts row inventory), plus §1's `◌` chip "unlock countdown" tooltips and §3's feed UNLOCK (◆) events — every surface that renders a countdown, ratio, or unlock date.
+
+**The design's machinery is not at fault.** LOCKED / LOW DATA / progress-with-denominator is exactly the right apparatus for a young dataset. Only the constants are wrong. The fix is recalibration, not redesign — and the honest recalibration will show far more locked rows for far longer, which is a product-scope conversation (D-011 and the v1 scope question), not just an edit.
+
+All lines read directly 2026-08-10. Owner asked for this to be tracked, 2026-08-10.
+
+---
+
 ### D-031 — Two more numbers in `HANDOFF.md` §5 contradict better sources
 The §5 data-dependency table carries at least two more values that disagree with documents closer to the data.
 
