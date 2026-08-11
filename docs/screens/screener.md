@@ -530,4 +530,66 @@ No loading skeleton, no error state, no empty/no-results state, no "0 screens" r
 
 ## 7. Open questions
 
+**Routing and persistence**
+1. Does the screen id belong in the URL? `HANDOFF.md:72` says yes (`/screener/{id}`), `uploads/CARDSTOCK_UI_SPEC_v1.md:112–113` says no. The prototype is silent.
+2. `/screener` is claimed by both the app and the marketing Screener Landing page (`HANDOFF.md:72` vs `:84`). Which one owns the path?
+3. What does **Save** actually do when the active screen is a preset — overwrite, or fork? No new-vs-overwrite affordance exists (`:191`).
+4. Who computes the rail sub-line (`"4 filters · edited 2d ago"`)? It is authored per screen and never recomputed (`:462`).
+5. The DC prop `defaultView` (enum terminal|binder, default terminal, `:417`) is declared but never read — `state.view` is a literal (`:427`). Is view density a persisted user preference?
+
+**Results behaviour**
+6. What happens on **row click**? Rows are `role="button" tabindex="0"` with no handler (`:360`, `:393`). `uploads/CARDSTOCK_UI_SPEC_v1.md:87` says peek panel, then "Open" → Card page. Unimplemented, and the accessibility role is currently a lie.
+7. Are the terminal metric columns fixed, or should they follow the active filters? The prototype hard-codes seven (`:768–776`).
+8. What does `show anyway →` reveal, and how are the revealed rows marked? `state.revealHidden` is toggled and read by nothing (`:873`). `DISPLAY_VOCABULARY.md:133` says "marked unreliable" without specifying a treatment.
+9. The hidden-rows banner names a **single** metric (`:872`). With several floor-bearing filters active, which one is named — the tightest, or all of them?
+10. No empty, loading, or error state exists. `uploads/CARDSTOCK_UI_SPEC_v1.md:429` authors a no-results string that nothing renders.
+11. Chip removal is keyed by **label text** (`:730`). The real model needs stable filter ids; otherwise two identical chips on different screens are removed together.
+12. Binder view offers no sort control and inherits the terminal sort (`:838`). Intended?
+
+**Composite / screen-state semantics**
+13. How is the `Screen` column's `ACTIVE` / `WATCH` / `EXITED` state defined? The seeded `compSince` reasons imply a near-miss rule ("churn ×1.4 not yet sustained", "price drifting below band", "pop reading is 1 observation old", `:473–479`) but no threshold is written down.
+14. `EXITED ≤ 30d ago` as a composite filter option (`:533`) implies a 30-day exit memory. Where is that stored, and does it apply to user screens or only to G1/G2/G4?
+
+**Backtest**
+15. Is the **date range** user-editable? `DESIGN_NOTES.md:12` lists it as backtest config, but the prototype renders it as static text bounded by the honest floor (`:226–228`).
+16. `BT_EXIT` carries a `mean` value that no tile renders (`:523`). Missing tile, or a deliberate exclusion because mean is misleading over variable holds?
+17. Signal-exit mode drops **Max drawdown** entirely (`:628–634`). Intentional, or an omission?
+18. In signal-exit mode the horizon group's explanatory tooltip is unreachable because the group is `pointer-events: none` (`:217`, `:657`). Needs a reachable affordance.
+19. In signal-exit mode the grey maturity banner still keys off `stats[btH]` (`:658`), so it can appear while the horizon is irrelevant. Suppress it in signal exit?
+20. How is the honest floor computed in general — "a screen is only as old as its youngest metric" (`:505`) is the stated rule, but the mapping from metric → data-start is per-metric and, per D-001, per-card and ragged.
+21. Concentration is set-keyed only; character clustering is listed as "to add" (`BACKTEST_WARNINGS.md:9`). Which of the 15 checks ship in v1?
+22. Is the badge vocabulary closed? The prototype uses exactly four strings — `LOW DATA`, `POST-SEAM`, `7 OBS`, `24M MIN` (`:487–494`).
+
+**Data honesty (blocked on D-032/D-033)**
+23. Every hard-coded sufficiency number in this screen's copy is known-wrong (see §8, rows 19–21). What replaces `7 OBS`, `7/12`, `Apr ’27`, `Jan ’26`, `Apr 2025`, and `~12%` once the 2026-09-01 floor is applied? These are *copy* decisions, not just arithmetic — the badges and cautions are user-facing.
+
 ## 8. Contradictions found
+
+Tier 1 (this HTML) wins over Tier 2/3 docs, **except** where `DECISIONS.md` records an owner decision, which overrides all tiers (`CLAUDE.md:30`). Rows 19–21 are that exception: the HTML copy is the thing that is wrong.
+
+| # | Claim | Source doc:line | What the HTML actually does |
+|---|---|---|---|
+| 1 | "27 filter metrics" | `HANDOFF.md:72` | **28.** `FILTER_MENU` (`:481–501`) and `EDITORS` (`:534–563`) each define 28 entries across 7 groups: 6 + 5 + 6 + 3 + 2 + 3 + 3 |
+| 2 | "filter editors for all **29** signals" | `DESIGN_NOTES.md:7` | 28 |
+| 3 | "§9 … all **27** metrics" | `DESIGN_NOTES.md:159` | 28 — and `DISPLAY_VOCABULARY.md`'s own §9 table already lists 28 rows, so the summary miscounts its own table |
+| 4 | Route `/screener/{id}` exists | `HANDOFF.md:72` | No routing of any kind; screen selection is `state.screen` (`:427`, `:711`). `uploads/CARDSTOCK_UI_SPEC_v1.md:112–113` lists only `/screener` and `/screener/{screenId}/backtest`, so the two docs also disagree with each other |
+| 5 | `/screener` is the marketing Screener Landing page | `HANDOFF.md:84` | Same doc assigns `/screener` to the app at `:72`. Direct collision; the HTML cannot arbitrate |
+| 6 | Results band actions are "Save / Backtest→ / **Alert me**" | `DESIGN_NOTES.md:10` | Only **Save** and **Backtest →** (`:191–192`). The alert affordance was stripped 2026-08-08 (`DESIGN_NOTES.md:80`, `:120`); line 10 is a stale 2026-08-03 record |
+| 7 | `between` chip renders as "ROC 1M **between** −2% **and** +2%" | `DISPLAY_VOCABULARY.md:92`; seeded chip `:455` | The generator emits `{short} {window} {fv(v1)}–{fv(v2)}` — no operator word, no "and" (`:807`). The same doc line states the correct rule (`v1–v2`) and then gives an example that violates it |
+| 8 | Exit-mode tile is labelled "Hit rate (closed)" / "Hit rate (closed trades)" | `DISPLAY_VOCABULARY.md:67`; `DESIGN_NOTES.md:15` | Tile key is plain **`Hit rate`**; "N of M closed trades" is the sub-line, not the label (`:630`) |
+| 9 | Horizon tiles are "Hit rate · Median return · Mean return · Best entry · Worst entry" | `DISPLAY_VOCABULARY.md:67`; `DESIGN_NOTES.md:15` | Keys carry the selected horizon: **`Hit rate 3M`**, **`Median 3M`**, **`Mean 3M`**, **`Best entry 3M`**, **`Worst entry 3M`** (`:637–649`). Subs are "return per entry", not "return" |
+| 10 | Best/Worst entry are part of the standard horizon tile set | `DISPLAY_VOCABULARY.md:67`; `DESIGN_NOTES.md:15` | **Conditional.** Rendered only when `stats[btH]` exists *and* at least one row has a non-null return at that horizon (`:642–651`). Horizon mode shows 6 or 8 tiles |
+| 11 | Exit mode "swaps to" 4 tiles: Hit rate · Median return · Median hold · Open positions | `DESIGN_NOTES.md:15` | Exit mode renders **6** tiles — it keeps Buy signals (entries) and Market index, and drops Mean and Max drawdown (`:628–634`) |
+| 12 | Honest floor is a **Grey (mechanics)** banner | `BACKTEST_WARNINGS.md:27` | Rendered **amber**: `rgba(176,127,26,.07)` fill, `rgba(176,127,26,.2)` border, `--warnInk` text (`:232`). Only the *age note* is grey (`--mutbg`/`--mut`, `:312`). The same file's intro (`BACKTEST_WARNINGS.md:3`) describes the amber/grey split correctly, so it contradicts itself |
+| 13 | Hidden-rows banner reads "N **rows** hidden — churn needs 60+ post-seam days" | `DISPLAY_VOCABULARY.md:133` | "**3 cards hidden — insufficient data for churn (needs 60+ post-seam days)**" (`:381`), with both the count (`3`) and the metric string hard-coded (`:872`) |
+| 14 | Hidden-rows banner reads "1,204 cards hidden: insufficient data — show" | `uploads/CARDSTOCK_UI_SPEC_v1.md:61` | Third distinct wording; HTML wording as row 13, and the escape link is "**show anyway →**" |
+| 15 | "Removing the last filter shows the unfiltered corpus" | `DISPLAY_VOCABULARY.md:96` | No filter ever affects results. `rows` is the full 12-card seed array and `matchLabel` is `rows.length` regardless of chips (`:738–744`, `:856`). Unverifiable in the prototype — treat as a design intent, not a Tier 1 fact |
+| 16 | "Row click → peek panel; 'Open' → Card page" | `uploads/CARDSTOCK_UI_SPEC_v1.md:87` | Rows are `role="button" tabindex="0"` with **no** click or key handler (`:360`, `:393`). The only row interaction is a hover-triggered floating art preview (`:361`, `:748`) |
+| 17 | "Ranked, **virtualized** results table" / "QuickGrid + virtualization" | `uploads/CARDSTOCK_UI_SPEC_v1.md:87`, `:46` | Plain `sc-for` over the full array; no virtualization, no pagination, no "load more" (`:359`) |
+| 18 | Beta vs index has unit "signed" | `DISPLAY_VOCABULARY.md:110` | Beta has **no unit**; `signed: true` is a separate flag that only controls the `+` prefix (`:545`, `:800`). Same conflation would mislead an implementer building the unit renderer |
+| 19 | **⚠ D-032 / D-033.** "Amihud … needs ~24 post-seam months (**Apr ’27**)"; "Supply overhang … **7/12** so far"; "Census history starts **Jan ’26** — **7 observations**"; `7 OBS` badges; Pop Δ column tip "2026+ — 7 observations" | HTML `:490`, `:494`, `:548`, `:552–554`, `:493`, `:774` — repeated verbatim into `DISPLAY_VOCABULARY.md:113`, `:117–119` | **The HTML is the wrong source here.** `DECISIONS.md:342–356` (D-032) proves these ratios were derived from dates D-001 disproved; `DECISIONS.md:309` (D-033) sets a disclosed floor of **2026-09-01**, giving ~1/24 (unlock ~Sept 2028) for Amihud and ~1/12 (unlock ~Sept 2027) for census-backed metrics. Every one of these strings must be recomputed before the Screener ships (`DECISIONS.md:244`) |
+| 20 | **⚠ D-001.** Backtest floor notes: "the grading census, which begins **Jan 2026**"; "the per-sale ledger begins **Apr 2025**" | HTML `:505`, `:511` | Contradicted by `DECISIONS.md:22` (D-001): both histories begin at each card's **first crawler visit, late Jul 2026**, and the seam is per-card and ragged, not a single shared date. The prototype's floor arithmetic (Mar ’26, Jun ’25 windows) is therefore illustrative only |
+| 21 | **⚠ D-031.** Discount-to-list: "Listed price captured on only **~12%** of rows so far" | HTML `:491`, `:550` | `DISPLAY_VOCABULARY.md:36` and `:61` say **4.4%**; `DECISIONS.md:359` (finding) and D-031 at `DECISIONS.md:416` record 4.4% as the credible figure. `DISPLAY_VOCABULARY.md:115` copies the HTML's 12% straight through, so the same file disagrees with itself. The Screener editor caution overstates coverage by ~3× |
+| 22 | Concentration fires "when >50% of signals from one set" | `DESIGN_NOTES.md:16` | The prototype computes nothing — `warn` is an authored string present only on the `short` dataset, gated on `btPhase === 'done'` (`:509`, `:668`). The threshold is doc-only and unverified by the HTML; the seeded text ("8 of 14") is consistent with it |
+| 23 | Backtest config includes a **date range** control | `DESIGN_NOTES.md:12` | Date range is static read-only text with the tooltip "Bounded by the honest floor below" — no picker, no handler (`:226–228`) |
+| 24 | Chips are "generated, never authored" | `DISPLAY_VOCABULARY.md:91` (rule is correct) | The rule holds for the live add-path (`:807–809`, `:835`), but **the seeded chips violate it**: `Spread compressing` and `New 12M high` (`:457`, `:459`) name conditions no metric can emit — "New 12M high" is not in the 28-metric vocabulary at all — and `EMA 3/9 bullish`, `Era: WOTC`, `Tier: Raw`, `Churn 30d ≥ ×1.2 baseline`, `Price ≥ $50`, `RS pct ≥ 90th`, `Gem rate ≥ 40%`, `Price $200–$2,000`, `ROC 3M ≤ 0%` all deviate from the generator's output (`:455–465`). Implement the generator; discard the seeds |

@@ -480,7 +480,7 @@ scrollable) and the deck renders its resting stack with auto-advance disabled, c
 
 ### 4.4 Image-slot states
 
-The seven `image-slot` elements (§6.6) are custom elements from `image-slot.js` with
+The eight `image-slot` elements (§6.6) are custom elements from `image-slot.js` with
 `placeholder="drop card image"`. Unfilled they render a placeholder; `image-slot.js:382` gives the
 loading shimmer its own reduced-motion off-path. Whether the prototype's local
 `.image-slots.state.json` (299 KB) contains dropped images for these specific ids is a design-time

@@ -19,7 +19,7 @@ illustrative sample data — the **structure** is the contract, not the values.
 | | |
 |---|---|
 | **Screen name** | Home (`data-screen-label="Home"`, line 37) |
-| **Route** | Application root. In the prototype: `Cardstock Home.dc.html`; the logo (line 41) and the active nav tab (line 45) both point here. Suggested Blazor route: `/` |
+| **Route** | Application root. In the prototype: `Cardstock Home.dc.html`; the logo (line 41) and the active nav tab (line 45) both point here. **Unresolved:** `HANDOFF.md:71` says `/`, `CARDSTOCK_UI_SPEC_v1.md:111` says `/home` — the HTML cannot settle it (§8 row 24). `/` is the better default on tier grounds |
 | **Nav position** | First of five primary tabs — Home · Screener · Charts · Binder · Browse (lines 45–49). Home renders as active: weight 600, `--ink` text, 2px `--acc` bottom border |
 | **Purpose** | A market-open dashboard: a scrolling market-wide ticker, what changed on the user's saved screens since last visit, a portfolio snapshot, and the user's watchlists with per-card tracked-signal state — with a peek drawer for inspecting any card without leaving the page |
 
@@ -636,7 +636,7 @@ afterwards jumps the peek to `ids[focusIdx]` in the active list, which may be a 
 | `ArrowUp` | `preventDefault`; `focusIdx − 1`, clamped to `[0, len − 1]` | From the initial −1 this computes −2 and clamps to **0** — so `ArrowUp` with nothing selected also selects row 0 |
 | `ArrowUp`/`ArrowDown` while the peek is open | Additionally re-points the peek at the newly focused row (line 530) | Only when `peekId` is truthy |
 | `Enter` | Opens the peek for `ids[focusIdx]` | Only when `focusIdx >= 0`; does nothing otherwise (line 535) |
-| `/` | Advertised by the hint `↑↓ rows · Enter peek · / search` (line 143) | **Not implemented in this file.** If it works it is handled inside `cardstock-search.js` |
+| `/` | Advertised by the hint `↑↓ rows · Enter peek · / search` (line 143) | **Not implemented in this file** — handled inside the shared `cardstock-search.js` component. Its documented contract: *"`/` from anywhere (unless focus is in an input), `Esc` clears and blurs, outside click closes. Fires at ≥2 characters"* (`DISPLAY_VOCABULARY.md:194`, `DESIGN_NOTES.md:123`). Note Home's own handler already blurs an input on `Escape` (line 522), which is consistent with that contract |
 
 Arrow navigation **does not scroll the focused row into view** — a focused row below the fold stays there.
 
@@ -777,9 +777,13 @@ A rebuild must preserve these. Each is enforced by the prototype's code, not mer
 **Data and sourcing**
 
 1. **Card art has no source.** Every image is an `image-slot` (a Design Composer placeholder) over a
-   two-stop gradient from a hard-coded per-card `ACCENTS` map (lines 426–431). The scraper schema has no
-   image table. Where does art come from, and what is the gradient fallback keyed on — a hash of the card
-   id, the set, the character?
+   two-stop gradient from a hard-coded per-card `ACCENTS` map (lines 426–431). The scraper's eight tables
+   (`CLAUDE.md` line 55) include no image table. `CARDSTOCK_UI_SPEC_v1.md:160` (Tier 3) says the peek image
+   comes *"from `cards.image_hash` local store"* — **unverified against `../PokemonInvestBatch`; check
+   `DATA_MODEL.md` before relying on it.** Two conventions are worth preserving regardless: slot ids are
+   `art-<cardid>` and are **shared across the watchlist row, the hover preview and the peek** (lines 507,
+   558; `DESIGN_NOTES.md:29` adds Charts to that list), and the gradient is a per-card two-stop fallback.
+   Open: where does art come from, and what is the gradient keyed on — card id hash, set, or character?
 2. **The market index is undefined.** `INDEX` in the ticker, `vs market index` on the Binder card, and the
    dashed line on the Binder chart all reference "the market index". Nothing says what it contains, how it
    is weighted, or what its base period is.
@@ -869,7 +873,75 @@ A rebuild must preserve these. Each is enforced by the prototype's code, not mer
 
 ## 8. Contradictions found
 
-| Claim | Source doc:line | What the HTML actually does |
+Every doc line below was opened and read directly on 2026-08-10, not taken second-hand. Per `CLAUDE.md`
+§"Document authority", the HTML column is the answer in every row; the doc line is recorded as stale, not
+averaged. `DN` = `CardStock Mockup/DESIGN_NOTES.md`, `DV` = `CardStock Mockup/DISPLAY_VOCABULARY.md`,
+`HO` = `CardStock Mockup/HANDOFF.md`, `SP` = `CardStock Mockup/uploads/CARDSTOCK_UI_SPEC_v1.md` (Tier 3).
+
+### Substantive contradictions
+
+| # | Claim | Source doc:line | What the HTML actually does |
+|---|---|---|---|
+| 1 | *"the five states above are the complete render set"* — **OK · LOW DATA · LOCKED · UNDEFINED window · UNSTABLE FIT**, "every metric on every surface" | DV:55 | **Home renders none of the five.** Grepped for all five names: zero hits. The only sufficiency surfaces on Home are the grey `◌ Churn — 12d` chip (line 395), the "first observed … deltas begin next observation" population string (line 393), and the phrase `LOW CONFIDENCE` inside one feed row's evidence text (line 423). No `N OBS` badge, no disabled control, no gap rendering, no fit badge |
+| 2 | `LOW CONFIDENCE` is a **Charts-only** badge for burned-in / show-anyway rows, distinct from the `LOW DATA` sufficiency state | DN:33, DN:131, DN:146 | Home's feed uses `LOW CONFIDENCE` as the name of the state a **newly unlocked indicator starts in** — *"per-sale ledger reached 30 days for PSA 10 — starts LOW CONFIDENCE"* (line 423). Either the term has a second meaning the docs never define, or the feed copy should say `LOW DATA`. **Unresolved — needs an owner ruling** |
+| 3 | Sparkline markers on the **Home watchlist**: *"▲ green **above** spark … ▼ red **below** … hollow ◌ (current month provisional) · amber tick (sufficiency event). Complete."* | DV:73 (section header DV:72 names "Home watchlist, peek panel") | **The Home watchlist sparkline has no markers at all** — it is a bare polygon + polyline, `aria-hidden="true"` (line 115). Markers exist only in the **peek** chart, and their placement is **inverted**: up events draw a green triangle **below** the line, down events a red triangle **above** it (lines 499–501). There is no amber tick. The provisional current month is a hollow **circle stroked in `--acc`** (line 271), not a `◌` glyph |
+| 4 | Grade tier vocabulary is the **canonical 19-value scale** — `Raw · Grade 1–Grade 9 · Grade 9.5 · PSA 10 · CGC 10 · …`; below 10 the buckets are **grader-agnostic** | DV:64, DN:77, HO:106 | Home uses **three incompatible vocabularies at once.** The peek "Current prices" block uses the **legacy six** (`Raw, Grade 7, Grade 8, Grade 9, Grade 9.5, PSA 10`, line 425). The watchlist Tier column uses **`PSA 9` and `PSA 8`** (lines 371, 381) — grader-*specific* labels below 10, which the canonical scale forbids. `DN:77`'s "Applied to" list does not mention the Home watchlist at all |
+| 5 | *(consequence of #4)* — implied: the peek highlights the row matching the card's tier | — | The match is raw string equality against the six labels (line 511). For the two `PSA 9` / `PSA 8` cards **nothing highlights**, because `'PSA 9' !== 'Grade 9'`. A live defect caused directly by the vocabulary split |
+| 6 | Ticker dropdown *"changes all stats"* | DN:28 | Two of the sixteen do not change. `INDEX` (`▲ +2.4%`) and `NEW 12M HIGHS` (`▲ 214`) are **byte-identical in all three window datasets** (lines 439/442, 450/453, 461/464). The same doc line says they are "always 30d-labeled", so DN:28 contradicts itself; the HTML resolves it — they are window-invariant, and the `30d` suffix says so |
+| 7 | ⋯ menu = *"open chart, open card, move/remove"* (SP), narrowed to "Open full chart" + removal (DN) | SP:157, DN:113 | **Five items**, in this order: `Open full chart`, `Open card page`, `Add to binder`, divider, `Move to list…`, `Remove from watchlist` (lines 125–130). **`Add to binder` appears in no document.** DN:113 is correct that "Edit tracked signals" is gone; it is wrong that the menu is down to two items |
+| 8 | Peek panel is *"focus-trapped"*, *"Esc … focus returns to the origin row"*, with *"roving tabindex in grids"* | SP:287, SP:359 | **No focus trap, no focus restore, no roving tabindex.** The peek is a `role="dialog"` with a global `document` keydown handler; `Escape` clears `peekId` (line 523) and nothing touches `document.activeElement`. Watchlist rows are plain `tabindex="0"` — every row is a tab stop |
+| 9 | Peek panel width = *"right column width"* / *"overlay, right column width"* | SP:160, SP:287 | A **fixed 480px** panel anchored to the **viewport**, not the column: `position: fixed; top: 96px; right: 20px; bottom: 16px; width: 480px; max-width: calc(100vw − 40px)` (line 231). At the 1480px max content width it does not align with the 2fr column |
+| 10 | *"Esc closes and restores the signals feed beneath"* | SP:84 | The peek is anchored to the viewport's right edge and overlays the **Binder** card, not the feed (which is the 3fr left column). Nothing is "restored"; the panel simply unmounts |
+| 11 | Global keyboard map includes `o` (open full page from peek), `t` (toggle Terminal/Binder), `?` (show map) | SP:129 | **None of the three exist.** The handler (lines 519–537) implements exactly four keys: `Escape`, `ArrowUp`, `ArrowDown`, `Enter`. `/` is advertised in the on-screen hint (line 143) but is not in this file |
+| 12 | *"Every interactive control on every app page carries [a `title` tooltip]"* — ~110 controls | HO:153, DN:152 | Contradicted on Home by at least: the ticker window `<select>` (line 59 — has `aria-label`, **no `title`**), the four inactive nav links (lines 46–49), the peek's primary `Open full chart →` link (line 296), the `Performance →` link (line 172), the `edit →` link (line 257), every feed row (line 155), and every footer link (lines 308–310). The rule holds for the watchlist and the ⋯ menu; it is not universal |
+| 13 | Binder card = *"stats row (Positions/Cost basis/1M change) + Best/Worst position/Largest holding + portfolio-vs-index sparkline"* | DN:30 | Correct as far as it goes, but **omits an entire first row**: three large tiles `Total value` / `Unrealized` / `vs market index` at 25.5px (lines 174–189). DN:30 describes rows 2–4 only |
+| 14 | Binder card = *"total value · unrealized ± · 'vs index ±' **one-liner**"* | SP:159 | Not a one-liner — a four-block card: 3 large tiles, 3 small tiles, 3 superlative lines, and a dual-series 12M chart with legend (lines 169–228). SP:159 also omits Positions, Cost basis, 1M change, Best/Worst/Largest, and the chart |
+| 15 | Footers say *"refreshed just now"*; `AsOfStamp` removed app-wide | HO:99, DN:27 | Home's footer says **neither**. It carries `About our data · Privacy · Terms` and a corpus stat `101,882 cards · 4.2M sales observed` (line 312). No freshness stamp of any kind exists on Home |
+| 16 | The *"{cards} cards · {sales} sales observed · updated {x}h ago"* honesty line belongs to the **Landing/marketing** page | SP:421, SP:140 | Home's footer carries that line (minus the `updated {x}h ago` clause) — line 312. No doc assigns it to Home |
+| 17 | Feed *"'All signals →' → Alert Center history"* | SP:158 | The header meta link is **`your screens →` → `Cardstock Screener.dc.html`** (line 152), matching DN:92 and the v2 deferral of Alert Center at DN:120. SP:158 is stale, as `HANDOFF.md` §4 predicts |
+| 18 | Feed rows include *"per-card tracked-signal threshold crossings"* | SP:158 | Removed. All seven seeded rows are screen entries/exits or the unlock product event (lines 416–424), matching the screens-only ruling at DN:80/DN:91–93 |
+| 19 | Feed row types (complete): ENTER is *"▲ green if screen thesis bullish, ▼ red for avoid-list screens"*; EXIT is *"amber"* | DV:58 | The two-way ENTER taxonomy does not cover the data. `Entered "RSI overheat watch"` is **amber `–`** (`s:'warn', i:'–'`, line 419) — neither green ▲ nor red ▼. Confirmed correct: EXIT is amber (line 421), UNLOCK is `◆` amber (line 423). The HTML treats glyph and colour as **two independent per-row fields**, so a rebuild must store both, not derive one from the other |
+| 20 | *"A tracked signal ALWAYS renders exactly one pill, in exactly one of **five** states"* (Hit bullish / Hit bearish / Caution / Quiet / **Pending**) | DV:40, DV:47 | The code defines **four** state keys — `gain`, `loss`, `warn`, `muted` (lines 349–354). Quiet and Pending share the `muted` key and are distinguished **only by the per-chip glyph** in the data (`–` vs `◌`, lines 370 vs 395). The rendered result matches the doc; the state model does not. A rebuild that types this as a five-value enum will not round-trip the prototype's data |
+| 21 | *"**One row per card + tier** on watchlists"* | HO:155, DN:110 | The prototype's row key is the **card id alone** — `lists[].ids` holds bare ids (lines 412–415) and the tier is read off the card record (line 556). The (card, tier) pair is **not representable**: the same card cannot appear twice at two tiers. The rule is satisfied only because the model cannot express a violation |
+| 22 | Watchlist table is *"virtualized"* | SP:157 | A plain `sc-for` over the full list (line 103). No virtualization, no windowing, no pagination, no row cap |
+| 23 | Responsive breakpoints: *"≥1280 full · 1024–1279 peek becomes full-height drawer · 768–1023 Home stacks (index strip → signals → watchlist → binder) · <768 read-mostly"* | SP:354 | **Zero width media queries exist in the file.** The only `@media` is `prefers-reduced-motion` (line 25). The 3fr/2fr grid, the 480px drawer and the fixed-pixel columns have no defined sub-desktop behaviour |
+| 24 | Route is `/` (HO) vs `/home` (SP) | HO:71 vs SP:111 | The HTML cannot settle this — the prototype is a static file (`Cardstock Home.dc.html`) and every self-link uses the filename (lines 41, 45). **Unresolved.** HO:71 is Tier 2 and SP:111 is Tier 3, so `/` is the better default, but this is a decision, not a finding |
+
+### Colour-token drift (verified, low severity but real)
+
+| # | Claim | Source doc:line | What the HTML actually does |
+|---|---|---|---|
+| 25 | Warn gold text was migrated `#B07F1A → #8F6614` in the contrast pass | DN:136–137 | Only the **text** migrated. The caution chip's **background is still hard-coded `rgba(176,127,26,0.12)`** = the old `#B07F1A` — in `this.CHIP.warn` (line 352) and again in the legend (line 140). It is the only chip background not drawn from a palette token, and it does not change in dark or CVD mode |
+| 26 | *"grey #5B5B57 neutral/informational"* | DV:2 | The quiet/pending chip uses `PAL.mut2` = **`#6B6B66`** light / `#A8A8A2` dark (lines 328–329, 353), not `#5B5B57`. `#5B5B57` is `--mut`, used for body-secondary text. DV:2 names the wrong token for chips |
+| 27 | *"accent #3B5BD6 (hover #2E49B8)"* | DN:26 | Superseded by DN:131 (`#4A63D0` / `#3A4FB8`) — and the HTML uses the **new** values throughout (lines 19–21, 329). DN:26 is stale but DN:131 already records the fix; no action beyond not citing DN:26 |
+
+### Doc claims the HTML confirms (recorded so they are not re-litigated)
+
+| Claim | Source | HTML |
 |---|---|---|
-| *(pending — see note)* | | |
+| Visual order = signals+binder row first, then watchlist | DN:5, DN:25 | Confirmed — `order: 1` / `order: 2` (lines 147, 85) |
+| Ticker: `MARKET` label + 7d/30d/90d dropdown; `INDEX` + `NEW 12M HIGHS` always 30d-labeled | DN:28 | Confirmed (lines 58–63; `x: '30d'` at 439/442, 450/453, 461/464) |
+| 48×66 image slots, id `art-<cardid>`, shared with peek; hover scale 3.4× | DN:29 | Confirmed — slot ids `'art-' + id` (lines 507, 558); hover preview 164×226 vs 48×66 = **3.42×** (lines 105, 315) |
+| Drag-to-reorder; resizable columns via header pipes `│`; ⋯ menu closes on outside click **and** mouse-leave | DN:29 | Confirmed (lines 577–585, 95–99, 124, 539–544) |
+| Feed renamed "Screen activity"; header tooltip copy; `your screens →` link to Screener | DN:92 | Confirmed verbatim (lines 151–152) |
+| Feed includes an unlock product event `Indicator unlocked: Churn 30d`, `◆` | DN:36 | Confirmed (line 423) |
+| No `"view all"` history on the feed; no nav bell; no DEMO chip; no peek "sign in with an invite" notice | DN:120, DN:141 | Confirmed absent |
+| Pending ETA format: days when under 60 (`— 12d`); tooltip = floor rule + date history began | DV:47, DV:51 | Confirmed — `Churn — 12d` (em dash) with tooltip *"Unlocks in ~12 days — sales history for this grade begins 2026-06-12"* (line 395) |
+| Chip glance rule: coloured = hit, grey = nothing to report | DV:8 | Confirmed verbatim in the legend tooltip (line 137) |
+| `peekIn` must animate **transform only**, never opacity | DN:37 | Confirmed — `@keyframes peekIn` moves `translateX` only (line 23) |
+| "Worst position", not "Laggard" | DN:30 | Confirmed (line 210) |
+| Nav: 48px, logo→Home, five links, search component, account circle→Profile; pre-paint `localStorage` script | HO:88 | Confirmed (lines 35, 39–54) |
+| Numbers are JetBrains Mono everywhere, including inside prose | HO:151 | Confirmed throughout |
+| Colour never alone — every state pairs a hue with a glyph; CVD swaps hue only | HO:150 | Confirmed (lines 27, 31, 324–327; every coloured value carries `▲▼–◌◆`) |
+| Theme + colourblind mode persist per device | HO:156 | Confirmed for both keys (line 35). **Density does not exist on Home** — no third key is read and no density control is present |
+| Footer links to About our data / Privacy#privacy / Terms#terms | DN:127, DN:148 | Confirmed (lines 308–310) |
+
+### One rule that applies to the rebuild, not to the prototype
+
+`HANDOFF.md:30` bans hand-written progress ratios and unlock dates: *"author the **denominator** … Numerators
+are computed against the floor and today's date. No hand-written progress ratios or unlock dates."* The
+prototype hard-codes exactly that — `Churn — 12d` and `sales history for this grade begins 2026-06-12`
+(line 395) — because it is seeded sample data. **A rebuild must compute the countdown**, not store it. Note
+also that `HANDOFF.md:26` says `DISPLAY_VOCABULARY.md`'s locked-row progress ratios *"overstate readiness by
+roughly 15 months"* (D-032), so any sufficiency copy inherited from that file needs re-derivation before use.
 

@@ -89,7 +89,7 @@ Tint bases (alpha applied per use site; `PAL` exposes them as functions `posBg(a
 | negative | `rgba(214,69,69,α)` | `rgba(213,94,0,α)` |
 | warn | `rgba(176,127,26,α)` in every mode | same |
 
-Observed α values in the prototypes: `.06 .07 .08 .10 .12 .25` light, `.18 .20` dark (`Cardstock Profile.dc.html:219–221`; `Cardstock Charts.dc.html:24`; `Cardstock Home.dc.html:27`). Named helper tokens exist where a tint is used in an inline style: `--posBg`, `--posBg10`, `--negBg`, `--negBg06`, `--negBg07`, `--negBg08`, `--negBg10`, `--negBg25`, `--warnBg`.
+Observed α values in the prototypes: `.06 .07 .08 .10 .12 .25` light, `.18 .20` dark (`Cardstock Profile.dc.html:219–221`; `Cardstock Screener.dc.html:24`; `Cardstock Home.dc.html:27`). Named helper tokens exist where a tint is used in an inline style: `--posBg`, `--posBg10`, `--negBg`, `--negBg06`, `--negBg07`, `--negBg08`, `--negBg10`, `--negBg25`, `--warnBg`.
 
 The CVD hues are Okabe-Ito **blue `#0072B2`** and **vermillion `#D55E00`**, darkened/lightened per surface for contrast (`#0B69A8`, `#CC5F00`, `#B34E00` light; `#58A9E6`, `#F5924E`, `#E8874D` dark).
 
@@ -104,7 +104,16 @@ Colorblind mode is *not* a full palette. It is a thin override that touches only
 | `:root[data-theme="dark"]:not([data-cvd="1"])` | dark standard state hues |
 | `:root[data-theme="dark"][data-cvd="1"]` | dark CVD state hues |
 
-Pages declare only the subset of CVD tokens they actually use inline, so the `:root[data-cvd="1"]` block differs page to page — Home declares 7 tokens (`:27`), Screener 2 (`:25`), Charts 1 (`:27`), Card 5 (`:24`). The dark block is byte-identical across the 11 pages that have one. **A Blazor implementation must declare the union once, globally.**
+Every page declares only the subset it actually uses inline, so **no two pages carry the same block**:
+
+| Block | Pages | Shape |
+|---|---|---|
+| `:root[data-cvd="1"]` | 9 pages, all different | Home 7 tokens (`:27`) · Screener 5 (`:24`) · Charts 2 (`:23`) · Card 2 (`:25`) · About Data 2 (`:24`) · Binder 1 (`:27`) · Browse 1 (`:25`) · Character 1 (`:25`) · Set 1 (`:25`). Absent from Legal, Profile, Account. |
+| Dark chrome — **long** (adds `--line3`, `--tooltipBg`, `--accBg`, `--accMut`) | 8: Home, Screener, Charts, Binder, Card, Browse, Set, Character | `Cardstock Home.dc.html:29` |
+| Dark chrome — **short** | 2: About Data, Legal | `Cardstock Legal.dc.html:21` — same tokens minus those four, plus `--logoTeal` folded in |
+| Dark chrome — **none** | 2: Profile, Account | theme applied in-component instead — see §7.4 |
+
+**A Blazor implementation must declare the union once, globally**, and take the long block as canonical.
 
 ### 2.5 Brand tokens (`brand/brand-tokens.css`)
 
@@ -174,7 +183,7 @@ Three families. Google Fonts, `display=swap`, with `preconnect` to `fonts.google
 | **JetBrains Mono** | 400, 500, 600 (app) · 400, 500, 700 (brand page) | **Every number**, ticker, timestamp, kbd hint, eyebrow, badge | `'JetBrains Mono', monospace` |
 
 App font link (`Cardstock Home.dc.html:14`):
-`Inter:wght@400;500;600;700` + `Inter+Tight:wght@600;700` + `JetBrains+Mono:wght@400;500;600`. Charts additionally loads mono 700.
+`Inter:wght@400;500;600;700` + `Inter+Tight:wght@600;700` + `JetBrains+Mono:wght@400;500;600`. `Cardstock Charts.dc.html` and `Cardstock Screener.dc.html` additionally load mono 700.
 Brand-specimen link (`Cardstock Brand System.dc.html:13`): `Inter:wght@400;500;600;700;800` + `JetBrains+Mono:wght@400;500;700` — **no Inter Tight**.
 
 `DESIGN_NOTES.md:24` records that Space Grotesk was tried and rejected.
@@ -271,7 +280,7 @@ Supporting rules:
 
 Verified four ways, all in Tier 1 code:
 
-1. **The CSS override sets only state hues.** `:root[data-cvd="1"]` and `:root[data-theme="dark"][data-cvd="1"]` declare exclusively `--pos`, `--pos2`, `--neg`, `--neg2`, `--neg3` and their `rgba` tints. No chrome, no type, no radius, no content token appears under any `[data-cvd]` selector on any page (`Cardstock Home.dc.html:27`, `:31`; `Cardstock Card.dc.html:24`; `Cardstock Screener.dc.html:25`; `Cardstock Charts.dc.html:27`).
+1. **The CSS override sets only state hues.** Across all 9 `:root[data-cvd="1"]` blocks and all 8 `:root[data-theme="dark"][data-cvd="1"]` blocks, the *only* properties ever declared are `--pos`, `--pos2`, `--neg`, `--neg2`, `--neg3` and their `rgba` tints. No chrome, type, radius, spacing or content token appears under any `[data-cvd]` selector on any page (`Cardstock Home.dc.html:27`, `:31`; `Cardstock Screener.dc.html:24`; `Cardstock Charts.dc.html:23`; `Cardstock Card.dc.html:25`).
 2. **`--warn` is outside the swap.** It is declared in the `[data-theme]` block, never in a `[data-cvd]` block — so amber `#8F6614` / `#D6A54A` is identical in all four modes (`Cardstock Home.dc.html:29`; `Cardstock Profile.dc.html:221` sets `--warn` from `dark` alone, ignoring `cvd`).
 3. **`PAL`'s CVD branches change only `pos/pos2/neg/neg2/neg3/posBg/negBg`.** The chrome object `ch` is selected by `d` (dark) alone — `cvd` is not consulted (`Cardstock Home.dc.html:328–329`). Same in `Cardstock Profile.dc.html:215–217`.
 4. **Glyphs are literal text in the markup, outside any conditional.** The Profile live-preview strip hard-codes `▲ RS 94th`, `▼ EMA 3/9`, `– RSI 71`, `– MACD –`, `◌ Churn — 12d` and only the *color* comes from a token (`Cardstock Profile.dc.html:101–105`). Toggling `cvd` cannot reach them.
@@ -318,7 +327,17 @@ Specimen section rhythm: `padding: 48px 0` between numbered sections, each close
 - **Hairlines are 1px, always.** `1px solid var(--line, #E4E4E0)` is the universal rule. No prototype uses a 2px border on chrome.
 - The active nav tab is a **2px** bottom border in `--acc`, with `margin-bottom: -1px` so it overlaps the nav's own hairline (`Cardstock Home.dc.html:45`).
 - Logo strokes are `stroke-width="2"` at a 32-unit viewBox (`Cardstock Home.dc.html:41`).
-- **No box-shadow elevation system.** The only shadows in the codebase are focus rings.
+- **There is no named elevation scale**, but shadows do exist — 46 inline `box-shadow` declarations, all on floating layers only (menus, modals, tooltips, drag rows, peek panels). Never on a resting card. The de-facto tiers:
+
+| Tier | Value | Count | Use |
+|---|---|---|---|
+| tooltip / popover | `0 3px 10px rgba(20,19,26,0.08)` · `0 4px 12px rgba(20,19,26,0.08)` | 4 | Hover tooltips, chart crosshair boxes |
+| dropdown / menu | `0 6px 20px rgba(20,19,26,0.10)` · `0 8px 24px rgba(20,19,26,0.12–0.13)` | 13 | Row `⋯` menus, selects, peek panel |
+| modal (light) | `0 24px 48px rgba(28,28,30,0.25)` · `0 18px 36px rgba(28,28,30,0.22)` · `0 12px 24px rgba(28,28,30,0.2)` | 13 | Dialogs, delete confirm |
+| dark-surface | `0 16px 32px rgba(0,0,0,0.45)` · `0 14px 40px rgba(20,19,26,0.35)` · `0 12px 36px rgba(20,19,26,0.3)` | 5 | Marketing dark hero art |
+| drag affordance | `inset 0 2px 0 <color>` | 1 | Drop-target indicator on watchlist rows |
+
+Shadow tint is `rgba(20,19,26,α)` for in-app layers and `rgba(28,28,30,α)` for modals — two near-identical inks that were never unified. Pick one when tokenising.
 - Focus, two mechanisms:
   - App: `*:focus-visible { outline: 2px solid var(--acc, #4A63D0); outline-offset: 1px; border-radius: 2px; }` (`Cardstock Home.dc.html:21`).
   - Brand/inputs: `box-shadow: 0 0 0 3px rgba(74,99,208,0.22)` light, `rgba(140,155,242,0.25)` dark — `--focus-ring` (`brand/brand-tokens.css:9`, `:25`; `Cardstock Brand System.dc.html:191–192`). The specimen's rule: *"Never remove focus without a ring."*
@@ -386,7 +405,7 @@ The nav mark is **inlined, not `<img>`**, so it inherits theme tokens with no as
 - front-card fill → `fill: var(--card, #FFFFFF)`
 - sparkline + dot → `stroke`/`fill: var(--logoTeal, #0E8A7B)`
 
-`--logoTeal` flips to `#3FBFAD` under `:root[data-theme="dark"]` — a dedicated one-token rule present on **all 13** themed pages including Profile and Account (`Cardstock Home.dc.html:32`; `Cardstock Profile.dc.html:23`; `Cardstock Account.dc.html:21`). Note that the in-app dark mark keeps `--ink` `#E9E9E5` and `--card` `#1E1E1C`, while the shipped `logo-mark-dark.svg` uses `#ECECE6` / `#131316`. Use the inline form in Blazor; the standalone SVGs are for external contexts.
+`--logoTeal` flips to `#3FBFAD` under `:root[data-theme="dark"]`. It is a dedicated one-token rule on **11** pages, including Profile and Account which have no other dark chrome (`Cardstock Home.dc.html:32`; `Cardstock Profile.dc.html:23`; `Cardstock Account.dc.html:21`). The 12th themed page, `Cardstock Legal.dc.html`, folds `--logoTeal: #3FBFAD` into its single main dark block instead (`:21`) — same result, different shape. Note that the in-app dark mark keeps `--ink` `#E9E9E5` and `--card` `#1E1E1C`, while the shipped `logo-mark-dark.svg` uses `#ECECE6` / `#131316`. Use the inline form in Blazor; the standalone SVGs are for external contexts.
 
 The specimen confirms one geometry only: *"dark · same geometry, no separate dark mark"* (`Cardstock Brand System.dc.html:66`) and *"strokes flip to #ECECE6 · teal lifts to #3FBFAD"* (`:64`).
 
@@ -466,7 +485,7 @@ Note the read is strict-equality on the exact strings — `'light'` and `'0'` ar
 
 ### 7.3 The pre-paint script — exactly how the flash is avoided
 
-One line, verbatim and byte-identical on 11 pages (`Cardstock Home.dc.html:35`, `Cardstock Screener.dc.html:32`, `Cardstock Charts.dc.html:31`, `Cardstock Binder.dc.html:35`, `Cardstock Card.dc.html:33`, `Cardstock Browse.dc.html:33`, `Cardstock Set.dc.html:33`, `Cardstock Character.dc.html:33`, `Cardstock About Data.dc.html:28`, `Cardstock Legal.dc.html:24`):
+One line, verbatim and byte-identical on **10** pages — `Cardstock Home.dc.html:35`, `Cardstock Screener.dc.html:32`, `Cardstock Charts.dc.html:31`, `Cardstock Binder.dc.html:35`, `Cardstock Card.dc.html:33`, `Cardstock Browse.dc.html:33`, `Cardstock Set.dc.html:33`, `Cardstock Character.dc.html:33`, `Cardstock About Data.dc.html:28`, `Cardstock Legal.dc.html:24` (verified: `grep -l` returns exactly these 10):
 
 ```html
 <script>if(localStorage.getItem('cardstock-cvd')==='1')document.documentElement.setAttribute('data-cvd','1');if(localStorage.getItem('cardstock-theme')==='dark')document.documentElement.setAttribute('data-theme','dark');</script>
@@ -619,9 +638,9 @@ Items 2–6 are the reason `--pos`/`--neg` (text) and `--pos2`/`--neg2`/`--neg3`
 | 10 | Focus is a 3px ring at 22% indigo | `Cardstock Brand System.dc.html:192`; `brand/brand-tokens.css:9` | The app uses `outline: 2px solid var(--acc)` with `outline-offset: 1px` (`Cardstock Home.dc.html:21`). The 3px `box-shadow` ring appears only on the specimen's demo input. Two different focus treatments exist; the app's wins. |
 | 11 | Tokens ship as CSS custom properties with a `[data-theme="dark"]` block | `Cardstock Brand System.dc.html:245` | True of `brand-tokens.css`, but **no prototype links it.** The app declares dark/CVD in a per-page inline `<style>` and carries light values as `var()` fallbacks. There is no shared stylesheet at all. |
 | 12 | Dark `--accH` is `#AAB6F6` | `Cardstock Home.dc.html:29`; `brand/brand-tokens.css:27` | `Cardstock Profile.dc.html:216` sets dark `--accH` to **`#8CA4F0`** and dark `--btnH` to `#AAB6F6`. One page disagrees with the other twelve. Treat `#AAB6F6` as correct (12 pages + brand file). |
-| 13 | Light `--tooltipBg` is `rgba(255,255,255,0.95)` | inline fallbacks, 3 occurrences | One occurrence uses `rgba(255,255,255,0.96)`. Single-page drift; use `0.95`. |
-| 14 | Light `--line` is `#E4E4E0` | 199 occurrences | 1 occurrence falls back to `#D9D9D4` (which is `--line2`) — `Cardstock Profile.dc.html:238`, the CVD toggle's off-state track. Deliberate or not, it is the only exception. |
-| 15 | The pre-paint script is on every app page | `HANDOFF.md:88` (*"Chrome shared by every app page … pre-paint script reading localStorage"*) | 11 of 13 pages carry it. **`Cardstock Profile.dc.html` and `Cardstock Account.dc.html` do not** — they theme via an in-component `display: contents` wrapper (`Cardstock Profile.dc.html:214–222`) and would flash on load. |
+| 13 | Light `--tooltipBg` is `rgba(255,255,255,0.95)` | inline fallbacks, 3 occurrences | `Cardstock Charts.dc.html:251` uses `rgba(255,255,255,0.96)`. Single-site drift; use `0.95`. |
+| 14 | Light `--line` is `#E4E4E0` | 199 occurrences | 1 occurrence falls back to `#D9D9D4` (which is `--line2`) — `Cardstock Profile.dc.html:236`, the CVD toggle's off-state track. It is the only exception. |
+| 15 | The pre-paint script is on every app page | `HANDOFF.md:88` (*"Chrome shared by every app page … pre-paint script reading localStorage"*) | **10** pages carry it. `Cardstock Profile.dc.html` and `Cardstock Account.dc.html` do not — they theme via an in-component `display: contents` wrapper (`Cardstock Profile.dc.html:214–222`) and would flash on load. |
 | 16 | Colorblind glyph set is `▲▼–◌◆` | `DISPLAY_VOCABULARY.md:76` | Incomplete — `●` is a sixth glyph with its own meaning (liquidity/descriptive state, `DISPLAY_VOCABULARY.md:34–38`, `:54`). `HANDOFF.md:150` lists all six correctly: `▲ ▼ – ● ◌ ◆`. The Profile UI copy lists only four (`Cardstock Profile.dc.html:94`) because `●` and `◆` do not appear in the preview strip. |
 | 17 | Colorblind mode swaps hue only | `HANDOFF.md:150`; `DISPLAY_VOCABULARY.md:76`; `Cardstock Profile.dc.html:96` | **Essentially true, with one addition:** Charts dashes the MACD signal line when CVD is on (`Cardstock Charts.dc.html:791`). That adds a redundant encoding; it does not alter any glyph, label or grammar. Worth noting because a literal reading of "hue only" would omit it. |
 | 18 | Theme follows the OS | (not claimed, but the natural assumption) | **No `prefers-color-scheme` query exists anywhere.** First visit is always light-standard regardless of OS setting. Only `prefers-reduced-motion` is honoured (`Cardstock Home.dc.html:25`). |

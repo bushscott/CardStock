@@ -1,14 +1,8 @@
-# Screen spec — About our data
+# Screen spec — About our data (`about-data`)
 
-**Source of truth:** `CardStock Mockup/Cardstock About Data.dc.html` (136 lines), read directly 2026-08-10.
-All line citations below are to that file unless another path is named.
+**Source of truth:** `CardStock Mockup/Cardstock About Data.dc.html` (136 lines), read directly 2026-08-10. Every quote carries its line number in that file. Per `CLAUDE.md`, the prototype is Tier 1 and authoritative for **what the page says** — §§1–5 record that faithfully. Whether what it says is **true** is §6, and the answer is: largely not.
 
-> ⚠️ **Read §6 before implementing.** This is a public methodology page. Its layout and copy
-> are authoritative per D-040, but a large fraction of its *factual claims about the data are
-> wrong* — and wrong in the direction that overstates what CardStock has. The seam date, the
-> price-history start date, the existence of pre-seam sale counts, and the census provenance
-> are all contradicted by `../PokemonInvestBatch/DATA_MODEL.md`. Build the layout from this
-> spec; do **not** ship the copy without the owner rulings listed in §7.
+> **Read §6 before implementing this page.** It is the most factually wrong page in the prototype set. Its central organising concept — "The April 2025 seam" — describes a boundary that does not exist, on a date that predates the project's first commit by fifteen months. The page also claims a data field (sale counts) the database has never had and the source has never published, and it understates the depth of the one series that is genuinely deep by nearly three years. Shipping this copy unchanged would put false public statements on a site whose entire brand is not making false public statements.
 
 ---
 
@@ -16,825 +10,506 @@ All line citations below are to that file unless another path is named.
 
 | Field | Value |
 |---|---|
-| **Screen name** | About our data |
-| **`data-screen-label`** | `About our data` (:30) |
-| **`<h1>`** | `About our data` (:47) |
-| **Route** | `/about-data` — `HANDOFF.md:81` (Tier 2) |
-| **Deep-link anchors** | `#sources` (:59), `#seam` (:68), `#refresh` (:76), `#sufficiency` (:84), `#honesty` (:107), `#disclaimers` (:121) |
-| **Auth** | Public. Nav chrome shows the account circle (:43) but no state depends on a session |
-| **Interactivity** | None. Static content + in-page anchors. Safe as static SSR |
+| Screen label | `About our data` — `data-screen-label="About our data"` (line 30) |
+| `<h1>` | "About our data" (line 47) |
+| Prototype file | `Cardstock About Data.dc.html` |
+| Proposed route | `/about-data` |
+| In-page anchors | `#sources` (59), `#seam` (68), `#refresh` (76), `#sufficiency` (84), `#honesty` (107), `#disclaimers` (121) |
+| Inbound link | `Cardstock Legal.dc.html:65` — "see [About our data]" |
+| Nav entry | **None.** Not in the primary nav (lines 34–40) |
 
-**Purpose**, stated on the page itself (:48):
+**Purpose.** The public data-provenance and methodology page. It is the destination for "where did this number come from", and it is where the product's honesty posture is stated as policy rather than implied by UI. Subtitle, line 48: *"Where every number comes from, how fresh it is, and what we refuse to show."*
 
-> "Where every number comes from, how fresh it is, and what we refuse to show."
-
-`DESIGN_NOTES.md:127` describes it as a *"static methodology page, linked from Home footer
-'About our data': sources & coverage, the Apr '25 seam, refresh & closed months,
-sufficiency-rules table, honesty policy, disclaimers (fan-made, not affiliated, not financial
-advice). Pill anchor-nav, 820px column."*
-
-**Why it is load-bearing:** D-038 (`DECISIONS.md:245`) — *"`Cardstock About Data.dc.html` must
-carry the floor and its reason"*. With v1 shipping the full UI with locks visible, this page is
-the single explanation surface for every locked row in the product. It is not optional content.
-
-### Inbound links (verified by grep across the mockup folder, 2026-08-10)
-
-| From | Target | Line |
-|---|---|---|
-| `Cardstock Home.dc.html` footer — "About our data" | page root | `:308` |
-| `Cardstock Screener.dc.html` — "sufficiency rules ⓘ" | `#sufficiency` | `:384` |
-| `Cardstock Charts.dc.html` — **"Why no candlesticks? → About our data"** | page root | `:182` |
-| `Cardstock Legal.dc.html` — "(see About our data)" | page root | `:65` |
-
-> ⚠️ **The Charts link is broken as content.** `Cardstock Charts.dc.html:182` sends the user
-> here to learn "Why no candlesticks?" and **this page never mentions candlesticks anywhere.**
-> See §6-A13 and §7-Q6.
-
-### Outbound links
-
-Nav only (:33–:43): Home, Screener, Charts, Binder, Browse, search component, Profile.
-**No link to `Cardstock Legal.dc.html`** — the relationship is one-directional (Legal links
-here at `Cardstock Legal.dc.html:65`, not the reverse). See §7-Q9.
+**Why accuracy matters more here than anywhere else.** The page's entire persuasive value is that it is checkable. A locked indicator elsewhere in the app is a design choice; a wrong date here is a false public statement about the dataset. D-032 (`DECISIONS.md:342`) already caught this project publishing readiness numbers "wrong in the direction that overstates readiness" — this page does it again, in public-facing copy.
 
 ---
 
 ## 2. Layout
 
-Shares the app shell with `Cardstock Legal.dc.html` (`DESIGN_NOTES.md:148` — *"Privacy & Terms
-on the About Data shell"*). Build one layout component; both pages consume it.
+Single centred column, no sidebar, **no footer**.
 
 ```
-┌─ nav (48px, sticky, top:0, z-index:20) ──────────────────────────────┐
-│ logo+wordmark → Home · Home Screener Charts Binder Browse · ⟶ ·      │
-│ <cardstock-search> · account circle "O" → Profile                    │
-└──────────────────────────────────────────────────────────────────────┘
-      ┌─ content column: max-width 820px, margin 0 auto ─┐
-      │ padding: 32px 24px 80px; box-sizing: border-box  │
-      │                                                  │
-      │  h1 "About our data"          27px/700/Inter Tight
-      │  subtitle                      14.5px, --mut2
-      │  ┌ pill anchor-nav (flex-wrap, gap 6px) ────────┐
-      │  │ Sources · The Apr '25 seam · Refresh &       │
-      │  │ closed months · Sufficiency rules ·          │
-      │  │ Honesty policy · Disclaimers                 │
-      │  └───────────────────────────────────────────────┘
-      │  ┌ section#sources      ─ card ┐ mb 14px
-      │  ┌ section#seam         ─ card ┐ mb 14px
-      │  ┌ section#refresh      ─ card ┐ mb 14px
-      │  ┌ section#sufficiency  ─ card ┐ mb 14px  (contains 2-col grid table)
-      │  ┌ section#honesty      ─ card ┐ mb 14px  (contains <ul>)
-      │  ┌ section#disclaimers  ─ card ┐ (no mb — last)
-      │  closing note                   12.5px, --mut2, mt 20px
-      └──────────────────────────────────────────────────┘
+sticky nav (48px)                                        line 32
+container  max-width 820px, margin 0 auto, padding 32px 24px 80px   line 46
+├─ h1 "About our data"                                   line 47
+├─ subtitle                                              line 48
+├─ pill row (flex, wrap, gap 6px, mb 28px)               lines 50–57
+│   Sources · The Apr '25 seam · Refresh & closed months · Sufficiency rules · Honesty policy · Disclaimers
+├─ section#sources        card, mb 14px    3 paragraphs  lines 59–66
+├─ section#seam           card, mb 14px    2 paragraphs  lines 68–74
+├─ section#refresh        card, mb 14px    2 paragraphs  lines 76–82
+├─ section#sufficiency    card, mb 14px    intro + 2-col grid table  lines 84–105
+├─ section#honesty        card, mb 14px    lead-in + 5-item <ul>     lines 107–119
+├─ section#disclaimers    card, no mb      2 paragraphs  lines 121–127
+└─ closing note (12.5px, --mut2, mt 20px)                lines 129–131
 ```
 
-### Measured tokens
-
-| Element | Spec | Line |
-|---|---|---|
-| Page root | `min-height:100vh`, `background: var(--bg,#FAFAF7)`, `color: var(--ink,#1C1C1E)`, `font-size:15px`, flex column | :30 |
-| Nav | `height:48px`, `background: var(--card,#FFFFFF)`, `border-bottom:1px solid var(--line,#E4E4E0)`, `gap:24px`, `padding:0 20px`, `position:sticky`, `top:0`, `z-index:20` | :32 |
-| Content column | `width:100%`, `max-width:820px`, `margin:0 auto`, `padding:32px 24px 80px` | :46 |
-| `h1` | Inter Tight, `27px`, `700`, `margin:0 0 6px` | :47 |
-| Subtitle | `14.5px`, `var(--mut2,#6B6B66)`, `margin-bottom:18px` | :48 |
-| Pill row | flex, `flex-wrap:wrap`, `gap:6px`, `margin-bottom:28px` | :50 |
-| Pill | `13px`/`600`, `1px solid var(--line)`, `border-radius:99px`, `padding:4px 12px`, `background: var(--card)` | :51–:56 |
-| Section card | `background: var(--card,#FFFFFF)`, `1px solid var(--line,#E4E4E0)`, `border-radius:8px`, `padding:20px 22px`, `margin-bottom:14px` | :59, :68, :76, :84, :107 |
-| Last section card | identical **without** `margin-bottom` | :121 |
-| **`scroll-margin-top`** | `62px` on every `<section>` — clears the 48px sticky nav | :59, :68, :76, :84, :107, :121 |
-| Section `h2` | Inter Tight, `18.5px`, `700`, `margin:0 0 10px` | :60, :69, :77, :85, :108, :122 |
-| Body prose | `14.5px`, `line-height:1.6`, `color: var(--mut,#5B5B57)` | :61, :70, :78, :86, :109, :123 |
-| Inline emphasis | `<strong style="color: var(--ink,#1C1C1E)">` — strong is a *color* promotion, not just weight | :62–:64, :71, :80 |
-| Closing note | `12.5px`, `var(--mut2,#6B6B66)`, `margin-top:20px` | :129 |
-
-### Sufficiency table (inside `#sufficiency`)
+**Metrics** (shared with the Legal screen — these two pages are the same document template):
 
 | Property | Value | Line |
 |---|---|---|
-| Wrapper | `1px solid var(--line)`, `border-radius:6px`, `overflow:hidden` | :87 |
-| Grid | `display:grid`, `grid-template-columns: 1.2fr 2fr`, `gap:0`, `font-size:13.5px` | :88 |
-| Header cells | `padding:8px 12px`, `background: var(--mutbg,#F3F3EE)`, `600`, `12px`, `letter-spacing:.06em`, `text-transform:uppercase`, `var(--mut2)` | :89–:90 |
-| Header labels | `Signal`, `Needs` | :89, :90 |
-| Signal cells | `padding:8px 12px`, `border-top:1px solid var(--line4,#F0F0EC)`, **JetBrains Mono `12.5px`** | :91, :93, :95, :97, :99, :101 |
-| Needs cells | same padding/border, `color: var(--mut)` | :92, :94, :96, :98, :100, :102 |
+| Section card | `--card` bg, `1px solid var(--line)`, `border-radius: 8px`, `padding: 20px 22px` | 59, 68, 76, 84, 107, 121 |
+| `scroll-margin-top` | `62px` on all six sections | same |
+| h1 | `'Inter Tight'`, 27px, 700 | 47 |
+| h2 | `'Inter Tight'`, 18.5px, 700, `margin: 0 0 10px` | 60, 69, 77, 85, 108, 122 |
+| Body | 14.5px, `line-height: 1.6`, `--mut` | 61, 70, 78, 86, 109, 123 |
+| Pill | 13px/600, `border-radius: 99px`, `padding: 4px 12px` | 51–56 |
+| Closing note | 12.5px, `--mut2`, `margin-top: 20px` | 129 |
 
-Note the grid is a flat cell sequence, not `<table>` markup. For accessibility, implement with
-`role="table"`/`role="row"`/`role="cell"` or convert to a real `<table>` with the same visual
-metrics — the prototype's flat grid gives screen readers no row association.
+**Sufficiency table** (lines 87–104) — not a `<table>`; a CSS grid inside a bordered, `overflow: hidden` wrapper:
 
-### Theming
-
-| Concern | Spec | Line |
+| Property | Value | Line |
 |---|---|---|
-| Dark tokens | Full `:root[data-theme="dark"]` override block | :21 |
-| CVD (colorblind) | `--pos`/`--neg` swapped under `[data-cvd="1"]`, and a dark+CVD combination | :22–:24 |
-| Dark logo teal | `--logoTeal: #3FBFAD` set in a **separate** rule (:25) — Legal folds it into the main dark block (`Cardstock Legal.dc.html:21`). Harmless divergence; unify in Blazor |
-| Pre-paint script | Reads `localStorage` `cardstock-cvd` and `cardstock-theme`, stamps `data-cvd` / `data-theme` on `<html>` before first paint | :28 |
-| Focus ring | `*:focus-visible { outline: 2px solid var(--acc); outline-offset:1px; border-radius:2px }` | :20 |
+| Wrapper | `border: 1px solid var(--line)`, `border-radius: 6px`, `overflow: hidden` | 87 |
+| Grid | `grid-template-columns: 1.2fr 2fr`, `gap: 0`, `font-size: 13.5px` | 88 |
+| Header cells | `--mutbg` bg, 600, 12px, `letter-spacing: 0.06em`, uppercase, `--mut2` | 89–90 |
+| Signal cells | `'JetBrains Mono'`, 12.5px, `border-top: 1px solid var(--line4)` | 91, 93, 95, 97, 99, 101 |
+| Needs cells | `--mut`, `border-top: 1px solid var(--line4)` | 92, 94, 96, 98, 100, 102 |
+| Cell padding | `8px 12px` throughout | all |
 
-⚠️ **This page uses no `--pos`/`--neg` tokens** (no numbers are rendered), yet ships the full
-CVD palette (:22–:24). That is shell boilerplate, not page requirement — but keep it, because
-the shell is shared.
+**Honesty list** (line 111): `<ul>` as `display: flex; flex-direction: column; gap: 6px`, `padding-left: 20px`.
 
-⚠️ **Google Fonts are loaded from a third-party CDN** (:12–:14: `preconnect` to
-`fonts.googleapis.com` and `fonts.gstatic.com`, plus a stylesheet link). See
-`docs/screens/legal.md` §6 — this directly undercuts the Legal page's "no third-party
-trackers" promise. Self-host Inter / Inter Tight / JetBrains Mono.
+**Theme tokens — richer than the Legal page.** This page defines gain/loss colours the Legal page does not:
+
+| Selector | Tokens | Line |
+|---|---|---|
+| `:root[data-theme="dark"]:not([data-cvd="1"])` | `--pos: #4CC08D; --neg: #E57B7B` | 22 |
+| `:root[data-theme="dark"][data-cvd="1"]` | `--pos: #58A9E6; --neg: #F5924E` | 23 |
+| `:root[data-cvd="1"]` | `--pos: #0B69A8; --neg: #CC5F00` | 24 |
+| `:root[data-theme="dark"]` | `--logoTeal: #3FBFAD` | 25 |
+
+These are inherited boilerplate — **no element on this page uses `--pos` or `--neg`.**
 
 ---
 
 ## 3. Content inventory
 
-Every substantive claim on the page, quoted exactly, with its line.
+Every claim the page makes, quoted exactly.
 
-### 3.1 Header
+### 3.1 Header and navigation pills
 
-| # | Quote | Line |
-|---|---|---|
-| C1 | "About our data" | :47 |
-| C2 | "Where every number comes from, how fresh it is, and what we refuse to show." | :48 |
-
-### 3.2 Pill anchor-nav (:50–:57)
-
-| Label | Href | Line |
-|---|---|---|
-| "Sources" | `#sources` | :51 |
-| "The Apr ’25 seam" | `#seam` | :52 |
-| "Refresh & closed months" | `#refresh` | :53 |
-| "Sufficiency rules" | `#sufficiency` | :54 |
-| "Honesty policy" | `#honesty` | :55 |
-| "Disclaimers" | `#disclaimers` | :56 |
-
-Note the pill (:52) uses a curly apostrophe — `The Apr ’25 seam` — while the section heading
-(:69) spells it out as `The April 2025 seam`. Preserve both strings verbatim if the copy
-survives §7-Q1.
-
-### 3.3 `#sources` — "Sources & coverage" (:59–:66)
-
-| # | Quote | Line |
-|---|---|---|
-| C3 | "**Prices** come from realized sales only — completed marketplace listings and major auction results." | :62 |
-| C4 | "Asking prices never enter an aggregate; the rare Listed figures you see are labeled as such and cover under 5% of rows." | :62 |
-| C5 | "**Populations** come from the public census reports the grading companies publish monthly." | :63 |
-| C6 | "When a grader restates a past census (it happens), we mark the affected window on charts rather than silently rewriting history." | :63 |
-| C7 | "**Excluded**: bulk lots, listings with ambiguous grade or damage notes, sales where the card can't be matched to one printing, and marketplaces whose sold data we can't verify." | :64 |
-| C8 | "Coverage is deepest for English-language cards graded PSA, BGS, CGC, SGC, ACE, and TAG, plus raw sales." | :64 |
-
-### 3.4 `#seam` — "The April 2025 seam" (:68–:74)
-
-| # | Quote | Line |
-|---|---|---|
-| C9 | "The April 2025 seam" (h2) | :69 |
-| C10 | "Before April 2025 our archive holds **monthly aggregates** — averages and sale counts, back to August 2023." | :71 |
-| C11 | "From April 2025 forward we keep the **per-sale ledger**: every individual transaction with its date, venue, and grade." | :71 |
-| C12 | "That boundary is drawn as a marker on charts." | :72 |
-| C13 | "Indicators that need individual sales — churn, price dispersion, Amihud illiquidity, cross-marketplace gap, discount-to-list — can only be computed after it, which is why their history starts there and why backtests refuse to reach further back (the \"honest floor\")." | :72 |
-
-### 3.5 `#refresh` — "Refresh & closed months" (:76–:82)
-
-| # | Quote | Line |
-|---|---|---|
-| C14 | "Sales data refreshes daily; census data lands when graders publish, roughly monthly." | :79 |
-| C15 | "The footer stamp on every page tells you how fresh what you're looking at is." | :79 |
-| C16 | "Monthly series only include **closed months**." | :80 |
-| C17 | "The current month appears as a hollow, dashed point — it aggregates the sales recorded so far and will keep revising until the month closes." | :80 |
-| C18 | "We never project or extrapolate it." | :80 |
-
-### 3.6 `#sufficiency` — "Sufficiency rules" (:84–:105)
-
-| # | Quote | Line |
-|---|---|---|
-| C19 | "An indicator that doesn't have enough history to be trustworthy is locked, with its unlock date shown — not rendered anyway with a warning buried in a tooltip. The rules:" | :86 |
-
-| Signal (line) | Needs (line) |
+| Line | Text |
 |---|---|
-| "Churn 30d" (:91) | "30 days of per-sale ledger in that grade bucket; starts LOW CONFIDENCE for its first 30 days" (:92) |
-| "Weekly bars" (:93) | "~6 months of ledger (≈ Jan 2027)" (:94) |
-| "Daily bars" (:95) | "~12 months of ledger, liquid cards only" (:96) |
-| "Oscillators (RSI, z-score)" (:97) | "their full warm-up window of monthly closes before the first value renders" (:98) |
-| "Seasonality" (:99) | "one observed cycle so far — labeled illustrative until there are three" (:100) |
-| "Composites (G1–G4)" (:101) | "every component signal individually sufficient — a composite never fires on partial inputs" (:102) |
+| 47 | "About our data" |
+| 48 | "Where every number comes from, how fresh it is, and what we refuse to show." |
+| 51 | "Sources" → `#sources` |
+| 52 | "The Apr ’25 seam" → `#seam` |
+| 53 | "Refresh & closed months" → `#refresh` |
+| 54 | "Sufficiency rules" → `#sufficiency` |
+| 55 | "Honesty policy" → `#honesty` |
+| 56 | "Disclaimers" → `#disclaimers` |
 
-### 3.7 `#honesty` — "Honesty policy" (:107–:119)
+### 3.2 Sources & coverage (lines 59–66)
 
-| # | Quote | Line |
-|---|---|---|
-| C20 | "Some things we simply don't show:" | :110 |
-| C21 | "No projected or extrapolated data points — a partial month renders as partial, never as a forecast." | :112 |
-| C22 | "Backtests start at each screen's honest floor — the first date every filter in it could actually be computed — not at the start of our archive." | :113 |
-| C23 | "A backtest that mostly found one set's moment says so, instead of presenting it as a repeatable pattern." | :114 |
-| C24 | "Missing metadata renders as METADATA PENDING, not as a silent blank or a guess." | :115 |
-| C25 | "When a grader restates history, the restatement window stays visibly marked." | :116 |
+| Line | Claim |
+|---|---|
+| 60 | "Sources &amp; coverage" |
+| 62 | "**Prices** come from realized sales only — completed marketplace listings and major auction results. Asking prices never enter an aggregate; the rare Listed figures you see are labeled as such and cover under 5% of rows." |
+| 63 | "**Populations** come from the public census reports the grading companies publish monthly. When a grader restates a past census (it happens), we mark the affected window on charts rather than silently rewriting history." |
+| 64 | "**Excluded**: bulk lots, listings with ambiguous grade or damage notes, sales where the card can't be matched to one printing, and marketplaces whose sold data we can't verify. Coverage is deepest for English-language cards graded PSA, BGS, CGC, SGC, ACE, and TAG, plus raw sales." |
 
-### 3.8 `#disclaimers` — "Disclaimers" (:121–:127)
+### 3.3 The April 2025 seam (lines 68–74)
 
-| # | Quote | Line |
-|---|---|---|
-| C26 | "Cardstock is a fan-made analytics project. It is not affiliated with, endorsed by, or sponsored by Nintendo, The Pokémon Company, or any grading company or marketplace." | :124 |
-| C27 | "Pokémon names and card references are used for identification only; all trademarks belong to their owners." | :124 |
-| C28 | "Nothing here is financial advice. Collectible prices are volatile and thinly traded; signals describe the past, not the future. Do your own research before spending money on cardboard." | :125 |
+| Line | Claim |
+|---|---|
+| 69 | "The April 2025 seam" |
+| 71 | "Before April 2025 our archive holds **monthly aggregates** — averages and sale counts, back to August 2023. From April 2025 forward we keep the **per-sale ledger**: every individual transaction with its date, venue, and grade." |
+| 72 | "That boundary is drawn as a marker on charts. Indicators that need individual sales — churn, price dispersion, Amihud illiquidity, cross-marketplace gap, discount-to-list — can only be computed after it, which is why their history starts there and why backtests refuse to reach further back (the "honest floor")." |
 
-### 3.9 Closing note
+### 3.4 Refresh & closed months (lines 76–82)
 
-| # | Quote | Line |
-|---|---|---|
-| C29 | "Questions about a number? Every stat's tooltip names its source and window." | :130 |
+| Line | Claim |
+|---|---|
+| 77 | "Refresh &amp; closed months" |
+| 79 | "Sales data refreshes daily; census data lands when graders publish, roughly monthly. The footer stamp on every page tells you how fresh what you're looking at is." |
+| 80 | "Monthly series only include **closed months**. The current month appears as a hollow, dashed point — it aggregates the sales recorded so far and will keep revising until the month closes. We never project or extrapolate it." |
+
+### 3.5 Sufficiency rules (lines 84–105)
+
+| Line | Claim |
+|---|---|
+| 85 | "Sufficiency rules" |
+| 86 | "An indicator that doesn't have enough history to be trustworthy is locked, with its unlock date shown — not rendered anyway with a warning buried in a tooltip. The rules:" |
+| 89 / 90 | Column headers "Signal" / "Needs" |
+
+| Signal | Line | Needs | Line |
+|---|---|---|---|
+| "Churn 30d" | 91 | "30 days of per-sale ledger in that grade bucket; starts LOW CONFIDENCE for its first 30 days" | 92 |
+| "Weekly bars" | 93 | "~6 months of ledger (≈ Jan 2027)" | 94 |
+| "Daily bars" | 95 | "~12 months of ledger, liquid cards only" | 96 |
+| "Oscillators (RSI, z-score)" | 97 | "their full warm-up window of monthly closes before the first value renders" | 98 |
+| "Seasonality" | 99 | "one observed cycle so far — labeled illustrative until there are three" | 100 |
+| "Composites (G1–G4)" | 101 | "every component signal individually sufficient — a composite never fires on partial inputs" | 102 |
+
+### 3.6 Honesty policy (lines 107–119)
+
+| Line | Claim |
+|---|---|
+| 108 | "Honesty policy" |
+| 110 | "Some things we simply don't show:" |
+| 112 | "No projected or extrapolated data points — a partial month renders as partial, never as a forecast." |
+| 113 | "Backtests start at each screen's honest floor — the first date every filter in it could actually be computed — not at the start of our archive." |
+| 114 | "A backtest that mostly found one set's moment says so, instead of presenting it as a repeatable pattern." |
+| 115 | "Missing metadata renders as METADATA PENDING, not as a silent blank or a guess." |
+| 116 | "When a grader restates history, the restatement window stays visibly marked." |
+
+### 3.7 Disclaimers (lines 121–127) and closing note
+
+| Line | Claim |
+|---|---|
+| 122 | "Disclaimers" |
+| 124 | "Cardstock is a fan-made analytics project. It is not affiliated with, endorsed by, or sponsored by Nintendo, The Pokémon Company, or any grading company or marketplace. Pokémon names and card references are used for identification only; all trademarks belong to their owners." |
+| 125 | "Nothing here is financial advice. Collectible prices are volatile and thinly traded; signals describe the past, not the future. Do your own research before spending money on cardboard." |
+| 130 | "Questions about a number? Every stat's tooltip names its source and window." |
 
 ---
 
-## 4. States / Interactions
+## 4. States / interactions
 
-**There are no dynamic states.** No `state = {}` block, no `onClick`, no `{{ }}` bindings, no
-conditional rendering. The page is pure static markup plus the shared shell.
+Static page. No data binding, no loading or empty states, no conditional rendering in the prototype.
 
 | Interaction | Behaviour | Line |
 |---|---|---|
-| Six anchor pills | In-page jump to `#sources` / `#seam` / `#refresh` / `#sufficiency` / `#honesty` / `#disclaimers` | :51–:56 |
-| Anchor landing offset | `scroll-margin-top:62px` on every target section, so the sticky 48px nav never covers the `h2` | :59, :68, :76, :84, :107, :121 |
-| Nav links | Full navigation to Home / Screener / Charts / Binder / Browse / Profile | :33–:43 |
-| Search | `<cardstock-search>` web component, shared across all app pages (`HANDOFF.md:86`) | :42 |
-| Link hover | `a:hover { color: var(--accH); text-decoration: underline }` — global | :19 |
-| Focus | `outline: 2px solid var(--acc)`, offset 1px | :20 |
-| Theme / CVD | Applied pre-paint from `localStorage`; **no toggle on this page** (it lives on Profile) | :28 |
+| Six pills | Same-page anchor jumps; every target carries `scroll-margin-top: 62px` to clear the 48px sticky nav | 51–56, section tags |
+| Deep links | `/about-data#sources`, `#seam`, `#refresh`, `#sufficiency`, `#honesty`, `#disclaimers` must land on their sections | 59–121 |
+| Inbound deep link | `Cardstock Legal.dc.html:65` links here without a fragment | — |
+| Nav / wordmark / avatar / search | Standard cross-page navigation | 33–43 |
+| Hover / focus | `--accH` + underline; `2px solid var(--acc)` outline, `1px` offset | 19–20 |
+| Theme + CVD | Read from `localStorage` pre-paint and stamped on `<html>` | 28 |
 
-### Deep-link contract
+**Dynamic-content candidates.** Nothing on the page reads from the database as drawn, but three strings are time-dependent and will rot if hard-coded:
+1. "The Apr ’25 seam" / "The April 2025 seam" (52, 69) — a date.
+2. "back to August 2023" (71) — a date.
+3. "~6 months of ledger (**≈ Jan 2027**)" (94) — a projected unlock date.
 
-`Cardstock Screener.dc.html:384` links to `Cardstock About Data.dc.html#sufficiency`. The
-Blazor route must therefore preserve `#sufficiency` as a stable fragment id forever, in
-addition to `/about-data` itself. Treat all six ids as a public API.
-
-### Implementation notes
-
-- No `@rendermode` needed. Static SSR is sufficient and correct (relevant to D-013).
-- The page performs **zero data reads**. Nothing here touches Postgres.
-- Once §7 is resolved, several numbers become *computed* rather than authored — see §5-R6.
+Per D-033 (`DECISIONS.md:319`) the correct pattern is "**one anchor date plus denominators**. Numerators are arithmetic against today. **No authored ratios, ever again.**" Line 94's parenthetical is an authored date of exactly the kind D-033 bans, and it is wrong (§6.10).
 
 ---
 
 ## 5. Rules and invariants
 
-| # | Rule | Source |
+1. **This page is the canonical statement of data provenance.** Any provenance wording elsewhere (tooltips, empty states, lock copy) must agree with it — line 130 promises "Every stat's tooltip names its source and window", making tooltips subordinate to this page.
+2. **Six sections, six anchors, fixed order** (59 → 121). The pill row (50–57) must stay in sync with the section ids.
+3. **`scroll-margin-top: 62px` on every section** — required by the sticky nav.
+4. **Locked, not degraded** (line 86): an insufficient indicator renders locked with an unlock date; it is never rendered anyway with a caveat. Corroborated by D-038 (`DECISIONS.md:237`) — "v1 ships the full UI with locks visible".
+5. **Never project** (lines 80, 112): the current month renders as a hollow dashed point; no forecast, no extrapolation, ever.
+6. **Composites never fire on partial inputs** (line 102).
+7. **Restatement windows stay marked** (lines 63, 116) — history is never silently rewritten. This is the exact commitment `Cardstock Legal.dc.html:68` cross-references ("That's how we treat charts").
+8. **Backtests start at the honest floor, not at the start of the archive** (line 113).
+9. **Missing metadata renders as `METADATA PENDING`** (line 115) — a literal display token, not a blank.
+10. **Dates on this page must be derived, not authored** — D-033's rule (`DECISIONS.md:319`), which the page currently violates three times.
+11. **Consistent with D-041** (`DECISIONS.md:224`): the page never mentions candlesticks or news, correctly applying the Tier-1 rule that permanently-impossible features are "omitted from the app entirely, not rendered as disabled controls" (`DECISIONS.md:233`).
+
+---
+
+## 6. Factual audit
+
+Checked against `../PokemonInvestBatch/DATA_MODEL.md` (489 lines), the scraper source, and `DECISIONS.md`. All receipts read directly 2026-08-10.
+
+### 6.0 The finding that frames everything else: the page never names its source
+
+**No claim on this page discloses that 100% of CardStock's market data is scraped from a single third-party website.**
+
+- `DATA_MODEL.md:89` — "**All data comes from pricecharting.com** (site facts verified 2026-07-27 against captured pages spanning 2024→live)."
+- `CLAUDE.md:47` — the sibling worker "politely crawls pricecharting.com into PostgreSQL".
+
+The page instead uses consistently first-party language:
+
+| Phrase | Line |
+|---|---|
+| "our archive holds" | 71 |
+| "we keep the per-sale ledger" | 71 |
+| "we mark the affected window on charts" | 63 |
+| "marketplaces whose sold data **we can't verify**" | 64 |
+| "**Excluded**: bulk lots…" | 64 |
+| "the start of our archive" | 113 |
+
+"Excluded" and "we can't verify" are the sharpest: they describe **editorial decisions about which marketplaces to admit**, implying CardStock evaluates marketplaces and rejects some. It does not. It parses whichever rows pricecharting.com prints, from the five sources that site chooses to show (`DATA_MODEL.md:227` — "ebay, tcgplayer, goldin, heritage, pwcc"). The inclusion decision is pricecharting's, not ours. **Verdict: the page's framing is FALSE by implication throughout**, and this is a bigger reputational exposure than any single wrong date, because a reader who checks will conclude the page was written to obscure a single point of dependency.
+
+It also has downstream consequences the page never states: prices are **not** aggregated by us (§6.1), and there is no editorial exclusion pipeline (§6.4).
+
+### 6.1 Prices come from realized sales only
+
+> **"Prices come from realized sales only — completed marketplace listings and major auction results."** (line 62)
+
+**Verdict: FALSE as applied to the price series the product actually plots.**
+
+- The plotted price series is **not computed from realized sales by CardStock**. It is copied wholesale from the source site's own chart. `DATA_MODEL.md:93–94` — "**`VGPC.chart_data`** — the price chart: **six series of monthly average prices**, in cents, reaching back to ~December 2020." `DATA_MODEL.md:186` — `price_cents` is "site — monthly average price".
+- The `price_months` table therefore contains a **third party's precomputed average**, whose methodology is not published and not knowable to us. Whether pricecharting's monthly average is built from realized sales only is an assumption, not a verified fact — nothing in `DATA_MODEL.md` establishes it.
+- The `sales` table *is* realized sales (`DATA_MODEL.md:231` — "site — realized sale price"; `:217` — "one immutable row per completed sale we have ever seen"), and the sources are marketplaces plus genuine auction houses — goldin, heritage, pwcc — so "major auction results" is fair **for the ledger**. But per D-001 the ledger begins late Jul 2026, so it is not what any historical price chart is drawn from.
+- **Precisely:** "Prices come from realized sales only" would be true of the sales ledger and is unproven for the price series. The page draws no distinction, and the price series is what "prices" means to a reader looking at a chart.
+
+> **"Asking prices never enter an aggregate; the rare Listed figures you see are labeled as such and cover under 5% of rows."** (line 62)
+
+**Verdict: first clause UNVERIFIABLE; "under 5% of rows" UNVERIFIABLE and unsupported.**
+
+- We cannot assert what does or does not enter an aggregate we did not compute (above).
+- `listed_price_cents` exists and is genuinely sparse: `DATA_MODEL.md:232` — "site — original listing price when shown; **most rows have none**". That supports "rare". It does **not** support "under 5%": "most rows have none" is consistent with anything from 0% to 49%. No query establishing 5% appears anywhere in either repo. **This is an authored precision number of exactly the class D-032 condemned** (`DECISIONS.md:342`) — a specific figure with no receipt.
+- The underlying field is real and its intended use is documented: `DATA_MODEL.md:447` — "Also derivable, currently unused: discount-vs-list (`price_cents` vs `listed_price_cents`".
+
+### 6.2 Populations come from graders' monthly census reports
+
+> **"Populations come from the public census reports the grading companies publish monthly."** (line 63)
+
+**Verdict: FALSE on all three counts — source, publisher, and cadence.**
+
+| Claim | Reality | Receipt |
 |---|---|---|
-| R1 | Content column is exactly `max-width:820px`, centred, `padding:32px 24px 80px` | :46 |
-| R2 | Every section is an anchor target with `scroll-margin-top:62px`. Adding a section means adding a pill and an id | :51–:56, :59–:121 |
-| R3 | The last section carries no `margin-bottom` | :121 |
-| R4 | `<strong>` inside prose promotes color to `--ink`, not merely weight | :62–:64, :71, :80 |
-| R5 | Section order is fixed and matches pill order: sources → seam → refresh → sufficiency → honesty → disclaimers | :51–:56 vs :59–:121 |
-| R6 | **No authored ratios or dates.** D-033 (`DECISIONS.md:319`): *"Numerators are arithmetic against today. No authored ratios, ever again."* The literal `"≈ Jan 2027"` at :94 violates this and must become a computed value against the 2026-09-01 floor | D-033 |
-| R7 | This page is the **only** explanation surface for locks. D-038 (`DECISIONS.md:243–245`): the sufficiency engine is on the critical path and *"`Cardstock About Data.dc.html` must carry the floor and its reason"* | D-038 |
-| R8 | Never project or extrapolate — restated three times on the page (:80, :112, and implied at :113) and corroborated by `DESIGN_NOTES.md:49` (*"NO projection/extrapolation to month-end, ever"*) | :80, :112 |
-| R9 | The disclaimer paragraph (:124) must survive any rewrite verbatim in substance — it is the trademark shield | :124 |
-| R10 | Sufficiency table is the canonical public statement of lock rules; `DISPLAY_VOCABULARY.md` §2/§9/§10 must not contradict it | `HANDOFF.md:132` |
-| R11 | The page must name its data source. It currently never does — see §6-A14. `sales.title`-style third-party provenance and D-010's open licensing question both argue for explicit attribution | D-010 |
+| From "the public census reports" | From the source site's embedded `pop_data` blob, scraped | `DATA_MODEL.md:103` — "**`VGPC.pop_data`** — the graded-population census: `{psa: [10 ints], cgc: [10 ints]}`" |
+| "the grading companies publish" | We never touch a grading company. Data is second-hand via pricecharting | `DATA_MODEL.md:89` |
+| "monthly" | The site publishes **no** cadence and **no** history — a current snapshot only. Rows appear when *we* visit | `DATA_MODEL.md:104` — "A **current snapshot only** — the site keeps no census history."; `:120–121` — "**Population history.** Only the current census is published; history exists only from the moment *we* started observing." |
 
----
+- Additionally, the page's coverage list (line 64) names six graders, but **census data exists for exactly two**: `DATA_MODEL.md:204` — "`grader` | string(8), PK part — **only `psa` or `cgc`; any other key is schema drift**". There is no BGS, SGC, ACE, or TAG population data at all.
+- Compounding this, D-001 (`DECISIONS.md:22`) makes census history start at each card's first visit in late Jul 2026 — so "monthly reports" describes a series that, at time of writing, has roughly one observation per card.
 
-## 6. ⚠ Factual audit
+> **"When a grader restates a past census (it happens), we mark the affected window on charts rather than silently rewriting history."** (line 63)
 
-Verdicts are against `../PokemonInvestBatch/DATA_MODEL.md` (Tier 1, authoritative for data) and
-`DECISIONS.md`. Every receipt was opened directly on 2026-08-10.
+**Verdict: the premise is VERIFIED and impressively specific; the chart-marking behaviour is UNVERIFIABLE (unbuilt).**
 
-**Summary: 8 FALSE, 9 UNVERIFIABLE, 6 VERIFIED, 1 critical omission.**
+- `DATA_MODEL.md:209–213` — "graders occasionally **restate** their counts (PSA restated ~June 2026; one card's grade cell jumped 397 → 99,246). A >10× jump on an established base, or any decrease, is flagged by metrics/alerts as a *source* change, not a market signal — but the rows are still written."
+- Note what the receipt actually covers: detection is an **operational alert**, not a user-facing chart annotation. "we mark the affected window on charts" is a UI promise with no implementation and no design artifact behind it. The honest-history posture ("the rows are still written", never rewritten) is genuinely verified.
 
----
+### 6.3 Coverage
 
-### A1 — C3 "Prices come from realized sales only" (:62) — ⚠ **UNVERIFIABLE, and misleading about mechanism**
+> **"Coverage is deepest for English-language cards graded PSA, BGS, CGC, SGC, ACE, and TAG, plus raw sales."** (line 64)
 
-CardStock's price series is not built from sales at all. It is `price_months`, which is a
-verbatim copy of pricecharting.com's own chart:
+**Verdict: UNVERIFIABLE for the language claim; partially supported for graders, and misleading in context.**
 
-- `DATA_MODEL.md:95` — *"**`VGPC.chart_data`** — the price chart: **six series of monthly average prices**, in cents, reaching back to ~December 2020."*
-- `DATA_MODEL.md:186` — `price_cents | int | ✓ | site — monthly average price`
-- `DATA_MODEL.md:175–178` — *"A card's first visit backfills the site's entire chart… so deep price history exists for every card from the moment it's first visited."*
+- **Language:** no language filter, field, or metric exists anywhere in the scraper. `DATA_MODEL.md` has no language column on `cards`. The claim may be incidentally true of pricecharting's Pokémon catalogue, but CardStock cannot substantiate it.
+- **Graders:** the six named do appear in the **sales** grade vocabulary — `CLAUDE.md:93` documents 19 values including "`PSA 10`, `CGC 10`, `CGC 10 Prist.`, `BGS 10`, `BGS 10 Black`, `SGC 10`, `TAG 10`, `ACE 10`", sourced from `GradeTierVocabulary.cs`, and `DATA_MODEL.md:230` confirms `grade_tier` carries "21 distinct labels driven by the page's own selector". So the labels exist on *sales*.
+- **The misleading part:** the sentence sits in a paragraph about coverage generally, immediately after a sentence about populations. A reader takes it to mean all six graders are covered across the product. For **populations**, four of the six do not exist (§6.2), and for **price series** the tiers collapse to six with only PSA 10 named — D-003 (`DECISIONS.md:44`): `Ungraded, Grade7, Grade8, Grade9, Grade9Half, Psa10`. D-003's own table makes the split explicit: price series 6 tiers, sales ledger 19. The page flattens three different vocabularies into one coverage claim.
+- **Raw sales:** verified — `Ungraded` is both a price tier (D-003) and a grade-tier label.
 
-Whether pricecharting composes that average from realized sales only is **the third party's
-methodology, and nothing in the scraper repo documents it.** The sentence states an upstream
-editorial policy as a first-party fact. The two data assets are independent: the chart (:95)
-and the completed-sales tables (:100) are parsed separately from the same page and never feed
-each other.
+### 6.4 The exclusion list
 
-**Fix:** "Prices are pricecharting.com's monthly average for each grade tier" — accurate, and
-it costs the page nothing.
+> **"Excluded: bulk lots, listings with ambiguous grade or damage notes, sales where the card can't be matched to one printing, and marketplaces whose sold data we can't verify."** (line 64)
 
----
+**Verdict: FALSE — no such exclusion pipeline exists.**
 
-### A2 — C4 "the rare Listed figures… cover under 5% of rows" (:62) — ⚠ **UNVERIFIABLE (but the most credible figure available)**
+- `grep -rniE "bulk|damage|exclude|ambiguous" --include="*.cs" src` across the scraper returns **no sale-content filtering whatsoever** (run 2026-08-10). Every "exclude" hit concerns delisted/not-a-card *cards* being excluded from **scheduling** (`VisitCandidatePool.cs:78–80`, `StatsLane.cs:108–109`, `CrawlMetrics.cs:94,121`) or a set `Blacklist.cs:21` the operator configures. None of it touches sale rows.
+- The parser ingests every row the page prints. `DATA_MODEL.md:100–102` — "Individual sale rows (`<tr id="{source}-{id}">`), grouped into up to 21 grade buckets"; the only validation is a length assertion on the tier label (`CardDetailParser.cs:251–255`) which **throws as schema drift** rather than silently skipping a sale.
+- "sales where the card can't be matched to one printing" cannot arise: sales are parsed from a specific card's detail page, so `card_id` comes from "visit context" (`DATA_MODEL.md:226`), not from matching. The stated risk does not exist, so the stated mitigation does not either.
+- "marketplaces whose sold data we can't verify" — the five sources are whatever pricecharting shows (`DATA_MODEL.md:227`); we exercise no admission decision (§6.0).
+- **If bulk lots or damaged listings appear in pricecharting's buckets, they are in our `sales` table today.** The page tells users the opposite.
 
-- `DATA_MODEL.md:232` — `listed_price_cents | int | opt | site — original listing price when shown; **most rows have none**`. Direction confirmed, magnitude not.
-- `DESIGN_NOTES.md:46` — *"production coverage is 4.4% (143,062 of 3,265,910 sales)"* — consistent with "under 5%".
-- **But** `HANDOFF.md:128` still says *"Listed prices | ~12% of rows"*, which is **not** under 5%.
-- D-031 (`DECISIONS.md:375`) rules 4.4% *"the credible one; ~12% looks stale"* — and explicitly adds *"Not yet settled by a live query."*
+### 6.5 The seam date — the page's central claim
 
-**Verdict:** the page picked the right number, but the project has two numbers on record and has
-never run the query. Do not ship a public percentage until one is run.
+> **"The Apr ’25 seam"** (line 52) · **"The April 2025 seam"** (line 69) · **"Before April 2025 our archive holds…"** / **"From April 2025 forward we keep…"** (line 71) · **"That boundary is drawn as a marker on charts."** (line 72)
 
----
+**Verdict: FALSE. This is the single largest factual error in the prototype set, and it is repeated four times including in a section heading and a navigation pill.**
 
-### A3 — C5 "Populations come from the public census reports the grading companies publish monthly" (:63) — ❌ **FALSE (three ways)**
+D-001 (`DECISIONS.md:22–33`) is titled, verbatim: *"Per-sale and census history begin at each card's first crawler visit (late Jul 2026), **not Apr 2025 / Jan 2026**"*, and states *"The seam is **per-card and ragged**, not a single shared date."*
 
-1. **Wrong source.** Populations are scraped from pricecharting.com, not obtained from graders.
-   `DATA_MODEL.md:103` — *"**`VGPC.pop_data`** — the graded-population census: `{psa: [10 ints], cgc: [10 ints]}`… A **current snapshot only** — the site keeps no census history."*
-   `DATA_MODEL.md:89` — *"All data comes from pricecharting.com."*
-2. **Wrong cadence.** Census is captured on the same detail-page visit as everything else, on
-   the crawler's priority schedule — not on a monthly publication rhythm.
-   `DATA_MODEL.md:322` — the Detail-crawl lane is *"continuous, one card at a time"* and writes `populations` alongside `price_months` and `sales`.
-3. **Wrong plurality.** Only two graders exist in the census.
-   `DATA_MODEL.md:204` — `grader | string(8), PK part — **only `psa` or `cgc`; any other key is schema drift**`.
-   Corroborated in the prototypes: `Cardstock Card.dc.html:221` reads *"PSA + CGC · as of 2026-07-30"*.
+Receipts, all independent of one another:
 
-**Systemic, not local.** `Cardstock Card.dc.html:255` carries the same error in a tooltip —
-*"Population data comes from PSA/CGC on their own publishing schedule — it can't be scraped on
-demand"* — and it traces to `DESIGN_NOTES.md:54` (*"census keeps its as-of date (PSA/CGC publish
-on their own schedule)"*). Fixing this page alone will not fix the product.
+| Receipt | What it shows |
+|---|---|
+| `DATA_MODEL.md:404` (via D-001) | `visits`, `fingerprints`, `parse_failures` "begin at first deployment (**2026-07-28**)" |
+| `DATA_MODEL.md:120–121` | Population history "exists only from the moment *we* started observing" |
+| `git -C PokemonInvestBatch log --reverse` (via D-001), `CLAUDE.md:47` | First commit **2026-07-27** |
+| `DESIGN_NOTES.md:41` (via D-001) | "per-sale scraping started Jul '26. Census data 2026+" |
+| Owner, `DECISIONS.md:31` | "That's completely false. It just started this month." |
 
----
+**April 2025 is fifteen months before the scraper's first commit.** No process was collecting anything then. The date cannot be right by any interpretation.
 
-### A4 — C5 (cont.) implied census depth (:63) — ❌ **FALSE by omission — the single most important missing fact**
+**Two distinct errors, not one:**
+1. **The date is wrong** — late Jul 2026, not Apr 2025.
+2. **The concept is wrong** — there is no single shared seam. It is per-card and ragged, because each card's history starts at *its* first visit. Line 72's "That boundary is drawn as a marker on charts" describes drawing one vertical line across all charts; the honest rendering is a different marker position per card.
 
-The sentence describes census as an ongoing monthly feed and never says when *our* history
-starts. It starts three weeks ago.
+D-009 (`DECISIONS.md:385`) already tracks the same error in `DESIGN_NOTES.md:35` ("still specifies an 'Apr '25 liquidity seam' that D-001 says cannot exist"). **This prototype is a second, public-facing instance of that defect, and D-009 does not currently mention it.**
 
-- D-001 (`DECISIONS.md:27`), quoting `DATA_MODEL.md:397` — population history *"begins at each card's first visit (the site publishes no history)"*.
-- `DATA_MODEL.md:104` — *"A **current snapshot only** — the site keeps no census history."*
-- `DATA_MODEL.md:120–121` — *"**Population history.** Only the current census is published; history exists only from the moment *we* started observing."*
-- `DATA_MODEL.md:406` — operational history begins *"at first deployment (2026-07-28)"*.
+**Note on document authority.** `CLAUDE.md:20` makes the mockups authoritative for "layout, states, copy, and behaviour" — not for facts about the data, where `CLAUDE.md:21` gives `../PokemonInvestBatch/` authority, and `CLAUDE.md:30` puts `DECISIONS.md` above all tiers. So there is no authority conflict here: the prototype is authoritative that the page *says* April 2025, and simply wrong that April 2025 *is* the seam.
 
-`CARDSTOCK_UI_SPEC_v1.md:425` shows the page was *supposed* to say this — its outline includes
-*"census starts when we started looking"*. The built page dropped it.
+### 6.6 Pre-seam contents: "averages and sale counts"
 
----
+> **"Before April 2025 our archive holds monthly aggregates — averages and sale counts, back to August 2023."** (line 71)
 
-### A5 — C6 / C25 "we mark the affected window on charts" (:63) and "the restatement window stays visibly marked" (:116) — ⚠ **UNVERIFIABLE, and contradicted by a design ruling**
+**Verdict: FALSE three times over — the date, the "sale counts", and the depth.**
 
-Restatements are real:
-`DATA_MODEL.md:209–213` — *"graders occasionally **restate** their counts (PSA restated ~June 2026; one card's grade cell jumped 397 → 99,246). A >10× jump on an established base, or any decrease, is flagged by metrics/alerts as a *source* change… but the rows are still written."*
+**(a) "sale counts" do not exist and never can.** This is the most serious error, because it advertises a field the source has permanently withheld.
 
-Three problems:
+- `price_months` has exactly five columns — `card_id`, `tier`, `month`, `price_cents`, `observed_at` (`DATA_MODEL.md:181–187`). **There is no count column.**
+- `DATA_MODEL.md:113–115` — "**Historical sales volume.** No page, in any epoch we've captured, carries a volume-over-time series. The only 'volume' on a detail page is a current-rate text label… a snapshot, no time axis."
+- `DATA_MODEL.md:482` (via D-017, `DECISIONS.md:467`) — "**Unavailable from source, permanently:** historical sales volume; sales beyond the bucket windows; pre-observation census history."
+- `DATA_MODEL.md:391` — "**Monthly sales volume:** derivable from the ledger (§6) **forward of each card's seam**." Counts exist only *after* the seam, from the ledger. The page places them exclusively *before* it. **The claim is precisely inverted.**
+- D-004 (`DECISIONS.md:61`) — no precomputed metric store exists in the database at all.
+- `DATA_MODEL.md:123–124` states the general rule the page violates: "Any spec that assumes deep volume history, complete deep sales history, or pre-2026 census history is assuming data that does not exist."
 
-1. **No stored flag.** Restatement is an *alert* in the scraper, not a column. CardStock would
-   have to re-derive it (>10× jump on an established base, or any decrease). Feasible, but it
-   is unbuilt work this page promises as existing behaviour.
-2. **It was removed from the Card page.** `DESIGN_NOTES.md:54` — *"Removed from Card page (user decisions): … census restatement hatching (**no census-diff detection planned**; hatching was my invention, not spec)."* `DESIGN_NOTES.md:35` still lists *"pop restatement hatched region"* under Charts seams, so the two notes disagree about whether it survives anywhere.
-3. **The one known restatement is unobservable.** PSA restated ~June 2026; our census history
-   begins late Jul 2026 (A4). We were not looking, so we hold no before-and-after to mark.
+**(b) "back to August 2023" understates the one genuinely deep series by ~32 months.** D-002 (`DECISIONS.md:37`) — "Monthly price history is genuinely deep: **~Dec 2020**, backfilled whole on first visit… **The one data series that is not thin.**" Receipts: `DATA_MODEL.md:93–94` and `:176–177` — "A card's first visit backfills the site's entire chart — **six tiers monthly back to ~Dec 2020**".
 
-The page makes this promise **twice** (:63, :116). At minimum one of them must go.
+This error is doubly unfortunate: it is wrong in the *conservative* direction, and it hides the product's only strong data asset. The page undersells the one thing it could legitimately boast about while overselling four things it cannot.
 
----
+**(c) "Before April 2025"** — same error as §6.5.
 
-### A6 — C7 "**Excluded**: bulk lots, listings with ambiguous grade or damage notes…" (:64) — ❌ **FALSE as a first-party claim**
+**The corrected sentence** is roughly: *"Monthly average prices go back to about December 2020 for every card — six tiers, one value per month, backfilled in full the first time we see a card. Sale counts are not available before we began observing, and are not available from the source at any depth."*
 
-No such filtering exists anywhere in the documented ingest path. Sales are inserted exactly as
-the page offers them:
+### 6.7 Post-seam contents: "every individual transaction"
 
-- `DATA_MODEL.md:341–349` — the sale insert is `INSERT … SELECT … FROM unnest(…) ON CONFLICT (source, source_id) DO NOTHING`. Every parsed row goes in. There is no predicate.
-- `DATA_MODEL.md:230` — `grade_tier | string(40) | ✓ | site — **bucket label exactly as the page names it** ("PSA 10", "Grade 9.5")`. Labels are taken verbatim; nothing is judged "ambiguous".
-- `DATA_MODEL.md:217–221` — *"one immutable row per completed sale we have ever seen… the ledger only ever grows with genuinely new sales."*
-- The only rejection mechanism is schema drift, which discards the **whole page**, not individual rows: `DATA_MODEL.md:281–284` (`parse_failures`, *"the crawl writes *nothing* to the fact tables"*).
+> **"From April 2025 forward we keep the per-sale ledger: every individual transaction with its date, venue, and grade."** (line 71)
 
-If pricecharting excludes bulk lots upstream, that is unverified third-party behaviour. As
-written the sentence claims an editorial pipeline CardStock does not operate.
+**Verdict: FALSE on the date and on "every"; VERIFIED on the three fields.**
 
----
+- **Date:** §6.5.
+- **"every individual transaction" is not achievable.** `DATA_MODEL.md:101–102` — "**Each bucket shows only the newest ~30 rows** — the site discards older ones forever." `:118–119` — "**Sales older than the ~30-row bucket windows.** Once a row scrolls off, the site shows it to no one."
+  - The scraper works hard against this: scheduling prioritises "due by burn window (a selling card approaching the point where its ~30-row bucket will start rolling sales off unseen; visited by 50% of that window — **the zero-missed-sales guarantee**)" (`DATA_MODEL.md:330–332`). That guarantee is real and impressive — but it is a *forward* guarantee, contingent on visit scheduling, on a corpus where cards can be "starved past the 30-day floor" (`DATA_MODEL.md:334`). It does not make "every individual transaction" true retrospectively, and it can be broken by any card whose sales rate outruns its visit rate.
+- **Fields VERIFIED.** date → `sold_on` (`DATA_MODEL.md:229`); venue → `source` (`:227`, "ebay, tcgplayer, goldin, heritage, pwcc"); grade → `grade_tier` (`:230`). The ledger is genuinely immutable and dedup-guaranteed (`:217–221`, `UNIQUE (source, source_id)`, `ON CONFLICT DO NOTHING`).
 
-### A7 — C8 "Coverage is deepest for English-language cards" (:64) — ⚠ **UNVERIFIABLE**
+### 6.8 Post-seam indicators
 
-There is **no language field anywhere in the schema.** `cards` (`DATA_MODEL.md:154–171`) carries
-`id, set_id, url, name, image_hash, image_fetched_at, first_seen_at, last_seen_at` plus mutable
-scheduler state. No locale, no language, no region. The claim cannot be evaluated, and CardStock
-cannot filter or badge on it.
+> **"Indicators that need individual sales — churn, price dispersion, Amihud illiquidity, cross-marketplace gap, discount-to-list — can only be computed after it, which is why their history starts there and why backtests refuse to reach further back (the "honest floor")."** (line 72)
 
----
+**Verdict: VERIFIED in principle (the reasoning is exactly right); the "after it" referent inherits the wrong date from §6.5.**
 
-### A8 — C8 (cont.) "graded PSA, BGS, CGC, SGC, ACE, and TAG, plus raw sales" (:64) — ✅ **VERIFIED as a tier list, ⚠ misleading as a coverage claim**
+- The logic matches D-001's stated consequence (`DECISIONS.md:33`): "every liquidity and supply indicator renders LOCKED for 6–12 months of calendar time that no engineering shortens. This is the largest scope fact in the project."
+- Each named indicator is supportable from the ledger: churn/volume (`DATA_MODEL.md:391`, `:429`, `:433–435`), discount-to-list (`:447`, explicitly "currently unused"), cross-marketplace gap (five `source` values, `:227`), dispersion and Amihud (derivable from `price_cents` + `sold_on` + volume, forward of the seam).
+- **The problem is arithmetic, not logic.** "their history starts there" points at April 2025. It actually starts at each card's first visit (D-001), and for display purposes at **2026-09-01** (D-033). The sentence's reasoning survives a date correction unchanged — this is the one seam claim that only needs its referent fixed.
 
-The six companies are exactly the grade-10 tiers in the vocabulary:
-`../PokemonInvestBatch/src/PokemonInvestBatch.Domain/Parsing/GradeTierVocabulary.cs` — `"PSA 10", "CGC 10", "CGC 10 Prist.", "BGS 10", "BGS 10 Black", "SGC 10", "TAG 10", "ACE 10"`, plus `"Ungraded"` (= "raw sales"). Read directly.
+### 6.9 Refresh cadence
 
-**But per-grader coverage only exists at grade 10.** D-022 (`DECISIONS.md:70–79`), from
-`../PokemonInvestBatch/docs/adr/0005-pooled-grade-tiers.md`: *"The source reports one 'Grade 8'
-figure covering every grading company, splitting by company only at grade 10."* The ADR's
-binding UI consequence is quoted in D-022 (`DECISIONS.md:79`): *"The interface must not imply
-the pooled figure is company-neutral."*
+> **"Sales data refreshes daily; census data lands when graders publish, roughly monthly."** (line 79)
 
-Saying coverage "is deepest for cards graded PSA, BGS, CGC, SGC, ACE, and TAG" implies
-company-resolved coverage across the grade range. Below 10 there is none — one pooled number
-serves all six. This is the same wording trap D-022 already flagged in `HANDOFF.md:106`
-(*"below 10 the buckets are grader-agnostic"*).
+**Verdict: FALSE on both halves.**
 
-**Also note:** `DATA_MODEL.md:101` and `:230` say the site offers **21** grade buckets while the
-vocabulary file lists **19**. See §8-X5.
+**Sales — not daily.** The crawl is continuous but per-card scheduling is a priority queue, not a daily sweep:
+- `DATA_MODEL.md:322` — Detail crawl cadence is "**continuous, one card at a time**".
+- `DATA_MODEL.md:315–316` — one shared politeness gate, "adaptive delay, **10 s floor** / 300 s ceiling".
+- `DATA_MODEL.md:329–335` — scheduling is a "pure priority score… *due by burn window* → *refresh requested* → *never visited* → *bucket already at cap* → *starved past the 30-day floor* → everyone else by staleness × (1 + churn)".
+- **"starved past the 30-day floor" is decisive**: the system explicitly tolerates a card going ~30 days without a visit. That is the opposite of a daily refresh.
+- Arithmetically: at a 10 s floor a full corpus lap takes ~10.5 days for ~91k cards (`DECISIONS.md:320` references "91k cards"), and longer whenever the adaptive delay rises toward the 300 s ceiling. D-033 (`DECISIONS.md:324`) flags the related "~12.4-day corpus lap" figure as **unverified** — so the exact lap time is unknown, but "daily per card" is excluded by the 30-day floor regardless.
+- The charitable reading — "the system ingests some sales every day" — is true and useless: a user reading line 79 beside a specific card's chart will conclude *that card* updates daily. It does not.
+
+**Census — does not land when graders publish.** It lands when *we* visit, on the same priority queue, from a snapshot with no history (`DATA_MODEL.md:104`, `:120–121`). Graders' own publication schedules are invisible to this pipeline. Same error as §6.2.
 
----
-
-### A9 — C9 / C10 / C11 "The April 2025 seam" (:52, :69, :71) — ❌ **FALSE. The headline error on the page.**
-
-There is no April 2025 seam. There is no shared seam date at all.
-
-- D-001 (`DECISIONS.md:22–23`) — *"Per-sale and census history begin at each card's first crawler visit (late Jul 2026), not Apr 2025 / Jan 2026. The seam is **per-card and ragged**, not a single shared date."*
-- `DATA_MODEL.md:382–385` — *"**Epoch boundary is per-card, per-grade-bucket** — *not* the crawler's start date… 'Start of reliable per-sale data' for a bucket = its oldest captured row."*
-- `DATA_MODEL.md:406` — *"`visits`, `fingerprints`, `parse_failures` begin at first deployment (2026-07-28)."*
-- `git -C ../PokemonInvestBatch log --reverse` — first commit 2026-07-27 (per D-001, `DECISIONS.md:29`).
-- `HANDOFF.md:126` (corrected 2026-08-10) — *"Per-sale ledger (post-seam) | **Each card's first visit, late Jul 2026 onward — ragged, never a shared date**"*.
-- Owner, quoted in D-001 (`DECISIONS.md:31`): *"That's completely false. It just started this month."*
-
-**Magnitude:** the page claims 16 months of per-sale history that does not exist. Under D-033 the
-usable ledger does not begin until **2026-09-01** — three weeks *after* this page's "last
-updated" date.
-
-**This settles D-009.** D-009 (`DECISIONS.md:385–390`) asked whether the "Apr '25 liquidity
-seam" at `DESIGN_NOTES.md:35` was an error, a lost data source, or deliberate design fiction.
-Per D-040's method (*"settleable by opening the HTML"*), the answer is now visible: the
-prototype does not merely draw an Apr '25 marker — **it states in prose, on a public methodology
-page, that the per-sale ledger begins in April 2025.** That is broader than
-`DESIGN_NOTES.md:35`, which scopes the Apr '25 seam to *"(churn/vol panes)"* and assigns
-*"per-sale ledger begins"* to the **Jul '26** seam. The prototype and the design note disagree
-about what April 2025 even means. Owner ruling required — §7-Q1.
-
----
-
-### A10 — C10 "monthly aggregates — averages and **sale counts**, back to August 2023" (:71) — ❌ **FALSE twice, in opposite directions**
-
-**(a) "back to August 2023" understates by ~2 years 8 months.**
-- D-002 (`DECISIONS.md:37–40`) — *"Monthly price history is genuinely deep: ~Dec 2020, backfilled whole on first visit."*
-- `DATA_MODEL.md:375` — *"Backfilled to ~Dec 2020 for every card at its first visit. Monthly resolution, six tiers. This is the only deep history we have, and it carries most of the undervaluation signal."*
-- `DATA_MODEL.md:95` — *"reaching back to ~December 2020"*; `:358` — *"6 tiers × ~68 months"*.
-- `CARDSTOCK_UI_SPEC_v1.md:20` and `HANDOFF.md:125` both say Dec 2020.
-
-The page is giving away the one genuinely strong asset in the dataset.
-
-**(b) "sale counts" pre-seam do not exist and can never exist.** This is the more serious half.
-- `DATA_MODEL.md:113–117` — *"**Historical sales volume.** No page, in any epoch we've captured, carries a volume-over-time series… a snapshot, no time axis."*
-- `DATA_MODEL.md:391–393` — *"**No pre-seam volume exists anywhere** — not in our store and not at the source (§2). A spec needing it must mark it *unavailable from source*, not 'pending import'."*
-- `DATA_MODEL.md:481–482` — *"**Unavailable from source, permanently:** historical sales volume; sales beyond the bucket windows; pre-observation census history."*
-- `DATA_MODEL.md:123–124` — *"Any spec that assumes deep volume history… is assuming data that does not exist."*
-
-`price_months` has exactly one integer per (card, tier, month) — `price_cents`
-(`DATA_MODEL.md:186`). There is no count column and no count series.
-
-**The claim is precisely inverted.** Sale counts are derivable *only forward of each card's
-seam* (`DATA_MODEL.md:433–438`, the monthly-volume query; `HANDOFF.md:126` gates *"sales count"*
-on the per-sale ledger) — the exact era this sentence describes as bare transactions. The page
-promises counts where they are permanently impossible and omits them where they exist.
-
----
-
-### A11 — C10/C11 "**our archive**" / "**we keep**" (:71) — ❌ **FALSE framing. 100% of this data is one third party's.**
-
-The seam section uses first-party possessive language three times — *"our archive holds"*,
-*"we keep the per-sale ledger"* (:71), and *"not at the start of our archive"* (:113).
-
-- `DATA_MODEL.md:89` — *"**All data comes from pricecharting.com**"* (site facts verified 2026-07-27).
-- `DATA_MODEL.md:8–11` — the worker *"politely scrapes pricecharting.com for Pokemon card price history, individual sales, graded population census, and product images."*
-- The monthly series is not even aggregated by CardStock — it is the site's precomputed chart, copied whole on first visit (`DATA_MODEL.md:175–178`). "Our archive holds monthly aggregates" implies an aggregation step that does not occur.
-
-Compounding it, **the page never names pricecharting.com anywhere** (grep across all mockups:
-the string appears only in `BRAND_BRIEF.md:18`, `PROJECT_LOG.md:227`, `CARDSTOCK_UI_SPEC_v1.md:20`
-and the research upload — never in a shipped page). Meanwhile C29 (:130) promises *"Every stat's
-tooltip names its source and window."*
-
-Also note D-017 (`DECISIONS.md:471`): *"no backup exists"* of any kind. "Our archive" asserts a
-durability nothing currently provides.
-
-See also `docs/screens/legal.md` §6 — `Cardstock Legal.dc.html:66` forbids users to *"scrape at
-volume, resell our data"*, which sits awkwardly beside this.
-
----
-
-### A12 — C11 "**every** individual transaction" (:71) — ❌ **FALSE (overstated)**
-
-- `DATA_MODEL.md:101` — *"**Each bucket shows only the newest ~30 rows** — the site discards older ones forever."*
-- `DATA_MODEL.md:118–119` — *"**Sales older than the ~30-row bucket windows.** Once a row scrolls off, the site shows it to no one."*
-- `DATA_MODEL.md:386–390` — *"Completeness is *engineered, not guaranteed* — a card can outsell our visit pace and roll rows off unseen… **a spec should say 'complete except alarmed cap incidents', not 'complete'.**"*
-
-DATA_MODEL states in as many words how this sentence should be phrased, and the page uses the
-phrasing it warns against. Note `DESIGN_NOTES.md:48` records the opposite user belief
-(*"Missed-sales scraper alert removed (user: capture is complete)"*) — worth an owner
-re-confirmation.
-
-**The three named fields are correct:** date = `sales.sold_on`, venue = `sales.source`, grade =
-`sales.grade_tier` (`DATA_MODEL.md:227–230`). Only "every" is wrong.
-
----
-
-### A13 — C13 "backtests refuse to reach further back (the \"honest floor\")" (:72) — ✅ **VERIFIED as mechanism, ❌ FALSE as calibrated**
-
-The mechanism is exactly right and matches `CARDSTOCK_UI_SPEC_v1.md:90` (*"the date picker
-*shows* the honest floor and why"*). But a floor computed from an April 2025 seam is **16 months
-too permissive**, which turns the product's flagship honesty feature into its largest
-overstatement — the identical failure mode D-032 (`DECISIONS.md:356`) describes as *"overstating
-data sufficiency inside its own honesty apparatus."*
-
-The five named indicators are individually sound: churn (`DATA_MODEL.md:428–431`), dispersion,
-Amihud, cross-marketplace gap, discount-to-list (`:447–449`, *"Also derivable, currently
-unused: discount-vs-list… per-bucket seam dates"*). One caveat: **cross-marketplace gap** may
-not be as locked as assumed — D-031 (`DECISIONS.md:377`) notes `DATA_MODEL.md:102`/`:227`
-document five sources (ebay, tcgplayer, goldin, heritage, pwcc) while `HANDOFF.md:129` says
-"eBay-only today", and *"the gate may be locking an indicator that has data behind it."*
-Unresolved; needs a query.
-
----
-
-### A14 — C14 "Sales data refreshes daily" (:79) — ❌ **FALSE**
-
-There is no daily refresh guarantee for any card. The crawl is a continuous priority queue:
-
-- `DATA_MODEL.md:320–322` — Detail crawl lane: *"continuous, one card at a time."*
-- `DATA_MODEL.md:329–336` — *"pure priority score, re-computed from Postgres each pick, highest tier wins — *due by burn window* → *refresh requested* → *never visited* → *bucket already at cap* → ***starved past the 30-day floor*** → everyone else by staleness × (1 + churn)."*
-
-A 30-day starvation floor is the *backstop*, meaning a cold card may legitimately go a month
-between visits. With ~91k–100k cards on one politely-gated crawler (10 s floor / 300 s ceiling,
-`DATA_MODEL.md:315–316`), daily coverage of the corpus is not achievable.
-
-**What *is* true and stronger:** `DESIGN_NOTES.md:54` — *"card page visits trigger a fresh
-scrape"* — and `Cardstock Card.dc.html:253` — *"Sales & prices refreshed just now"*. Via the
-express-visit intake endpoint (D-024), a viewed card is refreshed **on demand**, which beats
-"daily". The page is underselling a real capability while overselling a fake one.
-
----
-
-### A15 — C14 (cont.) "census data lands when graders publish, roughly monthly" (:79) — ❌ **FALSE**
-
-Same error as A3. Census arrives on the same detail-page visit as prices and sales
-(`DATA_MODEL.md:322`), scraped from a site snapshot (`:103–104`). Nothing "lands" from a grader.
-
----
-
-### A16 — C15 "The footer stamp on **every page**" (:79) — ❌ **FALSE against the prototypes**
-
-- `HANDOFF.md:99` — *"**AsOfStamp component** — removed app-wide; footers say 'refreshed just now' instead of per-element staleness stamps."*
-- `DESIGN_NOTES.md:54` — *"Footer staleness stamps replaced by 'Sales & prices refreshed just now'."*
-- Grep for freshness stamps across all `.dc.html`: hits only on `Cardstock Card.dc.html:253` (*"Sales & prices refreshed just now"*) and `:255` (*"Census as of 2026-07-30"*). **This page has no stamp. Neither does Home, Screener, Charts, Binder, Browse, or Legal.**
-
-The stamp exists on exactly one screen, and its semantics changed from staleness to
-"refreshed just now".
-
----
-
-### A17 — C16 "Monthly series only include **closed months**" (:80) — ✅ **VERIFIED**
-
-- `DATA_MODEL.md:98–99` — *"Closed months are immutable server-side; only the current month revises between visits."*
-- `DATA_MODEL.md:178–179` — *"a typical visit adds 0–2 rows (the current month moved); **closed months carry exactly one row forever**."*
-- `DATA_MODEL.md:189–191` — *"The composite PK ends in `observed_at`: the same (card, tier, month) legitimately has multiple rows when the *current* month's average revised between visits. Latest-per-key queries must order by `observed_at`."*
-
-**Implementation invariant:** every price read must be latest-per-key by `observed_at`
-(`DATA_MODEL.md:416–420` gives the canonical `DISTINCT ON (tier)` query). A naive query returns
-plausible-looking wrong numbers.
-
----
-
-### A18 — C17 "it aggregates the sales recorded so far" (:80) — ❌ **FALSE mechanism, and it contradicts a design note**
-
-The current-month point is pricecharting's own revising monthly **average**
-(`DATA_MODEL.md:186`, `:98–99`), not an aggregate CardStock computes from `sales`. The chart
-(`DATA_MODEL.md:95`) and the sales tables (`:100`) are two independent assets parsed from the
-same page; neither derives from the other.
-
-`DESIGN_NOTES.md:49` proposes something different again, and internally impossible:
-
-> *"**Current-month point methodology**: the month-to-date point is computed with the SAME aggregation as closed months (median of the tier's sales captured since month start, outlier-trimmed), just on partial data."*
-
-Closed months are **not** computed by CardStock at all, and the site's figure is an *average*,
-not an outlier-trimmed *median*. So "the SAME aggregation as closed months" cannot be satisfied
-by any implementation. Three options — copy the site's revising point, compute our own from
-`sales` (a visibly different series, discontinuous at the seam), or show both — and the choice
-must be made before Charts ships. §7-Q4.
-
-**The hollow/dashed presentation is verified design**: `DESIGN_NOTES.md:49` — *"final chart
-segment dashed + hollow end dot with tooltip, no text warning. Same treatment to be applied in
-Charts."*
-
----
-
-### A19 — C18 / C21 "We never project or extrapolate" (:80, :112) — ✅ **VERIFIED as policy**
-
-`DESIGN_NOTES.md:49` — *"NO projection/extrapolation to month-end, ever (violates honesty
-stance; daily/weekly resolutions are the honest 'right now' view)."* Consistent with D-041's
-posture. Keep verbatim.
-
----
-
-### A20 — "Churn 30d — 30 days of per-sale ledger in that grade bucket" (:91–:92) — ✅ **VERIFIED as mechanism, ⚠ incomplete**
-
-`DATA_MODEL.md:428–431` gives exactly this window: *"churn at any date d: sales in (d-30d, d] / 30.0"*.
-Per-bucket framing matches `DATA_MODEL.md:382–383` (*"Epoch boundary is per-card, per-grade-bucket"*).
-
-⚠ Two cautions the row omits:
-1. Under D-033 the earliest honest churn value is **~2026-10-01** (30 days after the floor). The
-   page implies it is available now.
-2. `cards.observed_sales_per_day` must **not** be used — `DATA_MODEL.md:76` and `:423–425` warn
-   it is a deliberately hotter, mutable scheduler cache (*"the hottest single bucket's fill
-   rate, for scheduling"*), not the card-wide rate. Derive from `sales.sold_on`.
-
----
-
-### A21 — "Weekly bars — ~6 months of ledger (≈ **Jan 2027**)" (:94) — ❌ **FALSE, and it contradicts this very page**
-
-`(≈ Jan 2027)` implies the ledger began ~Jul 2026 — which is D-001's real answer, **not** this
-page's own April 2025 claim at :71. If the ledger truly began April 2025, six months elapsed in
-October 2025 and weekly bars would have unlocked ten months ago.
-
-**The seam section and the sufficiency table cannot both be right.** The table was calibrated
-against the true Jul '26 seam; the prose was not.
-
-Against D-033's disclosed floor (2026-09-01), six months lands at **~Mar 2027**, so `Jan 2027`
-is ~2 months optimistic even on the correct substrate. And an authored literal date is exactly
-what D-033 abolished (`DECISIONS.md:319`): *"Numerators are arithmetic against today. No
-authored ratios, ever again."* No corroborating source exists — grep finds no weekly/daily bar
-entry in `DISPLAY_VOCABULARY.md`.
-
----
-
-### A22 — "Daily bars — ~12 months of ledger, liquid cards only" (:96) — ⚠ **UNVERIFIABLE**
-
-No date given (good — nothing to be wrong). Under D-033 this lands **~Sep 2027**, matching
-D-033's own arithmetic (`DECISIONS.md:321`: *"12 months of census → ~Sept 2027"*).
-
-⚠ "liquid cards only" is in tension with `DATA_MODEL.md:394–395`: *"per-sale history is shortest
-exactly where volume matters most (hot cards burn their windows in days)"*. That asymmetry is
-pre-seam only — forward of first visit the burn-window scheduler tier protects hot cards
-(`DATA_MODEL.md:330–332`) — but "liquid cards only" needs a defined threshold before it can be
-rendered as a lock.
-
----
-
-### A23 — "Oscillators (RSI, z-score) — their full warm-up window of monthly closes" (:98) — ✅ **VERIFIED, and satisfiable today**
-
-Monthly closes run to ~Dec 2020 (D-002), ~68 months (`DATA_MODEL.md:358`). RSI(6) and z-score vs
-6M MA (`CARDSTOCK_UI_SPEC_v1.md:184`) warm up in months, not years. **These indicators are
-live now** — one of the few rows on this page that is honest and favourable.
-
----
-
-### A24 — "Seasonality — **one observed cycle so far**" (:100) — ❌ **FALSE on either substrate**
-
-The page never says which substrate seasonality runs on, and both answers contradict "one":
-
-- **Monthly prices** (~Dec 2020 → Aug 2026): ~5.7 annual cycles, not one. D-002 / `DATA_MODEL.md:375`.
-- **Per-sale ledger** (late Jul 2026 → Aug 2026): **zero** cycles. D-001.
-
-The figure traces to `HANDOFF.md:130` (*"Annual cycles | 1 of 3"*), which D-031
-(`DECISIONS.md:379`) lists as **Unverified**, and `DISPLAY_VOCABULARY.md` contradicts itself on
-the unlock date — D-032 (`DECISIONS.md:360`): *"`:36` says 'corpus-locked until ~**Nov 2028**'; `:145` says '3 observed cycles · **Nov 2027** (1/3)'. Same file, one year apart."*
-
-Resolve the substrate first; the count follows arithmetically.
-
----
-
-### A25 — "Composites (G1–G4) — a composite never fires on partial inputs" (:102) — ✅ **VERIFIED as policy**
-
-Consistent with `CARDSTOCK_UI_SPEC_v1.md:184` and the D-038 posture. No data dependency to check.
-⚠ Note the consequence: since composites gate on their weakest input, and liquidity/supply
-inputs are locked into 2027–2028 (D-033, `DECISIONS.md:321`), **G1–G4 are dark at launch.**
-
----
-
-### A26 — C22 "Backtests start at each screen's honest floor" (:113) — ✅ **VERIFIED as design, inherits A9's miscalibration**
-
-`CARDSTOCK_UI_SPEC_v1.md:90` — *"date range limited to what the data honestly supports (S1-only
-screens: back to ~2021; screens using sales/census metrics: post-seam/post-2026 — the date picker
-*shows* the honest floor and why)"*. Note the spec says **post-2026**, not April 2025 — the spec
-was right and the prototype regressed.
-
-Also `CARDSTOCK_UI_SPEC_v1.md:90`: *"signals are computed only from rows whose
-`observed_at`/`captured_at` precede the entry date — the append-only ledger makes lookahead bias
-structurally impossible."* That is a genuine, verifiable strength (`DATA_MODEL.md:43–48`, Rule 1,
-enforced by the absence of a DELETE grant) — and this page does not mention it. Content gap.
-
----
-
-### A27 — C24 "Missing metadata renders as METADATA PENDING" (:115) — ⚠ **UNVERIFIABLE (product convention)**
-
-No data receipt needed or available. Cross-check against `DISPLAY_VOCABULARY.md` when
-implementing. Note `HANDOFF.md:107` carves out an exception: *"The Pokédex schema is external and
-pre-populated, so species attributes never show METADATA PENDING."*
-
----
-
-### A28 — C26 fan-made / unaffiliated disclaimer (:124) — ✅ **VERIFIED as present, ⚠ narrower than Legal's**
-
-Compare `Cardstock Legal.dc.html:67`, which adds **"Creatures Inc."** to the same list. This page
-omits it. Two disclaimers on one product should not enumerate different entities.
-
-**Neither page names pricecharting.com**, whose data is 100% of the product
-(`DATA_MODEL.md:89`), whose CDN serves every card image (`DATA_MODEL.md:105`, `:292–295` —
-~3.6 GB), and whose terms of service have never been read — D-010 (`DECISIONS.md:90`): *"No repo
-records reading any terms of service, and storing is a different act from serving."* This is the
-page where attribution belongs.
-
----
-
-### A29 — C28 not-financial-advice (:125) — ✅ **VERIFIED as present and consistent**
-
-*"signals describe the past, not the future"* matches `Cardstock Legal.dc.html:64` (*"Cardstock
-describes what the market did, not what it will do"*) and D-041's posture. No data claim. Keep.
-
----
-
-### A30 — C29 "Every stat's tooltip names its source and window" (:130) — ⚠ **UNVERIFIABLE, and currently self-undermining**
-
-An implementable commitment, but if honoured literally every tooltip on the product says
-"pricecharting.com" — a string this page never prints. Either the promise or the omission has to
-give.
-
----
-
-### A31 — ⚠️ **CRITICAL OMISSION: the 2026-09-01 sufficiency floor is absent**
-
-**The page never states the floor, and it was explicitly required to.**
-
-- D-033 (`DECISIONS.md:322`) — *"`Cardstock About Data.dc.html` should carry the floor **and its reason**. 'We discarded our own early data because we didn't trust it' is the same posture as the rest of the design and is a stronger story than an unexplained date."*
-- D-038 (`DECISIONS.md:245`) — *"**`Cardstock About Data.dc.html` must carry the floor and its reason** (D-033). With locks everywhere, the explanation page stops being optional."*
-
-Verified by reading all 136 lines: the strings "2026-09-01", "September", "floor" (in the
-sufficiency sense), and "stabilis*" appear **nowhere**. The `#sufficiency` section (:84–:105)
-runs six rows without once naming the date every one of them is measured from.
-
-**Required copy**, per D-033 (`DECISIONS.md:312–316`): a floor, not a claim about when data
-began; the collector was being stabilised through August 2026; earlier observations are
-discarded rather than trusted; September 1 is the first day of data the owner will stand behind.
-
-**Note the pointed irony:** the page's most-quoted virtue is *"An indicator that doesn't have
-enough history to be trustworthy is locked, with its unlock date shown"* (:86) — while the page
-itself omits the one date all those unlock dates are computed from.
-
----
-
-### A32 — ⚠️ **CONTENT GAP: candlesticks are never explained**
-
-`Cardstock Charts.dc.html:182` renders a link reading **"Why no candlesticks? → About our data"**
-that lands on a page with no such section. The explanation was specified twice:
-
-- `CARDSTOCK_UI_SPEC_v1.md:241` — *"Content authored in §8.6: what the six tiers are, **why monthly (no candlesticks)**, the sales seam, why volume can't predate it, census start + restatements, 'as of' stamps, and what we refuse to fake."*
-- `CARDSTOCK_UI_SPEC_v1.md:425` — *"…→ **why monthly means no candlesticks (and why we won't fake them)** → the sales seam, **per card**, drawn on your charts → **census starts when we started looking**…"*
-- `CARDSTOCK_UI_SPEC_v1.md:184` — *"the indicator panel footer links 'Why no candlesticks? → About our data'."*
-
-D-041 (`DECISIONS.md:224–233`) makes the reason owner-confirmed and rigorous: *"structurally
-impossible, not merely unimplemented. `price_months.price_cents` is a single monthly value
-(D-003 — six tiers, one integer each); OHLC needs four points per period and intraday sequencing
-that does not exist at the source."* Receipt: `DATA_MODEL.md:481` (*"unavailable from source,
-permanently"*).
-
-D-041 also confirms **no news**, and the spec outline names *"order books, news, real-time"* as
-deliberate omissions — none appear in the Honesty policy list (:112–:116).
-
-**Note how much of the spec's outline the built page dropped or inverted:** "the sales seam, per
-card" became a single false global date (A9); "census starts when we started looking" became
-"grading companies publish monthly" (A3/A4); "why monthly means no candlesticks" vanished
-entirely; "'as of' stamps" became a false claim about every page (A16).
+> **"The footer stamp on every page tells you how fresh what you're looking at is."** (line 79)
+
+**Verdict: FALSE as stated — "every page" is contradicted by this very page.**
+
+- A grep for freshness stamps across `CardStock Mockup/*.dc.html` (run 2026-08-10) finds them on `Cardstock Home.dc.html`, `Cardstock Landing.dc.html`, `Cardstock Binder Landing.dc.html`, `Cardstock Charts Landing.dc.html`, `Cardstock Screener Landing.dc.html`, and `Cardstock Brand System.dc.html`.
+- **`Cardstock About Data.dc.html` has no footer** — the container closes at line 132 after the note at 129–131; the only match in this file is the sentence making the claim (line 79). **`Cardstock Legal.dc.html` has no footer either.**
+- Both omissions are correct — neither page renders market data — but the word "every" makes the sentence self-refuting on the page that says it. Fix the copy ("every page that shows market data"), not the pages.
+
+### 6.10 Closed months and the current-month point
+
+> **"Monthly series only include closed months. The current month appears as a hollow, dashed point — it aggregates the sales recorded so far and will keep revising until the month closes. We never project or extrapolate it."** (line 80)
+
+**Verdict: the behaviour is VERIFIED and well-founded; the stated mechanism ("it aggregates the sales recorded so far") is FALSE.**
+
+- **Closed-month immutability, verified:** `DATA_MODEL.md:98–99` — "**Closed months are immutable server-side; only the current month revises between visits.**" And `:178–179` — "a typical visit adds 0–2 rows (the current month moved); **closed months carry exactly one row forever**."
+- **Revision is real and already modelled:** `DATA_MODEL.md:189–191` — "The composite PK ends in `observed_at`: the same (card, tier, month) legitimately has multiple rows when the *current* month's average revised between visits. Latest-per-key queries must order by `observed_at`." The hollow dashed point is an honest rendering of a fact the schema already encodes.
+- **The mechanism is wrong.** The current month's value is **the source site's revised monthly average**, refetched on our next visit — not an aggregate CardStock computes from its own sales rows. Two consequences the copy hides: the point revises **only when we visit that card** (not continuously), and its composition is the third party's, not ours (§6.1).
+- "We never project or extrapolate it" — VERIFIED as consistent with D-041 (`DECISIONS.md:229`), which establishes that `price_cents` is a single monthly value and that OHLC/intraday structure "does not exist at the source". The product is structurally incapable of the thing it disclaims.
+
+### 6.11 Sufficiency rules — and the missing 2026-09-01 floor
+
+**The page does not state the sufficiency floor, and D-033 says it should. Verdict on the omission: CONFIRMED — the floor is absent.**
+
+D-033 (`DECISIONS.md:322`) says in terms: *"`Cardstock About Data.dc.html` should carry the floor **and its reason**. 'We discarded our own early data because we didn't trust it' is the same posture as the rest of the design and is a stronger story than an unexplained date."*
+
+The string "2026-09-01", "September 2026", and any equivalent **appear nowhere in the file**. The `#sufficiency` section (84–105) lists per-signal requirements and never states the global cutoff they are measured from. The only date in the whole section is "≈ Jan 2027" (line 94), which is wrong *because* the floor is missing.
+
+D-033's substance, for the copy that needs writing (`DECISIONS.md:309–316`): the floor is "not an assertion about when data began — that is per-card and ragged (D-001). It is a deliberate, disclosed cutoff: the collector was still being stabilised through August 2026, so earlier observations are discarded rather than trusted." And on why September: "the owner expects the scraper's bugs resolved by the end of August 2026… An earlier proposal of 'August 2026' was rejected as inconsistent with that same reasoning — if August is the stabilisation month, August data is the suspect data."
+
+Per-row audit:
+
+| Signal | Line | Verdict |
+|---|---|---|
+| "Churn 30d" — "30 days of per-sale ledger in that grade bucket; starts LOW CONFIDENCE for its first 30 days" | 91–92 | **VERIFIED as a rule.** Churn is derivable — `DATA_MODEL.md:429`, `SELECT count(*) / 30.0 FROM sales`. The 30-day window must count from 2026-09-01 (D-033), which the page never says, so a reader cannot compute the unlock date |
+| "Weekly bars" — "~6 months of ledger (≈ Jan 2027)" | 93–94 | **FALSE.** 2026-09-01 + 6 months = **~Mar 2027**, not Jan 2027 — roughly two months optimistic. Jan 2027 is only reachable from a ~Jul 2026 start, i.e. by ignoring the D-033 floor. Also violates D-033's "no authored ratios, ever again" (`DECISIONS.md:319`) |
+| "Daily bars" — "~12 months of ledger, liquid cards only" | 95–96 | **VERIFIED as a rule**; no date authored, so nothing to be wrong. Implies ~Sept 2027, consistent with D-033's "12 months of census → ~Sept 2027" (`DECISIONS.md:321`) |
+| "Oscillators (RSI, z-score)" — "their full warm-up window of monthly closes before the first value renders" | 97–98 | **VERIFIED and available now.** These need monthly closes, which reach back to ~Dec 2020 (D-002) — so oscillators are the one family unaffected by the seam. The page never tells the reader this, which is a missed opportunity given §6.6(b) |
+| "Seasonality" — "one observed cycle so far — labeled illustrative until there are three" | 99–100 | **FALSE or incoherent, depending on the input series.** From monthly prices (D-002, ~Dec 2020) there are ~5 complete cycles, so "three" was passed years ago. From the per-sale ledger (D-001, late Jul 2026) there is **not yet one** cycle. Either way "one observed cycle so far" is wrong. The three-cycle rule itself is a sound policy |
+| "Composites (G1–G4)" — "every component signal individually sufficient — a composite never fires on partial inputs" | 101–102 | **UNVERIFIABLE** — G1–G4 are a CardStock construct with no counterpart in the scraper. The rule is sound and consistent with D-038 |
+
+> **"An indicator that doesn't have enough history to be trustworthy is locked, with its unlock date shown."** (line 86)
+
+**Verdict: VERIFIED as policy** — D-038 (`DECISIONS.md:237`) "v1 ships the full UI with locks visible". **But the page cannot honour "its unlock date shown" while omitting the anchor date** those unlock dates are computed from, and its one worked example (line 94) is wrong.
+
+### 6.12 Honesty policy
+
+| Claim | Line | Verdict |
+|---|---|---|
+| "No projected or extrapolated data points — a partial month renders as partial, never as a forecast." | 112 | **VERIFIED** — consistent with line 80, and structurally guaranteed by D-041 |
+| "Backtests start at each screen's honest floor — the first date every filter in it could actually be computed — not at the start of our archive." | 113 | **VERIFIED as policy, mis-anchored in practice.** The rule is exactly right and matches D-033's intent; but "the start of our archive" is presented on this page as Aug 2023 (§6.6) and the honest floor should be 2026-09-01 (D-033). Right principle, wrong numbers feeding it |
+| "A backtest that mostly found one set's moment says so, instead of presenting it as a repeatable pattern." | 114 | **UNVERIFIABLE** — a product behaviour with no data-side counterpart. Sound, unusually candid, no receipt either way |
+| "Missing metadata renders as METADATA PENDING, not as a silent blank or a guess." | 115 | **UNVERIFIABLE from the data model; well-founded as a need.** Real gaps exist — `cards` carries nullable identity fields, and `parse_failures` is a first-class table (`PokemonDbContext.cs:8–22`, D-030). The literal token is a display-vocabulary decision |
+| "When a grader restates history, the restatement window stays visibly marked." | 116 | **Premise VERIFIED** (`DATA_MODEL.md:209–213`, PSA ~June 2026, 397 → 99,246); **marking UNVERIFIABLE** (unbuilt). Duplicate of line 63 — see §8 |
+
+### 6.13 Disclaimers and closing note
+
+| Claim | Line | Verdict |
+|---|---|---|
+| "fan-made analytics project… not affiliated with… Nintendo, The Pokémon Company, or any grading company or marketplace" | 124 | **VERIFIED as consistent.** Entities named correctly (marketplaces `DATA_MODEL.md:227`; graders `:204`). **Narrower than the Legal page's version** (`Cardstock Legal.dc.html:67` adds "Creatures Inc." and "or marketplace"). Neither version addresses **image copyright**, the genuinely open risk in D-010 (`DECISIONS.md:90` — "No repo records reading any terms of service") |
+| "Nothing here is financial advice… signals describe the past, not the future." | 125 | **VERIFIED** — matches `Cardstock Legal.dc.html:64` and is structurally guaranteed by D-041 |
+| "Collectible prices are volatile and thinly traded" | 125 | **VERIFIED by the data's own shape** — the ~30-row bucket windows (`DATA_MODEL.md:101`) and the burn-window scheduler exist precisely because per-card sale flow is low |
+| "Every stat's tooltip names its source and window." | 130 | **UNVERIFIABLE and a large commitment.** No tooltip inventory exists. Note the trap: if tooltips name sources honestly they must say pricecharting.com, which this page never does (§6.0) — the two claims cannot both be satisfied without changing this page |
+| "Where every number comes from, how fresh it is, and what we refuse to show." | 48 | **FALSE as a summary of the page delivered.** "Where every number comes from" omits the single source (§6.0); "how fresh it is" is wrong (§6.9); "what we refuse to show" describes an exclusion pipeline that does not exist (§6.4) |
+
+### 6.14 Audit summary — every FALSE and UNVERIFIABLE claim
+
+| # | Claim | Line | Verdict |
+|---|---|---|---|
+| 1 | Subtitle: "Where every number comes from, how fresh it is…" | 48 | FALSE as a summary — source undisclosed, freshness wrong |
+| 2 | "The Apr ’25 seam" (pill) | 52 | FALSE — D-001, late Jul 2026, and per-card not global |
+| 3 | "Prices come from realized sales only" | 62 | FALSE for the plotted series — it is the source site's own monthly average |
+| 4 | "Asking prices never enter an aggregate" | 62 | UNVERIFIABLE — we do not compute the aggregate |
+| 5 | "cover under 5% of rows" | 62 | UNVERIFIABLE — only "most rows have none" (`DATA_MODEL.md:232`) |
+| 6 | "Populations come from the public census reports the grading companies publish monthly" | 63 | FALSE ×3 — scraped from `pop_data`, not from graders, no monthly cadence |
+| 7 | "we mark the affected window on charts" | 63 | UNVERIFIABLE — detection is an ops alert; chart marking unbuilt |
+| 8 | "Excluded: bulk lots, ambiguous grade or damage notes, unmatched printings, unverified marketplaces" | 64 | FALSE — no sale-content filtering exists in the parser |
+| 9 | "Coverage is deepest for English-language cards graded PSA, BGS, CGC, SGC, ACE, and TAG" | 64 | UNVERIFIABLE — no language data; census exists for psa/cgc only |
+| 10 | "The April 2025 seam" (heading) | 69 | FALSE — D-001 |
+| 11 | "Before April 2025 our archive holds monthly aggregates" | 71 | FALSE — D-001 |
+| 12 | "averages and **sale counts**" | 71 | FALSE — no count column; volume history "unavailable from source, permanently" |
+| 13 | "back to August 2023" | 71 | FALSE — ~Dec 2020 (D-002); understates depth by ~32 months |
+| 14 | "From April 2025 forward we keep the per-sale ledger" | 71 | FALSE — late Jul 2026, per-card (D-001) |
+| 15 | "every individual transaction" | 71 | FALSE — ~30-row buckets; older rows discarded by the source forever |
+| 16 | "That boundary is drawn as a marker on charts" | 72 | FALSE as stated — the seam is ragged, one marker per card |
+| 17 | "their history starts there" | 72 | FALSE — starts per-card (D-001), displayed from 2026-09-01 (D-033) |
+| 18 | "Sales data refreshes daily" | 79 | FALSE — priority queue with a 30-day starvation floor |
+| 19 | "census data lands when graders publish, roughly monthly" | 79 | FALSE — lands on our visit; source keeps no history |
+| 20 | "The footer stamp on **every page**" | 79 | FALSE — this page and the Legal page have no footer |
+| 21 | "it aggregates the sales recorded so far" | 80 | FALSE mechanism — it is the source's revised monthly average |
+| 22 | "~6 months of ledger (≈ Jan 2027)" | 94 | FALSE — ~Mar 2027 from the D-033 floor; also an authored date D-033 bans |
+| 23 | "one observed cycle so far" | 100 | FALSE either way — ~5 cycles of monthly prices, or 0 of ledger |
+| 24 | "Composites (G1–G4)… never fires on partial inputs" | 102 | UNVERIFIABLE — CardStock construct, no data-side counterpart |
+| 25 | "Backtests start at each screen's honest floor… not at the start of our archive" | 113 | Policy VERIFIED; mis-anchored by the wrong archive start (line 71) |
+| 26 | "A backtest that mostly found one set's moment says so" | 114 | UNVERIFIABLE — unbuilt product behaviour |
+| 27 | "Missing metadata renders as METADATA PENDING" | 115 | UNVERIFIABLE — display-vocabulary decision, unbuilt |
+| 28 | "When a grader restates history, the restatement window stays visibly marked" | 116 | Premise VERIFIED; marking UNVERIFIABLE |
+| 29 | "Every stat's tooltip names its source and window" | 130 | UNVERIFIABLE — and in tension with §6.0 |
+| 30 | **The 2026-09-01 sufficiency floor** | *absent* | **MISSING** — D-033 (`DECISIONS.md:322`) says this page should carry the floor and its reason. It does not |
+
+**Verified claims, for balance:** closed-month immutability (80), never-project (80, 112), the ledger's date/venue/grade fields (71), the post-seam indicator reasoning (72), the lock-don't-degrade policy (86), oscillator warm-up (98), the restatement premise (63, 116), both disclaimers (124, 125), and "thinly traded" (125).
 
 ---
 
 ## 7. Open questions
 
-| # | Question | Blocks | Owner input needed |
-|---|---|---|---|
-| **Q1** | **The April 2025 seam (:52, :69, :71–:72) is false (A9). Rewrite to the ragged per-card seam, or to the disclosed 2026-09-01 floor, or both?** D-001 says ragged and per-card; D-033 says one disclosed floor. The page needs one story. Settles **D-009** | Everything on this page; Charts seam markers; every backtest floor | ✅ Yes — this is the ruling |
-| **Q2** | Pre-seam "sale counts" (:71) are permanently impossible (A10b). Delete the phrase, or state plainly that volume history is unavailable from source? `CARDSTOCK_UI_SPEC_v1.md:425` wanted *"why volume can't predate it"* | Charts volume pane; Screener volume filters | ✅ Yes |
-| **Q3** | The page never names pricecharting.com (A11, A28). Add attribution — and does D-010's unresolved licensing question change the answer? | Legal §IP; image serving; D-010, D-011 | ✅ Yes |
-| **Q4** | Current-month point methodology (A18): copy the site's revising average, compute our own median from `sales`, or show both? `DESIGN_NOTES.md:49` specifies an impossible hybrid | Card page chart; Charts | ✅ Yes |
-| **Q5** | Restatement marking is promised twice (:63, :116) but `DESIGN_NOTES.md:54` says *"no census-diff detection planned"* while `:35` still lists hatching for Charts (A5). Build it or drop the promise? | Charts pop pane; both sentences | ✅ Yes |
-| **Q6** | Add the "why no candlesticks" section (A32)? `Cardstock Charts.dc.html:182` already links to it and D-041 supplies the reasoning | The Charts link is broken until answered | ✅ Yes |
-| **Q7** | "Sales data refreshes daily" (:79) is false (A14), while on-demand express-visit refresh is real. Rewrite to the stronger true claim? Ties to **D-025** (which scenarios call which intake endpoint) | Freshness copy across the app | ✅ Yes |
-| **Q8** | Which substrate does Seasonality run on (A24)? Determines whether the count is ~5, or 0 | The seasonality row; `DISPLAY_VOCABULARY.md` §2/§10 | ✅ Yes |
-| **Q9** | Add a Legal link to this page's footer? Legal links here (`Cardstock Legal.dc.html:65`); the reverse does not exist | Nav completeness | ⬜ Design call |
-| **Q10** | "under 5% of rows" (:62) — run the listed-price query and settle 4.4% vs ~12% (A2, D-031) before publishing a number | The sentence; discount-to-list gating | ⬜ Query, then confirm |
-| **Q11** | Does "English-language" (:64) survive, given no language field exists (A7)? | The coverage sentence | ⬜ Design call |
-| **Q12** | Define "liquid cards" for the daily-bars lock (:96, A22) | Charts D-resolution lock | ⬜ Design call |
+1. **What replaces "the April 2025 seam" in the UI?** D-001 makes the seam per-card. One marker per card is honest but complicates every chart; a single global marker at the D-033 floor (2026-09-01) is simpler and safe because it errs toward LOCKED (`DECISIONS.md:314`). Not decided — this is a design decision that must precede the copy rewrite.
+2. **Does the page disclose pricecharting.com by name?** §6.0. Naming a single upstream is a product-strategy call as well as an honesty call, and line 130's tooltip promise arguably forces it.
+3. **Are sale counts removed from the copy entirely, or reframed as post-seam-only?** They are derivable forward of each card's seam (`DATA_MODEL.md:391`) — the true statement is nearly the opposite of line 71's.
+4. **Where does the "under 5%" figure come from?** No receipt exists. Either run the query and cite it, or cut the number.
+5. **Does the exclusion pipeline (line 64) get built, or does the copy get corrected?** It describes real quality work that would improve the product. Right now it describes work that does not exist.
+6. **How is "unlock date shown" computed and rendered?** Requires the D-033 anchor plus per-signal denominators. Depends on D-015 (`DECISIONS.md:460`) for where that computation lives.
+7. **What is the true corpus lap time?** D-033 (`DECISIONS.md:324`) flags "~12.4-day corpus lap" as unverified. Whatever replaces "refreshes daily" needs a real number.
+8. **Which input series feeds Seasonality?** Determines whether line 100 becomes "five cycles" or "not yet one".
+9. **What are G1–G4?** Referenced as if the reader knows. No definition on this page and no counterpart in the scraper.
+10. **Do the two unaffiliated disclaimers converge?** Line 124 here vs `Cardstock Legal.dc.html:67`. And should either mention image licensing (D-010)?
+11. **Route and inbound links.** `/about-data` is proposed, not decided; only the Legal page currently links here, which is thin for a page this load-bearing.
+12. **Who owns re-auditing this page?** Every date on it is a claim that decays. D-033's "one anchor date plus denominators" rule should govern the implementation so the page cannot silently rot.
 
 ---
 
 ## 8. Contradictions found
 
-| # | Contradiction | Sources | Resolution |
-|---|---|---|---|
-| **X1** | **Page vs. reality on the seam.** ":71 — 'Before April 2025 our archive holds monthly aggregates'" vs `DATA_MODEL.md:382–385` (*"Epoch boundary is per-card, per-grade-bucket — not the crawler's start date"*) and D-001 | Tier 1 HTML vs Tier 1 data | Data wins on fact; HTML wins on what the page *says*. Copy must change — Q1 |
-| **X2** | **Page vs. itself.** The seam section says the ledger starts Apr 2025 (:71); the sufficiency table's *"(≈ Jan 2027)"* (:94) is arithmetic from a ~Jul 2026 start. Under :71, weekly bars unlocked in Oct 2025 | :71 vs :94 | Internal. Table is closer to truth; prose is the error |
-| **X3** | **Page vs. `DESIGN_NOTES.md:35`.** The note scopes Apr '25 to *"liquidity seam… (churn/vol panes)"* and assigns *"per-sale ledger begins"* to the **Jul '26** seam. The page assigns the per-sale ledger to **April 2025** | :71 vs `DESIGN_NOTES.md:35` | Two different meanings for one date. Settles D-009 — Q1 |
-| **X4** | **Prices: shallow vs deep.** ":71 — back to August 2023" vs `DATA_MODEL.md:375`, `HANDOFF.md:125`, `CARDSTOCK_UI_SPEC_v1.md:20`, D-002 — all ~Dec 2020 | 1 vs 4 | Dec 2020. Page understates by ~2y 8m |
-| **X5** | **19 vs 21 grade buckets.** `GradeTierVocabulary.cs` lists 19 labels (and `CLAUDE.md:93` says 19) while `DATA_MODEL.md:101` says *"up to 21 grade buckets"* and `:230` says *"21 distinct labels"* | Code vs DATA_MODEL | Likely reconcilable — the file is a *detection* vocabulary whose comment says *"this list grows"* — but 19 ≠ 21 is unexplained. Affects A8 |
-| **X6** | **Footer stamps.** ":79 — 'The footer stamp on every page'" vs `HANDOFF.md:99` (*"AsOfStamp component — removed app-wide"*) and a grep finding stamps only on `Cardstock Card.dc.html:253,:255` | Page vs HANDOFF + prototypes | Page is wrong — A16 |
-| **X7** | **Restatement marking.** Promised at :63 and :116 vs `DESIGN_NOTES.md:54` (*"no census-diff detection planned; hatching was my invention, not spec"*), while `DESIGN_NOTES.md:35` still lists *"pop restatement hatched region"* | Page vs two design notes that also disagree with each other | Unresolved — Q5 |
-| **X8** | **Current-month aggregation.** ":80 — 'it aggregates the sales recorded so far'" vs `DATA_MODEL.md:186` (site's monthly **average**), vs `DESIGN_NOTES.md:49` (*"median… outlier-trimmed"*, claimed to be *"the SAME aggregation as closed months"* — which CardStock does not compute) | Three mutually exclusive descriptions | Unresolved — Q4 |
-| **X9** | **Listed-price coverage.** ":62 — under 5%" vs `DESIGN_NOTES.md:46` (4.4%) vs `HANDOFF.md:128` (~12%) | D-031 | 4.4% credible, query not yet run — Q10 |
-| **X10** | **Seasonality cycle count.** ":100 — one observed cycle" vs D-002 (~5.7 price cycles) vs D-001 (0 ledger cycles); source figure `HANDOFF.md:130` is flagged Unverified by D-031; `DISPLAY_VOCABULARY.md:36` vs `:145` disagree by a year (D-032) | Four sources, no two agreeing | Unresolved — Q8 |
-| **X11** | **Disclaimer scope.** ":124" omits *"Creatures Inc."*, present at `Cardstock Legal.dc.html:67`. Neither names pricecharting.com | Page vs Legal | Align both — Q3 |
-| **X12** | **Sale counts, inverted.** ":71" puts counts pre-seam (impossible — `DATA_MODEL.md:481`) and omits them post-seam (where `DATA_MODEL.md:433–438` and `HANDOFF.md:126` confirm they are derivable) | Page vs DATA_MODEL | Page is exactly backwards — Q2 |
-| **X13** | **Built page vs its own spec.** `CARDSTOCK_UI_SPEC_v1.md:425` outlines *"the sales seam, **per card**"*, *"census starts when we started looking"*, *"why monthly means no candlesticks"*, *"order books, news, real-time"* — the built page inverts the first two and omits the last two | Tier 3 spec vs Tier 1 prototype | Prototype wins on authority, but the spec was factually right. Q1, Q6 |
-| **X14** | **Authored constants.** `"(≈ Jan 2027)"` (:94) vs D-033 (`DECISIONS.md:319`): *"Numerators are arithmetic against today. **No authored ratios, ever again.**"* | Page vs D-033 | D-033 overrides — compute it |
-| **X15** | **Sourcing language.** *"our archive"* / *"we keep"* (:71, :113) vs `DATA_MODEL.md:89` (*"All data comes from pricecharting.com"*); and `Cardstock Legal.dc.html:66` forbids users to *"scrape at volume, resell our data"* | Page + Legal vs DATA_MODEL | First-party framing over wholly third-party data — Q3 |
-
----
-
-## Implementation checklist
-
-- [ ] Extract the shared shell (nav + 820px column + theme/CVD pre-paint) — used by this page and `/legal`
-- [ ] Self-host Inter, Inter Tight, JetBrains Mono (remove the Google Fonts CDN links at :12–:14) — required for Legal's no-trackers promise
-- [ ] Preserve all six fragment ids; `#sufficiency` is linked from `Cardstock Screener.dc.html:384`
-- [ ] `scroll-margin-top:62px` on every section
-- [ ] Convert the sufficiency grid to a real `<table>` or add ARIA roles (:87–:103)
-- [ ] **Do not ship §3 copy** until Q1–Q8 are answered. This is a public factual page
-- [ ] Add the 2026-09-01 floor section with its reason (A31 — required by D-033 and D-038)
-- [ ] Add the "why no candlesticks" section (A32 — `Cardstock Charts.dc.html:182` links to it today)
-- [ ] Replace `"(≈ Jan 2027)"` with a value computed against the floor (R6, X14)
-- [ ] Name pricecharting.com (Q3), pending D-010/D-011
+1. **The page vs D-001 — four times.** "Apr ’25" (52), "April 2025" (69), and twice in line 71. D-001 (`DECISIONS.md:22`) is titled with the exact negation: "not Apr 2025 / Jan 2026". The owner's words, `DECISIONS.md:31`: "That's completely false. It just started this month."
+2. **The page vs D-002.** "back to August 2023" (71) vs "~Dec 2020" — and the page understates rather than overstates, hiding its own strongest asset.
+3. **The page vs `DATA_MODEL.md:113–115` and `:482`.** "sale counts" (71) vs "**Unavailable from source, permanently:** historical sales volume". The page advertises data that has never existed and cannot be obtained.
+4. **The page vs itself, on sale counts.** Line 71 puts counts *before* the seam; `DATA_MODEL.md:391` makes them derivable only *forward* of it. The page's own line 72 explains that individual sales exist only after the seam — which is incompatible with line 71's pre-seam counts.
+5. **The page vs itself, on the footer.** Line 79 says "The footer stamp on **every page**"; this page has no footer, and neither does `Cardstock Legal.dc.html`.
+6. **The page vs D-033 — omission plus arithmetic.** `DECISIONS.md:322` says this page "should carry the floor **and its reason**"; it carries neither. And "≈ Jan 2027" (94) is ~2 months earlier than the floor allows, i.e. wrong "in the direction that overstates readiness" — the exact failure D-032 (`DECISIONS.md:342`) was raised to stop, now recurring in public copy.
+7. **The page vs D-033's no-authored-dates rule.** `DECISIONS.md:319` — "**No authored ratios, ever again.**" Line 94 authors a date.
+8. **The page vs D-003 on coverage.** Line 64 implies six graders throughout; D-003 (`DECISIONS.md:44–57`) documents three separate vocabularies — 6 price tiers, 19 sales labels, arbitrary user entry — and `DATA_MODEL.md:204` limits census to psa/cgc.
+9. **Sources section vs the honesty policy.** "we mark the affected window on charts" (63) and "the restatement window stays visibly marked" (116) are the same promise stated twice. Not contradictory, but two copies of an unimplemented commitment that will drift.
+10. **D-009 is incomplete.** `DECISIONS.md:385` tracks the Apr '25 seam surviving in `DESIGN_NOTES.md:35`. It does not record that the same error is in this **public-facing prototype**, in a section heading and a nav pill. D-009 should be amended to cover `Cardstock About Data.dc.html:52, 69, 71, 72`.
+11. **This page vs the Legal page's data-accuracy claim.** `Cardstock Legal.dc.html:65` — "sales records and census reports contain errors upstream of us" — implies a first-party/third-party boundary that §6.0 shows does not exist. The two pages reinforce each other's misframing.

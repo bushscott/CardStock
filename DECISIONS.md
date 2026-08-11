@@ -369,6 +369,32 @@ All lines read directly 2026-08-10. Owner asked for this to be tracked, 2026-08-
 
 ---
 
+### D-044 — 🚩 The marketing pages assert the false Apr '25 seam in 7 places
+The seam that D-001 disproved is stated as fact across three public marketing pages: `Cardstock Landing.dc.html:202, :235, :236`; `Cardstock Charts Landing.dc.html:45, :74–75, :113`; `Cardstock Screener Landing.dc.html:92`.
+
+**This is the highest-priority copy fix in the project.** D-011 made the site publicly signup-able, so these are public factual claims about data provenance — on the pages a visitor sees first, for a product whose entire differentiator is honesty about data. Every one is wrong by roughly 15 months.
+
+Also flagged as high-risk by the same pass: all 30-day sales and census ticker stats, and the Screener landing's headline "churn" filter, which is post-seam-gated and therefore not computable yet.
+
+**Note the tier interaction:** the mockups are Tier 1 (D-040), so normally the HTML wins. Here the HTML is simply wrong about the world, and `../PokemonInvestBatch` — also Tier 1 — overrides it. Tier 1 is authoritative about *what the design is*, never about *what the data is*.
+
+**Related, unresolved — demo mode was removed incompletely.** Demo mode has 0 occurrences across all four marketing pages, but all 11 marketing CTAs land on `Cardstock Account.dc.html:56`, which still renders "Browse the demo →" into the app. `DESIGN_NOTES.md:141` records the removal and omits the Account page.
+
+---
+
+### D-045 — Marketing and app routes collide; the HTML cannot settle it
+`HANDOFF.md:83` puts the Landing at marketing `/` while `:71` puts app Home at `/`. Same for the three pillar pages at `/screener`, `/charts`, `/binder` (`HANDOFF.md:84`) against the app's own `/screener`, `/charts`, `/binder` (`:72–74`).
+
+The prototypes link by bare filename, so Tier 1 **cannot** resolve this — it is a genuine design decision, not a documentation error.
+
+**Why it matters for the build:** this is a routing decision entangled with render mode (D-013). The obvious resolution is auth-resolved roots — `/` serves the Landing when logged out and Home when logged in — which fits the static-SSR-for-marketing, interactive-for-app split cleanly, since the two branches want different render modes anyway.
+
+Two smaller findings from the same pass, both affecting how marketing pages get built:
+- **No `prefers-reduced-motion` in any of the four marketing pages** (six app pages have it). The ticker animates unconditionally — `@keyframes cdstkTicker` at `Landing:20`, applied `:334` as `44s linear infinite`. Contradicts the brand package README `:115`. The ticker motion is pure CSS over a duplicated list (`items.concat(items)`, `:326`), so pausing it is trivial.
+- **The marketing pages are light-only** — 0 `data-theme` occurrences across all four, contradicting `DESIGN_NOTES.md:105`'s "dark mode app-wide, all 10 pages."
+
+---
+
 ### D-043 — 🚩 Tier 1 contradicts Tier 1: the account-deletion promise
 Two prototypes state incompatible deletion policies. D-040 says the mockups are absolute truth — but it has no rule for when two mockups disagree, so this needs an owner ruling and D-040 needs a tiebreak clause.
 
@@ -424,6 +450,16 @@ The tiers genuinely without a price series are:
 So the open question is narrower and sharper: a user owns a BGS 10 Black. It has sales rows but no price series. Value it at PSA 10? At PSA 10 with a haircut? Leave it unvalued and exclude it from portfolio totals?
 
 **Strong steer from D-022:** the owner has already rejected exactly this move once. Applying a multiplier to approximate an unobserved company price was rejected as "statistically dishonest." Valuing a BGS 10 Black at `Psa10 × factor` is the same decision in a new place. Affects cost basis, P&L, and "vs market index" — the product's stated emotional centre.
+
+**Widened 2026-08-10 by direct extraction of the Binder prototype — the real number is far larger than the framing above.** The tier picker is not a 19-value list. It is a **7 grader × N grade cross product producing 118 labels** (`Cardstock Binder.dc.html:368–377`), including half-grades at every 0.5 step from 1.5 to 9.5, plus `CGC 10 Pristine`, `BGS 10 Black Label`, `TAG 10 Pristine`, `SGC 10 Pristine`.
+
+**93 of those 118 labels have no price series.** Only 7 labels overlap the canonical vocabulary at all, and `tierRank` (`:451`) returns `−1` for most of what the picker emits. Spellings diverge too — the picker writes `CGC 10 Pristine` where the vocabulary has `CGC 10 Prist.`
+
+**Two further findings that bear directly on the ruling:**
+- **Dead code already implements the rejected approach.** A dormant `bucketOf` (`:415–423`) encodes `n ≥ 10 → PSA 10` and `< 8 → PSA 7` — precisely the approximation D-022 records the owner rejecting as statistically dishonest. It must not be revived by accident during the rebuild.
+- **The correction modal silently asserts a grader that was never recorded.** Re-opening a `Grade N` transaction forces the grader field to **PSA** (`:522–532`), attributing a company the record never named — directly against ADR-0005's instruction that the interface must not imply the pooled figure is company-neutral.
+
+**Also:** the gallery view shows a holding's value with **no `EST` badge** while the table badges the same holding (`:99–102`, `:121`), under an IRON RULE strip rendered on both. Same number, two different honesty treatments.
 
 ### D-013 — Render mode: Interactive Server, WebAssembly, Auto, or per-component?
 Coupled to D-014. Interactive Server holds a SignalR circuit per visitor and round-trips every interaction to a residential Pi — weakest exactly where success criterion #1 ("a hiring manager clicks a link") lives. WebAssembly moves the C# into the browser, which cannot open a Postgres connection, forcing D-014 to be yes.

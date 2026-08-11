@@ -230,7 +230,7 @@ Shadow DOM built in the constructor (`image-slot.js:501–529`). Exported CSS pa
 image-slot[placeholder=" "]::part(empty) { opacity: 0; }
 ```
 
-`Cardstock Home.dc.html:22`, `Cardstock Card.dc.html:22`, `Cardstock Binder.dc.html:18`, `Cardstock Character.dc.html:22` (and matching lines on Browse, Set, Screener, Charts). So `placeholder=" "` — a single space — is the convention for **"render nothing, show only the coloured gradient behind me."** Those slots sit on a `thumbBg` linear-gradient supplied by the page (`Home:558`: `linear-gradient(160deg, ${ac[0]}, ${ac[1]})`), which is what the user actually sees today. Slots with real copy (`"card art 325×450"`, `"card art"`, `"drop card image"`) show the caption.
+Seven pages carry it, verified by grep: `Binder:18`, `Browse:22`, `Card:22`, `Character:22`, `Home:22`, `Set:22`, `Screener:22`. **Charts does not** — its one slot (`Charts:73`) uses `placeholder=" "` but has no suppression rule, so the empty icon still renders inside the hover-zoom thumbnail. Likely an oversight; either way, `placeholder=" "` — a single space — is the convention for **"render nothing, show only the coloured gradient behind me."** Those slots sit on a `thumbBg` linear-gradient supplied by the page (`Home:558`: `linear-gradient(160deg, ${ac[0]}, ${ac[1]})`), which is what the user actually sees today. Slots with real copy (`"card art 325×450"`, `"card art"`, `"drop card image"`) show the caption.
 
 `Cardstock Landing.dc.html` and `Cardstock Profile.dc.html` do **not** ship the suppression rule — their slots are meant to read as fillable.
 
@@ -252,20 +252,244 @@ Two paths exist in the component; only one is relevant to Blazor.
 
 ## 4. Cross-cutting UI patterns
 
-*(pending)*
+Seven patterns are re-implemented independently on multiple pages. Each should become one Blazor component.
+
+### 4.1 Resizable columns via header pipes
+
+**Where:** Home (`Home:95–99`), Screener (`Screener:354–356`), Binder (`Binder:112`, `:147`), Card sales ledger (`Card:194`), Character (`Character:111`), Set (`Set:106`).
+
+**Structure.** The table is a CSS grid whose `grid-template-columns` is a bound string (`{{ gridCols }}`, `Home:93`) built from a `colW` state object. Each header cell is `display: flex; align-items: center; min-width: 0` containing a centred label `<span style="flex: 1; text-align: center; overflow: hidden; white-space: nowrap;">` followed by the drag handle:
+
+```html
+<span onMouseDown="{{ rsCard }}" title="Drag to resize"
+      style="cursor: col-resize; color: var(--line3, #C9C9C4);
+             padding: 2px 3px; margin-right: -6px; flex-shrink: 0;"
+      style-hover="color: var(--acc, #4A63D0);">│</span>
+```
+
+The handle is the literal box-drawing character **`│` (U+2502)**, not a border or pseudo-element. `margin-right: -6px` cancels the grid `gap: 6px` so the pipe sits on the column seam. It tints to `var(--acc)` on hover.
+
+**Drag mechanics** (`Home:332–345`, near-identical at `Screener:428–443`):
+1. `mousedown` → `preventDefault()` + `stopPropagation()` (so it never triggers the header's sort click), capture `startX = e.clientX` and `startW = state.colW[key]`.
+2. Attach `mousemove`/`mouseup` on `document`, set `document.body.style.cursor = 'col-resize'` and `userSelect = 'none'` for the duration.
+3. New width = `startW + (ev.clientX - startX)`, clamped. **Home clamps to `[36, 420]`; Screener clamps to `[40, 420]`** — a 4px divergence with no apparent reason; pick one.
+4. `mouseup` removes both listeners and restores `cursor`/`userSelect`.
+
+Screener's version takes a second `bucket` argument (`startResize(key, bucket)`, default `'colW'`) because it resizes two independent grids. Widths are **in-memory only** — nothing persists across reload. Header sort is a separate `onClick` on the label span (`Binder:112`, `Character:111`, `Card:194`), so sort and resize share the cell without conflicting.
+
+Default widths, Home (`Home:331`): `{ card: 220, tier: 52, price: 76, chg: 52, spark: 68 }`.
+
+### 4.2 Row-actions overflow menu
+
+**Trigger** (`Home:122`): `<button aria-label="Row actions" title="More actions for this card" onClick="{{ row.toggleMenu }}">⋯</button>` — the literal `⋯` (U+22EF), `background: none; border: none; color: var(--mut2); font-size: 16px; padding: 2px`. The button sits in a `position: relative` wrapper.
+
+**Panel** (`Home:124`): `<div role="menu" onMouseLeave="{{ row.closeMenu }}">`, `position: absolute; right: 0; top: 22px; z-index: 40; background: var(--card); border: 1px solid var(--line); border-radius: 6px; box-shadow: 0 6px 20px rgba(20,19,26,0.12); min-width: 190px; padding: 4px; text-align: left`.
+
+**Items:** full-width `<button role="menuitem">`, `font-size: 14.5px`, `padding: 6px 8px`, `border-radius: 4px`, hover `background: var(--hov)`. Destructive items are `color: var(--neg2, #D64545)` with hover `background: var(--negBg08)` (`Home:132`, "Remove from watchlist"). Separator: `<div style="height: 1px; background: var(--line); margin: 4px 0;">` (`Home:130`).
+
+**Dismissal — three independent rules, all present:**
+1. **`onMouseLeave` on the panel** closes it immediately (`Home:124`).
+2. **Document click** (`Home:538–543`): closes when `menuIdx !== null` **and** the click target has no `[role="menu"]` ancestor **and** the target's `aria-label` is not `"Row actions"` (the second guard prevents the toggle button's own click from closing-then-reopening).
+3. **Escape** (`Home:523`): `if (e.key === 'Escape') this.setState(this.state.menuIdx !== null ? { menuIdx: null } : { peekId: null })` — **layered dismissal**: Escape closes the menu if one is open, otherwise closes the peek. Only one layer per press.
+
+Only one menu is open at a time — state is a single `menuIdx`, not a per-row flag. Opening a peek also clears it (`Home:573`: `{ peekId: id, focusIdx: ix, menuIdx: null }`).
+
+The same panel shape recurs for non-row menus: Charts saved views (`Charts:50`, `top: 34px; z-index: 60; min-width: 230px`), Screener screen-actions rail menu (`Screener:63`, `data-rail-menu="1"`), Screener/Browse "add" pickers (`Screener:101`, `Browse:70`) — all `onMouseLeave`-dismissed.
+
+### 4.3 Tooltips — convention: explain the CONSEQUENCE, not the identity
+
+The rule is an owner ruling recorded at `DESIGN_NOTES.md:152`: *"too many tooltips is better than not enough"* — **"Every interactive control on all 10 app pages now carries a `title` explaining its CONSEQUENCE, not its name (the label already says the name)."**
+
+The prototypes honour it. `title` attribute counts, counted directly: Screener 36, Card 27, Charts 25, Binder 24, Home 23, Profile 16, Browse 11, Account 10, Set 7, Character 6, About Data 1, Legal 1.
+
+Representative examples showing the convention in force:
+
+| Control | Tooltip | Where |
+|---|---|---|
+| "Open full chart" menu item | "Opens Charts with this row's tracked signals pinned — any pin changes save back to this row via Update watchlist." | `Home:126` |
+| "Add to binder" menu item | "Log a purchase of this card — opens the binder transaction form" | `Home:128` |
+| "Remove from watchlist" | "Stop following this card — its tracked signals are forgotten" | `Home:132` |
+| "Move to list…" | "Move this row to another watchlist — its tracked signals come with it" | `Home:131` |
+| Peek close `✕` | "Close the preview — the watchlist stays as it is" | `Home:237` |
+| Saved-views button | "Saved views — a view remembers the grade tiers, indicators, resolution, and date range you have set. Applying one changes which signals are tracked." | `Charts:48` |
+| Chip legend | "Chip color = the signal's current state, not its identity. Colored means it hit; grey means nothing to report." | `Home:139` |
+| Account circle | "Profile & settings" | `Home:53` |
+| Resize handle | "Drag to resize" | `Home:95` |
+
+**Mechanism:** native `title` attributes throughout — no custom tooltip component exists in any prototype, despite a `--tooltipBg` token being defined (`Home:29`, used 4×). Purely explanatory (non-interactive) tooltip anchors carry `cursor: help` (`Binder:60`, `Card:237`) or `cursor: default` (`Home:100`, `:139`). Dynamic tooltips come through render-value `tip` fields (`Character:111` `title="{{ c.tip }}"`, `Home:118` `title="{{ c.tip }}"`), documented at `DESIGN_NOTES.md:154`.
+
+**For Blazor:** one `<Hint>` wrapper that emits `title` plus the right cursor, and a lint rule that every interactive element has one. Do not build a custom floating tooltip unless the owner asks — the prototypes never did.
+
+### 4.4 Badges
+
+Three distinct badge families, all `JetBrains Mono`, 600 weight, `border-radius: 3px`, `padding: 1px 5px`–`1px 6px`:
+
+- **Outlined status badge** — `font-size: 11px; letter-spacing: 0.08em; color: var(--mut2); border: 1px solid var(--line); border-radius: 3px; cursor: help`. Example: `PRIVATE` on Binder (`Binder:60`), tooltip "Binder data is strictly private — no social features, never shared".
+- **Tinted warning/data-quality badge** — no border, `color: var(--warnInk, #8F6614); background: rgba(176,127,26,0.12)`. Example: `7 OBS` on Card (`Card:237`), tooltip "Census history begins Jan 2026 — 7 observations so far; deltas need two".
+- **Bound filter/state badge** — `font-size: 10.5px`, colours bound per item (`{{ fi.badgeFg }}` / `{{ fi.badgeBg }}`, `Screener:108`), `white-space: nowrap`. `DEFAULT` in the Charts saved-views menu (`Charts:55`) is the same shape with `color: var(--mut2); background: var(--mutbg)`.
+
+**Signal chips are a fourth, semantically distinct family** and should not be merged with badges: `display: inline-flex; gap: 3px; font-size: 11.5px; padding: 1px 6px; border-radius: 4px`, colour bound from a `CHIP` palette map (`Home:346–349`) keyed `gain` / `loss` / `warn` (→ `--pos`/`--posBg(0.10)`, `--neg`/`--negBg(0.10)`, `--warnInk`/`rgba(176,127,26,0.12)`), each carrying a `▲`/`▼`/`–` glyph so colour is never the sole carrier. The legend at `Home:139` states the rule: **chip colour is state, not identity.**
+
+### 4.5 Peek / drawer, and the overlay family
+
+**Peek drawer** — `Cardstock Home.dc.html:230–231`, the canonical instance:
+
+```
+<aside role="dialog" aria-label="Card peek"
+  position: fixed; top: 96px; right: 20px; bottom: 16px;
+  width: 480px; max-width: calc(100vw - 40px);
+  background: var(--card); border: 1px solid var(--line);
+  border-top: 3px solid {{ peek.accent }}; border-radius: 8px;
+  box-shadow: 0 8px 28px rgba(20,19,26,0.10);
+  display: flex; flex-direction: column; overflow: auto;
+  animation: peekIn 0.16s ease-out;
+```
+
+`top: 96px` clears the 48px nav plus the 36px market ticker plus padding. It is **non-modal**: no scrim, the table stays interactive, and it is an `<aside>`. The 3px accent top border is the card's own accent colour, tying drawer to row. Animation `@keyframes peekIn { from { transform: translateX(18px); } to { transform: translateX(0); } }` (`Home:23`) — slide only, no fade — and it is neutralised by the global `@media (prefers-reduced-motion: reduce) { * { animation-duration: 0.01ms !important; } }` (`Home:25`).
+
+*Note the source has a duplicate `z-index` on the same element (`z-index: 50` then `z-index: 10`); the later value wins. Pick one deliberately in Blazor.*
+
+Header is `position: sticky; top: 0` inside the scroll container with a `✕` close button (`Home:236–237`). Body is `padding: 12px; display: flex; flex-direction: column; gap: 12px` (`Home:239`).
+
+**Keyboard contract** (`Home:521–536`, hint bar rendered at `Home:143`: `↑↓ rows · Enter peek · / search`):
+- `↑`/`↓` move `focusIdx`; **if a peek is already open it follows the focused row** (`Home:530`: `if (this.state.peekId) st.peekId = ids[i]`), so arrowing through the table live-updates the drawer.
+- `Enter` opens the peek for the focused row (`Home:533–535`).
+- `Escape` closes menu-then-peek (§4.2).
+- `/` focuses nav search (owned by `cardstock-search.js`, §2.2).
+
+**Related overlays that are NOT this pattern** (keep them separate components):
+- *Card art lightbox* (`Card:101–106`) — modal: full-inset scrim `rgba(20,19,26,0.55)`, `z-index: 200`, `cursor: zoom-out` on the scrim, an inner `onClick="{{ stopClick }}"` guard so clicks on the art don't close, and a corner `✕` at `top: -14px; right: -14px`. Opened from the inline art wrapper's `cursor: zoom-in` (`Card:59`).
+- *Destructive confirm modal* (`Profile:188`) — `role="dialog"`, `position: fixed; inset: 0; z-index: 100; background: rgba(15,15,12,0.45)`, centred, with a type-to-confirm field (`delText`, `Profile:206`).
+- *Floating hover preview* (`Home:315–316`, `Screener:411–412`) — `position: fixed` at cursor-derived `left/top`, `164 × 226`, `z-index: 100`, **`pointer-events: none`**, driven by `onMouseEnter="{{ row.pvIn }}" / onMouseLeave="{{ pvOut }}"` on the 48×66 row thumbnail (`Home:105`, `Screener:361`). Position computed as `{ x: r.right + 10, y }` from the thumbnail's bounding rect (`Home:567`).
+
+### 4.6 Confirm-flash on save
+
+The universal success affordance: **the control itself becomes its own confirmation for ~2 s, then reverts.** No toast component exists anywhere in the prototypes.
+
+| Surface | Idle → flashed label | Duration | Where |
+|---|---|---|---|
+| Screener "Save screen" | `Save` → `✓ Saved` | **1800 ms** | `Screener:857–860` |
+| Binder CSV export | (button) → `csvDone` state | **1800 ms** | `Binder:534` |
+| Profile settings save | shows `Saved ✓` in `var(--pos, #157A50)` | **2200 ms** | `Profile:71–72`, `:240` |
+| Profile password change | `pwFlash` next to "Last changed Mar 2026" | **2600 ms** | `Profile:149`, `:247` |
+| Charts watchlist | `Update watchlist` → `✓ Watchlist updated` → settles at `✓ On watchlist` | — | `Charts:722` |
+| Charts panel glow (deep-link attention) | `panelGlow` | **2600 ms** | `Charts:342` |
+| Screener backtest run | `btPhase: 'run'` → `'done'` | **1100 ms** (simulated work, not a flash) | `Screener:624` |
+
+**Implementation shape, identical everywhere:** `clearTimeout(this._t); setState({flag: true}); this._t = setTimeout(() => setState({flag: false}), N)` — note every instance clears the prior timer first, so rapid re-saves restart the window rather than ending it early. Flashed styling is green-family: `saveFg: PAL.pos`, `saveBg: PAL.posBg(0.10)`, `saveBd: PAL.posBg(0.35)` (`Screener:858–859`).
+
+**Durations are inconsistent (1800 / 2200 / 2600).** Standardise on one in Blazor and record the choice.
+
+### 4.7 Sticky layering (z-index budget)
+
+Observed stack, so a Blazor rebuild does not re-derive it: nav `z-index: 20` (`Home:39`, `position: sticky; top: 0`) → table header `z-index: 10` at `position: sticky; top: 48px` (`Home:93`, offset by the nav height) → row menu `40` (`Home:124`) → search menu `80` (`cardstock-search.js:28`) → Charts views menu `60` (`Charts:50`) → Screener rail menu `60` (`Screener:63`) → add pickers `50` (`Screener:101`, `Browse:70`) → hover preview `100` (`Home:316`) → Profile modal `100` (`Profile:188`) → Card lightbox `200` (`Card:102`). The peek's `50`/`10` duplicate is the one incoherent entry.
+
+---
 
 ## 5. Theming hooks
 
-*(pending)*
+### 5.1 The pre-paint script
+
+One line, byte-identical, in the `<helmet>` of **ten** of the eleven app pages (`Home:35`, `Card:33`, `Screener:32`, `Charts:31`, `Binder:35`, `Browse:33`, `Set:33`, `Character:33`, `About Data:28`, `Legal:24`):
+
+```html
+<script>if(localStorage.getItem('cardstock-cvd')==='1')document.documentElement.setAttribute('data-cvd','1');if(localStorage.getItem('cardstock-theme')==='dark')document.documentElement.setAttribute('data-theme','dark');</script>
+```
+
+It is placed **after** the `<style>` block and immediately after `<script src="./cardstock-search.js">`, and it is synchronous and inline — that is the point: it stamps the root element before first paint so there is no light-mode flash.
+
+**The gap:** `Cardstock Profile.dc.html` — the page that *writes* both keys — has no pre-paint line at all (`grep -c "data-theme','dark'"` → 0), and neither does `Cardstock Account.dc.html`. Both read the keys from component code instead (`Profile:209–210`, `Account:117–118`), which runs after paint. A dark-theme user therefore gets a light flash on exactly the settings screen. In Blazor the script belongs in the shared layout head, so this class of omission cannot recur.
+
+**In Blazor this must be a raw inline `<script>` in `App.razor`'s `<head>`, before any rendered content** — it cannot be a Blazor component, because components run after paint. This is a hard constraint on the render-mode decision, alongside the loopback-API constraint in `CLAUDE.md`.
+
+### 5.2 The two switches
+
+| localStorage key | Values written | Root attribute set | Writer |
+|---|---|---|---|
+| `cardstock-theme` | `'light'` \| `'dark'` | `data-theme="dark"` (only when `dark`) | `Profile:234–235` |
+| `cardstock-cvd` | `'0'` \| `'1'` | `data-cvd="1"` (only when `'1'`) | `Profile:237` |
+
+Light and non-CVD are the **absence** of an attribute, not a value — no `data-theme="light"` is ever written. Profile is the only writer; there is no nav-level theme quick-switch in any prototype.
+
+**There is no `prefers-color-scheme` fallback anywhere.** An unset key means light. That is a deliberate-looking gap worth confirming (§7).
+
+### 5.3 Token architecture
+
+Tokens are declared as CSS custom properties on `:root` selectors in each page's `<helmet>` `<style>`, and consumed everywhere as `var(--token, #fallback)` — **every single usage carries a literal hex fallback**, so the light theme is effectively encoded in the fallbacks rather than in a `:root` block. That is a prototype convenience; Blazor should define the light palette explicitly on `:root` and drop the inline fallbacks.
+
+Three override layers (`Home:27–32`, same set on every app page):
+
+1. `:root[data-cvd="1"]` — remaps only the semantic up/down colours to an Okabe–Ito-derived blue/orange pair: `--pos: #0B69A8; --pos2: #0072B2; --neg: #CC5F00; --neg2: #D55E00;` plus `--posBg10`, `--negBg08`, `--negBg10`.
+2. `:root[data-theme="dark"]` — the full chrome set: `--bg: #161614; --card: #1E1E1C; --ink: #E9E9E5; --mut: #B4B4AE; --mut2: #A8A8A2; --mut3: #9A9A94; --mutbg: #2A2A27; --hov: #282825; --line: #33332F; --line2: #3E3E39; --line3: #4A4A44; --line4: #262623; --acc: #8C9BF2; --accH: #AAB6F6; --btn: #4A63D0; --warn: #D6A54A; --warnInk: #D6A54A; --tooltipBg: rgba(30,30,28,0.95); --accBg: #252B44; --accMut: #3A4570;` plus `color-scheme: dark` and `--logoTeal: #3FBFAD`.
+3. The **cross product**: `:root[data-theme="dark"]:not([data-cvd="1"])` and `:root[data-theme="dark"][data-cvd="1"]` each redefine `--pos/--pos2/--neg/--neg2/--neg3` (`Home:30–31`). Dark+CVD is `--pos: #58A9E6; --neg: #F5924E`. Four states must be styled, not two.
+
+Per-page variance: `Cardstock Card.dc.html:25` declares a **reduced** CVD block (`--pos` and `--neg2` only) while Home declares seven properties. Same-named tokens, different coverage per page — consolidate to one shared stylesheet.
+
+**Token inventory, by usage count across all `.dc.html`** (`grep -oh "var(--[a-zA-Z0-9]*"` | sort | uniq -c):
+
+`--mut2` 201 · `--line` 199 · `--mut` 191 · `--ink` 160 · `--card` 143 · `--acc` 104 · `--bg` 54 · `--line4` 49 · `--hov` 43 · `--mutbg` 27 · `--logoTeal` 24 · `--line3` 19 · `--btn` 19 · `--accH` 19 · `--warnInk` 12 · `--pos` 11 · `--inbg` 11 · `--neg` 8 · `--neg2` 7 · `--btnH` 7 · `--pos2` 6 · `--warn` 5 · `--line2` 5 · `--tooltipBg` 4 · `--accBg` 4 · `--negBg` 3 · `--mut3` 3 · `--warnBg` 2 · `--posBg` 2 · `--posBg10`, `--negBg25`, `--negBg10`, `--negBg08`, `--negBg07`, `--negBg06`, `--neg3` 1 each.
+
+Semantic roles: surfaces `--bg`/`--card`/`--mutbg`/`--hov`/`--inbg`; text `--ink`/`--mut`/`--mut2`/`--mut3`; borders `--line` → `--line4` (four weights); interactive `--acc`/`--accH`/`--accBg`/`--accMut`/`--btn`/`--btnH`; semantic `--pos`/`--pos2`/`--neg`/`--neg2`/`--neg3`/`--warn`/`--warnInk`/`--warnBg` with `--posBgNN`/`--negBgNN` alpha tints; brand `--logoTeal`.
+
+**Colour is never the sole signal.** Every semantic colour in the prototypes rides alongside a glyph (`▲`/`▼`/`–`) or a dash pattern (`Charts:791` picks `dash: '4 3'` for the signal line when CVD is on). Preserve that in Blazor.
+
+### 5.4 The JS-side palette mirror — do not port
+
+Every page-level component defines `PAL = (() => { const d = localStorage.getItem('cardstock-theme') === 'dark', c = localStorage.getItem('cardstock-cvd') === '1'; …` (`Home:323`, `Card:264`, `Screener:419`, `Charts:331`, `Binder:332`, `Browse:161`, `Set:146`, `Character:134`). This exists because SVG chart geometry (`fill`, `stroke`, `polyline` colours) is computed in JS where `var()` is not available. It is a **duplicate hard-coded copy of the palette, read once at construction and never re-read** — a theme change requires a reload for charts to recolour. In Blazor, generate SVG colours from one shared palette source rather than duplicating tokens into C#.
+
+### 5.5 Global element styles worth centralising
+
+From every app page's `<helmet>` (`Home:17–25`):
+
+```css
+html, body { margin: 0; padding: 0; background: var(--bg, #FAFAF7); }
+body { font-family: 'Inter', system-ui, sans-serif; color: var(--ink, #1C1C1E); }
+a { color: var(--acc, #4A63D0); text-decoration: none; }
+a:hover { color: var(--accH, #3A4FB8); text-decoration: underline; }
+*:focus-visible { outline: 2px solid var(--acc, #4A63D0); outline-offset: 1px; border-radius: 2px; }
+image-slot[placeholder=" "]::part(empty) { opacity: 0; }
+@media (prefers-reduced-motion: reduce) { * { animation-duration: 0.01ms !important; } }
+```
+
+Typography: three Google fonts loaded on every page (`Home:14`) — **Inter** 400/500/600/700 (UI), **Inter Tight** 600/700 (page headings, e.g. `Card:65` `h1`), **JetBrains Mono** 400/500/600 (all numerics, badges, tickers). Favicon `./brand/favicon.svg` (`Home:11`).
+
+---
 
 ## 6. Design Composer runtime (scaffolding — discard)
 
-*(pending)*
+`support.js` (1911 lines) is a **generated, third-party template engine** — line 1: `// GENERATED from dc-runtime/src/*.ts — do not edit. Rebuild with 'cd dc-runtime && bun run build'.` It is loaded by every `.dc.html` from the real `<head>` (`Home:6`) and is what makes the prototypes run at all: it parses the `<x-dc>` wrapper and its `<script data-dc-script>` block (`support.js:24–37`), hoists `<helmet>` into the document head (`:377–378`, `:1362+`), rewrites the custom control-flow tags `sc-if` / `sc-for` / `sc-else` / `dc-import` (`:487`, `:555–558`) into React elements, and renders the whole thing through `window.React` / `window.ReactDOM` (`:9–21`), lazily loading Babel to compile the inline class components (`:1173–1191`). It is the source of every construct that looks like product syntax but is not — `{{ expr }}` bindings, `style-hover="…"`, `hint-placeholder-count`, `hint-placeholder-val`, `data-screen-label`, `<x-dc>`, `<helmet>`. **It carries no product data and none of it ports to Blazor:** `sc-for` becomes `@foreach`, `sc-if` becomes `@if`, `{{ x }}` becomes `@x`, `style-hover` becomes a CSS `:hover` rule, and the `hint-placeholder-*` attributes are authoring-time skeleton hints with no runtime meaning. Delete `support.js` (and the identical copy at `uploads/Brand package creation/support.js`) from the rebuild entirely; read it only when a prototype construct is ambiguous.
+
+---
 
 ## 7. Open questions
 
-*(pending)*
+1. **Search has no keyboard result navigation.** `cardstock-search.js` binds only `/` and `Escape` — no `ArrowUp`/`ArrowDown`/`Enter`, no `aria-activedescendant`, no `role="listbox"`/`role="option"`, no `aria-expanded`. Is the Blazor version expected to add a full combobox contract, or match the prototype? (Recommendation: add it; the prototype's own hint bar advertises `/ search` as a keyboard affordance.)
+2. **Search result identity.** Every result in a group links to the same static page — the prototype passes no id. Confirm the real routes (`/card/{id}`, `/set/{id}`, `/character/{name}`?) and what the server-side query is (name substring over `cards`? `sets`? what is the character/species source, given the eight scraper tables?).
+3. **Search minimum query length is 2 and result caps are 4/4/5.** Keep, or tune against the real corpus? There is no "see all results" row and no full search-results page in any prototype.
+4. **Result ordering has no relevance model.** Corpus order + substring match will look arbitrary over a real corpus. Ranking is undesigned.
+5. **Card page has no active nav tab** while its siblings Set and Character mark Browse. Should Card highlight Browse, or nothing?
+6. **Active-tab href:** `#` on Home/Screener/Charts vs. self-href on Binder/Browse. Standardise which?
+7. **Column widths do not persist.** Should Blazor persist `colW` per user (localStorage? server-side preference?), and does resize apply to the Screener's second grid the same way?
+8. **Confirm-flash duration** is 1800/2200/2600 ms across surfaces. Pick one.
+9. **Peek z-index** is declared twice on one element (`50` then `10`). Which was intended?
+10. **No `prefers-color-scheme` default** — a first-time visitor always gets light. Intentional?
+11. **Theme changes do not recolour charts without a reload** (§5.4). Acceptable, or must Blazor make chart colour reactive?
+12. **`--tooltipBg` is defined and used 4×, but there is no custom tooltip component.** Is a styled tooltip planned, or is the token vestigial?
+13. **Real card images: serving is a licensing question, not an availability one** (D-010, D-011). Until that is settled, the placeholder path must remain a first-class state, not a fallback afterthought — which the gradient-tile + `placeholder=" "` convention (§3.5) already gives us for free.
+14. **Account circle initial** — derived from email/display name, and what happens with no name?
+
+---
 
 ## 8. Contradictions found
 
-*(pending)*
+| Claim | Source doc:line | What the code actually does |
+|---|---|---|
+| Nav includes a bell / alerts icon: "Persistent top nav… + global search box (`/` focuses), **bell (alerts)**, account menu" | `uploads/CARDSTOCK_UI_SPEC_v1.md:127` | No bell exists. `grep -rniI -e bell -e notification --include='*.html'` returns zero hits across all 17 `.dc.html` files. Nav is logo → 5 tabs → spacer → search → account circle (`Home:39–54`). Tier 3 doc, superseded — the removal is recorded at `DESIGN_NOTES.md:120`. |
+| "`TopNav` — fixed landmark: tabs, search box, **bell (unread badge), account menu, theme quick-switch, DEMO tag slot**" | `uploads/CARDSTOCK_UI_SPEC_v1.md:256` | Four of six do not exist. No bell, no unread badge, **no account menu** (the circle is a plain `<a href="Cardstock Profile.dc.html">`, `Home:53`), **no theme quick-switch in the nav** (theme is written only from Profile, `Profile:234–237`), no DEMO tag in any app nav. |
+| "Bell icon badge = unread fired events; Alert Center lists rule status and firing history" | `uploads/CARDSTOCK_UI_SPEC_v1.md:93` | Nothing of this exists. No `/alerts` link, no `unreadAlerts` prop, no alert-rule UI. |
+| "Nav constant: Home / Screener / Charts / Binder + search, **alerts (bell)**, account." — and the tab list omits Browse | `uploads/PROJECT_LOG.md:183` | Five tabs, not four: Home, Screener, Charts, Binder, **Browse** (`Home:45–49`). No bell. |
+| image-slot id convention is `art-<cardid>` | task brief / derived docs | Four schemes coexist: `'art-' + c.id` (`Home:507`, `:558`, `Screener:747`, `:839`), `'art-' + slugified **name**` (`Binder:484`, `Character:208`, `Set:235`), `'art-set-' + slug` for sets (`Browse:227`), and hardcoded literals (`Card:60`, `:104`, `Charts:73`). Non-card slots ignore the prefix entirely (`profile-avatar`, `hero-card-*`). |
+| "nav bell removed from **all 7 pages** (Charts never had one)" | `DESIGN_NOTES.md:120` | The removal itself is confirmed, but the page count no longer matches the prototype set: **eleven** pages now carry the app nav (Home, Screener, Charts, Binder, Browse, Set, Character, Card, Profile, About Data, Legal). The note is a historical record of an 8-page-era edit; it is not a current inventory. |
+| "Every interactive control on all 10 app pages now carries a `title`… **~110 controls**" | `DESIGN_NOTES.md:152` | The rule holds and is well applied, but the count is low: 175 `title="` attributes across the nine core app pages (Screener 36, Card 27, Charts 25, Binder 24, Home 23, Profile 16, Browse 11, Set 7, Character 6), 186 including Account (10) and About Data / Legal (1 each). Also "10 app pages" vs. eleven navs (About Data and Legal have 1 tooltip each and are effectively untooltipped). |
+| "Every card, set, and species image is a placeholder slot. This is the largest open risk" | `HANDOFF.md:114` | **Not a contradiction — correctly scoped, and re-confirmed here.** It describes the *prototypes*, and it is accurate: every `<image-slot>` in every `.dc.html` is empty (no page sets `src`). Real images do exist in the database (D-010), and `HANDOFF.md`'s second sentence — that the open question is licensing — is right. Recorded because D-010 documents this exact line being misread twice. |
+| `uploads/CARDSTOCK_UI_SPEC_v1.md:46` — "no HTTP API for the first-party UI" | Tier 3 | Out of scope for this document, but flagged because it touches the shared-chrome render-mode decision: `CLAUDE.md:41` records the owner ruling that this is a scoping note, not an architectural constraint (see D-013, D-014, S-002). The pre-paint theme script (§5.1) is an independent constraint on the same decision. |

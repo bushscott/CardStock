@@ -529,4 +529,24 @@ Card name → Card · set name → Set · "Why no candlesticks? → About our da
 
 ## 7. Open questions
 
+1. **Card identity is not in the route.** The prototype hardcodes Umbreon VMAX (Alt Art) / Evolving Skies / 215/203 and the art slot id `art-umbreon` (Charts:73–77). `HANDOFF.md:73` gives the route as bare `/charts`. Undecided: `/charts/{cardId}`, `/charts?card=…`, or a card-less landing that requires a search. `DESIGN_NOTES.md:29` says the `art-<cardid>` slot ids are shared with the Home peek and watchlist, which implies a card id is available.
+2. **Anchor selection.** `state.anchor` is read (Charts:469) and never written. Is an explicit "analyze this tier" control intended, or is "PSA 10 if visible, else first visible in canonical order" the final rule? Note the fallback returns `'PSA 10'` even when nothing is charted, so the readouts keep computing against an invisible series.
+3. **Wiring the locked form.** `D-038` (`DECISIONS.md:237–238`) says v1 ships locked rows "with real countdowns and progress computed against the 2026-09-01 floor" — which requires calling the currently-dead `locked()` (Charts:595) and `force()` (403). Which of the six `lockedOr` rows become genuinely locked, and which stay as enabled `LOW DATA` toggles?
+4. **`force()` toggles instead of forcing on.** It calls `toggleInd(id, true)()` (Charts:407), so if the indicator were already enabled, "show anyway" would switch it **off** while marking it burned-in. Must be fixed when the path is wired.
+5. **Nine authored constants need real derivations**: Trend slope (12M) `+2.1%/mo`, RS percentile (3M) `94th`, Beta vs index (24M) `1.31`, Churn acceleration `×1.6 vs 90d`, Gem rate `46% · drift −0.8pp`, stat cells `Trend R² 12M 0.87` and `RS pct 3M 94th`, and the two Valuation badges `4.8× · COMPRESSING` / `+$118` (Charts:606, 618–619, 624, 633, 568–569, 637–638). All are literals today.
+6. **What backs `IDX` and `SETIDX`?** The market index and the per-set index are fixtures (Charts:387, 393). `D-039` (`DECISIONS.md:438–452`) puts "index values" in the companion worker's write scope but no index definition exists. Blocks `rs`, `f3`, Beta, RS percentile and the compare overlay.
+7. **Composite rule definitions are absent.** `g1`–`g4` render authored badges and fixed trigger indices with authored tips (Charts:531–537, 641–644). The actual entry/exit rules exist nowhere in the prototype.
+8. **Hover tooltip under normalize** shows raw dollars (Charts:544) while the axis shows index points. Which is correct?
+9. **Table scope.** The grid is always the last 12 months ending at `i1`, ignoring `i0` (Charts:698). Intended, or should it follow the visible range?
+10. **Mixed measurement scopes.** Drawdown scans from index 0 (Charts:561) while ROC and z are range-relative. Intended?
+11. **Group chip tooltips promise bulk toggling** that the handler does not implement (Charts:85/101 vs 680). Decide: implement the bulk toggle, or rewrite the copy.
+12. **Persistence.** `savedViews`, `cg` (group collapse), `leftOpen`, `tableOpen` and `forced` are all in-memory. Which survive a reload, and in which CardStock-owned table do views live?
+13. **Theme/CVD is resolved once at construction** (Charts:331). A Blazor port needs either a live subscription or an explicit "theme change reloads the chart" contract.
+14. **Accessibility gaps.** Indicator switches are `<button aria-label>` with no `role="switch"` / `aria-pressed`; group headers are `role="button" tabindex="0"` with a click handler and no key handler (Charts:118, 124); locked W/D buttons are styled `not-allowed` but are not `disabled`/`aria-disabled` (Charts:741–742).
+15. **Parameter bounds are advisory.** `setP` accepts any integer > 0 and ignores the `min`/`max` attributes (Charts:439). Should it clamp?
+16. **`d2` off-by-one.** The pane plots from `i ≥ 54` — six bars (Charts:843) — while its sufficiency text claims "7 paired price+census months" (Charts:416).
+17. **Is the 2-pane cap a product rule?** It is asserted to the user in the footnote (Charts:324) but is otherwise an arbitrary constant (Charts:446).
+
+---
+
 ## 8. Contradictions found
