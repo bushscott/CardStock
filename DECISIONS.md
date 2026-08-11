@@ -371,6 +371,32 @@ All lines read directly 2026-08-10. Owner asked for this to be tracked, 2026-08-
 
 ---
 
+### D-056 — Plain `LOW CONFIDENCE` is abolished; it collapses into `LOW DATA`
+Owner, 2026-08-10. Resolves D-4 in the contradiction register.
+
+**What the prototype actually does** (`Charts:576`, read directly): a two-level system —
+```
+p.badge = fz ? 'LOW CONFIDENCE · BURNED IN' : (w ? 'LOW CONFIDENCE' : '')
+```
+So plain `LOW CONFIDENCE` already fired automatically whenever `suff(id)` was non-null, and `· BURNED IN` marked the user override. `DESIGN_NOTES.md:33, :131, :146` calling it "Charts-only" was stale — but that was never the real problem.
+
+**The real problem was two badges for one meaning.** `DISPLAY_VOCABULARY.md:55` declares five states "the complete render set" — OK / LOW DATA / LOCKED / UNDEFINED window / UNSTABLE FIT — and `LOW CONFIDENCE` is not among them. Plain `LOW CONFIDENCE` and `LOW DATA` were both amber, both meant "the data is thin," and no distinction between them survives inspection. That is precisely the drift a display vocabulary exists to prevent.
+
+**Decided:**
+
+| State | Meaning | Cause |
+|---|---|---|
+| `LOW DATA` | Below the sufficiency floor. Amber, `N OBS`, tooltip states the floor rule and what improves it | Automatic |
+| `LOW CONFIDENCE · BURNED IN` | A lock was overridden. Permanent — `state.forced` is never cleared by any path, so it survives screenshots | **User-caused** |
+
+Plain `LOW CONFIDENCE` no longer exists. `:55`'s five states become true again, and `BURNED IN` keeps its real meaning: *you* chose this, not *the data is thin*. The existing `NEW · 7 OBS` probation badge is `LOW DATA` with its count and needs no change.
+
+**Applied to the specs:** `docs/screens/charts.md` badge inventory (level 2 rewritten to `LOW DATA`), `docs/screens/home.md` §8 row 2 marked resolved, and the feed row copy becomes *"…reached 30 days for PSA 10 — starts LOW DATA"*.
+
+**Note for the build:** D-049 records that the burn-in machinery is orphaned — `force()` has no call site — so `LOW CONFIDENCE · BURNED IN` is currently unreachable. It has to be wired as part of building the LOCKED row form.
+
+---
+
 ### D-055 — Watchlist rows are keyed by `(card_id, tier)`, and the grade labels are corrected
 Owner, 2026-08-10. Resolves D-3 in the contradiction register.
 

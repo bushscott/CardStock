@@ -372,7 +372,7 @@ Envelope per pane: `{ title, sub, badge, badgeTip, hoverTxt, close, hx, regions[
 
 ### 4.6 Pane confidence badge — three states (Charts:574–576)
 1. **No badge** — `suff(id)` returns null and the pane was never forced.
-2. **`LOW CONFIDENCE`** — `suff(id)` non-null; tooltip = the sufficiency text.
+2. **`LOW DATA`** — `suff(id)` non-null; tooltip = the sufficiency text, stating the floor rule and what improves it. **Changed 2026-08-10 by D-056**: the prototype emits plain `LOW CONFIDENCE` here (Charts:576), which was `LOW DATA` under a second name. Two amber badges meaning "the data is thin" is vocabulary drift, and `DISPLAY_VOCABULARY.md:55` names five states as "the complete render set" with no `LOW CONFIDENCE` among them. **Build `LOW DATA`**, carrying its `N OBS` count where available.
 3. **`LOW CONFIDENCE · BURNED IN`** — `state.forced[id]` is true. **Persistent**: `forced` is never cleared by any code path — not by closing the pane, not by toggling the indicator off and on, not by applying a view. It survives every interaction in the screen's lifetime, so it is present in any screenshot of that pane.
 
 The link that sets it (Charts:159) carries: *"Force-enables this pane now and burns a permanent LOW CONFIDENCE badge into it — the badge does not clear until the data threshold is truly met."*
