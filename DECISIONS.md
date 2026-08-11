@@ -371,6 +371,33 @@ All lines read directly 2026-08-10. Owner asked for this to be tracked, 2026-08-
 
 ---
 
+### D-052 — Tier colours become tokens across all three modes; the prototypes are frozen
+Owner, 2026-08-10, answering the first of the contradiction-queue decisions. Two decisions in one.
+
+**Part 1 — the tier palette.** The question started as "Card and Charts disagree on three hex values." Verification showed a larger problem: the tier palette participates properly in **none** of the three modes.
+
+| Palette | Light | Dark | Colorblind |
+|---|---|---|---|
+| `brand/brand-tokens.css` `--series-1..6` | ✅ `:14–15` | ✅ `:28–29` | ❌ **no block exists** |
+| `Cardstock Card.dc.html:325` `TIER_COLORS` (19) | 3 via `PAL`, **16 frozen hex** | those 16 unchanged | those 16 unchanged |
+| `Cardstock Charts.dc.html:375` `TIER_COLORS` (19) | same, 3 differing from Card | unchanged | unchanged |
+
+Only `PSA 10` (`PAL.acc`), `Grade 9` (`PAL.warn`) and `Raw` (`PAL.mut2`) theme at all. `brand-tokens.css` has exactly two blocks — `:root` and `[data-theme="dark"]` — with **zero** occurrences of cvd/colorblind/okabe. And nothing links that file except the Brand System reference page.
+
+**Decision:** do not pick between the two frozen literals. **Adopt `--series-1..6` as tokens for the six price tiers**, add the missing colorblind block, and declare the union once globally — which D-050 established the Blazor build needs regardless, since the app has no `:root` light block at all.
+
+Six series tokens map exactly onto D-003's six price tiers (Card strip, Charts series). The remaining 13 `TIER_COLORS` entries are sales-ledger grade chips — a separate, lower-stakes set, because chips carry their label and colour is not the sole carrier there. Card and Charts can no longer diverge, because both reference the same tokens.
+
+**Part 2 — the prototypes are frozen (option A).** No `.dc.html`, `.js`, or `.css` file gets edited. Verified as of this decision: 19 files changed since the initial commit, all markdown, and the only file touched inside `CardStock Mockup/` is `HANDOFF.md`.
+
+**Rationale:** the prototypes are the reference everything was verified against, so editing them moves the ground under that verification — and they are scheduled for replacement, making edits throwaway. The tier palette proves the point: it *cannot* be fixed correctly in the prototypes, because they have no `:root` light block and no CVD series block. Doing it right means building the token architecture the Blazor app needs anyway.
+
+**The consequence the owner identified:** *"as soon as we don't make these changes to the mock ups, the mock ups are no longer the record of truth."* Correct, and now encoded — `docs/screens/*.md` is promoted to the build reference in `CLAUDE.md`, with the prototypes demoted to source-and-visual-tiebreak. They remain authoritative about *themselves*; they stop being authoritative about *facts*.
+
+**And the discipline that keeps it from rotting:** every decision changing a screen must land in that screen's spec, not only here. The ledger records why and when; the spec records what to build. Recorded in `CLAUDE.md` under "The maintenance rule that makes this work."
+
+---
+
 ### D-051 — ✅ The Card page tier strip is 6 cells, and it matches the database exactly
 Direct extraction of `Cardstock Card.dc.html`, 2026-08-10. The strip is a literal `repeat(6, 1fr)` grid (`:84`) filtering the 19-value `BUCKETS` down to **PSA 10 / 9.5 / 9 / 8 / 7 / Raw** (`:395`).
 

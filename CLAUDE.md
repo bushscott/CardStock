@@ -17,8 +17,21 @@ Extra tokens, extra time, and redundant checking are all explicitly acceptable c
 Owner's ruling, 2026-08-10: **"The mockups and the PokemonInvestBatch scraper codebase are the absolute truth."** Everything else is derived and may be stale. When two sources disagree, the higher tier wins — do not average them, and do not pick the one that reads more confidently.
 
 **Tier 1 — authoritative. Cite these.**
-- `CardStock Mockup/*.dc.html` — the prototypes. Authoritative for layout, states, copy, and behaviour. If a document describes a screen differently from the HTML, **the HTML is right.**
+- **`docs/screens/*.md` — the build reference.** One spec per screen, extracted directly from the prototypes on 2026-08-10 with line citations back to them, and carrying the data corrections the prototypes get wrong. **Build from these.** They inherit Tier 1 authority because they are a cited extraction of Tier 1, and they are the only design record being kept current.
+- `CardStock Mockup/*.dc.html` — the prototypes. The **source** those specs were extracted from, and the visual/behavioural tiebreak for anything a spec is silent on. **Frozen as of 2026-08-10** — see below.
 - `../PokemonInvestBatch/` — source, schema, and ADRs. Authoritative for everything about the data.
+
+**The prototypes are frozen. Do not edit them.** They are the reference everything else was verified against, so editing them moves the ground under that verification — and they are scheduled for replacement by the Blazor build, making edits throwaway work. Corrections live in `docs/screens/` and `DECISIONS.md`.
+
+**Their copy contains known-false claims about the data.** Roughly 25 of them, every instance enumerated in `docs/CONTRADICTIONS.md` **Class B** — the "Apr '25 seam" in seven marketing locations, "sale counts," "back to August 2023," "refreshes daily," and more. **Never quote prototype copy as a fact about the data.** The prototypes are authoritative that the page *says* something, never that it is true.
+
+### The maintenance rule that makes this work
+
+Freezing the prototypes moves the record of truth to `docs/screens/`. That only holds if the specs are actually maintained — otherwise they decay into another stale tier and nothing has been gained.
+
+**So: every decision that changes a screen must land in that screen's spec, not only in `DECISIONS.md`.** The ledger records *why* and *when*; the screen spec records *what to build*. A decision recorded in only one of them is a decision that will be missed.
+
+Each spec's §8 (Contradictions) is the audit trail — when a decision resolves one of its rows, update the row rather than deleting it, so the reasoning survives the way an ADR's does.
 
 **Tier 2 — current and useful, but derived.** Trustworthy about the design, verify anything they say about data (see the provenance banner in `HANDOFF.md`).
 - `HANDOFF.md`, `DESIGN_NOTES.md`, `DISPLAY_VOCABULARY.md`
