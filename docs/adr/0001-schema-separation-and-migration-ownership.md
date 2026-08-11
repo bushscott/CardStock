@@ -5,14 +5,18 @@
 
 ## Context
 
-CardStock has no data of its own. Everything it renders comes from the eight tables the
-`PokemonInvestBatch` crawler owns in the `public` schema of the `pokemon` database. But CardStock
-also needs roughly twenty tables nobody else has any business owning — users, transactions,
-watchlists, saved screens, and the market index and metric snapshots its worker will compute.
+**CardStock owns real data of its own** — users, transactions, watchlists, saved screens, and
+everything its worker will compute, including the market index that exists nowhere today (D-004).
+That is roughly twenty tables nobody else has any business owning.
 
-So two applications need to share one Postgres on one Raspberry Pi, and until now the crawler has
-never coexisted with anything. There is no precedent in that repo to copy: it configures no schema,
-no migrations history table, and no table mappings at all.
+What CardStock does **not** own is *market* data. Prices, sales, population counts, and the card
+catalog belong to the `PokemonInvestBatch` crawler, which owns eight tables in the `public` schema
+of the `pokemon` database and is the only writer to them.
+
+So this is not one application reading another's database. It is **two applications, each owning a
+body of data, sharing one Postgres on one Raspberry Pi** — and until now the crawler has never
+coexisted with anything. There is no precedent in that repo to copy: it configures no schema, no
+migrations history table, and no table mappings at all.
 
 ```
 grep -rn "HasDefaultSchema\|MigrationsHistoryTable\|MigrationsAssembly\|ExcludeFromMigrations\|ToView" \
