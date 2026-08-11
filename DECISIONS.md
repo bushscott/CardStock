@@ -371,6 +371,26 @@ All lines read directly 2026-08-10. Owner asked for this to be tracked, 2026-08-
 
 ---
 
+### D-055 — Watchlist rows are keyed by `(card_id, tier)`, and the grade labels are corrected
+Owner, 2026-08-10. Resolves D-3 in the contradiction register.
+
+**The docs win over the prototype here** — `HANDOFF.md:155` and `DESIGN_NOTES.md:110` say one row per card + tier, and that is what gets built. The prototype keys on card id alone (`Home:412–415`), so `(card, tier)` is not representable and the same card cannot be watched at two tiers.
+
+**Why card + tier:**
+1. **Signals are tier-specific.** ROC on PSA 10 and ROC on Raw are different series with different answers; a signal-tracking row without a tier is ambiguous by construction.
+2. **The product's own thesis needs it.** Grading arbitrage — `Psa10 ÷ Ungraded` (D-004's valuation group) — means watching one card at two tiers deliberately.
+3. **The display already assumes it.** Home has a Tier column with its own resize handle (`Home:96`) and every row carries a tier (`:507`). Only the key was missing.
+
+**Where the tier gets chosen:** not on the Card page. `DESIGN_NOTES.md:112` already makes Charts the editor ("you pick which signals it tracks in Charts"), and Charts has a one-tier rule, so the analysis tier is already first-class there. The Card page adds at a sensible default; the tier is edited from the watchlist row's ⋯ menu or in Charts.
+
+**Grade label correction.** The prototype seeds `PSA 9` and `PSA 8` (`Home:371`, `:381`). Those are not real tiers — ADR-0005 pools grading companies below grade 10, so the labels are **`Grade 9`** and **`Grade 8`**. This is the direct cause of a live defect: the peek's tier highlight is raw string equality against `TIER_LABELS` (`Home:511`), so `'PSA 9' !== 'Grade 9'` and nothing highlights.
+
+**Fix the labels, not the matcher.** Loosening the comparison would paper over a vocabulary error with a fuzzy match, and D-022 records the owner rejecting exactly that class of move — asserting a grading company the record never named.
+
+**Applied to the spec** (per the maintenance rule in `CLAUDE.md`): `docs/screens/home.md` §3 data contract updated to build values, and §8 rows 5 and 21 marked resolved with the reasoning preserved rather than deleted.
+
+---
+
 ### D-053 — Account deletion is a bounded window matching backup rotation
 Owner, 2026-08-10. Resolves the C-1 Tier-1 conflict in D-043.
 
