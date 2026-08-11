@@ -27,6 +27,87 @@ It carries three prototype props, all default `true` (`Cardstock Brand System.dc
 
 ---
 
+## 1B. Rationale and prohibitions
+
+Harvested 2026-08-10 from `CardStock Mockup/BRAND_BRIEF.md` before it was retired (D-054). The brief was written to *commission* the brand package; the package now exists, so its token values are stale (it still lists `muted #8A8A86`, the WCAG failure §8 records as fixed). What survives is the reasoning, which is not reconstructable from the CSS.
+
+### 🚫 Hard prohibition
+
+> "Fan-made demo; not affiliated with Nintendo/TPCi — **brand must NOT imitate official Pokémon trade dress (no Pokéballs, no official yellow/blue logotype vibes)**."
+
+This is a legal-adjacent constraint, not a taste preference, and it survives D-059's deferral of the wider licensing question. It binds any future logo, icon, or illustration work.
+
+### Positioning — where the design came from
+
+| Reference | What was taken |
+|---|---|
+| Bloomberg terminal | Density, mono numerals, keyboard shortcuts (`/` to search), data-first chrome |
+| Finviz · Koyfin · Yahoo Finance | Screener tables, sparklines, movers lists |
+| TCGplayer · PriceCharting | The domain — pricing, sets, grades — "but with a calmer, more professional skin" |
+| Paper and print | Warm off-white ground, hairline rules, restrained colour — **"cardstock" the material** |
+
+That last row is the reason the background is `#FAFAF7` rather than white, and why rules are 1px hairlines. The name is the design brief.
+
+**Note:** the brief calls the product a "Bloomberg terminal for Pokémon card collectors." That phrasing was later dropped from user-facing copy deliberately, to avoid the Bloomberg trademark. Keep it as internal shorthand only.
+
+### Tone
+
+> "Serious adult collectors/investors. Data-dense, calm, trustworthy, a little nerdy. Think **finance tool with warmth, not a toy**. No emoji, no gradients-everywhere AI look."
+
+Consistent with `HANDOFF.md` §1's copy rule — precise numbers over adjectives, no hype, no exclamation marks — and with the requirement that brand colours survive **all three** modes: light, dark, and colourblind.
+
+---
+
+## 1C. Rules from the brand package handoff
+
+Harvested 2026-08-10 from `CardStock Mockup/uploads/Brand package creation/README.md` before retirement (D-054). This is the package author's own handoff and states intent the CSS cannot.
+
+### 🔒 The colour-separation rule — the reason the primary is indigo
+
+> "**the primary is indigo, not green.** Green/red are reserved for market direction (▲ `#46C08A` / ▼ `#D0655E` on dark). Teal is logo-only. **This separation is the whole reason for the indigo primary — do not reintroduce green or teal into interactive chrome.**"
+
+| Token | Light | Dark | Use |
+|---|---|---|---|
+| `--brand-primary` | `#4A63D0` | `#8C9BF2` | Links, buttons, focus rings, active states, eyebrow labels |
+| `--brand-primary-strong` | `#3A4FB8` | `#AAB6F6` | Hover on primary |
+| `--brand-logo-teal` | `#0E8A7B` | `#3FBFAD` | **Logo mark + favicon ONLY** — never text or UI chrome |
+| `--brand-foil` | `#9A7B2D` | `#C9A84C` | Grade premiums, badges. Sparing |
+
+This is why §9 flags the app's accent as `#4A63D0` against `DESIGN_NOTES.md:26`'s stale `#3B5BD6` — the package is right and the note was never updated.
+
+### Chart series — assignment order, and an important find
+
+> "S1 `#4A63D0`/`#8C9BF2` · S2 `#C98A0D`/`#E0A93C` · S3 `#0E8A7B`/`#3FBFAD` · S4 `#B85C9E`/`#D98BC4` · S5 `#4C9FD8`/`#7BBCE8` · S6 `#71716D`/`#A5A5A0` (light/dark). **Tuned from Okabe–Ito; no series borrows the ▲/▼ green–red.**"
+
+**This changes D-052.** That decision said to adopt `--series-1..6` for the six price tiers and "add the missing colorblind block." But the series were **already tuned from Okabe–Ito** — the colourblind-safe palette — so they may need no CVD variant at all. The absence of a CVD block for series may be intent rather than omission. **Verify before adding one**; a redundant swap could make them worse.
+
+Note also the deliberate exclusion: no series borrows the ▲/▼ green–red, so a chart line can never be mistaken for a direction indicator.
+
+### Logo rules
+
+Two cards fanned, front card charting. Stroke-drawn at 2px on a 32×32 viewBox; the sparkline is the only coloured element.
+
+- **Clearspace:** one card-width (½ mark width) on all sides
+- **Never below 16px**; below 20px use the filled favicon tile
+- **Nav lockup:** mark 24px + wordmark 18px (Inter 700, `-0.03em`), gap 10px, optional `CDSTK` mono chip
+
+> **Never:** official yellow/blue logotype vibes or Pokéball geometry · gradients or drop shadows on the mark · rotation beyond the built-in fan · the outline mark on card art (use the filled tile) · **a falling or recoloured sparkline — it is fixed geometry, not data**
+
+### Scales
+
+- **Radius:** 5px badges · 7px buttons/inputs · 8–10px cards · 12px dark panels · 14–16px large card slots
+- **Focus ring:** `0 0 0 3px rgba(74,99,208,0.22)` light, `rgba(140,155,242,0.25)` dark. **Never remove focus without a ring**
+- **Shadows:** `0 24px 48px rgba(28,28,30,0.25)` floating dark panels · `0 12px 24px rgba(28,28,30,0.2)` scattered cards · `0 16px 32px rgba(0,0,0,0.45)` cards on dark
+- **Marketing type scale** (landing only, distinct from the app's 13–15px density): Display 52/800/-0.03em/1.06 · H2 30/700/-0.02em · H3 17/650 · Body 17/1.6 and 14/1.55 · Eyebrow 12 mono, `0.08em`, uppercase, indigo
+
+### Asset licensing — a rare piece of good news
+
+> "`brand/` — logo SVGs, favicons, `og-image.png`, `brand-tokens.css`. **All generated for this project; free to ship.**"
+
+The brand assets carry no licensing question. That is distinct from **card imagery**, which the same file flags: *"Ensure any card imagery used is properly licensed; the product is fan-made and the footer disclaimer must stay."* See D-010 and D-059.
+
+---
+
 ## 2. Color tokens
 
 ### 2.1 How light theme is expressed (critical for Blazor)

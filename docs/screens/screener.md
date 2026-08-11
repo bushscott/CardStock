@@ -528,6 +528,44 @@ No loading skeleton, no error state, no empty/no-results state, no "0 screens" r
 18. **One backtest dataset per screen, with a default.** `BT_MAP` covers only `g1`/`g2`/`g3`; every other screen — including anything the user creates — falls through to `long` (`:586`). A real implementation must compute per screen; the map is scaffolding.
 19. **Theme and CVD are read once at construction.** `this.PAL` is built from `localStorage` at class-field initialisation (`:419–426`) and the helmet script sets the root attributes before paint (`:32`). Logic-driven colours therefore do **not** react to a theme change without a reload, while CSS-token colours do. Four palette branches: light/dark × standard/CVD.
 
+## Backtest warning checks
+
+Harvested 2026-08-10 from `CardStock Mockup/BACKTEST_WARNINGS.md` before that file was retired (D-054). It is the only record of these, and the reasoning behind several is not reconstructable from the prototype.
+
+Warnings the real backtest engine computes after every run. Each renders as a caution banner under the stat tiles: **red** for risk, **amber** for data coverage, **grey** for aging notes.
+
+### Status, corrected against the prototype
+
+The source file claims three are "implemented in prototype." **Verified: closer to two.** Check 1 (concentration) is *seeded*, not computed — `warn` is set on the `short` fixture only (`Screener:509`, `:668`), with no >50% calculation anywhere. Treat all fifteen as unbuilt.
+
+| # | Check | Severity | Trigger |
+|---|---|---|---|
+| 1 | **Concentration (set/era)** | 🔴 Risk | >50% of buy signals from one set or era — the screen may have found one set's moment, not a pattern |
+| 2 | **Aging / maturity** | ⚪ Mechanics | Horizons with no aged entries are disabled, showing the date the first cohort matures |
+| 3 | **Honest floor** | ⚪ Mechanics | Window bounded by the youngest metric's data start. **Always shown, with the reason** |
+| 4 | **Concentration (character)** | 🔴 Risk | Same check keyed on character — e.g. every entry is a Charizard |
+| 5 | **Small sample** | 🟠 Data | Fewer than ~10 aged entries at the selected horizon: anecdote, not evidence |
+| 6 | **Mean ≫ median** | 🔴 Risk | Mean return >~2× median — a few big winners carry it; hit rate is the safer read |
+| 7 | **Single-winner dependence** | 🔴 Risk | Removing the best entry flips the mean, or the screen-vs-index verdict, negative |
+| 8 | **Entry clustering in time** | 🔴 Risk | Most entries in one or two adjacent months — one market episode, not a recurring setup. Outcomes are correlated, not independent trials |
+| 9 | **Regime dependence** | 🔴 Risk | All positive outcomes fall inside one broad upswing; untested in a flat or down market. Compare entry dates against index drawdowns |
+| 10 | **Thin liquidity at entry** | 🟠 Data | Entries whose cards had <N sales/month at entry — the simulated buy may not have been executable at that price |
+| 11 | **Wide dispersion at entry** | 🟠 Data | Entry price drawn from a high-dispersion month; the entry price itself is uncertain and returns inherit that error |
+| 12 | **Survivorship** | 🟠 Data | The corpus holds only cards still tracked today; delisted and dead cards are missing, biasing results upward. **Structural — disclose always** |
+| 13 | **Overlapping capital** | ⚪ Mechanics | Many entries open at once: the equity curve assumes you funded all of them. Real returns depend on position sizing |
+| 14 | **Parameter fragility** | On demand | Nudging a filter threshold ±10% changes entries by >~40% — the screen is tuned to noise. Expensive; run on request, not every backtest |
+| 15 | **Lookahead in composites** | 🟠 Data | Composites (G1/G2/G4) must be computed from point-in-time data. Warn if any component metric was revised after the fact |
+
+### Why this matters more than it looks
+
+Checks 6, 7, 8, 9 and 12 are the ones doing the real protective work — they catch a backtest that looks profitable for reasons that will not repeat. A backtest rendering numbers with three banners **reads as vetted**. The gap between fifteen documented checks and two built ones is the difference between a rigorous product and one that merely looks rigorous.
+
+Check 12 is flagged "disclose always" in the source and should stay that way: it is not a condition to detect, it is a permanent property of the corpus.
+
+Check 15 interacts with D-001 — see `charts.md` and D-032. Anything computed against a revised figure inherits the revision.
+
+---
+
 ## Corrected values — build these
 
 Written 2026-08-10 (D-061). The filter caution strings in §3 carry authored numbers that are wrong. **The rule from D-033 is: author the denominator, never the ratio.** Numerators and unlock dates are computed against the 2026-09-01 floor and today's date.

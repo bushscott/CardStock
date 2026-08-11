@@ -754,6 +754,38 @@ self-host these.
 
 ---
 
+## Interaction specs from the package handoff
+
+Harvested 2026-08-10 from `CardStock Mockup/uploads/Brand package creation/README.md` before retirement (D-054). These are the package author's own timings — not reconstructable from the prototype without reverse-engineering the CSS.
+
+**Ticker.** Infinite CSS marquee, **44s linear**. The item array is duplicated so the `-50%` translate loops seamlessly. (Matches what §3 found in the HTML — `@keyframes cdstkTicker` at `Landing:20`, applied `:334`, `items.concat(items)` at `:326`.)
+
+**Shuffle deck.** 4.2s auto-advance, 620ms deal animation. `mouseenter` pauses · `mouseleave` resumes · `click` deals immediately. **Guard against re-entry while a card is exiting. Clear timers on unmount.**
+
+**Both animations must respect `prefers-reduced-motion`.** The handoff says so explicitly — *"both animations should have an off path (they are toggleable props in the prototype)."* §8 confirms the guard is absent from all four pages; the author intended it and it was never wired. This is a build requirement, not a nice-to-have, under D-011.
+
+**Hover.** Nav and footer links shift to the primary; primary buttons darken to `#3A4FB8` light / lighten to `#AAB6F6` dark; text links underline.
+
+**Focus.** 3px indigo ring, **never removed**.
+
+### Responsive — the only guidance that exists anywhere
+
+> "No responsive breakpoints are specified in the prototype (desktop-first at 1080px). At narrower widths, **collapse the hero to one column, the 3-col grids to one, and hide or reduce the decorative card slots**."
+
+Class E flags zero breakpoints across every prototype. This is the sole piece of direction on record, and it covers marketing only — the app screens have none.
+
+### State
+
+Landing only: `order: ['A','B','C','D']` (deck stacking) · `exiting: string | null` (card mid-deal) · `paused: boolean`. Props `tickerMotion`, `cardShuffle`, `showMethodology` are author-time toggles, invisible to visitors. **No data fetching — every figure is demo content.**
+
+### Assets
+
+Screenshots under `assets/screens/` are **context only** — the handoff records they "rasterized poorly" and the deck cards are real markup instead. Brand assets are "generated for this project; free to ship." Card imagery is **not** included and the slots are empty placeholders — see D-010.
+
+`image-slot.js` and `support.js` are prototype-runtime helpers, explicitly **not for production**.
+
+---
+
 ## Corrected copy — build this
 
 Written 2026-08-10 (D-061) to resolve the seam claims flagged in §6.4. These are **public marketing pages under D-011**, so a false data claim here is the most exposed instance of the error in the product.
