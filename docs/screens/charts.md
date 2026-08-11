@@ -527,6 +527,49 @@ Card name → Card · set name → Set · "Why no candlesticks? → About our da
 
 ---
 
+## Corrected values — build these
+
+Written 2026-08-10 (D-061). Charts is the worst instance of the seam error, because here it is **not just copy — it is wired into rendering logic.**
+
+### The hardcoded seams
+
+`Charts:388–398` defines two constants:
+
+| Constant | Value | Verdict |
+|---|---|---|
+| `SEAM` | Apr '25 — drives the liquidity panes | **FALSE.** Fifteen months before the collector's first commit (D-001). Remove |
+| `RSEAM` | Jul '26 — the price chart's resolution marker | Roughly right by accident, but still a single shared date |
+
+**Neither survives.** The seam is per-card and ragged — each card's sales history begins at its own first visit. A chart drawing one vertical line across all cards is drawing a boundary that does not exist.
+
+**Build instead:** the seam marker is computed per card as `min(sold_on)` per `grade_tier` (`DATA_MODEL.md:449` names this derivation as already available), and the analysis floor is 2026-09-01 (D-033). A card visited in October has its marker in October.
+
+### Sufficiency notes to replace
+
+| Row | Prototype note | Build instead |
+|---|---|---|
+| `amihud` (`:170`) | "needs 24 post-seam months · ~Apr 2027" | "needs 24 post-seam months · **~Sept 2028**" — computed from the floor, not authored |
+| `dtl` (`:172`) | "listed price on 12% of rows" | "listed price on **4.4%** of rows" (`DESIGN_NOTES.md:46`, D-031) |
+| `e4` (`:173`) | "needs ≥5 sales/venue/window — eBay-only depth today" | Keep the requirement, **drop "eBay-only"** — five sources are documented (`DATA_MODEL.md:102`, `:227`); the observed distribution has never been queried |
+| `popd` (`:179`) | `NEW · 7 OBS`, "Census snapshots, 2026+" | `NEW · **N** OBS` computed; census begins at each card's first visit |
+| `overhang` (`:182`) | "needs 12M of census history" | Unchanged — it is a denominator, which is the correct form |
+| `seasonality` (`:607`) | "Nov 2027" | `DISPLAY_VOCABULARY.md:36` says Nov **2028** for the same row. Neither is authored — compute from the floor |
+
+### Pane badges
+
+`:211` shows `"16/24 post-seam months — forced early"`. Per **D-056**, the badge vocabulary is now:
+
+- **`LOW DATA`** — automatic, carrying `N OBS` where available. Replaces plain `LOW CONFIDENCE` at `:576`.
+- **`LOW CONFIDENCE · BURNED IN`** — user override only. Currently unreachable (D-049); must be wired when the LOCKED row form is built.
+
+The `16/24` ratio is authored and wrong — the true figure is nearer `1/24` (D-032). **Compute it.**
+
+### The rule, stated once
+
+**Author the denominator. Never author the ratio, the numerator, or the unlock date.** Every authored number in this file was wrong in the direction that overstates readiness, which is the one direction this product cannot afford. D-033 records the reasoning.
+
+---
+
 ## 7. Open questions
 
 1. **Card identity is not in the route.** The prototype hardcodes Umbreon VMAX (Alt Art) / Evolving Skies / 215/203 and the art slot id `art-umbreon` (Charts:73–77). `HANDOFF.md:73` gives the route as bare `/charts`. Undecided: `/charts/{cardId}`, `/charts?card=…`, or a card-less landing that requires a search. `DESIGN_NOTES.md:29` says the `art-<cardid>` slot ids are shared with the Home peek and watchlist, which implies a card id is available.

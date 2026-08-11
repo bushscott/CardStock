@@ -754,6 +754,41 @@ self-host these.
 
 ---
 
+## Corrected copy — build this
+
+Written 2026-08-10 (D-061) to resolve the seam claims flagged in §6.4. These are **public marketing pages under D-011**, so a false data claim here is the most exposed instance of the error in the product.
+
+### The seam claims — replace all six
+
+| Where | Prototype says | Build instead |
+|---|---|---|
+| `Landing:202` | "the Apr '25 data seam stays marked, never smoothed" | "**where our sales record starts for a card, we mark it — we never smooth across it**" |
+| `Landing:235`, `:236` | Apr '25 seam, methodology chip | Same substitution — describe the boundary, never date it |
+| `Charts Landing:45`, `:74–75`, `:113` | Apr '25 seam | Same |
+| `Screener Landing:92` | footer `honest floor Apr '25` | **`honest floor · per screen`** — the floor is the first date every filter in that screen could be computed, which differs by screen |
+
+**The principle, and why no date replaces the date:** the seam is per-card and ragged (D-001) — each card's sales history begins at its own first visit. There is no single date that could be substituted, so the copy must describe the *behaviour* instead. That is also the stronger marketing claim: "we mark it wherever it falls" says more about the product's rigour than any date would.
+
+**Do not substitute "Jul '26."** It is closer to true but still asserts a shared date the data does not have, and it ignores the 2026-09-01 floor (D-033).
+
+### Other corrections
+
+| Where | Prototype says | Truth | Receipt |
+|---|---|---|---|
+| `Screener Landing:107` | "12 filters" | **28** filter metrics | Direct count, `Cardstock Screener.dc.html:481–501`, `:534–563` |
+| All four pages | No `prefers-reduced-motion` | The ticker animates unconditionally. **Add the guard** — motion is pure CSS (`@keyframes cdstkTicker`, `Landing:20`) over a duplicated list, so pausing it is trivial | Brand package README `:115`; six app pages already do this |
+| All four pages | Light-only, 0 `data-theme` | Decide: either support dark here or amend `DESIGN_NOTES.md:105`'s "app-wide, all 10 pages" | — |
+
+### Routing
+
+Per **D-058**, these pages move to a `/product` prefix — `/product`, `/product/screener`, `/product/charts`, `/product/binder`. §1's identity table is superseded. A logged-out visitor at `/` redirects here.
+
+### Demo mode
+
+Demo mode has **0 occurrences** across all four pages, but all 11 CTAs land on `Cardstock Account.dc.html:56`, which still renders "Browse the demo →". Demo mode was removed 2026-08-10 (`HANDOFF.md` §4) and `DESIGN_NOTES.md:141` omits the Account page from the removal list. **Strip that remnant when building the Account page.**
+
+---
+
 ## 7. Open questions
 
 1. **Route ownership for the three pillar pages.** `HANDOFF.md:84` says marketing `/screener` etc.;

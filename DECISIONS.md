@@ -371,6 +371,21 @@ All lines read directly 2026-08-10. Owner asked for this to be tracked, 2026-08-
 
 ---
 
+### D-061 — ✅ Class B closed: false data claims corrected across marketing, Screener and Charts
+Owner, 2026-08-10. Completes the copy corrections begun in D-060. Corrected values written into `docs/screens/marketing.md`, `screener.md`, and `charts.md` under "Corrected copy / values — build this."
+
+**Marketing (the most exposed instance, being public under D-011).** Six seam assertions replaced. **No date substitutes the date** — the seam is per-card and ragged, so the copy describes the behaviour instead: *"where our sales record starts for a card, we mark it — we never smooth across it."* That is also the stronger claim, since it says more about the product's rigour than a date would. Explicitly recorded: **do not substitute "Jul '26"** — closer to true, but still asserts a shared date the data lacks. The Screener landing's "12 filters" is corrected to **28**.
+
+**Screener.** Six caution strings corrected: listed-price coverage 12% → **4.4%**; the eBay-only assertion dropped pending a query, since five sources are documented; census and ledger start dates changed from fixed months to per-card language; the `7 OBS` badge becomes computed `N OBS`. Unlock dates recomputed from the floor — 24-month liquidity lands **~Sept 2028**, 12-month census **~Sept 2027**.
+
+**Charts — the worst case, because the error is in *logic*, not copy.** `Charts:388–398` hardcodes `SEAM = Apr '25` driving the liquidity panes and `RSEAM = Jul '26` on the price chart. **Neither survives**: a single vertical line across all cards draws a boundary that does not exist. The replacement is `min(sold_on)` per `grade_tier`, per card — a derivation `DATA_MODEL.md:449` already names as available.
+
+**The rule extracted from all of it, now stated in each spec:** *author the denominator; never author the ratio, the numerator, or the unlock date.* Every authored number found in this pass was wrong in the direction that **overstates readiness** — the one direction this product cannot afford.
+
+**Class B is now closed.** All ~25 false data claims across five surfaces are corrected in the specs. Class A (doc staleness) and Class F (prototype self-contradictions) remain, and both are mechanical.
+
+---
+
 ### D-060 — ✅ About Data rewritten; all 22 false claims resolved
 Owner, 2026-08-10: *"Fix all the twenty two data issues."* Done — the corrected copy is in `docs/screens/about-data.md` under **"Corrected copy — build this."**
 

@@ -528,6 +528,48 @@ No loading skeleton, no error state, no empty/no-results state, no "0 screens" r
 18. **One backtest dataset per screen, with a default.** `BT_MAP` covers only `g1`/`g2`/`g3`; every other screen — including anything the user creates — falls through to `long` (`:586`). A real implementation must compute per screen; the map is scaffolding.
 19. **Theme and CVD are read once at construction.** `this.PAL` is built from `localStorage` at class-field initialisation (`:419–426`) and the helmet script sets the root attributes before paint (`:32`). Logic-driven colours therefore do **not** react to a theme change without a reload, while CSS-token colours do. Four palette branches: light/dark × standard/CVD.
 
+## Corrected values — build these
+
+Written 2026-08-10 (D-061). The filter caution strings in §3 carry authored numbers that are wrong. **The rule from D-033 is: author the denominator, never the ratio.** Numerators and unlock dates are computed against the 2026-09-01 floor and today's date.
+
+### Caution strings to replace
+
+| Metric | Prototype string | Build instead | Why |
+|---|---|---|---|
+| **Discount-to-list** (`:491`) | "Listed price captured on only ~12% of rows" | "Listed price captured on only **4.4%** of rows" | `DESIGN_NOTES.md:46` measured 143,062 of 3,265,910 sales. D-031 rules 4.4% credible; the 12% figure has no receipt anywhere |
+| **Cross-marketplace gap** (`:492`) | "eBay-only depth today" | "**Needs ≥5 sales per venue in the window**" — drop the eBay-only assertion pending a query | `DATA_MODEL.md:102`, `:227` document **five** sources: ebay, tcgplayer, goldin, heritage, pwcc. Whether observed volume is effectively eBay-only is a distribution question no one has run |
+| **Pop Δ** (`:505`) | "Census history starts Jan '26 — 7 observations" | "Census history starts when we first visited this card. **N observations so far**" — N computed | D-001: census begins at each card's first visit, late Jul 2026. Jan 2026 is 7 months before that |
+| **Gem rate** (`:506`) | "Census history starts Jan '26" | Same substitution | Same |
+| **Supply overhang** (`:507`) | "Needs 12 months of census history — 7/12 so far" | "Needs 12 months of census history — **N/12**" — N computed from the floor | The 7 was derived from the false Jan 2026 start (D-032) |
+| **Amihud / churn** (`:511`) | "ledger begins Apr 2025" | "**the ledger begins when we first visited this card**" | D-001 |
+
+### Badge values
+
+`:487–494` uses four badge strings: `LOW DATA`, `POST-SEAM`, `7 OBS`, `24M MIN`.
+
+- **`7 OBS` becomes `N OBS`**, computed. It is `LOW DATA` carrying its count (D-056), not a separate state.
+- **`LOW CONFIDENCE` must not appear** — collapsed into `LOW DATA` per D-056.
+- `POST-SEAM` and `24M MIN` are denominators, not ratios, and stand as written.
+
+### Unlock dates, recomputed from the 2026-09-01 floor
+
+| Metric | Prototype | Corrected |
+|---|---|---|
+| 24-month liquidity (Amihud) | "~Apr 2027" | **~Sept 2028** |
+| 12-month census (overhang, gem drift) | implied ~Jan 2027 | **~Sept 2027** |
+
+**Do not author these as strings either** — compute them, so they stay right as time passes.
+
+### Filter count
+
+The Screener has **28** filter metrics (`:481–501`, `:534–563`), not the 27 in `HANDOFF.md:72` or the 29 in `DESIGN_NOTES.md:7`. `DISPLAY_VOCABULARY.md`'s own table already lists 28. The Screener landing page advertises "12 filters" and is also wrong — see `marketing.md`.
+
+### Seeded chips
+
+11 seeded chips (`:455–465`) violate the "chips are generated, never authored" rule, and at least one — `New 12M high` — is not producible by the generator at all. **Implement the generator; discard the seeds.** They are illustrative, not a specification.
+
+---
+
 ## 7. Open questions
 
 **Routing and persistence**
