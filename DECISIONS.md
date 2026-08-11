@@ -391,6 +391,37 @@ put the last point of nearly every chart into `LOW DATA`.
 shows a price and a change computed from **different populations** — PriceCharting's undisclosed
 average versus our own captured sales.
 
+**Which sales feed which cell.** Owner, 2026-08-11: *"PSA ten here means PSA ten. Grade nine means all
+grade nines."* The pooling is already done upstream — the source pools graders below 10 and splits only
+at 10 (ADR-0005) — so `Grade 9` *is* every grade nine and there is nothing for CardStock to combine.
+**6 of `sales.grade_tier`'s 19 labels map; 13 feed nothing.**
+
+| `sales.grade_tier` | Strip cell |
+|---|---|
+| `Ungraded` | **rendered `Raw`** — see the label rule below |
+| `Grade 7` · `Grade 8` · `Grade 9` · `Grade 9.5` · `PSA 10` | its own, same label |
+| `Grade 1`–`Grade 6` | none — `price_months` has no series below 7 (D-012) |
+| `CGC 10` · `CGC 10 Prist.` · `BGS 10` · `BGS 10 Black` · `SGC 10` · `TAG 10` · `ACE 10` | none — one grade-10 tier exists and it is `Psa10` |
+| anything unrecognised | none |
+
+**It must be an allow-list, not a deny-list**, and that is not a style preference.
+`GradeTierVocabulary.cs:16–18` states the vocabulary **grows**: *"Graders get added over time — TAG and
+ACE are recent — so this list grows."* A deny-list would silently fold a future eleventh grader's 10
+into the PSA 10 cell — precisely the substitution D-022 and D-057 both rejected — and it would do it
+without an error, in the cell users look at first. Unknown labels fall through to "feeds no cell".
+
+The 13 unmapped labels still render in the sales ledger. They simply have no price beside them to
+change against.
+
+**`Raw` is the display label; `Ungraded` is the stored value.** Verified 2026-08-11 against the
+prototype, which is authoritative here: `Cardstock Card.dc.html:322`'s `BUCKETS` opens with `'Raw'`,
+the strip allow-list at `:395` names `'Raw'`, and the ledger chip at `:453` is `'Raw'` — while both
+`GradeTierVocabulary.cs:21` and `PriceTier.cs:14` store `Ungraded`. The two vocabularies are otherwise
+identical, same 19 labels, same spellings down to `CGC 10 Prist.`. `card.md` C-2 already recorded this
+for the chart legend, calling it *"consistent with the later app-wide rename"*; it holds for the strip
+and the ledger chips as well. **Translate at the render boundary and nowhere else** — no query, enum, or
+mapping key may ever spell it `Raw`.
+
 **Open — how far apart are those two numbers?** Owner: *"I wonder how off those two numbers end up
 being… I doubt they're spot on."* This is answerable now: compare `price_months` for the current month
 against the mean of our own `sales` for the same card, month and mapped tier. It also bears on
