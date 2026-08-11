@@ -392,6 +392,28 @@ No longer blocked by the spec (see D-005). Forced by WebAssembly; optional under
 
 **Relevant precedent, verified 2026-08-10:** an HTTP API already exists in the sibling repo — `docs/adr/0006-localhost-intake-api-and-express-visits.md`, "A localhost intake API, with express visits outside the polite gate." It is an *intake/command* surface, not a read surface, and it is loopback-only. So the question of whether CardStock gets a read API is still open, but HTTP plumbing and a decision precedent both already exist. **ADR-0006 has not been read in full** — do that before relying on any detail beyond its title.
 
+### D-039 — A companion .NET console/worker app, and what belongs in it
+Raised by the owner 2026-08-10: *"we're gonna have to have a companion console app to run things such as 'screen activity' and maybe update values for this ticker and the others."* Correct, and it absorbs and expands D-015.
+
+**Why it is structurally required, not an optimisation.** `DESIGN_NOTES.md` defines the Home feed as *"the diff log those screens emit on data refresh"* — ENTER/EXIT rows produced by comparing each saved screen's membership against its previous run. "What changed since last time" **cannot** be computed while rendering a page; it requires a prior run to diff against. The feed is batch work by construction.
+
+**Candidate contents:**
+- Market index construction (D-004 — no index exists in any form)
+- Per-card metric materialization for Screener filters and Charts rows (the old D-015)
+- Saved-screen evaluation and feed-row generation
+- Ticker aggregates (MARKET / INDEX / NEW 12M HIGHS)
+- Per-card sufficiency state against the 2026-09-01 floor (D-033)
+
+**Precedent and consistency:** `PokemonInvestBatch` is already exactly this shape — a .NET worker on a timer under systemd. D-005 explicitly permits it (*"Supporting processes are .NET console/worker apps"*). Mirroring it is consistent across both repos and yields a second portfolio artifact.
+
+**Write scope:** it writes **CardStock's own tables** (index values, metric snapshots, feed rows, sufficiency state) and reads the scraper's. Same boundary as the web app per D-026/D-037, so it needs a role with DML on CardStock tables and `SELECT` on the scraper's.
+
+**Effect on render mode (D-013):** none directly — a separate process writing rows is orthogonal to how a browser talks to the web app. Second-order, it argues **for** static SSR: once the ticker, feed, screen membership, and index are precomputed rows, page rendering is a cheap `SELECT` with no computation on the request path, which is exactly where WebAssembly's benefit is smallest.
+
+**Open:** its schedule and trigger (timer? on crawl completion? both?), whether it is one worker or several, whether it shares a solution with the web app, and how it coordinates with the crawler's own cadence.
+
+---
+
 ### D-015 — Shape of the analytics / metric materialization tier
 Owner's instinct, 2026-08-10: a separate calculating process, "especially for things like screens." D-004 confirms nothing exists today. Open: what it computes, on what schedule, into what tables, and whether it lives in this repo or `PokemonInvestBatch`. Note the sufficiency framework means it must emit **states** (LOW DATA / LOCKED / UNSTABLE FIT) alongside values, not nulls.
 
