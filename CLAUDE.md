@@ -139,7 +139,7 @@ That includes the line most likely to be misread as a prohibition — `uploads/C
 
 ## Related repository — `../PokemonInvestBatch`
 
-CardStock has no data of its own. Everything it renders comes from a separate, already-running system in the sibling directory. **That repo is the authority on what data exists; this one is the authority on what the product does with it.**
+CardStock owns its own data — users, transactions, watchlists, saved screens, and everything its worker computes, including the market index that exists nowhere today (ADR-0001, D-004). What it does **not** own is *market* data: prices, sales, populations and the card catalog all come from the separate, already-running system in the sibling directory. **That repo is the authority on what data exists; this one is the authority on what the product does with it.**
 
 **What it is:** a .NET 10 batch worker that politely crawls pricecharting.com into PostgreSQL, deployed as a systemd unit on a 16 GB Raspberry Pi 5 (64-bit Raspberry Pi OS, Debian 12/13, SSD), published self-contained for `linux-arm64`. Four source projects in a strictly one-directional reference chain — `Domain ← Application ← Infrastructure ← Worker`, with Domain referencing nothing — plus six test projects. First commit 2026-07-27.
 
