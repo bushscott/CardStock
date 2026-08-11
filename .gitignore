@@ -13,3 +13,6 @@ publish/
 # Secrets. The connection string carries the cardstock_app password and the
 # git hook in ops/ blocks committing it; this is the second line of defence.
 appsettings.Production.json
+
+# Local credential convenience copy. Never committed.
+ops/credentials.local

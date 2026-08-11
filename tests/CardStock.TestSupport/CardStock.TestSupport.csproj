@@ -5,7 +5,15 @@
   </ItemGroup>
 
   <ItemGroup>
+    <PackageReference Include="Npgsql" Version="10.0.3" />
     <PackageReference Include="xunit.extensibility.core" Version="2.9.3" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <!-- The crawler's schema, generated from the sibling repo and committed.
+         A throwaway test database has no public.cards, and the cross-boundary
+         join is the whole product. SchemaDriftTests guards it against rot. -->
+    <None Update="Fixtures/scraper-schema.sql" CopyToOutputDirectory="PreserveNewest" />
   </ItemGroup>
 
   <PropertyGroup>

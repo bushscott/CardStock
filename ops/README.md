@@ -78,6 +78,24 @@ CARDSTOCK_TEST_DB="Host=192.168.0.56;Database=postgres;Username=cardstock_tester
 With `CARDSTOCK_TEST_DB` unset the database tests skip rather than fail, and the
 model guards still run. CI sets it to its own `postgres:15` service container.
 
+### When the schema drift test fails
+
+`SchemaDriftTests` fingerprints the crawler's migration sources. A failure means
+the sibling gained or changed a migration. Read it, decide whether CardStock
+reads the column it touched, then regenerate both files:
+
+```bash
+cd ../PokemonInvestBatch && dotnet ef migrations script \
+  -p src/PokemonInvestBatch.Infrastructure -s src/PokemonInvestBatch.Infrastructure \
+  -o ../CardStock/tests/CardStock.TestSupport/Fixtures/scraper-schema.sql
+```
+
+For the fingerprint, **copy the `actual:` value from the test's own failure
+message** into `Fixtures/scraper-schema.fingerprint`. Do not compute it with an
+external tool: EF scaffolds migrations with a UTF-8 BOM, which `File.ReadAllText`
+strips and most other readers do not, so an externally-computed hash will not
+match.
+
 ## 4. Cross-repo migration ordering
 
 - **Additive** crawler changes deploy first.
