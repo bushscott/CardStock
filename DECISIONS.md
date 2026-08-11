@@ -375,6 +375,29 @@ discards everything before 2026-09-01. So every strip cell ships in `LOW DATA` a
 without a deploy. Note this is a month later than a single window would have needed — the honest
 definition costs 30 days, and is worth it.
 
+**The chart's current-month point stays on `price_months`.** Owner, 2026-08-11: *"use price months…
+that way the data comes from all the same lineage."* So the dashed final segment and hollow dot draw
+**PriceCharting's own month-to-date average** — their number firming up as their sales land, which is
+what `Card.dc.html:132`'s tooltip describes — and **not** a figure we compute from our own `sales`
+rows. Verified live: Charizard #24 holds two rows for `2026-08-01` (`$28.61`, `$25.00`), the current
+month revising between visits exactly as documented.
+
+The alternative was rejected on data grounds as well as lineage: our sales record is ~2 weeks old and
+ragged (D-001), so computing that point ourselves would swap a well-sourced value for a thin one and
+put the last point of nearly every chart into `LOW DATA`.
+
+**So the Card page's price surfaces draw from both tables, on a clean split:** every *price* comes from
+`price_months`, every *change* comes from `sales`. Worth stating because it means a single strip cell
+shows a price and a change computed from **different populations** — PriceCharting's undisclosed
+average versus our own captured sales.
+
+**Open — how far apart are those two numbers?** Owner: *"I wonder how off those two numbers end up
+being… I doubt they're spot on."* This is answerable now: compare `price_months` for the current month
+against the mean of our own `sales` for the same card, month and mapped tier. It also bears on
+`about-data.md:238`, which currently records as an **assumption** that PriceCharting's monthly average
+is built from realized sales at all. Not blocking Phase 1; worth running before any copy claims the two
+agree.
+
 **On "why not just finish one page at a time"** (owner asked, 2026-08-11, and the answer belongs
 here rather than in a conversation): the Card page **cannot be finished**. Its sales ledger and census
 panel need post-seam data that does not exist until 2027 (D-001), so a page-at-a-time order stalls on
