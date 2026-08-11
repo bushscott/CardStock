@@ -15,6 +15,25 @@ Extra tokens, extra time, and redundant checking are all explicitly acceptable c
 
 Everything else in `CardStock Mockup/HANDOFF.md` is open for discussion — including the spec's "components → services → Postgres directly, no HTTP API" rule, which is **no longer a hard constraint** (owner, 2026-08-10).
 
+## Related repository — `../PokemonInvestBatch`
+
+CardStock has no data of its own. Everything it renders comes from a separate, already-running .NET 10 scraper that writes to Postgres. That repo is the authority on what data exists; this one is the authority on what the product does with it.
+
+Durable pointers, so this never has to be re-derived:
+
+| What | Where |
+|---|---|
+| Schema, storage rules, and the "what can never be backfilled" section | `../PokemonInvestBatch/DATA_MODEL.md` |
+| Domain vocabulary | `../PokemonInvestBatch/GLOSSARY.md` |
+| Architecture decision records | `../PokemonInvestBatch/docs/adr/` |
+| Price tier enum (6 values) | `../PokemonInvestBatch/src/PokemonInvestBatch.Domain/Parsing/PriceTier.cs` |
+| Grade tier vocabulary (19 values) | `../PokemonInvestBatch/src/PokemonInvestBatch.Domain/Parsing/GradeTierVocabulary.cs` |
+| EF Core context — the 8 tables that exist | `../PokemonInvestBatch/src/…/PokemonDbContext.cs` |
+
+That repo also already carries CI (`.github/`), ADRs, `.editorconfig`, and `Directory.Build.props`. **Mirror its conventions rather than inventing new ones** — consistency across the two repos is itself part of the portfolio story. Confirm the specifics before copying; they have not been read into this project yet (see D-018–D-021).
+
+**Caution:** that repo's documentation is authoritative about the scraper but has already been shown to disagree with CardStock's design docs (see D-001). Verify across both, never from one.
+
 ## The ledger — read this before asserting anything
 
 `DECISIONS.md` at this root is the running register of what is true about this project and what has been decided.

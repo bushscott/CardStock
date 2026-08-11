@@ -142,6 +142,28 @@ CardStock standalone talking to a read API? Grow `PokemonInvestBatch` to serve H
 ### D-017 — Backups
 Claimed (unverified): `sales` and `populations` cannot be reconstructed if lost — the source publishes no history — while `price_months` is fully re-crawlable. If true, a nightly off-box dump of two tables is cheap insurance against losing the only irreplaceable asset in the project. **Needs first-hand verification per D-007.**
 
+### D-018 — Code organization
+Owner, 2026-08-10: this is a portfolio piece, so structure is a deliverable, not an afterthought. Open: solution layout, project boundaries, where the Blazor app / read API / analytics worker each live, and how that reconciles with D-016 (repo topology).
+
+**Precedent to check first:** `../PokemonInvestBatch` uses a strict one-directional layered structure (Domain / Application / Infrastructure / Worker) with 6 test projects. Mirroring it is likely the right answer and is cheaper than designing fresh — but the specifics have not been read yet.
+
+### D-019 — Code standards
+Owner, 2026-08-10. Open: analyzer set and severity, nullable reference types, warnings-as-errors, naming and file-scoped namespaces, formatting enforcement in CI.
+
+**Precedent to check first:** `../PokemonInvestBatch` already carries `.editorconfig` and `Directory.Build.props`. Read both before proposing anything.
+
+### D-020 — GitHub repository: public, documented, with CI
+Owner, 2026-08-10: "a fully functional GitHub for this project with documentations, CI, and ADR." Open: repo name and visibility, README shape, what documentation ships, and what the CI workflow runs (build, test, format check, coverage?).
+
+**Note:** this repo was `git init`-ed locally on 2026-08-10 with no remote. Nothing has been pushed.
+
+**Precedent to check first:** `../PokemonInvestBatch/.github/` already has workflows.
+
+### D-021 — ADRs for CardStock
+Owner, 2026-08-10. Open: format, numbering, and where they live (`docs/adr/` to match the sibling repo is the obvious default).
+
+**Relationship to this ledger — needs a ruling.** They overlap and should not both record the same thing. Proposed split: an ADR is a *considered architectural decision with alternatives weighed and consequences stated* — D-013 through D-016 are all ADR-shaped. The ledger is the faster-moving register of facts, open questions, and small calls. When a ledger entry gets big enough to need alternatives and consequences, it graduates to an ADR and the ledger entry points at it.
+
 ---
 
 ## Superseded
