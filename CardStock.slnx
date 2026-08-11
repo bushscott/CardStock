@@ -1,0 +1,17 @@
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="src/CardStock.Api/CardStock.Api.csproj" />
+    <Project Path="src/CardStock.Application/CardStock.Application.csproj" />
+    <Project Path="src/CardStock.Domain/CardStock.Domain.csproj" />
+    <Project Path="src/CardStock.Infrastructure/CardStock.Infrastructure.csproj" />
+    <Project Path="src/CardStock.Web/CardStock.Web.csproj" />
+    <Project Path="src/CardStock.Worker/CardStock.Worker.csproj" />
+  </Folder>
+  <Folder Name="/tests/">
+    <Project Path="tests/CardStock.Application.Tests/CardStock.Application.Tests.csproj" />
+    <Project Path="tests/CardStock.Domain.Tests/CardStock.Domain.Tests.csproj" />
+    <Project Path="tests/CardStock.Infrastructure.Tests/CardStock.Infrastructure.Tests.csproj" />
+    <Project Path="tests/CardStock.Integration.Tests/CardStock.Integration.Tests.csproj" />
+    <Project Path="tests/CardStock.TestSupport/CardStock.TestSupport.csproj" />
+  </Folder>
+</Solution>

@@ -1,0 +1,72 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+jobs:
+  build-and-test:
+    name: Build and test
+    runs-on: ubuntu-latest
+
+    # Matches the Pi's PostgreSQL 15.18, verified by direct query 2026-08-11.
+    # A version drift here would pass in CI and fail in production, which is
+    # the one failure a test suite must not have.
+    services:
+      postgres:
+        image: postgres:15
+        env:
+          POSTGRES_PASSWORD: postgres
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+    env:
+      # Only a template: each test creates and drops a database of its own
+      # beside this one. The superuser is used because the tests need CREATEDB,
+      # exactly as cardstock_tester does on the Pi.
+      CARDSTOCK_TEST_DB: "Host=localhost;Port=5432;Database=postgres;Username=postgres;Password=postgres"
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '10.0.x'
+
+      - name: Cache NuGet packages
+        uses: actions/cache@v4
+        with:
+          path: ~/.nuget/packages
+          key: ${{ runner.os }}-nuget-${{ hashFiles('**/*.csproj') }}
+          restore-keys: ${{ runner.os }}-nuget-
+
+      # The sibling repo omits this step, and its tool manifest sits at the
+      # repo root where restore never looks, so it has never used its own pin.
+      - name: Restore tools
+        run: dotnet tool restore
+
+      - name: Restore
+        run: dotnet restore CardStock.slnx
+
+      # Directory.Build.props sets TreatWarningsAsErrors, so any new warning
+      # fails the build here rather than accumulating unnoticed.
+      - name: Build
+        run: dotnet build CardStock.slnx --no-restore -c Release
+
+      - name: Test
+        run: dotnet test CardStock.slnx --no-build -c Release
+
+      # EF scaffolds its migrations with a byte-order mark that the shared
+      # .editorconfig rejects, so generated code is excluded rather than
+      # hand-edited after every scaffold.
+      - name: Verify formatting
+        run: dotnet format CardStock.slnx --verify-no-changes --severity error --exclude '**/Migrations/**'

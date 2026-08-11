@@ -1,1 +1,15 @@
 .DS_Store
+
+# Build output
+bin/
+obj/
+publish/
+*.user
+
+# Rider / VS
+.idea/
+.vs/
+
+# Secrets. The connection string carries the cardstock_app password and the
+# git hook in ops/ blocks committing it; this is the second line of defence.
+appsettings.Production.json
