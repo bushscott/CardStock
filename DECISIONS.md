@@ -191,6 +191,27 @@ Owner, 2026-08-10, answering the deployment question during brainstorming. Resol
 
 ---
 
+### D-042 — Harvest from `PROJECT_LOG.md` before it is retired
+All lines read directly 2026-08-10. The file is Tier 3 (D-040) and slated for deletion; these items exist nowhere else and are extracted so they survive it.
+
+**`:241` — the API was deferred, never forbidden.** *"**API design: OUT OF SCOPE** for this conversation. **Final UI drives API decisions.** ✅ user ruling."* This is a better source than the spec parenthetical S-002 rested on. The UI is now designed, so **D-014 is not overturning a ruling — it is the ruling coming due on its own schedule.**
+
+**`:218` — static data required, non-scraped, one-time.** (1) A **set metadata table** — release date + era/series for ~303 sets. (2) A **character tag table** — card → Pokémon, derived from `cards.name` × a Pokédex species list. Both are prerequisites for Browse's era shelves, the Set and Character pages, and the Screener's Era and Character filters. Neither exists in the scraper (D-004's eight tables). These are CardStock's own tables to build and curate.
+
+**`:235` — 🚩 conflicts with D-026.** *"Dominant-color extraction from card art → character/set page header accents. **NEW derived column on cards** (computed from stored images)."* A new column on `cards` means CardStock writing to the **scraper's** table — precisely the case D-026 left open and D-037 proposed to make structurally impossible via a `SELECT`-only role. Resolvable by putting the derived colour in a CardStock-owned table keyed by card id, but it needs a ruling.
+
+**`:106` — Binder is strictly private.** *"No social layer, no public profiles, no leaderboards, no shared/forkable strategies. ✅ decided."* Matters more now that D-011 made the app publicly signup-able.
+
+**`:242` — charting locked.** TradingView Lightweight Charts via JS interop, *"Blazor wrapper component = portfolio centerpiece."* Series markers give the trigger triangles natively; v5 panes carry MACD/RSI sub-charts. Screener grid is QuickGrid + virtualization.
+
+**`:137` — the "show anyway" override burns in.** Overriding a Tier-2 lock renders a **persistent** low-confidence badge into the chart region, deliberately so it **survives screenshots**. An anti-misuse detail that would be easy to lose and hard to reinvent.
+
+**`:201` — undecided, still open.** A possible "data events" feed (restatements, cap incidents) as the honest analog to a news feed. Marked ⬜ undecided there; still undecided.
+
+**Superseded, do not harvest:** `:204–210`'s seven critical user flows include *"Get alerted → signals feed at login + email when away."* Alerts were cut wholesale (`HANDOFF.md` §4), so flow 6 is dead as written.
+
+---
+
 ### D-040 — Document authority: the mockups and the scraper codebase are absolute truth
 Owner, 2026-08-10: *"The mockups and Pokemon investment scraper codebase are the absolute truth."* Recorded in full in `CLAUDE.md` under "Document authority."
 
