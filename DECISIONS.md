@@ -166,6 +166,39 @@ Read directly 2026-08-10, to be mirrored per D-018–D-021.
 
 ## Decided
 
+### D-074 — Cost basis is FIFO. This unblocks the Binder
+Owner, 2026-08-11: *"First in, first out."*
+
+Forced by D-067 — once holdings are derived from transactions rather than stored, there is no
+running average to fall back on, so a SELL has to name which purchase lot it consumed. `binder.md`
+§7.4 was promoted to blocking for exactly this reason and is now resolved.
+
+**The rule:** a SELL consumes open lots oldest-first. Realized P&L is proceeds minus the FIFO cost
+of the units sold. Remaining lots keep their own purchase dates and prices.
+
+**Why FIFO over average cost**, and it is not a matter of taste: `binder.md` §3.9 defines the
+**Avg hold** tile as *mean(sell date − buy date) over closed positions*. Pooling two purchases into
+one average destroys the buy date, so that tile becomes undefined. FIFO names the consumed lot, so
+holding period falls out for free. Average cost would have silently broken a designed stat.
+
+**Why not specific identification:** it requires asking "which lot?" on every sell — friction on the
+core interaction, and no prototype supports it. Additive later if tax-lot optimisation ever matters;
+the transactions are all retained either way.
+
+**What stays true:** the holdings column header "Avg cost" (`binder.md:194`) remains honest. It is
+the average of the lots **still held**, which is a display question independent of the accounting
+method.
+
+**Two consequences to carry into the build:**
+- **Corrections cascade for free.** Editing a historical BUY changes which lots exist and therefore
+  the FIFO matching downstream of it. Because holdings are derived (D-067), this recomputes rather
+  than needing repair — the reason that shape was chosen.
+- **Overselling now has a definite meaning.** `binder.md` §4.9 rule 3 records that SELL-edit accepts
+  any quantity with no cap against holdings. Under FIFO that is a sale with no lots left to consume,
+  so it is not merely untidy — it is unrepresentable, and the write path must reject it.
+
+---
+
 ### D-071 — ✅ ADR-0001 is built and running. The boundary is enforced by Postgres, not convention
 Implemented 2026-08-11 on branch `first-slice`. Every claim below was checked by direct query after
 the fact, not inferred from the code.

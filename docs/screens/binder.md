@@ -912,9 +912,12 @@ The BUY/SELL segmented control is rendered **unconditionally** (Binder:244–247
    plus a valuation bucket (as `bucketOf`'s comment implies)?
 3. **Does the market index exist?** D-004 says there is no index table and no metrics store in the
    scraper DB, yet this screen's entire performance tab and its `EST` semantics depend on one. Blocking.
-4. **🚩 BLOCKING as of D-067 — realized P&L, win rate, and avg hold have no cost-lot model.** Since
-   holdings are now derived from transactions rather than stored (§3.3), *every* holding's `cost`
-   depends on this rule, not just the performance tab. It must be ruled before implementation. All
+4. **✅ Resolved by D-074 — the cost-lot model is FIFO.** A SELL consumes open lots oldest-first;
+   realized P&L is proceeds minus the FIFO cost of the units sold; remaining lots keep their own
+   purchase dates and prices. **Avg hold** (§3.9) is computable because FIFO names the consumed lot
+   — average cost would have destroyed the buy date and left that tile undefined, which is what
+   decided it. The `Avg cost` column header stays honest: it is the average of the lots still held,
+   a display question independent of the accounting method. *Original finding:* all
    three are literals here. A SELL
    realizes against *which* purchase lot — FIFO, average cost, or specific identification? The
    "Avg cost" header hints at average cost; nothing states it. `HOLD` carries a single `cost` per
@@ -928,6 +931,9 @@ The BUY/SELL segmented control is rendered **unconditionally** (Binder:244–247
 6. **Should a correction be allowed to change a transaction's kind?** It currently can (§5.8).
 7. **Should SELL-edit re-validate against holdings?** It currently accepts any qty ≥ 1 with no cap
    (§4.9 rule 3), letting a correction claim a sale larger than the position.
+   **Sharpened by D-074:** under FIFO an oversell is a sale with no remaining lots to consume, so it
+   is not merely untidy — it is unrepresentable, and the write path must reject it rather than
+   record something the cost-basis calculation cannot evaluate.
 8. **BUY qty is unvalidated and silently coerced to 1** (§4.9 rule 2). Intentional leniency or a gap?
 9. **CSV file generation.** The affordance exists; the payload is specified only by the button tooltip
    ("date, card, grade, quantity, price, and note"). Open: does it export `txAll` (post-override current
