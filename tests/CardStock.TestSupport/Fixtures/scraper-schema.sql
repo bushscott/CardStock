@@ -190,3 +190,11 @@ VALUES ('20260809153250_AddCardRefreshRequestedAt', '10.0.10');
 
 COMMIT;
 
+START TRANSACTION;
+ALTER TABLE cards ADD near_miss_at timestamp with time zone;
+
+INSERT INTO "__EFMigrationsHistory" (migration_id, product_version)
+VALUES ('20260812162439_AddCardNearMissAt', '10.0.10');
+
+COMMIT;
+
