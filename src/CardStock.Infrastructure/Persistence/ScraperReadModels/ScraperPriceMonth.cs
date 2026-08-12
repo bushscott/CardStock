@@ -1,3 +1,5 @@
+using CardStock.Domain.Prices;
+
 namespace CardStock.Infrastructure.Persistence.ScraperReadModels;
 
 /// <summary>

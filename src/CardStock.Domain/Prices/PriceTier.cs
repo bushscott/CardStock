@@ -1,4 +1,4 @@
-namespace CardStock.Infrastructure.Persistence.ScraperReadModels;
+namespace CardStock.Domain.Prices;
 
 /// <summary>
 /// Mirrors PokemonInvestBatch.Domain.Parsing.PriceTier exactly. CardStock cannot
@@ -8,6 +8,7 @@ namespace CardStock.Infrastructure.Persistence.ScraperReadModels;
 /// 20260728032826_InitialCreate.cs:134, which is NOT the smallint used for
 /// populations.grade. NEVER reorder or insert a member: the ordinal IS the
 /// stored value, so a change here silently misreads every historical price.
+/// PriceTierTests enforces this.
 /// </summary>
 public enum PriceTier
 {
