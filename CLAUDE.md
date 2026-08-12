@@ -162,7 +162,7 @@ CardStock owns its own data — users, transactions, watchlists, saved screens, 
 
 **So on the month axis, gaps are gaps.** Carrying a price forward across a month with no row invents a number the source never published. `DATA_MODEL.md:53–56`'s "history between two stored rows is flat" is written about `populations` and does not transfer.
 
-**What only the current month can do:** revise. `DATA_MODEL.md:110` — "Closed months are immutable server-side; only the current month revises between visits." That is why the PK ends in `observed_at`, and why latest-per-key still matters even though it fires rarely.
+**Any month can revise, including closed ones.** `DATA_MODEL.md:110` claims *"Closed months are immutable server-side; only the current month revises between visits"* and `:179` says closed months carry *"exactly one row forever."* **Both are false** — verified 2026-08-12 (D-078): card 630437 restated its July prices on 4 August, after July had closed. So the PK ending in `observed_at` is load-bearing for **every** month, and a read that resolves latest-per-key only for the newest month will silently return superseded prices.
 
 *Not verified:* how sparse the month axis actually is. `price_months` holds 10,352,706 rows over 91,570 cards (D-071) — **113 per card**, against 408 for a dense six-tier backfill to Dec 2020. Either series are genuinely sparse or much of the corpus is uncrawled, and the two imply different read layers. One query settles it: `SELECT count(*) FILTER (WHERE last_visited_at IS NULL), count(*) FROM cards WHERE delisted_at IS NULL AND not_a_card_at IS NULL;`
 

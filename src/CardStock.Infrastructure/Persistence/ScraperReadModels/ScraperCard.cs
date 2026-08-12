@@ -18,6 +18,17 @@ public class ScraperCard : IScraperOwned
 
     public string? ImageHash { get; init; }
 
+    /// <summary>
+    /// When the crawler last fetched this card's page. Drives the 24h refresh
+    /// decision (D-062) and the as-of stamp (D-077).
+    ///
+    /// DATA_MODEL.md:163 classifies this as mutable scheduler state under Rule 3,
+    /// with the durable history in the visits table, which CardStock does not
+    /// mirror. That warning is about treating caches as analytical FACTS; for
+    /// "when did we last look", this cache is the answer.
+    /// </summary>
+    public DateTimeOffset? LastVisitedAt { get; init; }
+
     /// <summary>Set by hand when the product is gone from the source outright.</summary>
     public DateTimeOffset? DelistedAt { get; init; }
 

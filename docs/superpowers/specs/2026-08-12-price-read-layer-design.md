@@ -32,7 +32,7 @@ Every one was verified against the live database or the crawler's source. They a
 | Fact | Consequence | Receipt |
 |---|---|---|
 | The corpus is fully crawled — 0 of 91,518 live cards unvisited | Sparse series are real, not an artifact of an unfinished crawl | Query, 2026-08-11 |
-| Only the current month revises; **17,804 revision rows of 10,357,098 (0.17%)** | `max(observed_at)` is a correctness rule, not a performance concern | Query; `DATA_MODEL.md:110` |
+| **Any** month can revise, closed ones included; **17,804 revision rows of 10,357,098 (0.17%)** | `max(observed_at)` is a correctness rule, not a performance concern — and must be applied to every month, not just the newest | Query; D-078 disproves `DATA_MODEL.md:110` |
 | A missing month means **the source published no point** | Never carry a value across a gap. Gaps are gaps | `CardDetailParser.cs:318–331`; `ChangeOnlyPlanner.cs:22` |
 | `price_cents = 0` **never occurs** (0 rows in 10.3M) | Zero is not a sentinel we must disambiguate | Query, 2026-08-11 |
 | **95% of in-window months are filled; 33% of series contain ≥1 gap** | Gap handling is the common path, not a corner | 300-card sample |

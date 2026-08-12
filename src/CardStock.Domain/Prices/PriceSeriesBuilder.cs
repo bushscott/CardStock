@@ -4,9 +4,16 @@ namespace CardStock.Domain.Prices;
 /// Turns raw price_months rows into six resolved series.
 ///
 /// This is where the change-only contract is honoured: a (tier, month) cell can
-/// carry several rows because the current month revises between visits, so the
-/// one with the greatest ObservedAt wins. It fires on roughly 0.17% of rows,
-/// which is exactly why it must be encoded once rather than remembered.
+/// carry several rows, so the one with the greatest ObservedAt wins. It fires on
+/// roughly 0.17% of rows, which is exactly why it must be encoded once rather
+/// than remembered.
+///
+/// Resolve EVERY month this way, never just the newest. The sibling's
+/// DATA_MODEL.md:110 claims closed months are immutable and carry "exactly one
+/// row forever" -- that is false, verified 2026-08-12 (D-078): card 630437
+/// restated its July figures on 4 August, after July had closed. An optimisation
+/// that trusts only the current month to have duplicates would silently return
+/// superseded prices.
 /// </summary>
 public static class PriceSeriesBuilder
 {

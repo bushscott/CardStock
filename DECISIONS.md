@@ -19,6 +19,54 @@ Entries keep their ID forever and move between status sections as they settle. S
 
 ## Verified
 
+### D-078 — 🚩 Closed months DO revise. `DATA_MODEL.md`'s immutability claim is false
+Found 2026-08-12 while verifying the price read layer's query plans against live data.
+
+**The claim.** `DATA_MODEL.md:110` — *"Closed months are immutable server-side; only the current month
+revises between visits."* And `:179` — *"closed months carry exactly one row forever."* Both are
+repeated in `CLAUDE.md` and were used as reasoning in this repo.
+
+**The counter-example**, card 630437 (`Charmeleon #24`, Base Set), read directly:
+
+| tier | month | price_cents | observed_at |
+|---|---|---|---|
+| 0 `Ungraded` | **2026-07-01** | 222 | 2026-07-29 |
+| 0 `Ungraded` | **2026-07-01** | **220** | **2026-08-04** |
+| 4 `Grade9Half` | 2026-07-01 | 5850 | 2026-07-29 |
+| 4 `Grade9Half` | **5832** | | **2026-08-04** |
+| 5 `Psa10` | 2026-07-01 | 25000 | 2026-07-29 |
+| 5 `Psa10` | **24635** | | **2026-08-04** |
+
+On 29 July, July was the live month. On **4 August — after July closed** — all three restated. The
+source revises a month after it ends, so "exactly one row forever" is not a property of closed months.
+
+**Re-runnable receipt:**
+
+```sql
+SELECT tier, month, price_cents, observed_at,
+       row_number() OVER (PARTITION BY tier, month ORDER BY observed_at DESC) AS newest_first
+FROM price_months
+WHERE card_id = 630437
+  AND (tier, month) IN (SELECT tier, month FROM price_months
+                        WHERE card_id = 630437 GROUP BY tier, month HAVING count(*) > 1)
+ORDER BY tier, month, observed_at DESC;
+```
+
+**What it does not change.** The read layer resolves `max(observed_at)` per `(tier, month)` regardless
+of which month it is, so `PriceSeriesBuilder` is correct as written and needs no edit. This is a
+documentation error, not a defect.
+
+**What it does change.** Any optimisation that special-cases "only the current month can have two
+rows" is unsafe — including the obvious one of resolving only the newest month and trusting the rest.
+Nobody has written that yet. This entry exists so nobody writes it later.
+
+**Not established:** how often this happens corpus-wide, or how long after a month closes it can still
+move. 17,804 of 10,357,098 rows are revisions (D-075 receipt), but that figure was never broken down
+by whether the revised month was open or closed at the time. One card is proof the invariant is false;
+it is not a measurement of the effect.
+
+---
+
 ### D-076 — 🚩 The express-visit contract is wrong in three places, in `CLAUDE.md` and in D-062 itself
 Found 2026-08-11 while designing the Card page's refresh. All three errors are ADR-0006 facts that
 survived **ADR-0008**, which superseded them. Every claim below was read from source, not inferred.
