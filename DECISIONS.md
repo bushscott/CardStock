@@ -365,8 +365,8 @@ CardStock's own tables. `sales` and `populations` are a 2027 story no engineerin
 | Phase | What | Status |
 |---|---|---|
 | 0 | Walking skeleton: solution, CI, schema, deployed to the Pi | ✅ **Done** 2026-08-11 |
-| 1 | `price_months` read layer — change-only as-of semantics, encoded once, tested hard. **Plus the 30-day sales read** — see below | **Next** |
-| 2 | Card page end to end, with real `LOCKED` / `LOW DATA` states | |
+| 1 | `price_months` read layer — change-only as-of semantics, encoded once, tested hard. **Plus the 30-day sales read** — see below | ✅ **Done** 2026-08-12 |
+| 2 | Card page end to end, with real `LOCKED` / `LOW DATA` states | **Next** |
 | 3 | Worker: index construction first — nothing comparative exists without it | |
 | 4 | Binder — the owner's stated emotional centre, and it works on today's data | |
 | 5+ | Screener, Charts, Home feed, demo mode (D-064), marketing and landing **last** | |
@@ -378,9 +378,26 @@ CardStock's own tables. `sales` and `populations` are a 2027 story no engineerin
 - *Depth-first by screen.* The data does the sequencing; a screen-at-a-time order would repeatedly
   hit the same 2027 wall in five different places.
 
-**Phase 1 is the next thing to start**, and it is where the correctness risk concentrates: absence
-means "unchanged", not "missing", and "latest" is `max(observed_at)` per key rather than the newest
-month.
+**Phase 1 shipped 2026-08-12.** Spec at `docs/superpowers/specs/2026-08-12-price-read-layer-design.md`,
+plan at `docs/superpowers/plans/2026-08-12-price-read-layer.md`, merged to `main` as `1874f32..c7a336a`.
+63 Domain tests plus 6 integration tests against the Pi. It added no tables and no migrations.
+
+**What Phase 2 inherits:** `ICardPriceReader.GetAsync(cardId)` returns a `CardPriceSnapshot` — six
+tiers always, each with its full series, a `TierPrice` and a `TierChange`, plus the card's
+`LastVisitedAt`. Absence is in the type, so the page cannot accidentally render a hole as a number.
+**Nothing is registered in DI yet** — deliberately, because no consumer existed to prove the wiring.
+
+**Three things Phase 1 turned up that outlive it:** D-076 (the express contract was wrong in three
+places), D-078 (closed months revise, contradicting `DATA_MODEL.md` twice over), and the fact that the
+crawler's schema drifts under us — `SchemaDriftTests` caught `AddCardNearMissAt` the morning it landed.
+
+**Still open, and neither blocks Phase 2:** `SalesChange.MinimumSalesPerWindow` is 3 on no evidence and
+cannot be tuned until real windows exist (~Nov 2026); and nobody has measured how far
+PriceCharting's monthly average sits from the mean of our own captured sales.
+
+*Original framing, kept because it was the whole point:* Phase 1 is where the correctness risk
+concentrates — absence means "unchanged", not "missing", and "latest" is `max(observed_at)` per key
+rather than the newest month.
 
 **Amended 2026-08-11 — Phase 1 also carries a 30-day sales read.** Owner: the tier strip's 30-day
 change *"should not be based on the monthly scrape data. It should be based on the past thirty days of
