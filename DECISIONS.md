@@ -367,13 +367,39 @@ eventually that query will work for only the latest thirty days."* Today it retu
 in a year it returns a full window; the query is identical. No early-days special case to unpick later
 — which was the whole point of *"that way in 30 days we won't have wasted code."*
 
-**It returns both counts alongside the change**, so the cell wears the `N OBS` amber `LOW DATA` badge
-(`card.md` §4.11) until they are healthy, on the same code path that serves it forever.
+**It returns both counts alongside the change**, and the counts decide whether a number renders at all.
 
-**Nothing is computable until ~1 Nov 2026.** Two 30-day windows need 60 countable days; D-033's floor
-discards everything before 2026-09-01. So every strip cell ships in `LOW DATA` and improves on its own
-without a deploy. Note this is a month later than a single window would have needed — the honest
-definition costs 30 days, and is worth it.
+**Insufficient data renders a dash. No countdown, no unlock date, no `LOCKED` state.** Settled
+2026-08-11 after I proposed a countdown and the owner rejected it: *"I don't want logic sticking around
+forever that calculates when the data will be full, because it will be full in six weeks."* He is right,
+and the reasoning generalises further than the ramp-up:
+
+> **"Not enough sales" never expires.** A quiet card will not have two sales in 30 days in 2028 either.
+> So the insufficient case needs handling permanently regardless — it is only the *countdown* that has
+> a shelf life. Dropping it removes code without removing honesty.
+
+- Below the threshold → **dash**, in the change slot. Identical rule today and in five years.
+- At or above → the number.
+- The threshold is **one named constant**, so tuning it is a value change, not a rewrite.
+- The tooltip is **static** — *"Not enough sales in the last 60 days to compute a change"* — true now and
+  permanently, with no date arithmetic in it.
+
+This deliberately overrides the `LOCKED` treatment `card.md` §4.11 describes for this cell (*"countdown
+copy… unlocks ~Mar 2027"*). That pattern still stands wherever an unlock genuinely is a one-time event;
+it is wrong here, because this cell's insufficiency is a permanent possibility rather than a phase.
+
+**For the record, since it no longer appears in the UI:** two 30-day windows need 60 countable days and
+D-033's floor starts at 2026-09-01, so the earliest any card can produce a change is ~1 Nov 2026. Every
+strip cell will dash until then and start filling itself with no deploy.
+
+**Price staleness, settled the same day and measured before deciding.** A price renders if its newest
+month is **the current month or the one just closed**; two or more months behind, it dashes.
+
+*Receipt (500-card sample, 1,802 series, run 2026-08-11):* 81.3% of series are current-month, 15.2% are
+one month behind, **3.5% are two or more**, tailing to 53 months. The 15% are not stale — early in a
+month PriceCharting has not yet posted an average for every tier — so a strict current-month-only rule
+would have dashed 19% of series, most of them healthy. The chosen rule keeps 96.5% showing a real price
+and dashes only genuinely dead grades.
 
 **The chart's current-month point stays on `price_months`.** Owner, 2026-08-11: *"use price months…
 that way the data comes from all the same lineage."* So the dashed final segment and hollow dot draw
