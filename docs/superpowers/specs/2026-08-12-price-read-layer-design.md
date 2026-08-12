@@ -91,11 +91,14 @@ month the source has not yet posted every tier (§3).
 ```csharp
 public abstract record TierChange;
 
-public sealed record ChangeAvailable(decimal Percent, int RecentSales, int PriorSales) : TierChange;
+public sealed record ChangeAvailable(decimal Fraction, int RecentSales, int PriorSales) : TierChange;
 
 /// Too few sales in one or both windows. Renders a dash. Permanent state, not a phase.
 public sealed record ChangeInsufficient(int RecentSales, int PriorSales) : TierChange;
 ```
+
+`Fraction` is a fraction, not a percentage: `0.062m` is +6.2%. Named to remove the 100× ambiguity at
+the render boundary — the draft called it `Percent`, which reads either way.
 
 Mean sale price over the last 30 days against the mean over the 30 before that (D-075). Both windows
 are hardcoded and never widen — today they return a handful of rows, in a year a full window, and the
