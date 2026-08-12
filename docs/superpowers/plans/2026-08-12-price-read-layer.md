@@ -78,7 +78,7 @@ The pure rules need this enum and Domain references nothing, so it cannot stay i
 - Consumes: nothing.
 - Produces: `CardStock.Domain.Prices.PriceTier` — `Ungraded=0, Grade7=1, Grade8=2, Grade9=3, Grade9Half=4, Psa10=5`. Every later task uses it.
 
-- [ ] **Step 1: Write the failing test**
+- [x] **Step 1: Write the failing test**
 
 Create `tests/CardStock.Domain.Tests/Prices/PriceTierTests.cs`:
 
@@ -114,12 +114,12 @@ public class PriceTierTests
 }
 ```
 
-- [ ] **Step 2: Run test to verify it fails**
+- [x] **Step 2: Run test to verify it fails**
 
 Run: `dotnet test tests/CardStock.Domain.Tests -c Release --filter PriceTierTests`
 Expected: FAIL — build error, `CardStock.Domain.Prices` namespace does not exist.
 
-- [ ] **Step 3: Create the Domain enum**
+- [x] **Step 3: Create the Domain enum**
 
 Create `src/CardStock.Domain/Prices/PriceTier.cs`:
 
@@ -147,7 +147,7 @@ public enum PriceTier
 }
 ```
 
-- [ ] **Step 4: Delete the Infrastructure copy and repoint its user**
+- [x] **Step 4: Delete the Infrastructure copy and repoint its user**
 
 Delete `src/CardStock.Infrastructure/Persistence/ScraperReadModels/PriceTier.cs`.
 
@@ -161,7 +161,7 @@ namespace CardStock.Infrastructure.Persistence.ScraperReadModels;
 
 The `PriceTier Tier { get; init; }` property is unchanged; it now resolves to the Domain type.
 
-- [ ] **Step 5: Run the whole suite to verify nothing else referenced the old location**
+- [x] **Step 5: Run the whole suite to verify nothing else referenced the old location**
 
 Run: `dotnet build CardStock.slnx -c Release -m:1`
 Expected: build succeeds with zero warnings. If any file fails to resolve `PriceTier`, add the same using there.
@@ -171,7 +171,7 @@ Expected: PASS, including the two new tests.
 
 > **If `dotnet test` hangs before any test runs**, it is MSBuild node contention, not the database (`ops/README.md`). Fix: `dotnet build-server shutdown && pkill -f MSBuild.dll`, then rebuild with `-m:1` and test with `--no-build -m:1`.
 
-- [ ] **Step 6: Commit**
+- [x] **Step 6: Commit**
 
 ```bash
 git add -A
@@ -205,7 +205,7 @@ The change-only rule in one place. Every card returns exactly six series whether
   - `PriceSeriesBuilder.Build(IEnumerable<PriceObservation>) → IReadOnlyList<TierSeries>` — always 6, strip order
   - `PriceSeriesBuilder.StripOrder → IReadOnlyList<PriceTier>`
 
-- [ ] **Step 1: Write the failing tests**
+- [x] **Step 1: Write the failing tests**
 
 Create `tests/CardStock.Domain.Tests/Prices/PriceSeriesBuilderTests.cs`:
 
@@ -308,12 +308,12 @@ public class PriceSeriesBuilderTests
 }
 ```
 
-- [ ] **Step 2: Run tests to verify they fail**
+- [x] **Step 2: Run tests to verify they fail**
 
 Run: `dotnet test tests/CardStock.Domain.Tests -c Release --filter PriceSeriesBuilderTests`
 Expected: FAIL — `PriceObservation`, `MonthlyPrice`, `TierSeries`, `PriceSeriesBuilder` do not exist.
 
-- [ ] **Step 3: Write the four types**
+- [x] **Step 3: Write the four types**
 
 Create `src/CardStock.Domain/Prices/PriceObservation.cs`:
 
@@ -413,12 +413,12 @@ public static class PriceSeriesBuilder
 }
 ```
 
-- [ ] **Step 4: Run tests to verify they pass**
+- [x] **Step 4: Run tests to verify they pass**
 
 Run: `dotnet test tests/CardStock.Domain.Tests -c Release --filter PriceSeriesBuilderTests`
 Expected: PASS, 6 tests.
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add -A
@@ -452,7 +452,7 @@ A caller asking for twelve months gets twelve slots. Three of them mean differen
   - `PriceSlot(DateOnly Month)` abstract, with `ObservedPrice(DateOnly, int PriceCents, DateTimeOffset)`, `MissingMonth(DateOnly)`, `OutsideSeries(DateOnly)`
   - `PriceWindow.Of(TierSeries series, DateOnly endMonth, int months) → IReadOnlyList<PriceSlot>` — ascending, oldest first, `endMonth` last
 
-- [ ] **Step 1: Write the failing tests**
+- [x] **Step 1: Write the failing tests**
 
 Create `tests/CardStock.Domain.Tests/Prices/PriceWindowTests.cs`:
 
@@ -546,12 +546,12 @@ public class PriceWindowTests
 }
 ```
 
-- [ ] **Step 2: Run tests to verify they fail**
+- [x] **Step 2: Run tests to verify they fail**
 
 Run: `dotnet test tests/CardStock.Domain.Tests -c Release --filter PriceWindowTests`
 Expected: FAIL — `PriceWindow`, `ObservedPrice`, `MissingMonth`, `OutsideSeries` do not exist.
 
-- [ ] **Step 3: Write the slot hierarchy and the windowing function**
+- [x] **Step 3: Write the slot hierarchy and the windowing function**
 
 Create `src/CardStock.Domain/Prices/PriceSlot.cs`:
 
@@ -620,12 +620,12 @@ public static class PriceWindow
 }
 ```
 
-- [ ] **Step 4: Run tests to verify they pass**
+- [x] **Step 4: Run tests to verify they pass**
 
 Run: `dotnet test tests/CardStock.Domain.Tests -c Release --filter PriceWindowTests`
 Expected: PASS, 7 tests.
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add -A
@@ -661,7 +661,7 @@ Three outcomes, measured rather than chosen: 81% of real series are current-mont
   - `PriceStaleness.MaxMonthsBehind` (const int, 1)
   - `PriceStaleness.Evaluate(TierSeries series, DateOnly currentMonth) → TierPrice`
 
-- [ ] **Step 1: Write the failing tests**
+- [x] **Step 1: Write the failing tests**
 
 Create `tests/CardStock.Domain.Tests/Prices/PriceStalenessTests.cs`:
 
@@ -752,12 +752,12 @@ public class PriceStalenessTests
 }
 ```
 
-- [ ] **Step 2: Run tests to verify they fail**
+- [x] **Step 2: Run tests to verify they fail**
 
 Run: `dotnet test tests/CardStock.Domain.Tests -c Release --filter PriceStalenessTests`
 Expected: FAIL — `PriceStaleness`, `PriceAvailable`, `PriceStale`, `NoPriceSeries` do not exist.
 
-- [ ] **Step 3: Write the outcomes and the rule**
+- [x] **Step 3: Write the outcomes and the rule**
 
 Create `src/CardStock.Domain/Prices/TierPrice.cs`:
 
@@ -830,12 +830,12 @@ public static class PriceStaleness
 }
 ```
 
-- [ ] **Step 4: Run tests to verify they pass**
+- [x] **Step 4: Run tests to verify they pass**
 
 Run: `dotnet test tests/CardStock.Domain.Tests -c Release --filter PriceStalenessTests`
 Expected: PASS, 7 tests.
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add -A
@@ -867,7 +867,7 @@ Six of nineteen labels map. The rest have no price series to change against, and
 - Consumes: `PriceTier` (Task 1).
 - Produces: `GradeTierMap.ToPriceTier(string gradeTier) → PriceTier?`
 
-- [ ] **Step 1: Write the failing tests**
+- [x] **Step 1: Write the failing tests**
 
 Create `tests/CardStock.Domain.Tests/Prices/GradeTierMapTests.cs`:
 
@@ -956,12 +956,12 @@ public class GradeTierMapTests
 }
 ```
 
-- [ ] **Step 2: Run tests to verify they fail**
+- [x] **Step 2: Run tests to verify they fail**
 
 Run: `dotnet test tests/CardStock.Domain.Tests -c Release --filter GradeTierMapTests`
 Expected: FAIL — `GradeTierMap` does not exist.
 
-- [ ] **Step 3: Write the map**
+- [x] **Step 3: Write the map**
 
 Create `src/CardStock.Domain/Prices/GradeTierMap.cs`:
 
@@ -1007,12 +1007,12 @@ public static class GradeTierMap
 }
 ```
 
-- [ ] **Step 4: Run tests to verify they pass**
+- [x] **Step 4: Run tests to verify they pass**
 
 Run: `dotnet test tests/CardStock.Domain.Tests -c Release --filter GradeTierMapTests`
 Expected: PASS, 25 test cases.
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add -A
@@ -1051,7 +1051,7 @@ Mean sale price over the last 30 days against the 30 before that. Below the thre
 
 > **`Fraction`, not `Percent`.** `0.062m` means +6.2%. The spec's draft called it `Percent`, which invites a 100× error at the render boundary; the name now says which it is. Update the spec's §4.2 to match when this task lands.
 
-- [ ] **Step 1: Write the failing tests**
+- [x] **Step 1: Write the failing tests**
 
 Create `tests/CardStock.Domain.Tests/Prices/SalesChangeTests.cs`:
 
@@ -1190,12 +1190,12 @@ public class SalesChangeTests
 }
 ```
 
-- [ ] **Step 2: Run tests to verify they fail**
+- [x] **Step 2: Run tests to verify they fail**
 
 Run: `dotnet test tests/CardStock.Domain.Tests -c Release --filter SalesChangeTests`
 Expected: FAIL — `SalesChange`, `SaleObservation`, `ChangeAvailable`, `ChangeInsufficient` do not exist.
 
-- [ ] **Step 3: Write the types and the calculation**
+- [x] **Step 3: Write the types and the calculation**
 
 Create `src/CardStock.Domain/Prices/SaleObservation.cs`:
 
@@ -1284,19 +1284,19 @@ public static class SalesChange
 }
 ```
 
-- [ ] **Step 4: Run tests to verify they pass**
+- [x] **Step 4: Run tests to verify they pass**
 
 Run: `dotnet test tests/CardStock.Domain.Tests -c Release --filter SalesChangeTests`
 Expected: PASS, 10 tests.
 
-- [ ] **Step 5: Update the spec's field name**
+- [x] **Step 5: Update the spec's field name**
 
 In `docs/superpowers/specs/2026-08-12-price-read-layer-design.md` §4.2, change
 `ChangeAvailable(decimal Percent, ...)` to `ChangeAvailable(decimal Fraction, ...)` and add after the
 record block: *"`Fraction` is a fraction, not a percentage: `0.062m` is +6.2%. Named to remove the
 100× ambiguity at the render boundary."*
 
-- [ ] **Step 6: Commit**
+- [x] **Step 6: Commit**
 
 ```bash
 git add -A
@@ -1335,7 +1335,7 @@ Everything above, joined into the one shape a caller receives. Six tiers, always
   - `CardPriceSnapshotBuilder.Build(long cardId, DateTimeOffset? lastVisitedAt, IEnumerable<PriceObservation> prices, IEnumerable<SaleObservation> sales, DateOnly today) → CardPriceSnapshot`
   - `ICardPriceReader.GetAsync(long cardId, CancellationToken) → Task<CardPriceSnapshot?>`
 
-- [ ] **Step 1: Write the failing tests**
+- [x] **Step 1: Write the failing tests**
 
 Create `tests/CardStock.Domain.Tests/Prices/CardPriceSnapshotBuilderTests.cs`:
 
@@ -1446,12 +1446,12 @@ public class CardPriceSnapshotBuilderTests
 }
 ```
 
-- [ ] **Step 2: Run tests to verify they fail**
+- [x] **Step 2: Run tests to verify they fail**
 
 Run: `dotnet test tests/CardStock.Domain.Tests -c Release --filter CardPriceSnapshotBuilderTests`
 Expected: FAIL — `CardPriceSnapshot`, `TierSnapshot`, `CardPriceSnapshotBuilder` do not exist.
 
-- [ ] **Step 3: Write the contract and the assembler**
+- [x] **Step 3: Write the contract and the assembler**
 
 Create `src/CardStock.Domain/Prices/CardPriceSnapshot.cs`:
 
@@ -1537,17 +1537,17 @@ public interface ICardPriceReader
 }
 ```
 
-- [ ] **Step 4: Run tests to verify they pass**
+- [x] **Step 4: Run tests to verify they pass**
 
 Run: `dotnet test tests/CardStock.Domain.Tests -c Release --filter CardPriceSnapshotBuilderTests`
 Expected: PASS, 6 tests.
 
-- [ ] **Step 5: Run the whole Domain suite**
+- [x] **Step 5: Run the whole Domain suite**
 
 Run: `dotnet test tests/CardStock.Domain.Tests -c Release`
 Expected: PASS, all tests from Tasks 1–7.
 
-- [ ] **Step 6: Commit**
+- [x] **Step 6: Commit**
 
 ```bash
 git add -A
@@ -1581,7 +1581,7 @@ Two narrow queries, then Domain does the thinking. This is the first task that n
 - Consumes: `ICardPriceReader` (Task 7), `CardPriceSnapshotBuilder` (Task 7), `GradeTierMap` (Task 5), `SalesChange.WindowDays` (Task 6).
 - Produces: `CardPriceReader(CardStockDbContext db, TimeProvider time) : ICardPriceReader`.
 
-- [ ] **Step 1: Write the failing tests**
+- [x] **Step 1: Write the failing tests**
 
 Create `tests/CardStock.Integration.Tests/CardPriceReaderTests.cs`:
 
@@ -1756,14 +1756,20 @@ public class CardPriceReaderTests : CardStockDatabaseTest
 }
 ```
 
-- [ ] **Step 2: Run tests to verify they fail**
+- [ ] **Step 2: Run tests to verify they fail** — ⚠ **NOT DONE AS WRITTEN, 2026-08-12.**
 
 Run: `CARDSTOCK_TEST_DB="Host=192.168.0.56;Database=postgres;Username=cardstock_tester;Password=...;Maximum Pool Size=10" dotnet test tests/CardStock.Integration.Tests -c Release --filter CardPriceReaderTests`
 Expected: FAIL — `CardStock.Infrastructure.Prices` does not exist.
 
+> Left unticked deliberately. No database credentials were available at this point, so the red-first
+> step was skipped and the implementation was written before the tests had ever run. They passed 6/6
+> on their first real execution, which is a *weaker* result than red-then-green: a test that has never
+> been seen to fail has not been shown to test anything. Worth re-running with one assertion inverted
+> if this layer's behaviour is ever in doubt.
+
 > The password is in `ops/credentials.local`. With the variable unset these skip rather than fail, which is a pass-looking result — read the output and confirm they actually ran.
 
-- [ ] **Step 3: Add `LastVisitedAt` to the card mirror**
+- [x] **Step 3: Add `LastVisitedAt` to the card mirror**
 
 In `src/CardStock.Infrastructure/Persistence/ScraperReadModels/ScraperCard.cs`, add after `ImageHash`:
 
@@ -1782,7 +1788,7 @@ In `src/CardStock.Infrastructure/Persistence/ScraperReadModels/ScraperCard.cs`, 
 
 No migration: `cards` is mapped `ToView`, so this is one property against a column that already exists.
 
-- [ ] **Step 4: Write the reader**
+- [x] **Step 4: Write the reader**
 
 Create `src/CardStock.Infrastructure/Prices/CardPriceReader.cs`:
 
@@ -1846,22 +1852,22 @@ public sealed class CardPriceReader(CardStockDbContext db, TimeProvider time) : 
 }
 ```
 
-- [ ] **Step 5: Run tests to verify they pass**
+- [x] **Step 5: Run tests to verify they pass**
 
 Run: `CARDSTOCK_TEST_DB="..." dotnet test tests/CardStock.Integration.Tests -c Release --filter CardPriceReaderTests`
 Expected: PASS, 6 tests. Confirm the output says 6 passed and **not** 6 skipped.
 
-- [ ] **Step 6: Run the whole suite**
+- [x] **Step 6: Run the whole suite**
 
 Run: `dotnet build CardStock.slnx -c Release -m:1` then `CARDSTOCK_TEST_DB="..." dotnet test CardStock.slnx -c Release --no-build -m:1`
 Expected: PASS. `SchemaModelTests` and `MigrationContentTests` must still pass — the new property must not have produced a migration or a `public` reference.
 
-- [ ] **Step 7: Verify no migration was implied**
+- [x] **Step 7: Verify no migration was implied**
 
 Run: `dotnet ef migrations has-pending-model-changes -p src/CardStock.Infrastructure -s src/CardStock.Infrastructure --context CardStockDbContext`
 Expected: "No changes have been made to the model since the last migration." `cards` is a view, so adding a property to its mirror must not alter the migration model. **If this reports pending changes, stop** — something mapped the property as a table column.
 
-- [ ] **Step 8: Commit**
+- [x] **Step 8: Commit**
 
 ```bash
 git add -A

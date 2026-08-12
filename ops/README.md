@@ -73,6 +73,31 @@ The three role passwords generated when `cardstock-postgres-setup.sql` was first
 The `cardstock_app` password also sits in `/opt/cardstock/api/appsettings.Production.json` on the Pi,
 owned by the `cardstock` service account and mode 600.
 
+### Resetting one, when it is lost
+
+Happened 2026-08-12 with `cardstock_tester`. Run **on the Pi**:
+
+```bash
+NEWPW=$(openssl rand -base64 48 | tr -dc 'A-Za-z0-9' | head -c 32)
+sudo -u postgres psql -qc "ALTER ROLE cardstock_tester WITH PASSWORD '$NEWPW'"
+echo "cardstock_tester = $NEWPW"
+```
+
+Then write it into `ops/credentials.local`.
+
+**Alphanumeric only, deliberately.** `;` is the connection-string separator, so a password containing
+one silently truncates `CARDSTOCK_TEST_DB` and the failure reads as a wrong password rather than a
+malformed string.
+
+**Which roles this is safe for.** `cardstock_tester` is used only by the test harness, so resetting it
+breaks nothing running. **`cardstock_app` is different** — the deployed API holds it, so a reset must
+be followed by editing `/opt/cardstock/api/appsettings.Production.json` and restarting the unit, or
+the site goes down. `cardstock_owner` is used only at migration time, by hand.
+
+**It leaves the plaintext in the Pi's shell history**, and in the Postgres log if `log_statement` is
+on. `sudo -u postgres psql -c "\password cardstock_tester"` prompts instead and sends only the hash,
+at the cost of having to invent and remember the password yourself.
+
 ## 3. Running the tests
 
 Database development happens on the Pi; there is no local Postgres by decision
