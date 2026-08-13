@@ -306,3 +306,64 @@ Throughout, I refer to the three substrates as **[S1] monthly six-tier average p
 - **Regime risk dominates**: the 2021 bubble/2022–23 crash (modern cards down 40–60% as The Pokémon Company flooded print runs) shows card markets undergo structural breaks where mean-reversion signals fail catastrophically. No indicator substitutes for the supply-side (D-family) context.
 - **Survivorship in the ~30-row sale windows**: cards that stop selling drop out of recent-sales visibility, biasing churn/volume upward for active cards; screen results skew toward liquid names.
 - Several practitioner figures (gem rates, ROI multiples, auction-house premia, alt-art grade difficulty) come from secondary/marketing sources; treat specific percentages as directional, not precise. The Engelberg et al. and Amihud figures are the peer-reviewed anchors.
+---
+
+## Chip vocabulary — restored 2026-08-12 (D-085)
+
+> Restored verbatim from the retired `DISPLAY_VOCABULARY.md` §1 (`git show d54b40b^:"CardStock Mockup/DISPLAY_VOCABULARY.md"`).
+> The retirement commit claimed that file was "verified fully superseded"; this section — the complete
+> chip inventory, the only definition of every chip the product can display — had in fact migrated
+> nowhere. It lives here now because every chip is a signal's display form; keep it in sync with the
+> signal table above.
+
+
+## 1. Signal chips (Card page header · watchlist rows · peek panel)
+One chip grammar everywhere: `icon + short name + evidence number`, tooltip = one-sentence evidence with window and threshold.
+
+**Card page header**: shows only FIRING chips (a signal in a notable state), priority-ordered, cap 4, overflow "+N more" opens all. A signal below its sufficiency floor never chips.
+**Watchlist rows**: chips are the user's TRACKED signals for that card — all render regardless of state, including quiet (`–` grey muted) and insufficient (`◌` grey, tooltip = unlock countdown). Glance rule: **colored = hit** (green ▲ bullish · red ▼ bearish · amber – caution/directionless), **grey = nothing to report** (quiet or not yet computable).
+
+Full chip inventory (trigger → chip text):
+| Signal | Fires when | Chip | Dir |
+|---|---|---|---|
+| RS vs index | pct ≥ 90 / ≤ 10 | `RS 94th` | ▲/▼ · amber – on decile exit: 80–89th within 3 mo of ≥90 (`RS 84th`) |
+| ROC 3M | ≥ +15% / ≤ −15% | `ROC 3M +18%` | ▲/▼ |
+| ROC 1/6/12M | same bands, only if tracked | `ROC 12M +41%` | ▲/▼ |
+| MACD (3,6,4) | above/below signal line | `MACD +` / `MACD −` | ▲/▼ |
+| EMA 3×9 cross | crossed within last 2 mo | `EMA cross +` / `−` | ▲/▼ |
+| RSI (6) | > 80 / < 20 | `RSI 82` | ▲/▼ · amber – in 70–80 (`RSI 71`; tooltip: monthly >70 often continuation) |
+| Z vs 6M MA | \|z\| > 1.5 | `z +1.8` | ▲/▼ |
+| Trend R² | R² ≥ 0.8 over 6–12M | `clean trend R² .91` | ▲ if slope+, ▼ if slope− |
+| Drawdown | ≥ 15% off trailing peak | `−28% off peak` | ▼ (grey-red: state, not signal) |
+| Tier-spread | compression trend ≥ threshold | `spread compressing` | ▼ |
+| Grading-arb EV | EV > $0 (raw ≥ $40) | `arb EV +$38` | ▲ |
+| Churn 30d | ≥ 2× churn 90d | `churn ×2.3` | ▲ |
+| Monthly volume | top decile in corpus | `● Most active · 41 sales/30d` | ● grey |
+| Monthly volume | ≤ 1 sale/30d | `● thin · 1 sale/30d` | ● grey |
+| Amihud | ≥ 90th pct within set | `illiquid · 96th pct` | ● grey |
+| Dispersion | σ/μ ≥ 0.20 trailing | `wide pricing ·24` | ● grey |
+| Cross-mkt gap | \|gap\| ≥ 10%, venues at depth | `eBay −12% vs auction` | ● grey |
+| Pop Δ 60d | ≥ +2% | `Pop Δ +5.1%` | – amber (supply caution; ≥ +5% also arms Supply-Flood composite) |
+| Pop Δ 60d | ≤ 1% with churn firing | `pop flat` | ▲ |
+| Gem rate drift | \|drift\| ≥ 0.3pp/90d | `gem rate −0.4pp` | ▲ if falling, ▼ if rising |
+| Supply overhang | ≥ 3 years | `3.2y overhang` | ▼ |
+| Composite match | card in preset/user screen today | `◆ Quiet Accum` | ◆ icon · thesis-colored (green bullish screen · red avoid screen) |
+
+Not chip-eligible: Bollinger (visualization-grade, spec §8.3), beta (descriptive), discount-to-list (4.4% coverage), seasonality (corpus-locked until ~Nov 2028).
+Priority when > cap: composites → RS → supply (pop/overhang) → momentum (ROC/MACD/EMA/RSI/z) → liquidity → the rest. Newest crossing wins ties.
+
+### Tracked-pill states (watchlist rows) — the complete pill set
+A tracked signal ALWAYS renders exactly one pill, in exactly one of five states; no other pill forms exist:
+| State | Render | Example |
+|---|---|---|
+| Hit bullish | green ▲ · chip text from inventory | `▲ RS 94th` |
+| Hit bearish | red ▼ · chip text from inventory | `▼ EMA 3/9` |
+| Caution | amber – · evidence number (notable but directionless) | `– RSI 71` |
+| Quiet | grey – · short name + `–` (tracked, between bands) | `– MACD –` |
+| Pending | grey ◌ · short name + unlock ETA | `◌ Churn — 12d` |
+
+- **Amber bands (complete list)**: RSI 70–80 · RS decile exit (80–89th within 3 mo of ≥90) · Pop Δ 60d ≥ +2%. No other signal has a caution band.
+- **Liquidity/state signals** (volume, Amihud, dispersion, cross-market gap) are never directional: notable = ● grey + value, else quiet.
+- **Pending ETA format**: days when under 60 (`— 12d`), month beyond (`— Mar ’27`); tooltip = the floor rule + the date history began.
+- **Trackable set = the chip-eligible inventory above, exactly.** Bollinger, beta, discount-to-list, seasonality (not chip-eligible) and pure overlays (SMA) cannot be tracked.
+

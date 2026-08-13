@@ -17,11 +17,14 @@ deltas are floor-gated to zero (D-083).
 
 **In:** route `/card/{id}`; four API endpoints; three new Application readers + DI wiring; the full
 page: identity header, tier strip, LWC price chart, sales ledger, census pair, freshness footer,
-refresh flow; deferred-disabled chrome; all states in §8; tests; deploy to the Pi.
+refresh flow; **the signal-chip engine — seven price-derived signals plus the full chip machinery
+(§12, D-084.11)**; deferred-disabled chrome; all states in §8; the §13 completeness items; tests;
+deploy to the Pi.
 
 **Out, with reasons recorded:** auth (D-084.1 — watchlist/binder render deferred-disabled); any card
 lookup/search (D-084.2 — URL-only reachability); species anywhere (D-084.10 — future Pokédex phase);
-signal chips *content* (worker is Phase 3; the row renders empty because chips are firing-only);
+index-, liquidity-, census-, and composite-based chips (their substrates are Phase 3+; firing-only
+means they are silently absent until then — §12 names each);
 seam markers and ledger captions (D-084.5 — C-7 stands); census gem-rate sentence (inputs
 floor-gated until ~late 2026); marketing/SSR tier (Phase 5+).
 
@@ -71,6 +74,10 @@ All responses JSON; errors are RFC 7807 problem details. All endpoints anonymous
 - `Census`: six cells (PSA 8/9/10, CGC 8/9/10 — D-084.4), each `{grader, grade, count}` with
   absent-cell = 0 (true zero by the storage contract); `PsaTotal`, `CgcTotal` (all grades);
   `ObservedAt?`; `QualifyingObservations` (counted under the 2026-09-01 floor, D-033 — 0 today).
+- `Signals`: the firing chips, already selected and priority-ordered by Domain (§12): each
+  `{glyph, text, tooltip, tone}` where `tone ∈ pos | neg | caution | neutral`. The client renders
+  the first four and puts the rest behind `+N more`. Empty list = nothing notable — a true
+  statement, because every computable signal was evaluated.
 - `Freshness`: `LastVisitedAt?`.
 - 404 for unknown ids and for `not_a_card_at` cards (problem detail carries which).
 
@@ -113,7 +120,8 @@ Every panel is a values-only component (`<TierStrip Tiers=…>`, `<CensusBars Ce
 - **Identity:** title/subline per §3; a `delisted {date}` muted chip beside the subline when
   `DelistedAt` is set. Art thumbnail 217×300 → lightbox with Escape, `role="dialog"`, focus return
   (resolves OQ-8); placeholder slot when imageless. The 28px badge slot is always reserved (§6).
-  **Chip row renders empty** — firing-only, nothing computable before the worker.
+  **Chip row renders the §12 engine's output** — firing-only, cap 4, `+N more` opens all; an empty
+  row means every computable signal is quiet, never "not built".
 - **Tier strip:** six cells; absence is a dash (missing tier → `—` price; below-floor → `—`
   change); `◌` per cell only when that cell's price is current-month, keyboard-reachable, D-077's
   two tooltips.
@@ -224,7 +232,9 @@ Inside Phase 2 if the timing allows; the first follow-up otherwise.
 One test project per source project; TDD during implementation.
 
 - **Domain:** `CardTitle.Parse` exhaustively (trailing `#215`, bracket tags, `TG23`, no-number,
-  hostile strings); floor-aware observation counting (D-033).
+  hostile strings); floor-aware observation counting (D-033); the §12 indicator math against
+  hand-computed fixtures (EMA, ROC, z, R², drawdown, MACD, tier-spread) and the chip engine's
+  firing thresholds, floors, anchor-tier selection, priority order, and chip-text formatting.
 - **Infrastructure:** the three readers against real Postgres on the Pi's test databases (D-073):
   census latest-per-cell under change-only semantics; sales ordering/completeness; identity mapping.
 - **Api:** parallel snapshot composition; status codes + problem details; image streaming from a
@@ -258,5 +268,69 @@ Applied as the implementation plan's first task, so the screen spec never trails
 7. §8 — new rows: delisted chip; not-found page; route id = PriceCharting product id (**OQ-1 →
    resolved**); subline ships set + `#num` (D-079/D-084.10 — species to the Pokédex phase).
 8. §4.11 — the launch-reality paragraph corrected per D-082/D-083 (ledger deep, census bars real).
+9. §3.3 — the Phase 2 chip catalog (§12's seven-signal table, the anchor-tier rule, the compression
+   threshold) with a pointer to signals.md's restored chip vocabulary; **C-13 row updated** (the
+   selection machinery is now specced and built); **OQ-12 → partially resolved** (S1 signals
+   computed in Domain on request; index/liquidity/census chips arrive with their substrates).
 
 Rows update in place per the audit-trail rule; reasoning survives.
+
+## 12. The signal-chip engine (D-084.11 — added by owner ruling after the completeness sweep)
+
+The chip vocabulary is `docs/signals.md` § "Chip vocabulary" (restored 2026-08-12, D-085): one
+grammar — `icon + short name + evidence number`, tooltip = one-sentence evidence with window and
+threshold — firing-only on the card header, **cap 4, `+N more` opens all**, colour never alone.
+
+**Where it runs:** Domain, on request, inside the snapshot — the price reader already loads every
+row. Signals are computed over **closed months only** (the revising current month is excluded,
+signals.md's standing caveat), windows anchored at the most recent closed calendar month. Below a
+signal's floor it never chips; there are no pending/quiet pills on this page (those belong to
+watchlist surfaces, later phases).
+
+**The Phase 2 roster — everything honestly computable from the monthly six-tier series:**
+
+| Signal | Fires when | Chip text | Tone | Floor (closed months) |
+|---|---|---|---|---|
+| ROC 3M (A1) | \|3-mo return\| ≥ 15% | `ROC 3M +18%` | ▲ pos / ▼ neg | 4 |
+| MACD 3,6,4 (A3) | MACD above/below signal line | `MACD +` / `MACD −` | ▲ / ▼ | 10 |
+| EMA 3×9 cross (A2) | crossed within last 2 closed months | `EMA cross +` / `−` | ▲ / ▼ | 12 |
+| z vs 6M MA (B1) | \|z\| > 1.5 | `z +1.8` | ▲ / ▼ | 7 |
+| Tier-spread compression (E2) | PSA 10/PSA 9 ratio at the last closed month ≤ 0.8 × the ratio 6 closed months earlier | `spread compressing` | ▼ | 6 paired months, both tiers observed at both endpoints |
+| Trend R² (A4) | R² ≥ 0.8 over the trailing 6–12 closed months | `clean trend R² .91` | ▲ if slope +, ▼ if slope − | 6 |
+| Drawdown (B4) | ≥ 15% below trailing 12-mo peak | `−28% off peak` | ▼ | 3 |
+
+Two details the retired inventory never pinned, authored here:
+
+- **Anchor-tier rule:** card-level chips read **PSA 10's series when it clears the signal's floor,
+  otherwise the highest-ranked tier (strip order) that does**; the tooltip names the tier read
+  ("PSA 10 · 3-mo window · fires at ±15%"). Tier-spread compression is inherently two-tier and
+  exempt. A card with no tier clearing a floor simply doesn't chip that signal.
+- **Compression threshold:** the 0.8× / 6-closed-months rule in the table (the inventory said only
+  "≥ threshold"). Recorded in card.md §3.3 with this spec as receipt.
+
+**Priority order within Phase 2** (from the restored family order — composites → RS → supply →
+momentum → liquidity → the rest — with "the rest" ordered by signals.md v1 rank):
+ROC 3M → MACD → EMA cross → z → tier-spread → trend R² → drawdown. Newest crossing wins ties.
+
+**Silently absent until their substrates exist** (firing-only makes absence honest): RS (needs the
+Phase 3 index), volume/churn/Amihud/dispersion/cross-market (post-seam floor + corpus ranking),
+Pop Δ/gem-rate/overhang/arb-EV (census deltas and gem rate), composites (need screens).
+
+**Architecture note:** the engine is pure Domain — indicator math, floors, firing, selection,
+formatting — and is precisely the code the Phase 3 worker later runs corpus-wide for the index and
+screener. Build it once here, under test.
+
+## 13. Completeness-sweep items (added with §12)
+
+1. **Image store reality:** the art endpoint reads `ImageStore:Directory` from configuration; the
+   deploy grants the `cardstock` service user read access to the crawler's image directory (group
+   membership or ACL — decided against the Pi's actual ownership during deploy). `/healthz/data`
+   extends with `populations` and `sales` counts so production grants for every table Phase 2 reads
+   are proven at a glance, not assumed.
+2. **Static brand assets:** the nav logo mark and wordmark are transcribed from the Logo prototype
+   into inline Razor components (same treatment as the loader); a favicon is derived from the mark.
+   No binary brand files are invented.
+3. **Theme and CVD:** the page honors `localStorage['cardstock-theme']` and
+   `localStorage['cardstock-cvd']` at boot, exactly as the prototypes do. **No toggle UI ships in
+   Phase 2** — the toggles belong to the Profile screen's phase; until then the keys are set by
+   hand. Deliberate, recorded here.

@@ -19,6 +19,19 @@ Entries keep their ID forever and move between status sections as they settle. S
 
 ## Verified
 
+### D-085 — 🚩 The chip inventory existed in no current document; the retirement over-claimed. Restored
+Found 2026-08-12 when the owner asked "did we define anywhere all the possible chips that could
+display?" The answer was yes — the retired `DISPLAY_VOCABULARY.md` §1 held the complete inventory:
+a 21-row trigger→chip table, the chip grammar (`icon + short name + evidence number`), firing-only /
+cap 4 / priority / `+N more` rules, the five tracked-pill states, the complete amber-band list, and
+the not-chip-eligible list. The retirement commit (`d54b40b`, 2026-08-10) claimed the file was
+*"verified fully superseded"* — **false for §1**: card.md §3.3 carries only the machinery summary
+plus three seeded triggers, and grep finds the inventory nowhere else; `design-rationale.md:71`
+still points at the deleted file. **Restored verbatim into `docs/signals.md` ("Chip vocabulary")**
+with provenance; receipt: `git show d54b40b^:"CardStock Mockup/DISPLAY_VOCABULARY.md"` is
+byte-identical to the copy a prior session recovered into tmp. Lesson for future retirements: a
+"fully superseded" claim needs a per-section receipt, same as any other Verified.
+
 ### D-080 — The corpus is fully crawled; month-axis sparsity is real. CLAUDE.md's open query, run
 Live read-only queries against the Pi, 2026-08-12 (`ssh scott@192.168.0.56 "sudo -u postgres psql -d pokemon"`).
 `SELECT count(*) FILTER (WHERE last_visited_at IS NULL), count(*) FROM cards WHERE delisted_at IS NULL AND not_a_card_at IS NULL;`
@@ -385,6 +398,16 @@ Owner, 2026-08-12, at the start of the (restarted) Phase 2 brainstorming:
    identity DTO carries no Species field; the subline's finished Phase 2 form is `{set} · 215/203`.
    The Character screen's subline link waits for the Pokédex phase alongside the species data
    itself.
+11. **The signal-chip engine ships in Phase 2 — the seven S1-computable signals plus the full chip
+   machinery.** Owner, choosing completeness over ease (*"not looking for the easiest. I'm looking
+   for the best"*), after the completeness sweep surfaced that chips had never been designed for
+   this phase and D-085 restored the chip inventory. Roster: ROC 3M · MACD 3,6,4 · EMA 3×9 cross ·
+   z vs 6M MA · tier-spread compression · trend R² · drawdown — computed in Domain, on request,
+   closed months only, firing-only with cap 4 and `+N more`. Two details authored in spec §12: the
+   **anchor-tier rule** (PSA 10 when it clears the floor, else the highest tier that does; tooltip
+   names the tier) and the **compression threshold** (PSA 10/PSA 9 ratio ≤ 0.8× its value 6 closed
+   months earlier). RS, liquidity, census, and composite chips stay silently absent until their
+   substrates exist. The engine is the seed of the Phase 3 worker's corpus-wide computation.
 
 ### D-077 — Stale prices are shown, never hidden. The Card page's freshness treatment, settled
 Owner, 2026-08-11, across a mockup session. Implements the call pattern D-062 already recorded: on
