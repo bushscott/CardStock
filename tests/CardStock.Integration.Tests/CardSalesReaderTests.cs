@@ -96,7 +96,7 @@ public class CardSalesReaderTests : CardStockDatabaseTest
         await SeedCardAsync(db, 42);
 
         var date = new DateOnly(2026, 8, 1);
-        var hostileTitle = "<script>alert(1)</script> 🔥 \"PSA 10\"";
+        var hostileTitle = "<script>alert(1)</script> 🔥 “PSA 10”";
 
         await db.Database.ExecuteSqlInterpolatedAsync(
             $"""
