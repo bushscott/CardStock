@@ -142,16 +142,32 @@
         await PushDataAsync();
     }
 
+    // The shaper's fixed 12-slot window: 11 closed months (0..10) plus the current month (11).
+    // Every tier shares it (card.md §2.4; task-10's CardPageMapper windows every tier from the
+    // same CurrentMonth), so it is a constant here, not something to read off Tiers.
+    private const int MonthSlotCount = 12;
+
     /// <summary>[JSInvokable] target for lwc-interop.js's crosshair subscription. Public and
-    /// directly callable so bUnit tests can invoke it without a real chart (task-17 brief).</summary>
+    /// directly callable so bUnit tests can invoke it without a real chart (task-17 brief).
+    ///
+    /// C1: bounds-checked defensively. lwc-interop.js's own index rule is now fixed (setData's
+    /// noteTime), but a stale client, a future regression, or any other out-of-range index must
+    /// degrade to "no tooltip" rather than let MonthAt/tier.Points[hoverIndex] throw
+    /// ArgumentOutOfRangeException and take the page down mid-hover.</summary>
     [JSInvokable]
     public void OnCrosshairMonth(int? monthIndex)
     {
-        _hoverMonthIndex = monthIndex;
+        _hoverMonthIndex = monthIndex is >= 0 and < MonthSlotCount ? monthIndex : null;
         StateHasChanged();
     }
 
-    private string MonthAt(int index) => Prices.Tiers[0].Points[index].Month;
+    // C1: derived from CurrentMonth by date arithmetic -- mirrors LwcSeriesShaper.Shape's own
+    // XFirst/XMiddle/XLast derivation (current.AddMonths(-11) etc.) -- rather than indexing
+    // Prices.Tiers[0].Points[index]. The old form crashed whenever index came back out of the
+    // 12-slot window (the C1 bug) and depended on Tiers being non-empty for no real reason: every
+    // tier is windowed identically, so the month at a slot never needed a tier to read it from.
+    private string MonthAt(int index) =>
+        DateOnly.Parse(Prices.CurrentMonth + "-01").AddMonths(index - (MonthSlotCount - 1)).ToString("yyyy-MM-dd");
 
     private static string LegendTitle(string label, bool hasData, bool isVisible) =>
         !hasData ? $"no {label} prices observed" :

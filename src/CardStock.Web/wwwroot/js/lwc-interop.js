@@ -126,12 +126,17 @@ window.lwcInterop = (function () {
         state.monthIndex.clear();
         state.lastShape = shape;
 
-        let idx = 0;
+        // C1 fix: index by insertion order into the Map itself (state.monthIndex.size), not a
+        // separately-incremented counter. The dashed tail's first point always duplicates the
+        // last closed month's time (setData() re-notes it) -- the old counter advanced on that
+        // duplicate anyway, so the current month (the tail's second point) landed one slot past
+        // its true index. Skipping an already-seen time now costs nothing, so duplicates from
+        // repeated series (every visible tier shares the same 11 closed months) or a dashed tail
+        // never inflate the index.
         const noteTime = (time) => {
             if (!state.monthIndex.has(time)) {
-                state.monthIndex.set(time, idx);
+                state.monthIndex.set(time, state.monthIndex.size);
             }
-            idx++;
         };
 
         for (const series of shape.series) {

@@ -140,6 +140,33 @@ public class PriceChartTests : BunitContext
     }
 
     [Fact]
+    public async Task OnCrosshairMonth_out_of_range_index_clears_the_tooltip_without_throwing()
+    {
+        // C1: lwc-interop.js's index-rule bug could land the crosshair on the CURRENT month at
+        // index 12 -- one past the 12-slot window's last valid index (11) -- whenever the dashed
+        // tail re-noted the last closed month. Under the old, unguarded OnCrosshairMonth, the
+        // next render evaluated MonthAt(12) => Prices.Tiers[0].Points[12] on an 11-or-12-element
+        // list and threw ArgumentOutOfRangeException, taking the whole page down on hover. The
+        // fix must degrade silently: clear the tooltip, never throw.
+        var cut = Render<PriceChart>(p => p.Add(x => x.Prices, SixTiers()));
+
+        await cut.InvokeAsync(() => cut.Instance.OnCrosshairMonth(5));
+        Assert.Single(cut.FindAll(".pc-tooltip"));
+
+        // bUnit's renderer catches render exceptions rather than propagating them back through
+        // InvokeAsync's Task, so a plain try/catch around the call below is vacuous -- Renderer
+        // .UnhandledException is bUnit's own hook for observing one (Bunit.Rendering
+        // .BunitRenderer.UnhandledException: "a Task ... which completes when an unhandled
+        // exception is thrown during the rendering of a component").
+        var unhandled = Renderer.UnhandledException;
+
+        await cut.InvokeAsync(() => cut.Instance.OnCrosshairMonth(12));
+
+        Assert.False(unhandled.IsCompleted);
+        Assert.Empty(cut.FindAll(".pc-tooltip"));
+    }
+
+    [Fact]
     public void Dot_hotspot_absent_when_no_visible_tier_has_a_current_month_value()
     {
         var noCurrentMonth = new PricesDto("2026-08",

@@ -229,4 +229,60 @@ public class LwcSeriesShaperTests
         Assert.Equal("Feb ’26", shape.XMiddle);
         Assert.Equal("Aug ’26", shape.XLast);
     }
+
+    // C1 regression: lwc-interop.js's setData() builds state.monthIndex by walking each visible
+    // series' main Points, then its DashedTail, calling noteTime(time) on every point in order.
+    // The bug was noteTime advancing an incrementing counter even when a time was already
+    // present -- and the dashed tail's FIRST point always duplicates the last closed month
+    // (ShapedSeries.DashedTail's own doc comment: "[last closed, current]"), so the current
+    // month (the tail's second point) landed one slot past its true index. The fix is indexing
+    // by state.monthIndex.size instead, i.e. first-seen insertion order. This mirrors that exact
+    // rule so a regression in lwc-interop.js's noteTime shows up here even though nothing in
+    // this repo executes the .js file directly (verified empirically against node too).
+    private static IReadOnlyDictionary<string, int> IndexTimesLikeLwcInterop(ChartShape shape)
+    {
+        var index = new Dictionary<string, int>();
+        void Note(string time)
+        {
+            if (!index.ContainsKey(time))
+            {
+                index[time] = index.Count;
+            }
+        }
+
+        foreach (var series in shape.Series)
+        {
+            foreach (var point in series.Points)
+            {
+                Note(point.Time);
+            }
+
+            if (series.DashedTail is not null)
+            {
+                foreach (var point in series.DashedTail)
+                {
+                    Note(point.Time);
+                }
+            }
+        }
+
+        return index;
+    }
+
+    [Fact]
+    public void Index_rule_maps_the_current_month_to_eleven_when_a_dashed_tail_duplicates_the_last_closed_month()
+    {
+        var cents = (int?[])AllNull.Clone();
+        cents[10] = 7000; // last closed (2026-07) -- re-noted by the dashed tail's first point
+        cents[11] = 7200; // current (2026-08)
+        var prices = Prices(Tier("Psa10", cents));
+
+        var shape = LwcSeriesShaper.Shape(prices, new HashSet<string> { "Psa10" });
+        Assert.NotNull(shape.Series[0].DashedTail); // fixture sanity: this run must exercise the tail
+
+        var index = IndexTimesLikeLwcInterop(shape);
+
+        Assert.Equal(11, index["2026-08-01"]); // the current month -- NOT 12
+        Assert.Equal(12, index.Count); // 11 closed months (0..10) + the current month (11)
+    }
 }
