@@ -1,4 +1,9 @@
+using CardStock.Api.Cards;
+using CardStock.Application.Cards;
+using CardStock.Application.Prices;
+using CardStock.Infrastructure.Cards;
 using CardStock.Infrastructure.Persistence;
+using CardStock.Infrastructure.Prices;
 using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -8,6 +13,12 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddDbContextFactory<CardStockDbContext>(options =>
     options.UseCardStock(builder.Configuration.GetConnectionString("CardStock")
         ?? throw new InvalidOperationException("ConnectionStrings:CardStock is not configured.")));
+
+builder.Services.AddSingleton(TimeProvider.System);
+builder.Services.AddScoped<ICardIdentityReader, CardIdentityReader>();
+builder.Services.AddScoped<ICardPriceReader, CardPriceReader>();
+builder.Services.AddScoped<ICardCensusReader, CardCensusReader>();
+builder.Services.AddScoped<ICardSalesReader, CardSalesReader>();
 
 var app = builder.Build();
 
@@ -27,4 +38,8 @@ app.MapGet("/healthz/data", async (CardStockDbContext db) => Results.Ok(new
     sets = await db.ScraperSets.LongCountAsync(),
 }));
 
+app.MapCardEndpoints();
+
 app.Run();
+
+public partial class Program { }

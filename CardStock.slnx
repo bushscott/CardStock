@@ -8,6 +8,7 @@
     <Project Path="src/CardStock.Worker/CardStock.Worker.csproj" />
   </Folder>
   <Folder Name="/tests/">
+    <Project Path="tests/CardStock.Api.Tests/CardStock.Api.Tests.csproj" />
     <Project Path="tests/CardStock.Application.Tests/CardStock.Application.Tests.csproj" />
     <Project Path="tests/CardStock.Domain.Tests/CardStock.Domain.Tests.csproj" />
     <Project Path="tests/CardStock.Infrastructure.Tests/CardStock.Infrastructure.Tests.csproj" />
