@@ -8,6 +8,7 @@
 @using CardStock.Web.Services
 @using Microsoft.AspNetCore.Components.Web.Virtualization
 @inject IJSRuntime JS
+@implements IDisposable
 
 @if (Sales is null)
 {
@@ -114,6 +115,7 @@ else
     [Parameter] public EventCallback Retry { get; set; }
 
     private readonly LedgerState _state = new();
+    private readonly string _instanceId = $"sales-ledger-{Guid.NewGuid():N}";
     private bool _tensOpen;
     private bool _lowsOpen;
     private double _dateW = 96, _bucketW = 108, _priceW = 92, _srcW = 92;
@@ -134,8 +136,19 @@ else
         if (firstRender)
         {
             _dotNetRef = DotNetObjectReference.Create(this);
-            await JS.InvokeVoidAsync("watchOutsideMousedown", "[data-lg-pop]", _dotNetRef);
+            await JS.InvokeVoidAsync("watchOutsideMousedown", _instanceId, "[data-lg-pop]", _dotNetRef);
         }
+    }
+
+    /// <summary>Mirrors PriceChart's Dispose (task-17): every mounted instance registered a
+    /// permanent `document` mousedown listener in OnAfterRenderAsync above, so without this,
+    /// ordinary card-to-card navigation -- which tears down and rebuilds SalesLedger on every
+    /// Id change (CardPage.LoadAsync nulls _result synchronously) -- leaks one listener and one
+    /// DotNetObjectReference per card visited.</summary>
+    public void Dispose()
+    {
+        _dotNetRef?.Dispose();
+        _ = JS.InvokeVoidAsync("unwatchOutsideMousedown", _instanceId);
     }
 
     private void Recompute() => Filtered = _state.Apply(Sales!).ToList();

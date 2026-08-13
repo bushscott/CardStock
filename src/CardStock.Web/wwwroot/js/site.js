@@ -13,8 +13,16 @@ function focusElement(id) {
 // a mousedown on the toggle button itself would count as "outside" and fight its own @onclick
 // reopen. Generic over selector/callback name so any future outside-dismiss popover (e.g. the
 // watchlist picker) can reuse it.
-function watchOutsideMousedown(selector, dotnetRef) {
-    document.addEventListener("mousedown", function (e) {
+//
+// Keyed by `id` (mirrors lwc-interop.js's per-element Map) so the listener this call attaches
+// to `document` can be torn down by its owner's own id later, from `unwatchOutsideMousedown`.
+// Without that, every component instance -- e.g. every SalesLedger mounted as the user
+// navigates card-to-card -- would leak one permanent document listener plus its
+// DotNetObjectReference.
+const outsideMousedownWatchers = new Map();
+
+function watchOutsideMousedown(id, selector, dotnetRef) {
+    function handler(e) {
         if (!e.target.isConnected) {
             return;
         }
@@ -25,7 +33,17 @@ function watchOutsideMousedown(selector, dotnetRef) {
             }
         }
         dotnetRef.invokeMethodAsync("CloseGroups");
-    });
+    }
+    document.addEventListener("mousedown", handler);
+    outsideMousedownWatchers.set(id, handler);
+}
+
+function unwatchOutsideMousedown(id) {
+    var handler = outsideMousedownWatchers.get(id);
+    if (handler) {
+        document.removeEventListener("mousedown", handler);
+        outsideMousedownWatchers.delete(id);
+    }
 }
 
 // Sales ledger column resize (card.md §5.5 #31, R-7): drag a header grip to resize its column.

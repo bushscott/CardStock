@@ -117,6 +117,23 @@ public class SalesLedgerTests : BunitContext
     }
 
     [Fact]
+    public void Disposing_removes_its_outside_mousedown_listener_through_the_js_teardown()
+    {
+        var sales = new[] { Sale("2026-08-01", "PSA 10", 100) };
+        var cut = Render<SalesLedger>(p => p.Add(x => x.Sales, sales));
+
+        // Every mount registers a permanent `document` listener (OnAfterRenderAsync ->
+        // watchOutsideMousedown); ordinary card-to-card navigation tears down and rebuilds this
+        // component on every Id change, so it must actually be removed on disposal, not just
+        // orphaned. Locks the convention mirrored from PriceChart.Dispose (task-17).
+        Assert.IsAssignableFrom<IDisposable>(cut.Instance);
+
+        Renderer.DisposeComponents();
+
+        JSInterop.VerifyInvoke("unwatchOutsideMousedown");
+    }
+
+    [Fact]
     public void A_null_sales_list_renders_the_panel_error_state_and_retry_invokes_the_callback()
     {
         var retried = false;
