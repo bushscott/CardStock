@@ -18,8 +18,8 @@
 @using CardStock.Web.Services
 
 <div class="card-identity-panel">
-    <button type="button" class="art-col" title="Click to enlarge" @onclick="OpenLightbox">
-        @if (_imageFailed)
+    <button type="button" class="art-col" title="Click to enlarge" disabled="@(!Identity.HasImage)" @onclick="OpenLightbox">
+        @if (!Identity.HasImage || _imageFailed)
         {
             <div class="art-placeholder">card art pending</div>
         }
@@ -86,7 +86,18 @@
 
     private void OnImageError() => _imageFailed = true;
 
-    private void OpenLightbox() => _lightboxOpen = true;
+    // I3: HasImage false means the source never had art for this card, so the placeholder
+    // already rendered above with no <img>, no 404 round-trip. This guard keeps the lightbox
+    // from opening even if a click somehow reaches the handler regardless of the button's
+    // `disabled` attribute (e.g. a test harness that does not enforce real-browser disabled
+    // semantics) -- there is nothing for it to show.
+    private void OpenLightbox()
+    {
+        if (Identity.HasImage)
+        {
+            _lightboxOpen = true;
+        }
+    }
 
     private void CloseLightbox() => _lightboxOpen = false;
 

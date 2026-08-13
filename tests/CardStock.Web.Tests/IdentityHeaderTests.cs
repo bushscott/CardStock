@@ -90,6 +90,24 @@ public class IdentityHeaderTests : BunitContext
     }
 
     [Fact]
+    public void Imageless_identity_renders_the_placeholder_and_the_lightbox_cannot_open()
+    {
+        // I3: HasImage was carried on the wire but never read. False means the source never had
+        // art for this card -- the placeholder must render immediately (no <img>, no 404
+        // round-trip) and the art button must not open a lightbox onto nothing.
+        var cut = RenderHeader(Identity() with { HasImage = false });
+
+        var artButton = cut.Find(".art-col");
+        Assert.True(artButton.HasAttribute("disabled"));
+        Assert.Single(cut.FindAll(".art-placeholder"));
+        Assert.Empty(cut.FindAll("#card-art-thumb"));
+
+        artButton.Click();
+
+        Assert.Empty(cut.FindAll("[role='dialog']"));
+    }
+
+    [Fact]
     public void Escape_closes_the_lightbox_opened_from_the_thumbnail()
     {
         var cut = RenderHeader(Identity());
