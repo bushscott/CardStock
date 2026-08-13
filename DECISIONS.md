@@ -19,6 +19,50 @@ Entries keep their ID forever and move between status sections as they settle. S
 
 ## Verified
 
+### D-080 — The corpus is fully crawled; month-axis sparsity is real. CLAUDE.md's open query, run
+Live read-only queries against the Pi, 2026-08-12 (`ssh scott@192.168.0.56 "sudo -u postgres psql -d pokemon"`).
+`SELECT count(*) FILTER (WHERE last_visited_at IS NULL), count(*) FROM cards WHERE delisted_at IS NULL AND not_a_card_at IS NULL;`
+→ **1 never-visited of 91,596 active cards.** So the 113-rows-per-card average (D-071) is genuine series
+sparsity, not an uncrawled corpus: per-card `price_months` counts run **p25 36 · median 103 · p75 213 ·
+max 437** against ~408 for a dense six-tier backfill to Dec 2020. `DATA_MODEL.md` §5's "deep and uniform"
+means uniform *depth* (~Dec 2020 for every card), not filled cells. **Consequence for Phase 2: an empty
+(tier, month) cell is the common case — chart gap handling (gaps render as gaps, never bridged, D-061/
+CLAUDE.md) is the main path, not an edge case — and a never-visited card page is a genuine rarity.**
+
+### D-081 — Sale grade labels observed: exactly the 19-value vocabulary, no others
+`SELECT grade_tier, count(*) FROM sales GROUP BY 1 ORDER BY 2 DESC;` (live, 2026-08-12) → **19 rows,
+matching `GradeTierVocabulary` exactly**: Ungraded 2,635,173 · Grade 9 443,496 · PSA 10 441,223 ·
+Grade 8 266,092 · CGC 10 141,894 · Grade 7 118,444 · Grade 6 70,356 · Grade 9.5 68,071 · CGC 10 Prist.
+67,758 · Grade 5 42,303 · Grade 4 21,010 · TAG 10 19,783 · Grade 1 18,309 · ACE 10 14,045 · BGS 10
+11,347 · Grade 3 11,171 · Grade 2 6,697 · SGC 10 6,329 · BGS 10 Black 2,636. `DATA_MODEL.md:236`'s
+"21 distinct labels driven by the page's own selector" does not match the observed ledger (it may
+describe the selector's option count). The Card page's filter-chip partition (card.md R-4 — 19 buckets
+exactly once) holds with no holes.
+
+### D-082 — 🚩 The launch-day ledger is deep, not empty: sales reach back to 2016
+Live, 2026-08-12: `sales` holds **4,406,142 rows over 79,336 cards**, `sold_on` **2016-11-17 →
+2026-08-12**; the most-active card (1958438, Ancient Mew) has **715 rows**. Mechanism, per
+`DATA_MODEL.md` §5: a card's first visit captures whatever its per-bucket windows still held — years of
+real history for thin cards, days for hot ones; forward of first visit is effectively complete; **no
+pre-seam volume exists anywhere**. Three corrections follow. (1) `card.md` §4.11's "realistic launch-day
+page shows a very short or empty sales ledger" is **wrong in the direction that understates readiness**
+— the ledger must be built for hundreds of rows, and OQ-16 (windowing) has real stakes. (2) D-075's
+"Card sales ledger … blocked until 2027" applies to liquidity *metrics* (floor-gated), not the ledger
+*display*, which is rich today. (3) The per-bucket epoch seam inside the displayed ledger is a real
+density discontinuity, which reopens the seam-marker question (C-6/C-7) for the owner during Phase 2
+design. Top-5 live dev cards: 1958438 Ancient Mew (715) · 630417 Charizard #4 (615) · 5834844 Pikachu
+with Grey Felt Hat #85 (604) · 844898 Moltres & Zapdos & Articuno GX #SM210 (599) · 630415 Blastoise #2 (588).
+
+### D-083 — Census display data exists today; census deltas do not, and half grades cannot
+Live, 2026-08-12: **57,464 cards** carry `populations` rows; observation depth is **1 for 54,562 cards,
+2 for 2,902, none deeper**. So the population panel renders real current-census bars for ~63% of the
+corpus now, while grading-activity deltas — which need two observations — count **zero qualifying
+observations under D-033's 2026-09-01 floor** for every card today. Schema fact with design impact:
+`populations.grade` is `short 1–10`, "array index + 1" (`DATA_MODEL.md` §3.4), so **half grades cannot
+exist in census data** — the prototype's seeded `CGC 9.5` population bar (card.md §3.8) is unfillable,
+and the panel's six-bar selection needs a rule written against real columns. Also confirmed from the
+read models: `sales` stores **no listing URL**, settling OQ-15 — the ledger can never link out.
+
 ### D-078 — 🚩 Closed months DO revise. `DATA_MODEL.md`'s immutability claim is false
 Found 2026-08-12 while verifying the price read layer's query plans against live data.
 
@@ -271,6 +315,76 @@ Read directly 2026-08-10, to be mirrored per D-018–D-021.
 ---
 
 ## Decided
+
+### D-084 — Phase 2 scope rulings: no auth, URL-only reachability, brand.md tier palette
+Owner, 2026-08-12, at the start of the (restarted) Phase 2 brainstorming:
+1. **No auth in Phase 2.** The Card page ships anonymous. Watchlist and binder render
+   deferred-disabled per the present-not-omitted ruling; the D-062 abuse-shape limit binds **per-IP**
+   until accounts exist; auth arrives with its first real consumer (Binder, Phase 4, or a public URL —
+   D-011).
+2. **URL-only reachability.** No card lookup ships in Phase 2; the nav search element renders
+   deferred-disabled; navigation arrives with its own screens (D-075 ordering).
+3. **Tier palette: brand.md §2.6 `TIER_COLORS` — the Charts values.** Grade 9.5 `#7A56C9`, Grade 8
+   `#4C8F8A`, Grade 7 `#A96A4A`. **Resolves C-20/OQ-21**; the Card prototype's three variant hexes
+   (`Cardstock Card.dc.html:325`: `#6E4DB8`, `#2E7F78`, `#B0552E`) are superseded. card.md §8 row
+   update lands with the Phase 2 spec.
+4. **Census six-bar rule: fixed premium six — PSA 8 · PSA 9 · PSA 10 · CGC 8 · CGC 9 · CGC 10.**
+   Chosen in the visual companion against Charizard #4's live census after seeing the mocked
+   `CGC 9.5` bar is unfillable (D-083: census grades are integers 1–10). CGC 8 substitutes for the
+   impossible 9.5; the mid-grade mass is carried by a **total-slabs count in the panel's summary
+   line** rather than bars, preserving R-20/R-21 (grader grouping, fixed cross-card scaling).
+   Sub-line names both graders' totals so 25%-of-census framing stays honest. card.md §3.8 update
+   lands with the Phase 2 spec.
+5. **Ledger epoch boundary: no in-table markers and no caption — C-7 stands.** Owner's argument,
+   accepted after the live-data review (D-082): within its range each grade's record is complete —
+   a sale newer than the list's oldest entry is by definition on the list — and this persona reads
+   marketplace sold-lists as windowed by default, so a permanent caption defends against a misread
+   the audience largely doesn't make. Honesty lands in zero-chrome places instead: the ledger
+   row-count carries a help tooltip ("each grade is complete from its own first captured sale;
+   nothing earlier was observable"), and the About Data screen's spec gets the rolling-window story
+   when its phase comes. The marketable fact is forward completeness, not the window. Resolves the
+   reopened half of OQ-3 for this screen.
+6. **API shape: snapshot + sales split, per-panel readers composed concurrently inside the
+   snapshot.** Owner's synthesis: keep the two GETs (small snapshot for immediate paint, full ledger
+   separately — ≤715 rows known max, D-082, rendered with `<Virtualize>`), but organize the snapshot
+   internally by panel — independent readers (identity, prices, census) run in parallel via
+   `IDbContextFactory`, since one EF context is not thread-safe. Grouping follows the must-not-drift
+   invariants: strip+chart share the price reader (R-2); census bars+sentence share the census
+   reader (R-26). Cross-reader skew mid-refresh is harmless on append-only data and heals on the
+   post-refresh refetch. Owner adds the standing expectation (not a constraint): this app will call
+   for highly parallelized workloads even where computation lives in the database — the per-reader
+   connection is the unit that scales into that; corpus-scale work still prefers set-based SQL and
+   worker lanes over connection fan-out on the four-core Pi.
+7. **Charting: TradingView Lightweight Charts, reaffirmed.** The owner recalled the harvested
+   ruling my keyword grep missed — D-042's `PROJECT_LOG.md:242` harvest: *"charting locked.
+   TradingView Lightweight Charts via JS interop, 'Blazor wrapper component = portfolio
+   centerpiece.'"* Phase 2 builds the wrapper's minimal slice for the Card page's price chart:
+   self-hosted bundle, line series with **whitespace points for gaps**, dashed provisional tail as a
+   two-point overlay series, hollow dot via custom primitive, month-snapped crosshair, and an
+   `applyOptions` theming shim reading the brand tokens (canvas cannot inherit CSS variables).
+   License verified 2026-08-12: Apache 2.0 **plus required attribution** — TradingView notice and
+   link on the page; goes in the app footer. Panes/markers for MACD etc. wait for the Charts phase.
+8. **Census bars: styled divs inside a values-only `<CensusBars>` component — LWC is reserved for
+   time axes.** Chosen in the companion against a best-case LWC histogram mock (grades need fake
+   timestamps, value labels need a custom plugin, grade labels end up as HTML under canvas anyway).
+   All presentation math lives in the component. Its scaling rule becomes **per-card max** (tallest
+   of the six bars fills the row; 4px stub floor stays): the prototype's fixed `maxPop = 4020`
+   cannot survive real data — Charizard #4's PSA 8 is 15,931 — so R-21's cross-card-comparability
+   half is retired as seed fiction. card.md §3.8/R-21 updates land with the spec.
+9. **Chart axes: mockup-minimal.** Chosen in the companion against an LWC-native-axes rendering of
+   the same real series. The wrapper hides LWC's price and time scales and overlays the frozen
+   prototype's five labels as HTML — visible max/min on the left, first/middle/last month below.
+   TradingView attribution is satisfied by the notice + link in the app footer (whether the
+   in-canvas logo mark also stays is resolved at build time against the shipped LWC version; either
+   placement satisfies the license). Hover model unchanged from the spec: month-snapped vertical
+   crosshair, tooltip pinned top-left, one row per visible series, built from LWC's crosshair
+   events.
+10. **Species is out of Phase 2 and out of the TCGdex enrichment entirely.** Owner: *"in another
+   phase, we will have to create a Pokedex, and it will belong in there."* The enrichment's required
+   scope is collector number + official set size only (handoff amended same day); the Phase 2
+   identity DTO carries no Species field; the subline's finished Phase 2 form is `{set} · 215/203`.
+   The Character screen's subline link waits for the Pokédex phase alongside the species data
+   itself.
 
 ### D-077 — Stale prices are shown, never hidden. The Card page's freshness treatment, settled
 Owner, 2026-08-11, across a mockup session. Implements the call pattern D-062 already recorded: on
@@ -1485,6 +1599,51 @@ The line reads: *"Seams: liquidity seam Apr '25 (churn/vol panes), resolution se
 ---
 
 ## Open
+
+### D-079 — Metadata enrichment via TCGdex: researched, feasible, owner to implement in the sibling repo
+Raised by the owner 2026-08-12 during Phase 2 brainstorming, after learning the scraper's data cannot
+fill the Card page's `{set} · 215/203 · {character}` subline (no number column, no set size, no
+species — `DATA_MODEL.md` §3.1–3.2). Owner: the solution "should not live in this project… I can
+implement it in the batch process if it is possible." Research says it is possible.
+
+**Verified by me, live, 2026-08-12** (re-ran the probes myself after the research workflow):
+- `GET api.tcgdex.net/v2/en/cards/swsh7-215` → `localId "215"`, `name "Umbreon VMAX"`, `dexId [197]`,
+  `set.cardCount { official: 203, total: 237 }` — all three missing fields, on the exact example card.
+  `official` vs `total` is the printed-size vs secret-cards split.
+- `tcgdex/cards-database` LICENSE is plain **MIT** — permanent Postgres storage, modification, and
+  commercial use (D-034) expressly permitted; only obligation is notice preservation.
+- `tcgdex/server` Docker tags ship `linux/arm64` — self-hostable beside the worker on the Pi.
+- pokemontcg.io's bulk repo `PokemonTCG/pokemon-tcg-data` has **no license** (GitHub `license: null`)
+  and its live API returned 5xx on most probes → wrong foundation for a permanent enrichment column.
+
+**Claimed by the research workflow, not re-verified by me** (full receipts in
+`docs/superpowers/handoffs/2026-08-12-tcgdex-enrichment-research.txt`, salvaged from the crashed
+session's task directory): an executed number-driven join matched **283/283** numbered products on two sampled
+150-product PriceCharting pages (Evolving Skies, Base Set), with ~97% name agreement and known synonym
+classes (Electric/Lightning Energy, gender symbols, é). Set-name mapping is the real work: ~124/300
+PC set names exact-match after stripping the "Pokemon " prefix; ~20 need hand-aliases; the ~157
+Japanese/Chinese/Korean/Topps sets do not auto-join (TCGdex serves Japanese sets under its `ja`
+locale only). Known breakers: Celebrations Classic Collection (PC `#4` vs TCGdex `CC002`), the
+`Pokemon Promo` grab-bag's bare numbers. `localId` can be non-numeric (`TG23`) → text column, not int.
+
+**Open, owner's call:** whether and when to implement in `../PokemonInvestBatch` (vendored/pinned
+TCGdex release or self-hosted image, enrichment table keyed by card id with an explicit
+`match_status`, species stored 0..n). **Phase 2 does not block on this** — the Card page ships on
+today's columns and upgrades its subline when enriched columns appear. Related: the image-source
+question is settled the other way — TCGdex rejected for images (holo/non-holo), recorded in
+`DATA_MODEL.md` §2 (`:105–114`) the same day (that file has no §2.4 heading — pointer corrected
+2026-08-12 while appending the update below).
+
+**Update, 2026-08-12 (restarted session):** owner confirmed the direction — *"if we are going to use
+TCGdex to populate the missing data, that's fine, but that needs to be done in the Pokemon invest
+batch context"* — and chose the delivery: a written handoff now, then **a subagent scoped to
+`../PokemonInvestBatch` alone, spawned after Phase 2 planning wraps**. The brief lives at
+`docs/superpowers/handoffs/2026-08-12-tcgdex-enrichment-handoff.md`, with the salvaged research
+receipts beside it. The three fields were re-verified live from this session as well:
+`api.tcgdex.net/v2/en/cards/swsh7-215` → `localId "215"`, `dexId [197]`,
+`set.cardCount {official: 203, total: 237}`. The owner adds, same day: *"this will not be the last
+data enrichment that we're gonna come across"* — recorded as an expectation for the sibling ADR to
+weigh, not a constraint (per `CLAUDE.md`'s rule on expectations).
 
 ### D-011 — Public URL, or private portfolio piece?
 The single answer that most reorders everything downstream. Private (Tailscale / localhost / screen-share) drops image licensing, provenance rewrites, rate limiting, and residential-exposure concerns off the critical path entirely. Public gates all of them.

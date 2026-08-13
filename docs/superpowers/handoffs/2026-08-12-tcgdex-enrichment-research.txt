@@ -1,0 +1,226 @@
+========================= joinFeasibility =========================
+SUMMARY: The join is highly feasible for international English sets and it is number-driven, not name-driven: PriceCharting embeds the collector number in the card name ("Umbreon VMAX #215") and URL slug ("umbreon-vmax-215"), and TCGdex's localId matches it verbatim — an actual join I executed on two sampled 150-product pages matched 283/283 numbered products (139/139 Evolving Skies vs swsh7, 144/144 Base Set vs base1) with 97% exact name agreement, the mismatches being known synonym classes (Electric/Lightning Energy, Nidoran vs Nidoran♂, Pokemon vs Pokémon). TCGdex directly supplies all three enrichment targets: cardCount.official (203 for Evolving Skies — the "/203"), localId ("215"), and dexId ([197] = Umbreon) for species. Set-level mapping is the real work: stripping the "Pokemon " prefix exact-matches only 124 of PC's 300 distinct set names against TCGdex's 218 English sets; ~20 more international sets need a one-time alias table, and the remaining ~157 (127 Japanese, 15 Chinese, 5 Korean, 10 Topps, plus Burger King/Oreo/Trick-or-Trade-style products) are largely unjoinable via the English TCGdex catalog — Japanese sets exist only in TCGdex's ja locale (177 sets) under Japanese-script names and 404 under /en. Structural quirks are all tractable with routing rules: PC folds Trainer/Galarian Gallery cards into the parent set as #TG23/#GG70 while TCGdex splits them into sibling sets (swsh9.5tg, swsh12.5gg) with identical TG##/GG## localIds; PC's one "Pokemon Promo" grab-bag maps onto 13 TCGdex promo sets routed by number prefix (SWSH262→swshp, XY124→xyp) with bare-numbered modern promos ambiguous across eras; PC lists print variants ([1st Edition], [Shadowless], [Reverse Holo], [Prize Pack]) as separate products that TCGdex models as variant flags on one card — an N:1 that is harmless for this enrichment since number, set size, and species are identical across variants.
+
+RECOMMENDATION: Build the enrichment as a two-phase batch join inside the worker, keyed on collector number with name as a confirmation gate, and store an explicit match_status per card rather than forcing a match. Phase A (set mapping, one-time, ~300 rows, human-reviewed): (1) partition PC sets by slug prefix — japanese/chinese/korean/topps/burger-king/oreo/world-championships → status UNMAPPED, never fuzzy-matched; (2) for the rest, normalize (strip leading 'Pokemon ', casefold, accent-fold, unify '&'/'and', strip punctuation) and exact-match against TCGdex /en/sets names (measured: 124/300 hit); (3) hand-alias the ~20 stragglers (151, Pokémon GO, Rumble, McDonald's Collection YYYY, Expedition Base Set, FireRed & LeafGreen, HeartGold SoulSilver, Team Magma vs Team Aqua, Battle Academy, ...); (4) attach sibling-set routes discovered from the TCGdex list: parent set → {tg/gg gallery sibling, shiny-vault sibling}, celebrations → {cel25, cel25cc, swshp}, pokemon-promo → all 13 promo sets. Phase B (card join): parse `^(base)\s*(\[tag\])?\s*(#num)?$` from cards.name; no #num → status NO_NUMBER (sealed; exclude from denominator); normalize num (uppercase, split alpha prefix from digits, strip leading zeros); route by prefix (TG/GG/SV/CC → gallery sibling, SWSH/SM/XY/BW/DP/HGSS → promo set) else parent set; look up localId; then confirm name (accent/symbol-fold, casefold, energy-synonym table: Electric→Lightning, Dark→Darkness, Steel→Metal) — agree → CONFIRMED and write enrichment {card_number = localId, set_official_size = set.cardCount.official, species = dexId[] resolved to names, null for Trainer/Energy by category}; disagree → NAME_MISMATCH, no write, review queue. Keep the enrichment in its own table keyed by the PriceCharting product id with tcgdex_card_id + match_status + matched_at, so unmatched is a first-class state (mirroring the project's LOW DATA discipline) and re-runs are idempotent. Before committing to scope, run one SQL query against the sibling DB — card counts grouped by the slug-prefix partition — to turn the set-level 48% (≈145/303 mappable sets) into a real card-level coverage number; expect near-100% of numbered products to match within mapped sets (283/283 in this session's samples) and treat Japanese sets as a deliberate later phase with a curated 127-row alias table rather than a fuzzy matcher.
+
+RISKS:
+ - Japanese sets are the largest single bucket (127 of 303 set slugs) and cannot auto-join: TCGdex serves them only under the ja locale with Japanese-script names (en/S6a returns 404), and at least one PC Japanese card URL carries no number at all — expect this whole bucket to need a curated alias map or a different source, and until the sibling DB is queried for per-set card counts the overall card-level match rate is genuinely unknown (could be anywhere from ~45% to ~75% of 91,570 cards).
+ - PC's 'Pokemon Promo' grab-bag mixes every era; bare-numbered promos (#53, #44, #85) collide across WOTC/Nintendo/DP/SV promo ranges and must be resolved by name+number across 13 TCGdex promo sets — some will remain ambiguous.
+ - Celebrations Classic Collection breaks the number join outright (PC #4 vs TCGdex CC002); any set that reprints cards under original numbering needs a special case — only 25 cards here, but the pattern may recur (e.g. TCG Classic decks, which TCGdex may not carry at all).
+ - Fuzzy set-name matching must hard-exclude japanese/chinese/korean slug prefixes first, or 'Pokemon Korean Scarlet & Violet 151' will happily match TCGdex '151' and silently enrich Korean cards with English-set data — a wrong-but-plausible failure the project's rules exist to prevent.
+ - TCGdex has no shadowless variant concept and models 1st Edition/reverse as flags, so PC variant products all inherit the same enrichment; that is correct for number/size/species but means tcgdex_card_id is deliberately N:1 and must not be treated as unique per PC product.
+ - cards.set_id in the scraper DB is never updated when a card moves sets (documented TODO), so a small fraction of joins will route through a stale set.
+ - Name-agreement checking must whitelist known synonym classes (Electric/Lightning, Dark/Darkness, Steel/Metal Energy; accent folding; gender symbols; VStar/VSTAR casing) or it will flag ~2-3% false mismatches; conversely, skipping the name check entirely risks silently accepting wrong-number matches.
+ - TCGdex is a community-maintained open API: coverage lag on brand-new sets (PC already lists 2026 sets like 'Pokemon Phantasmal Flames'), uptime, and rate limits are unverified — for a Pi batch worker, mirroring the per-set JSON (218 requests, cacheable) or self-hosting the dataset should be evaluated before taking a live dependency.
+ - Everything measured here comes from two 150-product pages plus targeted probes; older special-numbered sets (Aquapolis H-series, crystal a/b variants — TCGdex ecard2 has 40 non-numeric localIds) were verified on the TCGdex side only, not the PC side.
+
+FACTS:
+ * PriceCharting card names carry the collector number inside the name string after '#', and the URL slug ends with the same number
+   src: /tmp/pc-evs.html (live fetch of https://www.pricecharting.com/console/pokemon-evolving-skies, 2026-08-12)
+   q: <a href="/game/pokemon-evolving-skies/umbreon-vmax-215">Umbreon VMAX #215
+ * TCGdex's localId for the same card is the identical number, and the card is a distinct entity from the non-alt-art print
+   src: https://api.tcgdex.net/v2/en/cards/swsh7-215
+   q: "id": "swsh7-215", ... "localId": "215", "name": "Umbreon VMAX", "rarity": "Secret Rare"
+ * TCGdex supplies the official printed set size directly, separate from the total including secrets
+   src: https://api.tcgdex.net/v2/en/sets/swsh7
+   q: "cardCount":{"firstEd":0,"holo":130,"normal":112,"official":203,"reverse":132,"total":237}
+ * TCGdex supplies species via dexId (197 = Umbreon national dex number) on the card detail endpoint
+   src: https://api.tcgdex.net/v2/en/cards/swsh7-215
+   q: {'dexId': [197], 'name': 'Umbreon VMAX', 'localId': '215', 'rarity': 'Secret Rare', 'suffix': None, 'stage': 'VMAX'}
+ * Evolving Skies contains two distinct Umbreon VMAX cards distinguished only by localId (95 and 215), so name alone can never be the join key
+   src: https://api.tcgdex.net/v2/en/sets/swsh7
+   q: {'id': 'swsh7-95', ..., 'localId': '95', 'name': 'Umbreon VMAX'}, ... {'id': 'swsh7-215', ..., 'localId': '215', 'name': 'Umbreon VMAX'}
+ * PriceCharting lists print variants as separate products with bracketed tags in the name, sharing the same number
+   src: /Users/scott/RiderProjects/PokemonInvestBatch/tests/PokemonInvestBatch.Domain.Tests/Fixtures/console-base-set-page1.html.gz (gunzip)
+   q: <a href="/game/pokemon-base-set/charizard-shadowless-4">Charizard [Shadowless] #4 ... <a href="/game/pokemon-base-set/charizard-1st-edition-4">Charizard [1st Edition] #4
+ * TCGdex models 1st Edition as a variant flag on one card, not a separate card, and has no shadowless concept in its variant vocabulary
+   src: https://api.tcgdex.net/v2/en/cards/base1-4
+   q: "variants": {"firstEdition": true, "holo": true, "normal": false, "reverse": false, "wPromo": false}
+ * Sealed products on PriceCharting have no '#' number and therefore self-select out of the card join
+   src: /Users/scott/RiderProjects/PokemonInvestBatch/tests/PokemonInvestBatch.Domain.Tests/Fixtures/console-base-set-page1.html.gz (gunzip)
+   q: <a href="/game/pokemon-base-set/booster-box-1st-edition">Booster Box [1st Edition]
+ * PriceCharting folds Trainer Gallery cards into the parent set with TG-prefixed numbers
+   src: /tmp/pc-brs.html (live fetch of https://www.pricecharting.com/console/pokemon-brilliant-stars, 2026-08-12)
+   q: <a href="/game/pokemon-brilliant-stars/umbreon-vmax-tg23">Umbreon VMAX #TG23
+ * TCGdex splits Trainer/Galarian Galleries into sibling sets whose localIds carry the same TG/GG prefix, so a prefix-routing rule joins them exactly
+   src: https://api.tcgdex.net/v2/en/sets/swsh9.5tg and /en/sets/swsh12.5gg
+   q: {'id': 'swsh9.5tg-TG01', 'localId': 'TG01', 'name': 'Flareon'} ... {'id': 'swsh12.5gg-GG70', 'localId': 'GG70', 'name': 'Arceus VSTAR'} ... Brilliant Stars set swsh9 non-numeric localIds: [] ... count
+ * PriceCharting has one promo grab-bag set mixing eras, with prefixed numbers that route cleanly and bare numbers that do not
+   src: /tmp/pc-promo.html (live fetch of https://www.pricecharting.com/console/pokemon-promo, 2026-08-12)
+   q: Charizard VStar #SWSH262 ... Pikachu EX #XY124 ... Mewtwo & Mew GX #SM191 ... Mew ex #53 ... Charmander #44
+ * TCGdex splits promos into 13 per-era sets; SM promos use SM-prefixed localIds while SV promos use zero-padded bare numbers, so number normalization must strip leading zeros
+   src: https://api.tcgdex.net/v2/en/sets (promo names) and /en/sets/smp, /en/sets/svp
+   q: smp SM Black Star Promos ... ['SM01', 'SM02', 'SM03', 'SM04'] ... svp SVP Black Star Promos ... ['001', '002', '003', '004']
+ * Celebrations is a genuine number-join failure: PriceCharting lists Classic Collection reprints under their original printed numbers while TCGdex assigns CC-prefixed localIds
+   src: /tmp/pc-cel.html (live fetch, 2026-08-12) and https://api.tcgdex.net/v2/en/sets/cel25cc
+   q: PC: <a href="/game/pokemon-celebrations/charizard-4">Charizard #4 ... TCGdex cel25cc: [('CC001', 'Blastoise'), ('CC002', 'Charizard'), ('CC003', 'Venusaur')]
+ * PriceCharting also files sealed-adjacent promos inside Celebrations, joinable only by prefix-routing to swshp
+   src: /tmp/pc-cel.html
+   q: <a href="/game/pokemon-celebrations/lance%27s-charizard-v-swsh133">Lance&#39;s Charizard V #SWSH133
+ * Executed join, Evolving Skies page 1: every numbered product found a TCGdex localId; only name disagreements were energy-name conventions
+   src: join script over /tmp/pc-evs.html + https://api.tcgdex.net/v2/en/sets/swsh7 (this session)
+   q: EVS: products 150 no-number(sealed) 11 num matched 139 name agree 136 name mismatch 3 number missing in tcgdex 0 ... [('Electric Energy #235', 'Lightning Energy'), ('Dark Energy #236', 'Darkness Energ
+ * Executed join, Base Set fixture page 1: every numbered product matched; only mismatches were gender-symbol and accent normalization
+   src: join script over console-base-set-page1.html.gz + https://api.tcgdex.net/v2/en/sets/base1 (this session)
+   q: BASE1: products 150 no-number(sealed) 6 num matched 144 name agree 142 name mismatch 2 missing 0 ... [('Nidoran [1st Edition] #55', 'Nidoran♂'), ('Pokemon Breeder #76', 'Pokémon Breeder')]
+ * Set-name exact match after stripping the 'Pokemon ' prefix covers 124 of 300 distinct PriceCharting set names against TCGdex's 218 English sets, with only 25 international-English misses (rest are Japanese/Chinese/Korean/Topps)
+   src: matching script over category-pokemon-cards.html.gz + https://api.tcgdex.net/v2/en/sets (this session)
+   q: PC sets: 300 exact-name hits: 124 misses: 176 ... international misses (25): ... Pokemon Scarlet & Violet 151 ... Pokemon Promo ... Pokemon McDonalds 2021 ... Pokemon Go ... Pokemon Expedition
+ * PriceCharting's set census in the fixture: 303 unique slugs, of which 127 Japanese, 15 Chinese, 10 Topps
+   src: /Users/scott/RiderProjects/PokemonInvestBatch/tests/PokemonInvestBatch.Domain.Tests/Fixtures/category-pokemon-cards.html.gz (gunzip | grep -c)
+   q: 303 / japanese: 127 / chinese: 15 / topps: 10
+ * TCGdex serves Japanese-exclusive sets only under the ja locale with Japanese-script names; the same set id 404s under /en, so PC's English 'Pokemon Japanese ...' names cannot auto-join
+   src: https://api.tcgdex.net/v2/ja/sets and https://api.tcgdex.net/v2/en/sets/S6a
+   q: ja set count: 177 ... [('S6a', 'イーブイヒーローズ')] ... en/S6a: {"type":"https://tcgdex.dev/errors/not-found",...,"status":404,"endpoint":"/en/sets/S6a"}
+ * The scraper stores set slugs verbatim-encoded (percent-encoding kept) but HTML-entity-decoded, and card names/urls exactly as the site renders them
+   src: /Users/scott/RiderProjects/PokemonInvestBatch/DATA_MODEL.md:164 and tests/PokemonInvestBatch.Domain.Tests/Parsing/CategoryPageParserTests.cs:34-35
+   q: DATA_MODEL: `slug` ... site — href after `/console/`, verbatim-encoded ... Test: Assert.Contains(sets, s => s.Slug == "pokemon-scarlet-&-violet-151"); Assert.DoesNotContain(sets, s => s.Slug.Contains(
+ * Some PriceCharting Japanese card URLs carry no number at all, so even number parsing can fail on the Japanese corpus
+   src: /Users/scott/RiderProjects/PokemonInvestBatch/tests/PokemonInvestBatch.Infrastructure.Tests/Http/PriceChartingClientTests.cs:140
+   q: "/game/pokemon-japanese-awakening-legends/misdreavus", CancellationToken.None);
+ * TCGdex set names use accented and symbol forms that defeat naive comparison
+   src: https://api.tcgdex.net/v2/en/sets
+   q: [('ru1', 'Pokémon Rumble'), ('hgss1', 'HeartGold SoulSilver'), ('swsh10.5', 'Pokémon GO')]
+ * The scraper's cards.set_id can be stale for cards that moved sets, which would route the join to the wrong set
+   src: /Users/scott/RiderProjects/PokemonInvestBatch/DATA_MODEL.md (cards table, set_id row)
+   q: computed — the set being walked at discovery. TODO: never updated if a card later moves sets (known small bug, back-burner)
+========================= alternatives =========================
+SUMMARY: Four credible alternatives to TCGdex exist, and they split cleanly on the three fields. The Pokemon TCG API (pokemontcg.io) is the only source that carries all three explicitly — card.number "215", set.printedTotal 203 (distinct from total 237, which includes secret rares), and nationalPokedexNumbers [197] — and its data is current through Pitch Black (2026/07/17), but its live cards endpoint failed 8 of 10 probes with 500/502 today, so the safe consumption path is its bulk GitHub mirror PokemonTCG/pokemon-tcg-data (same data, pushed 2026-07-17, contains me1–me5). TCGCSV (TCGplayer's catalog, refreshed daily ~20:00 UTC, no auth) uniquely encodes number and printed size together as extendedData Number = "215/203" and disambiguates variants by product name ("Umbreon VMAX (Alternate Art Secret)"), but has no species/dex field at all. The tcgdex/cards-database repo used directly is the freshest source (pushed 2026-08-12, all Mega Evolution sets present with dexId populated) but its files are TypeScript not JSON, and the card number lives only in the filename with inconsistent zero-padding ("215.ts" vs "001.ts"). PokeAPI carries zero TCG data but cleanly maps dex number → species name (197 → "Umbreon"), which every dexId-based source needs as a companion; Scrydex is the commercial successor ($29–$399+/mo) and not a fit for a free batch worker.
+
+RECOMMENDATION: Best fit for the three fields is the pokemontcg.io dataset consumed as bulk JSON from the PokemonTCG/pokemon-tcg-data GitHub repo — it is the only source with all three fields explicit and cleanly separated (card.number, set.printedTotal distinct from total, nationalPokedexNumbers), it is current through the newest set, and the repo path avoids the live API's demonstrated 5xx instability and rate limits entirely; pair it with a one-time PokeAPI (or static) dex-number-to-name table for species names. Keep TCGCSV as the cross-check and variant-disambiguation source: its per-card 'Number': '215/203' strings independently confirm both number and printed denominator, and its TCGplayer product names ('Alternate Art Secret') distinguish variants that share a dex number. Treat direct consumption of tcgdex/cards-database as a fallback only — freshest data but TypeScript files and filename-encoded numbers make it the most awkward fit for a .NET batch worker (the TCGdex API, covered separately, is the better face of that same data). Ignore Scrydex/PokéWallet/PokeTrace for this use case — commercial price APIs, wrong cost model for a free enrichment pass on the Pi.
+
+RISKS:
+ - pokemontcg.io live API instability is severe right now (8/10 probes returned 500/502 on the cards endpoint while sets worked) — any design that calls it per-card at runtime will fail; only the bulk GitHub repo path is dependable, and even that could stall if maintainer energy has genuinely moved to the commercial Scrydex product (that shift is a secondhand blog claim, not verified from the team).
+ - pokemon-tcg-data repo updates appear to land in bursts (pushed_at exactly on Pitch Black's release day) — a set released between pushes would be temporarily absent; pushed_at needs monitoring, not assuming.
+ - No source yields the species NAME directly: pokemontcg.io and tcgdex give a dex number array (nationalPokedexNumbers / dexId) requiring a PokeAPI or static mapping, and multi-Pokemon cards return multiple dex numbers, so the schema must allow 0..n species per card.
+ - TCGCSV has no species field at all — species would have to be inferred from product names, which is fuzzy; its groups also mix sealed products with cards (288 products vs 237 cards in Evolving Skies), requiring filtering by extendedData presence.
+ - Using tcgdex/cards-database directly means parsing TypeScript source files from a .NET worker, and the card number exists only as the filename with era-dependent zero-padding ('215.ts' vs '001.ts') — real integration friction versus consuming JSON.
+ - None of these sources carry pricecharting.com identifiers, so joining to PokemonInvestBatch's cards table is name+set string matching regardless of source — the choice of source does not remove the matching problem.
+ - Field semantics diverge subtly across sources (e.g. rarity: 'Rare Rainbow' vs 'Secret Rare' for the same card), so mixing sources per-field risks silent inconsistency; pick one primary source per field and record it.
+ - Keyless pokemontcg.io access (1000/day, 30/min) cannot cover 91,570 cards in one pass even when healthy; with a free key it is 20,000/day — bulk file consumption sidesteps rate limits entirely.
+
+FACTS:
+ * Pokemon TCG API v2 distinguishes official printed set size (printedTotal) from full size including secret cards (total) for Evolving Skies
+   src: https://api.pokemontcg.io/v2/sets/swsh7
+   q: {"data":{"id":"swsh7","name":"Evolving Skies","series":"Sword & Shield","printedTotal":203,"total":237,..."ptcgoCode":"EVS","releaseDate":"2021/08/27"}}
+ * Pokemon TCG API v2 provides all three target fields for the Umbreon VMAX alt-art probe: number, printed set size via nested set, and species via national dex number
+   src: https://api.pokemontcg.io/v2/cards/swsh7-215?select=id,name,number,nationalPokedexNumbers,supertype,subtypes,rarity,set
+   q: {"data":{"id":"swsh7-215","name":"Umbreon VMAX","supertype":"Pokémon","subtypes":["VMAX","Single Strike"],"set":{"id":"swsh7",..."printedTotal":203,"total":237,...},"number":"215","rarity":"Rare Rainb
+ * Pokemon TCG API rate limits: 20,000/day with a free API key, 1000/day and 30/min without one
+   src: https://docs.pokemontcg.io/getting-started/rate-limits
+   q: ", requests are limited to 20,000/day." ... "API key, you are rate limited to 1000 requests a day, and a maxium of 30 per minute." [typo 'maxium' is in the original] ... "Third-party applications are 
+ * Pokemon TCG API keys are free via the Developer Portal and sent as an X-Api-Key header; the portal is up (HTTP 200)
+   src: https://docs.pokemontcg.io/getting-started/authentication and https://dev.pokemontcg.io/
+   q: "Developer Portal to get your API key for free." ... "X-Api-Key header." — dev.pokemontcg.io returned: dev.pokemontcg.io: 200
+ * The Pokemon TCG API's live single-card endpoint is currently unreliable: 8 of 10 consecutive keyless probes failed with 5xx (not 429s, so not rate limiting)
+   src: GET https://api.pokemontcg.io/v2/cards/swsh7-215, 10 probes 1s apart, 2026-08-12
+   q: 200 500 200 500 502 500 500 502 500 502 / OK=2 FAIL=8
+ * Pokemon TCG API data is current through the newest set: Pitch Black (me5) released 2026/07/17, in the Mega Evolution era
+   src: https://api.pokemontcg.io/v2/sets?orderBy=-releaseDate&pageSize=6
+   q: {"id":"me5","name":"Pitch Black","printedTotal":84,"total":120,"releaseDate":"2026/07/17"},{"id":"me4","name":"Chaos Rising",..."releaseDate":"2026/05/22"}..."totalCount":174
+ * Bulk access to the same data exists via the PokemonTCG/pokemon-tcg-data GitHub repo, last pushed 2026-07-17 (Pitch Black's release day), and it contains all six Mega Evolution era set files
+   src: https://api.github.com/repos/PokemonTCG/pokemon-tcg-data and .../contents/cards/en
+   q: {"full_name": "PokemonTCG/pokemon-tcg-data", "pushed_at": "2026-07-17T04:45:28Z", ... "description": "The data found within the Pokémon TCG API"} — me-era files: ['me1.json', 'me2.json', 'me2pt5.json'
+ * TCGCSV encodes card number and printed set size together in one extendedData field per product, and distinguishes the alt art by product name; it has no species or dex field
+   src: https://tcgcsv.com/tcgplayer/3/2848/products
+   q: {"productId": 246723, "name": "Umbreon VMAX (Alternate Art Secret)", "extendedData": [{"Number": "215/203"}, {"Rarity": "Secret Rare"}, {"HP": "310"}, {"Stage": "VMAX"}]} — extendedData names present:
+ * TCGCSV updates daily around 20:00 UTC with no auth or documented rate limits; the Evolving Skies group (2848) was modified 2026-08-08 and Pokemon has 217 groups
+   src: https://tcgcsv.com/ and https://tcgcsv.com/tcgplayer/3/groups
+   q: "Daily Updates — All content updates everyday around 20:00:00 UTC" — {"groupId": 2848, "name": "SWSH07: Evolving Skies", "abbreviation": "SWSH07", ... "modifiedOn": "2026-08-08T05:09:54.643", "categor
+ * The tcgdex/cards-database repo's set file carries the official printed size, plus TCGplayer/Cardmarket cross-IDs; the card file carries species as dexId but NOT the card number (which is only the filename, 215.ts)
+   src: https://raw.githubusercontent.com/tcgdex/cards-database/master/data/Sword%20%26%20Shield/Evolving%20Skies.ts and .../Evolving%20Skies/215.ts
+   q: Set file: "cardCount: {\n\t\tofficial: 203\n\t}," and "thirdParty: {\n\t\tcardmarket: 4328,\n\t\ttcgplayer: 2848\n\t}" — Card file 215.ts: "rarity: \"Secret Rare\", category: \"Pokemon\", hp: 310, ...
+ * The tcgdex/cards-database repo is the freshest of all sources (pushed today, 2026-08-12, MIT license) and covers the newest era at card level: Pitch Black has cardCount.official 84, 120 card files, dexId populated, filenames zero-padded unlike older sets
+   src: https://api.github.com/repos/tcgdex/cards-database and .../contents/data/Mega%20Evolution/Pitch%20Black; raw .../Pitch%20Black.ts and .../Pitch%20Black/001.ts
+   q: {"full_name": "tcgdex/cards-database", "pushed_at": "2026-08-12T21:16:46Z", "open_issues_count": 158, "stargazers_count": 986, "license": {"key": "mit"...}} — Pitch Black.ts: "cardCount: {\n\t\toffici
+ * PokeAPI maps national dex number to canonical species name (197 → Umbreon) but carries no TCG data of any kind
+   src: https://pokeapi.co/api/v2/pokemon-species/197
+   q: {"name": "umbreon", "id": 197, "names_en": ["Umbreon"]}
+ * Scrydex is a paid commercial TCG API ($29–$399+/month, credit-based) covering Pokemon including Japanese; third-party reporting says the pokemontcg.io team's energy has shifted to it
+   src: https://scrydex.com/ and web search results citing https://cardgrader.ai/blog/pokemon-card-api and https://www.scrapingbee.com/blog/pokemon-card-api/
+   q: Scrydex site: "The ultimate TCG API & Toolkit for Pokémon, MTG, Lorcana" — tiers "$29/ month" (5,000 credits), "$99/ month", "$399/ month", Enterprise. Search result (secondhand claim, not verified on
+ * Rarity taxonomies disagree across sources for the same physical card (swsh7-215), so sources must not be mixed field-by-field without care
+   src: https://api.pokemontcg.io/v2/cards/swsh7-215 vs tcgdex 215.ts vs TCGCSV product 246723
+   q: pokemontcg.io: "rarity":"Rare Rainbow" — tcgdex: rarity: "Secret Rare" — TCGCSV/TCGplayer: {"Rarity": "Secret Rare"}
+========================= licensingOps =========================
+SUMMARY: TCGdex is the clean fit on all three axes. Licensing: its data lives in the tcgdex/cards-database repo under a plain MIT license (fetched verbatim), which expressly permits copying, modifying, merging, publishing, and even selling — permanent storage of enriched values in CardStock's Postgres is unambiguously permitted, with the only obligation being preservation of the copyright/permission notice; there is no separate data license — the repo IS the data. Operations: no API key, no published rate limits ("please be considerate... cache responses locally"), an officially supported self-host path via Dockerfile/docker-compose, and the tcgdex/server Docker image ships linux/arm64 so it runs on the Pi 5; a full English backfill is at most 218 per-set API requests, or zero if the repo is vendored/self-hosted, and a live probe confirmed one set request returns every card's number (localId), the official printed size (cardCount.official=203 vs total=237 for Evolving Skies), and the full card object carries dexId=[197] for species. pokemontcg.io: free key at dev.pokemontcg.io, 20,000 requests/day, but its ToS is silent on storing data in your own DB (no grant, no prohibition), its bulk-data repo PokemonTCG/pokemon-tcg-data has NO license (all-rights-reserved by default), access is terminable "at any time, with or without cause," and live keyless probes today returned HTTP 500 and 502 on two of three endpoints. Update cadence is comparable: TCGdex tags releases per set roughly every 1-2 months (v2.42.0 Fantastical Parade 2026-01-29 through v2.47.0 2026-07-18); pokemon-tcg-data commits a new set roughly every 2 months (me5 on 2026-07-17).
+
+RECOMMENDATION: Use TCGdex, vendored — not queried live. Pin a cards-database release tag (currently v2.47.0) or run the tcgdex/server Docker image (multi-arch, linux/arm64 confirmed) beside the batch worker on the Pi, and run the entire ~91,570-card backfill against the local copy: zero external requests, which is strictly politer than even the 218 per-set API calls the public endpoint would happily absorb. Incremental enrichment of newly discovered cards then becomes 'bump the pinned tag when TCGdex cuts a set release' (every 1-2 months, matching PriceCharting's own new-set cadence) rather than an ongoing API dependency. Compliance is one line: keep TCGdex's MIT copyright/permission notice in the repo and credit TCGdex in docs; permanent Postgres storage, modification, and even future commercialization (D-034) are expressly covered by the MIT grant. The enrichment fields map directly: localId → card number, set.cardCount.official → printed size (with total > official flagging secret cards like 215/203), dexId → species. Treat pokemontcg.io as at most a manual cross-check: its ToS grants no storage right, its bulk dump is unlicensed, its access is revocable at will, and it was returning 500/502 during testing — a permanent enrichment column should not be built on it.
+
+RISKS:
+ - Neither source can license the underlying Pokemon IP (card names, characters, images) — TCGdex's MIT covers only their compilation, and both projects carry the same 'not affiliated with Nintendo/The Pokemon Company' disclaimer this project already uses. Storing facts (card number, set size, species name) is the lowest-IP-risk slice; storing card images would be a different question.
+ - pokemontcg.io grants no explicit right to store its data: the ToS is silent, the bulk repo is unlicensed (all-rights-reserved by default under copyright law), terms are modifiable at any time, and access is terminable without cause — permanent Postgres storage rests entirely on implied license, which is weak footing for a permanent enrichment.
+ - TCGdex data is community-maintained under an AS-IS MIT warranty disclaimer; its own FAQ acknowledges missing cards, wrong localIds, and known marketplace-ID mapping errors. Enriched values should carry provenance (source + version tag) so bad joins are auditable, consistent with this project's never-compute-on-insufficient-data rule.
+ - Coverage is unverified: TCGdex has 218 English sets vs PriceCharting's ~303 sets (which include Japanese sets and promos). TCGdex claims 10+ languages including Japanese, but how many of the 91,570 PriceCharting cards actually match a TCGdex record was not measured here — that is the join-quality question, separate from licensing.
+ - Two README quotes (the MIT statement and the Dockerfile sentence) were relayed through WebFetch's summarizer model rather than fetched raw; the LICENSE file itself, the FAQ, both pokemontcg.io docs pages, and the ToS were fetched raw. The README quotes are consistent with the raw LICENSE but are one step less direct.
+ - pokemontcg.io showed live instability (HTTP 500/502 on 2 of 3 endpoints during probes) — any pipeline depending on it needs retry/backoff and should not be the primary path.
+ - TCGdex's 'no hard rate limits' is a courtesy policy, not a contract — it could add limits at any time. Self-hosting/vendoring eliminates this exposure entirely, which is another argument for the vendored path.
+
+FACTS:
+ * TCGdex's cards-database repository (which contains the card data itself) is licensed MIT, permitting permanent storage, modification, and redistribution of the data
+   src: https://raw.githubusercontent.com/tcgdex/cards-database/master/LICENSE
+   q: MIT License
+
+Copyright (c) 2021 TCGdex
+
+Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), to deal in th
+ * TCGdex's only attribution requirement is the standard MIT notice-preservation clause
+   src: https://raw.githubusercontent.com/tcgdex/cards-database/master/LICENSE
+   q: The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
+ * The TCGdex README states the database is MIT-licensed and documents self-hosting via Docker (quotes relayed via a summarizing fetch of the README; the LICENSE file itself was fetched raw)
+   src: https://github.com/tcgdex/cards-database/blob/master/README.md
+   q: The Database is licensed under the MIT License. A copy of the license is available in LICENSE ... You can build the API yourself by using our Dockerfile and using it on the port 3000 (docker-compose.y
+ * TCGdex requires no API key
+   src: https://tcgdex.dev/faq (fetched raw via curl 2026-08-12)
+   q: No. The TCGdex API is free to use and requires no API key.
+ * TCGdex has no hard rate limits and explicitly endorses local caching for bulk needs
+   src: https://tcgdex.dev/faq (fetched raw via curl 2026-08-12)
+   q: There are no published hard rate limits, but please be considerate. For bulk data needs, cache responses locally rather than fetching the same data repeatedly.
+ * TCGdex card data is community-maintained, so per-card errors are acknowledged and fixed via PRs
+   src: https://tcgdex.dev/faq (fetched raw via curl 2026-08-12)
+   q: Card data is community-maintained. If you notice a missing card or an incorrect localId, you can contribute a fix directly in the cards database repository.
+ * The tcgdex/server Docker image is actively built multi-arch including linux/arm64, so it runs on the Raspberry Pi 5
+   src: https://hub.docker.com/v2/repositories/tcgdex/server/tags/ (Docker Hub API, 2026-08-12)
+   q: edge | 2026-08-12T21:18:37.551093Z | [('linux', 'amd64'), ('linux', 'arm64')]
+ * One TCGdex set request returns the official printed size, total including secrets, and every card's number and name — proven on the example target card (Umbreon VMAX 215/203)
+   src: https://api.tcgdex.net/v2/en/sets/swsh7 (live probe 2026-08-12)
+   q: cardCount: {"firstEd": 0, "holo": 130, "normal": 112, "official": 203, "reverse": 132, "total": 237} ... {"id": "swsh7-215", "image": "https://assets.tcgdex.net/en/swsh/swsh7/215", "localId": "215", "
+ * The TCGdex full card object carries the National Dex id, so species can be resolved from dexId rather than name parsing
+   src: https://api.tcgdex.net/v2/en/cards/swsh7-215 (live probe 2026-08-12)
+   q: {'id': 'swsh7-215', 'localId': '215', 'name': 'Umbreon VMAX', 'dexId': [197], 'category': 'Pokemon', 'rarity': 'Secret Rare'}
+ * TCGdex has 218 English sets, so a per-set API backfill is 218 requests total
+   src: https://api.tcgdex.net/v2/en/sets (live probe 2026-08-12)
+   q: english sets: 218
+ * TCGdex tags data releases per set roughly every 1-2 months
+   src: https://api.github.com/repos/tcgdex/cards-database/releases
+   q: v2.47.0 | 2026-07-18T08:03:08Z ... v2.46.0 | v2.46.0: me04 english | 2026-05-23T18:36:32Z ... v2.42.0 | v2.42.0: Fantastical Parade release | 2026-01-29T23:11:26Z
+ * TCGdex disclaims Pokemon affiliation; MIT covers their compilation, not the underlying Pokemon IP
+   src: https://github.com/tcgdex/cards-database/blob/master/README.md
+   q: This database is not produced, endorsed, supported or affiliated with Nintendo or The Pokémon Company
+ * pokemontcg.io with a free API key allows 20,000 requests/day; keyless is 1,000/day and 30/minute
+   src: https://docs.pokemontcg.io/getting-started/rate-limits/ (fetched raw via curl 2026-08-12)
+   q: By default, requests are limited to 20,000/day. If you need a higher rate limit, feel free to contact me via Discord or email and we can discuss. If you aren't using an API key, you are rate limited t
+ * pokemontcg.io key signup is free at the Developer Portal, auth via X-Api-Key header
+   src: https://docs.pokemontcg.io/getting-started/authentication/ (fetched raw via curl 2026-08-12)
+   q: Sign up for an account at the Pokémon TCG Developer Portal to get your API key for free. ... Authentication to the API is performed via the X-Api-Key header.
+ * The pokemontcg.io ToS contains no clause permitting or prohibiting storing/caching its data in your own database — the acceptable-use rules are the complete usage constraints and none mention data storage or redistribution
+   src: https://dev.pokemontcg.io/terms (fetched raw via curl 2026-08-12, full text read)
+   q: You may not interfere with the Pokémon TCG API's operation / You may not attempt to gain access to another user's account / You may not attempt to disrupt or tamper with the Pokémon TCG API's servers 
+ * pokemontcg.io access is terminable at will and terms are modifiable at any time
+   src: https://dev.pokemontcg.io/terms (fetched raw via curl 2026-08-12)
+   q: we reserve the right to suspend anyone's access to the Pokémon TCG Developer portal and Pokémon TCG API at any time, with or without cause, and with or without notice. ... We may modify these terms at
+ * pokemontcg.io's bulk data dump repo has no license — GitHub reports license null and the root file listing contains no LICENSE file — so cloning it into Postgres has no explicit legal grant
+   src: https://api.github.com/repos/PokemonTCG/pokemon-tcg-data and its /contents/ listing
+   q: "name": "PokemonTCG/pokemon-tcg-data", "description": "The data found within the Pokémon TCG API", "license": null ... root files: .editorconfig .gitignore README.md cards decks sets v2_to_v1.rb
+ * pokemon-tcg-data adds new sets roughly every 2 months and is actively maintained
+   src: https://api.github.com/repos/PokemonTCG/pokemon-tcg-data/commits
+   q: 2026-07-17T04:45:22Z | Add Pitch Black (me5) / 2026-05-22T04:34:33Z | Chaos Rising (me4) / 2026-03-27T17:38:57Z | Add Perfect Order (me3) / 2026-01-30T23:12:56Z | Add ascended heroes (me2pt5)
+ * pokemontcg.io cards search caps at 250 cards per page, and its set object carries printedTotal (the official size field)
+   src: https://docs.pokemontcg.io/api-reference/cards/search-cards/ and https://api.pokemontcg.io/v2/sets?pageSize=1 (live probe 2026-08-12)
+   q: pageSize The maximum amount of cards to return. 250 (max of 250) ... {"id":"base1","name":"Base",..."printedTotal":102,"total":102,...} "totalCount":174
+ * pokemontcg.io API was unstable during live probes: cards search returned HTTP 500 (empty body) and single-card fetch returned HTTP 502, while /v2/sets succeeded, all within minutes on 2026-08-12
+   src: https://api.pokemontcg.io/v2/cards?pageSize=1&select=id and https://api.pokemontcg.io/v2/cards/swsh7-215 (live probes 2026-08-12)
+   q: HTTP_STATUS:500 ... error code: 502 HTTP_STATUS:502
+ * pokemontcg.io disclaims its price data, which is irrelevant here since CardStock's prices come from pricecharting, but confirms the API's own data posture
+   src: https://dev.pokemontcg.io/terms (fetched raw via curl 2026-08-12)
+   q: Price data is for informational purposes only. The Pokémon TCG API may include information about the price of third-party products or cards. Absolutely no guarantees are made for this information.
