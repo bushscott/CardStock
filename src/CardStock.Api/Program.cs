@@ -77,6 +77,12 @@ app.MapGet("/healthz/data", async (CardStockDbContext db) => Results.Ok(new
 app.MapCardEndpoints();
 app.MapRefreshEndpoint();
 
+// The WASM app's own static assets and its host page fallback. Kept after the
+// API routes so a request for a mapped API path is never shadowed by these.
+app.UseBlazorFrameworkFiles();
+app.UseStaticFiles();
+app.MapFallbackToFile("index.html");
+
 app.Run();
 
 public partial class Program { }

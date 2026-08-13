@@ -12,4 +12,10 @@
     <PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly.DevServer" Version="10.0.2" PrivateAssets="all" />
   </ItemGroup>
 
+  <ItemGroup>
+    <!-- Wire DTO types only (CardPageSnapshotDto, SaleDto, and friends). Application
+         references only Domain, so this keeps the WASM payload lean. -->
+    <ProjectReference Include="..\CardStock.Application\CardStock.Application.csproj" />
+  </ItemGroup>
+
 </Project>

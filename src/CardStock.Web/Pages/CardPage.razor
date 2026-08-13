@@ -1,0 +1,61 @@
+@page "/card/{Id:long}"
+@using CardStock.Application.Cards
+@using CardStock.Web.Services
+@inject CardApiClient Api
+
+@if (_result is null)
+{
+    <p class="loading-strip" aria-busy="true">Loading…</p>
+}
+else if (_result.Failed)
+{
+    <div class="card-error">
+        <p>Couldn't reach the data service.</p>
+        <button type="button" @onclick="LoadAsync">Retry</button>
+    </div>
+}
+else if (_result.Snapshot is null)
+{
+    <p class="card-not-found">@NotFoundCopy()</p>
+}
+else
+{
+    <PageTitle>@_result.Snapshot.Identity.Title</PageTitle>
+    <header class="card-identity">
+        <h1>@_result.Snapshot.Identity.Title</h1>
+        <p class="subline">@Subline(_result.Snapshot.Identity)</p>
+    </header>
+}
+
+@code {
+    [Parameter] public long Id { get; set; }
+
+    private SnapshotResult? _result;
+    private IReadOnlyList<SaleDto>? _sales;
+
+    protected override Task OnParametersSetAsync() => LoadAsync();
+
+    private async Task LoadAsync()
+    {
+        _result = null;
+        _sales = null;
+
+        var snapshotTask = Api.GetSnapshotAsync(Id);
+        var salesTask = Api.GetSalesAsync(Id);
+        await Task.WhenAll(snapshotTask, salesTask);
+
+        _sales = salesTask.Result;
+        _result = snapshotTask.Result;
+    }
+
+    private string NotFoundCopy() =>
+        _result?.NotFoundReason == "not_a_card"
+            ? $"Id {Id} isn't a card."
+            : $"No card with id {Id}.";
+
+    // Two segments only in Phase 2 -- no species field exists yet (docs/screens/card.md §3.1.1).
+    private static string Subline(IdentityDto identity) =>
+        identity.SetSize is { } size
+            ? $"{identity.SetName} · {identity.CollectorNumber}/{size}"
+            : $"{identity.SetName} · #{identity.CollectorNumber}";
+}

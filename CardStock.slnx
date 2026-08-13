@@ -14,5 +14,6 @@
     <Project Path="tests/CardStock.Infrastructure.Tests/CardStock.Infrastructure.Tests.csproj" />
     <Project Path="tests/CardStock.Integration.Tests/CardStock.Integration.Tests.csproj" />
     <Project Path="tests/CardStock.TestSupport/CardStock.TestSupport.csproj" />
+    <Project Path="tests/CardStock.Web.Tests/CardStock.Web.Tests.csproj" />
   </Folder>
 </Solution>
