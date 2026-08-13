@@ -100,11 +100,17 @@
     white-space: nowrap;
 }
 
-/* Reserved space for a badge Task 20 wires in -- empty for now. */
+/* card.md §4.2.1 (D-077): a fixed FULL-WIDTH 28px row beneath the title/subline block
+   (row-a), reserved whether or not RefreshBadge has anything to show -- without it the
+   six price cells jump a moment after paint, undoing the point of painting real data
+   immediately. Carried Task 16 review finding: this must be its own row, not a flex
+   sibling of row-a's title/actions. */
 .badge-slot {
-    width: 28px;
+    width: 100%;
     height: 28px;
     flex-shrink: 0;
+    display: flex;
+    align-items: center;
 }
 
 .row-a-actions {

@@ -73,12 +73,13 @@ internal static class Fixtures
         string title = "Umbreon VMAX (Alt Art)",
         string setName = "Evolving Skies",
         string? collectorNumber = "215",
-        int? setSize = null) =>
+        int? setSize = null,
+        DateTimeOffset? lastVisitedAt = null) =>
         new(
             cardId,
             new IdentityDto(title, collectorNumber, setSize, setName, HasImage: true, DelistedAt: null),
             new PricesDto("2026-08", []),
             new CensusDto([], PsaTotal: 0, CgcTotal: 0, ObservedAt: null, QualifyingObservations: 0),
             [],
-            new FreshnessDto(LastVisitedAt: null));
+            new FreshnessDto(lastVisitedAt));
 }

@@ -17,6 +17,11 @@ public class CardPageTests : BunitContext
         // auto-satisfies those calls so this file's identity/error-path tests (which don't care
         // about the chart) don't need to configure every JS call by hand.
         JSInterop.Mode = JSRuntimeMode.Loose;
+
+        // Task 20: CardPage injects TimeProvider to decide freshness. None of this file's
+        // fixtures care about the exact instant, so the real clock is fine here -- only
+        // RefreshFlowTests.cs needs a fixed one.
+        Services.AddSingleton(TimeProvider.System);
     }
 
     [Fact]

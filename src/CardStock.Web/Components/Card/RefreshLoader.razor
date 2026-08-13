@@ -1,0 +1,24 @@
+@* card.md §4.2.1 / D-077: the "genuinely in flight" mark -- transcribed from
+   CardStock Mockup/Cardstock Logo.dc.html:196-208 (mockup is READ-ONLY and frozen; this
+   component is the only place this motion runs). D-077 is explicit that only the sparkline
+   draws and clears here ("cards static, sparkline drawing and clearing") -- the entrance
+   keyframes (csBack/csFront, played by a different instance at Logo:159-176 when the mark
+   first deals itself) are not reproduced, so the two card outlines never move here. Colors
+   mirror AppLogo.razor's theme tokens rather than the mockup's literal light-mode hexes, the
+   same documented in-app rule: inlined, not <img>, so it inherits theme tokens with no asset
+   swap. *@
+<svg viewBox="0 0 32 32" fill="none" width="@Size" height="@Size" aria-hidden="true">
+    <g transform="rotate(-12 13 16)">
+        <rect x="5.5" y="5.5" width="15" height="21" rx="2.5" stroke="var(--ink, #1C1C1E)" stroke-width="2"></rect>
+    </g>
+    <rect x="12" y="5.5" width="15" height="21" rx="2.5" fill="var(--card, #FFFFFF)" stroke="var(--ink, #1C1C1E)" stroke-width="2"></rect>
+    <polyline class="rl-line" points="15,21.5 17.5,17 19.5,18.5 23.5,12.5" stroke="var(--logoTeal, #0E8A7B)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></polyline>
+    <circle class="rl-dot" cx="23.5" cy="12.5" r="1.7" fill="var(--logoTeal, #0E8A7B)"></circle>
+</svg>
+
+@code {
+    /// <summary>card.md §4.2.1: 18px minimum in the badge -- Logo:145 floors the mark at
+    /// 16px, so the badge is sized to the logo, not the reverse.</summary>
+    [Parameter]
+    public int Size { get; set; } = 18;
+}

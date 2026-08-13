@@ -1,7 +1,9 @@
 @* card.md §2.1-§2.2: art column + right column (title/actions row, tier strip, chip
    row) -- the one card panel block #1 describes as a single flex container, so the
    three "stacked rows" of §2.2 are rendered together here rather than split across
-   sibling components.
+   sibling components. §4.2.1 (D-077) inserts a fourth row between row-a and the tier
+   strip: a fixed 28px full-width badge slot, never a flex sibling beside the title
+   (Task 16 review finding, carried into Task 20, which wires RefreshBadge into it).
 
    §3.1.1 (D-079, D-084.10): Phase 2's subline is two segments, never three. The set
    name is a real destination that doesn't exist yet, so it renders through the same
@@ -41,14 +43,14 @@
                 <DelistedChip DelistedAt="@Identity.DelistedAt" />
             </div>
 
-            <div class="badge-slot">@BadgeSlot</div>
-
             <div class="row-a-actions">
                 <DeferredControl Label="Open in Charts →" Tooltip="Charts arrives in a later phase" CssClass="btn-open-charts" />
                 <DeferredControl Label="+ Watchlist ▾" Tooltip="Watchlists arrive with accounts, in a later phase" CssClass="btn-watchlist" />
                 <DeferredControl Label="+ Binder" Tooltip="The Binder arrives in Phase 4" CssClass="btn-binder" />
             </div>
         </div>
+
+        <div class="badge-slot">@BadgeSlot</div>
 
         <TierStrip Prices="@Prices" />
         <SignalChips Chips="@Chips" />
@@ -73,7 +75,9 @@
     [Parameter]
     public IReadOnlyList<ChipDto> Chips { get; set; } = Array.Empty<ChipDto>();
 
-    /// <summary>Empty reserved 28px slot until Task 20 fills it in.</summary>
+    /// <summary>The reserved 28px slot's content -- CardPage supplies a RefreshBadge
+    /// here (task 20). Empty renders as a blank row; the reservation is CSS
+    /// (.badge-slot), not conditional on this fragment being set.</summary>
     [Parameter]
     public RenderFragment? BadgeSlot { get; set; }
 

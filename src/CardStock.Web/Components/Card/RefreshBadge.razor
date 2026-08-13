@@ -1,0 +1,36 @@
+@* card.md §4.2.1 (D-077): the badge slot's visible content, copy verbatim. Fresh and
+   Landed both render nothing -- the reserved 28px slot (IdentityHeader.razor's
+   .badge-slot) is what keeps the six price cells from jumping, not visible content in
+   either of those two states. *@
+@if (State == RefreshState.Fetching)
+{
+    <span class="refresh-badge refresh-badge-fetching">
+        <RefreshLoader Size="18" />
+        <span>Checking for a newer price</span>
+    </span>
+}
+else if (State == RefreshState.Failed)
+{
+    <span class="refresh-badge refresh-badge-failed">@FailedCopy()</span>
+}
+
+@code {
+    [Parameter, EditorRequired]
+    public RefreshState State { get; set; }
+
+    /// <summary>The STORED as-of date -- unaffected by this fetch's outcome. "Prices
+    /// unchanged. They were never wrong, only old" (D-077).</summary>
+    [Parameter]
+    public DateTimeOffset? LastVisitedAt { get; set; }
+
+    [Parameter]
+    public DateTimeOffset Now { get; set; }
+
+    // En dash (U+2013), brand.md §4.2's "caution, directionless" -- never a hyphen.
+    private string FailedCopy() =>
+        LastVisitedAt is { } visited
+            ? $"– as of {visited:yyyy-MM-dd} · {DaysOld(visited)}d old"
+            : "– never visited";
+
+    private int DaysOld(DateTimeOffset visited) => (int)Math.Floor((Now - visited).TotalDays);
+}

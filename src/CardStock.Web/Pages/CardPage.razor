@@ -1,8 +1,10 @@
 @page "/card/{Id:long}"
+@implements IDisposable
 @using CardStock.Application.Cards
 @using CardStock.Web.Components.Card
 @using CardStock.Web.Services
 @inject CardApiClient Api
+@inject TimeProvider Clock
 
 @if (_result is null)
 {
@@ -22,8 +24,13 @@ else if (_result.Snapshot is null)
 else
 {
     <PageTitle>@_result.Snapshot.Identity.Title</PageTitle>
+    <Breadcrumb SetName="@_result.Snapshot.Identity.SetName" CardTitle="@_result.Snapshot.Identity.Title" />
     <IdentityHeader Identity="@_result.Snapshot.Identity" CardId="@_result.Snapshot.CardId"
-                    Prices="@_result.Snapshot.Prices" Chips="@_result.Snapshot.Signals" />
+                    Prices="@_result.Snapshot.Prices" Chips="@_result.Snapshot.Signals">
+        <BadgeSlot>
+            <RefreshBadge State="@_refreshState" LastVisitedAt="@_result.Snapshot.Freshness.LastVisitedAt" Now="@_now" />
+        </BadgeSlot>
+    </IdentityHeader>
     <PriceChart Prices="@_result.Snapshot.Prices" />
     <SalesLedger Sales="@_sales" Retry="LoadSalesAsync" />
     <div class="census-pair">
@@ -39,20 +46,87 @@ else
 
     private SnapshotResult? _result;
     private IReadOnlyList<SaleDto>? _sales;
+    private RefreshState _refreshState = RefreshState.Fresh;
+    private DateTimeOffset _now;
+    private long? _refreshCheckedForId;
+    private bool _disposed;
 
     protected override Task OnParametersSetAsync() => LoadAsync();
 
     private async Task LoadAsync()
     {
+        var id = Id;
         _result = null;
         _sales = null;
+        _refreshState = RefreshState.Fresh;
 
-        var snapshotTask = Api.GetSnapshotAsync(Id);
-        var salesTask = Api.GetSalesAsync(Id);
+        var snapshotTask = Api.GetSnapshotAsync(id);
+        var salesTask = Api.GetSalesAsync(id);
         await Task.WhenAll(snapshotTask, salesTask);
 
         _sales = salesTask.Result;
         _result = snapshotTask.Result;
+
+        if (_result is { Snapshot: { } snapshot } && _refreshCheckedForId != id)
+        {
+            _refreshCheckedForId = id;
+            _ = MaybeRefreshAsync(id, snapshot.Freshness.LastVisitedAt);
+        }
+    }
+
+    /// <summary>D-062/D-077: on load, a card whose last_visited_at is null or older than
+    /// 24h gets one express-visit through the API, fired without blocking the paint above --
+    /// LoadAsync's own await has already resolved and the snapshot is already on screen by
+    /// the time this method's continuation runs. Deliberately fire-and-forget (not awaited by
+    /// LoadAsync) so a slow or hung upstream (D-076: no timeout of its own, up to HttpClient's
+    /// 60s cap) never holds up route navigation completing.</summary>
+    private async Task MaybeRefreshAsync(long id, DateTimeOffset? lastVisitedAt)
+    {
+        if (_disposed) return;
+        _now = Clock.GetUtcNow();
+
+        // D-062/D-077: a card visited within the last 24h makes no call at all -- "the
+        // second viewer of a card costs the site nothing."
+        if (lastVisitedAt is { } visited && _now - visited <= TimeSpan.FromHours(24))
+        {
+            _refreshState = RefreshState.Fresh;
+            return;
+        }
+
+        _refreshState = RefreshState.Fetching;
+        StateHasChanged();
+
+        var status = await Api.RefreshAsync(id);
+        if (_disposed) return;
+
+        if (status == 200)
+        {
+            _refreshState = RefreshState.Landed;
+
+            var snapshotTask = Api.GetSnapshotAsync(id);
+            var salesTask = Api.GetSalesAsync(id);
+            await Task.WhenAll(snapshotTask, salesTask);
+            if (_disposed) return;
+
+            // Never null _result mid-refetch (D-077): stored prices stay painted even if
+            // this second call somehow fails; only a genuine, non-failed response replaces
+            // what's on screen.
+            if (!snapshotTask.Result.Failed)
+            {
+                _result = snapshotTask.Result;
+            }
+
+            if (salesTask.Result is not null)
+            {
+                _sales = salesTask.Result;
+            }
+        }
+        else
+        {
+            _refreshState = RefreshState.Failed;
+        }
+
+        StateHasChanged();
     }
 
     /// <summary>The ledger panel's own Retry (SalesLedger's error state) -- re-fetches only the
@@ -67,4 +141,6 @@ else
         _result?.NotFoundReason == "not_a_card"
             ? $"Id {Id} isn't a card."
             : $"No card with id {Id}.";
+
+    public void Dispose() => _disposed = true;
 }

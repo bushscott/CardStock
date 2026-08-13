@@ -1,0 +1,21 @@
+/* card.md §4.2.1: both badge variants are 26px tall so they swap with no movement
+   inside the identity header's reserved 28px slot (IdentityHeader.razor's .badge-slot). */
+.refresh-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    height: 26px;
+    font-size: 12px;
+    font-weight: 500;
+}
+
+.refresh-badge-fetching {
+    color: var(--mut);
+}
+
+/* Mono, brand.md §4.2's "caution, directionless" en dash in --warnInk -- the one hue
+   colourblind mode leaves alone. */
+.refresh-badge-failed {
+    font-family: 'JetBrains Mono', monospace;
+    color: var(--warnInk);
+}
