@@ -87,15 +87,7 @@ public static class ChipEngine
         return null;
     }
 
-    private static string Label(PriceTier tier) => tier switch
-    {
-        PriceTier.Psa10 => "PSA 10",
-        PriceTier.Grade9Half => "Grade 9.5",
-        PriceTier.Grade9 => "Grade 9",
-        PriceTier.Grade8 => "Grade 8",
-        PriceTier.Grade7 => "Grade 7",
-        _ => "Raw",
-    };
+    private static string Label(PriceTier tier) => TierLabels.For(tier);
 
     private static string Pct(decimal fraction)
     {
