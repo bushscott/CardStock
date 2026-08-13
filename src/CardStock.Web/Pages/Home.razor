@@ -1,7 +1,13 @@
-﻿@page "/"
+@page "/"
 
-<PageTitle>Home</PageTitle>
+@* D-087: every not-yet-built surface ships its UI with an honest placeholder —
+   the root is the Home feed's slot, and it says so instead of rendering the
+   Blazor template's filler. The copy reuses the Home nav tab's exact deferred
+   tooltip string (ChromeTests.DeferredTooltips). *@
 
-<h1>Hello, world!</h1>
+<PageTitle>Cardstock</PageTitle>
 
-Welcome to your new app.
+<div class="home-placeholder">
+    <h3>Home</h3>
+    <p>Home arrives in a later phase. Card pages are live at <span class="mono">/card/{id}</span>.</p>
+</div>

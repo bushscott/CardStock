@@ -61,6 +61,28 @@ public class IdentityHeaderTests : BunitContext
     }
 
     [Fact]
+    public void Subline_species_placeholder_is_deferred_with_its_phase_tooltip()
+    {
+        // D-087: the slot ships before the data. An honest placeholder label holds the
+        // character segment until the Pokédex phase's tag table supplies real names —
+        // never an omitted segment, and never a name guessed from the title string.
+        var cut = RenderHeader(Identity());
+        var species = cut.Find(".subline .subline-character");
+
+        Assert.True(species.HasAttribute("disabled"));
+        Assert.Equal("Pokémon name", species.TextContent);
+        Assert.Equal("The Pokémon's name arrives with the Pokédex phase", species.GetAttribute("title"));
+    }
+
+    [Fact]
+    public void Subline_species_placeholder_renders_even_without_a_collector_number()
+    {
+        var cut = RenderHeader(Identity(collectorNumber: null));
+
+        Assert.Single(cut.FindAll(".subline .subline-character"));
+    }
+
+    [Fact]
     public void Delisted_chip_renders_only_when_delisted_at_is_set()
     {
         var delisted = RenderHeader(Identity(delistedAt: new DateTimeOffset(2026, 7, 30, 0, 0, 0, TimeSpan.Zero)));

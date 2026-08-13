@@ -5,11 +5,13 @@
    strip: a fixed 28px full-width badge slot, never a flex sibling beside the title
    (Task 16 review finding, carried into Task 20, which wires RefreshBadge into it).
 
-   §3.1.1 (D-079, D-084.10): Phase 2's subline is two segments, never three. The set
+   §3.1.1 (D-079, D-084.10, amended by D-087): all three subline slots render. The set
    name is a real destination that doesn't exist yet, so it renders through the same
    deferred-disabled treatment as every other not-yet-built control (Task 14 review
-   finding, carried into this task) -- never plain text. The character segment does
-   not render at all; there is no species field to show.
+   finding, carried into this task) -- never plain text. The character segment has no
+   species field behind it yet, so its slot holds the D-087 placeholder label in the
+   pending tone -- self-evidently not data -- until the Pokédex phase's tag table
+   supplies real names. A name is never guessed from the title string.
 
    Row A's actions (Open in Charts / watchlist / binder) reuse the exact label and
    tooltip strings Task 15 already put on record in ChromeTests.DeferredTooltips, so
@@ -39,6 +41,10 @@
                     {
                         <span class="subline-number">@number</span>
                     }
+                    <span class="subline-dot" aria-hidden="true">·</span>
+                    <DeferredControl Label="Pokémon name"
+                                     Tooltip="The Pokémon's name arrives with the Pokédex phase"
+                                     CssClass="subline-character" />
                 </p>
                 <DelistedChip DelistedAt="@Identity.DelistedAt" />
             </div>

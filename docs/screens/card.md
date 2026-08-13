@@ -28,7 +28,7 @@
 | `Cardstock Binder.dc.html` | :46 | "Binder" nav tab |
 | `Cardstock Browse.dc.html` | :47, :56 | "Browse" nav tab; breadcrumb root |
 | `Cardstock Set.dc.html` | :56, :66 | Breadcrumb set crumb; set name in the subline |
-| `Cardstock Character.dc.html` | :66 | Character name in the subline. **Phase 2: this segment does not render at all** — no species field exists yet; see §3.1.1 (D-079, D-084.10). |
+| `Cardstock Character.dc.html` | :66 | Character name in the subline. **Phase 2: this segment does not render at all** — no species field exists yet; see §3.1.1 (D-079, D-084.10). **Amended 2026-08-13 (D-087): the slot renders a deferred placeholder label — see §3.1.1.** |
 | `Cardstock Profile.dc.html` | :51 | Avatar chip (initial `O`) |
 
 No nav tab is marked active on this screen — all five carry `border-bottom: 2px solid transparent` (:43–:47). The Card screen is a leaf, not a tab.
@@ -240,7 +240,7 @@ Everything the screen renders. **All monetary values pass through `money()` (:33
 | Card name | :56, :65 | string | `Umbreon VMAX (Alt Art)` | Rendered twice: breadcrumb leaf and `<h1>`. Must match. |
 | Set name | :56, :66 | string + link | `Evolving Skies` | Rendered twice: breadcrumb crumb and subline. Both link to the Set screen. |
 | Card number | :66 | string, verbatim | `215/203` | Printed as-is between `·` separators; not zero-padded or reformatted. **Phase 2: ships `#num` until enrichment lands, then `215/203` — see §3.1.1.** |
-| Character name | :66 | string + link | `Umbreon` | Links to the Character screen. **Phase 2: this segment does not render at all** — no species field exists yet; see §3.1.1 (D-079, D-084.10). |
+| Character name | :66 | string + link | `Umbreon` | Links to the Character screen. **Phase 2: this segment does not render at all** — no species field exists yet; see §3.1.1 (D-079, D-084.10). **Amended 2026-08-13 (D-087): the slot renders the deferred placeholder `Pokémon name` — see §3.1.1.** |
 | Card art | :60, :104 | image, native 325×450 | `image-slot id="art-umbreon"` | Same asset id in thumbnail and lightbox. Thumbnail radius 6, lightbox radius 10. |
 
 #### 3.1.1 Corrected — the subline drops species in Phase 2 (D-079, D-084.10)
@@ -263,6 +263,16 @@ itself (D-084.10). This is a different case from the deferred-disabled nav tabs/
 binder controls (D-084.1) — those defer a *feature* that already has data; this defers a *field*
 that does not exist yet, so there is nothing to render, disabled or otherwise. See §8 C-24 for the
 route-id, delisted-chip, and not-found additions from the same design pass.
+
+**Amended 2026-08-13 (D-087) — the slot ships, holding a placeholder.** The owner extended the
+deferred-UI ruling to data slots: *"Even if you don't have the functionality wired up, put the UI in
+with placeholder controls or labels."* The subline therefore renders **three** segments again —
+`{set} · #4 · Pokémon name` — where the third is a deferred control with label `Pokémon name` and
+tooltip `The Pokémon's name arrives with the Pokédex phase`, wearing the pending tone (`--mut2`,
+the `card art pending` precedent) rather than the accent, so it can never be read as a real name.
+The paragraph above stands as the pre-amendment record; D-084.10 is unchanged on sourcing — real
+names and the Character link still arrive with the Pokédex phase's tag table, and a name is never
+guessed from the title string.
 
 ### 3.2 Tier strip — 6 rows
 

@@ -329,6 +329,31 @@ Read directly 2026-08-10, to be mirrored per D-018–D-021.
 
 ## Decided
 
+### D-087 — Placeholder-first UI: every slot ships, labeled honestly, before its data or feature
+Owner, 2026-08-13, reviewing the live card page: *"Even if you don't have the functionality wired
+up, put the UI in with placeholder controls or labels."* A standing rule for all remaining
+development. It extends D-084.1 (later-phase **controls** render deferred-disabled with honest
+tooltips) to **data-shaped slots**: where a field's data does not exist yet, the slot still
+renders, holding a placeholder label that is self-evidently not data — pending tone (`--mut2`),
+deferred treatment, tooltip naming the phase that fills it. This supersedes card.md §3.1.1's
+pre-amendment distinction ("a field that does not exist… there is nothing to render, disabled or
+otherwise"); that spec section carries the dated amendment.
+
+**Boundary — the two rules are untouched.** A placeholder *label* is UI scaffolding; a
+computed-looking *value* is data. Metrics below their floors still render states (`LOW DATA`,
+`LOCKED`, …), never placeholder numbers, and identity fields render placeholder labels, never
+guessed values — the species name is still never derived from the title string (D-084.10 unchanged
+on sourcing).
+
+**First applications, same day:** the subline's character segment (deferred label `Pokémon name`,
+tooltip `The Pokémon's name arrives with the Pokédex phase`; real names arrive with the Pokédex
+phase's tag table) and the root page (the Home feed's slot renders `Home arrives in a later phase`,
+retiring the Blazor template's "Hello, world!" filler the Phase 2 plan's deletion list missed).
+
+**Known omission left un-ruled:** the census gem-rate sentence (card.md §3.8) is omitted until its
+inputs qualify; under this rule it arguably becomes a visible state line instead. Not changed —
+needs an owner call when it next comes up.
+
 ### D-084 — Phase 2 scope rulings: no auth, URL-only reachability, brand.md tier palette
 Owner, 2026-08-12, at the start of the (restarted) Phase 2 brainstorming:
 1. **No auth in Phase 2.** The Card page ships anonymous. Watchlist and binder render
