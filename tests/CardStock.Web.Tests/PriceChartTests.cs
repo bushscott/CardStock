@@ -60,6 +60,22 @@ public class PriceChartTests : BunitContext
     }
 
     [Fact]
+    public void Open_in_charts_renders_deferred_disabled_with_no_anchor_in_the_header()
+    {
+        // I1: "open in Charts" used to be a dead <a href="/charts"> -- Charts doesn't exist
+        // until a later phase. It must render present-but-disabled like every other deferred
+        // control (CLAUDE.md; global-constraints.md), never a link to nowhere.
+        var cut = Render<PriceChart>(p => p.Add(x => x.Prices, SixTiers()));
+
+        Assert.Empty(cut.FindAll(".pc-header a"));
+
+        var openInCharts = cut.Find(".pc-open-charts");
+        Assert.True(openInCharts.HasAttribute("disabled"));
+        Assert.Equal("Charts arrives in a later phase", openInCharts.GetAttribute("title"));
+        Assert.Equal("open in Charts →", openInCharts.TextContent);
+    }
+
+    [Fact]
     public void Legend_renders_six_chips()
     {
         var cut = Render<PriceChart>(p => p.Add(x => x.Prices, SixTiers()));
