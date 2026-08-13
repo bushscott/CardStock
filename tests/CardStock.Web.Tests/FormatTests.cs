@@ -1,0 +1,43 @@
+using CardStock.Web.Services;
+
+namespace CardStock.Web.Tests;
+
+public class FormatTests
+{
+    [Fact]
+    public void Money_rounds_to_whole_dollars_with_en_US_grouping()
+    {
+        Assert.Equal("$1,486", Format.Money(148600));
+    }
+
+    [Fact]
+    public void ChangePercent_uses_the_true_minus_sign_for_negatives()
+    {
+        var text = Format.ChangePercent(-0.002m);
+
+        Assert.Equal("−0.2%", text);
+        Assert.Equal('−', text[0]);
+    }
+
+    [Fact]
+    public void ChangePercent_signs_positive_and_zero_values_with_a_plus()
+    {
+        Assert.Equal("+6.2%", Format.ChangePercent(0.062m));
+        Assert.Equal("+0.0%", Format.ChangePercent(0m));
+    }
+
+    [Fact]
+    public void MonthLabel_renders_the_typographic_apostrophe_from_a_full_date()
+    {
+        var text = Format.MonthLabel("2026-08-01");
+
+        Assert.Equal("Aug ’26", text);
+        Assert.Contains('’', text);
+    }
+
+    [Fact]
+    public void MonthLabel_accepts_a_bare_yyyy_MM_month()
+    {
+        Assert.Equal("Aug ’26", Format.MonthLabel("2026-08"));
+    }
+}

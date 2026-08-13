@@ -1,0 +1,66 @@
+/* card.md §2.3 Row B: display:grid; grid-template-columns: repeat(6, 1fr); gap: 8px. */
+.tier-strip {
+    display: grid;
+    grid-template-columns: repeat(6, 1fr);
+    gap: 8px;
+}
+
+/* card.md §2.3 line :86-:90: --bg background, 1px --line, radius 8, padding 9px 11px. */
+.tier-cell {
+    background: var(--bg);
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    padding: 9px 11px;
+    min-width: 0;
+}
+
+.tier-label {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 4px;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: .06em;
+    color: var(--mut2);
+    text-transform: uppercase;
+    white-space: nowrap;
+}
+
+.tier-label-text {
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+/* card.md §2.3.1: current-month provisional marker, --mut2, ~12px, keyboard-reachable. */
+.tier-glyph {
+    flex-shrink: 0;
+    color: var(--mut2);
+    font-size: 12px;
+    cursor: help;
+}
+
+/* JetBrains Mono, 18px/700 (card.md §2.3 line 2). */
+.tier-price {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 18px;
+    font-weight: 700;
+    margin-top: 3px;
+    color: var(--ink);
+}
+
+/* JetBrains Mono, 12px (card.md §2.3 line 3). Colour keys off the formatted sign. */
+.tier-change {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12px;
+    margin-top: 1px;
+    color: var(--mut2);
+}
+
+.tier-change-pos {
+    color: var(--pos);
+}
+
+.tier-change-neg {
+    color: var(--neg2);
+}

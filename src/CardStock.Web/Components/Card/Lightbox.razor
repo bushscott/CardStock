@@ -1,0 +1,40 @@
+@* card.md §5.3 / OQ-8 (resolved 2026-08-13): role="dialog" + aria-modal, Escape closes,
+   backdrop click closes, the art itself does not (stopPropagation), and on close focus
+   returns to the thumbnail via JS interop. A focus trap and scroll lock are explicitly
+   NOT built in Phase 2 -- that is the complete set OQ-8 resolves. *@
+@using CardStock.Web.Services
+@inject IJSRuntime JS
+
+<div class="lightbox-backdrop" role="dialog" aria-modal="true" tabindex="-1"
+     @onkeydown="OnKeyDownAsync" @onclick="CloseAsync">
+    <div class="lightbox-art" @onclick:stopPropagation="true">
+        <img src="@CardApiClient.ImageUrl(CardId)" alt="@Title" />
+        <button type="button" class="lightbox-close" aria-label="Close"
+                title="Close the full-size art" @onclick="CloseAsync">✕</button>
+    </div>
+</div>
+
+@code {
+    [Parameter, EditorRequired]
+    public long CardId { get; set; }
+
+    [Parameter]
+    public string Title { get; set; } = "";
+
+    [Parameter]
+    public EventCallback OnClose { get; set; }
+
+    private async Task CloseAsync()
+    {
+        await OnClose.InvokeAsync();
+        await JS.InvokeVoidAsync("focusElement", "card-art-thumb");
+    }
+
+    private async Task OnKeyDownAsync(KeyboardEventArgs e)
+    {
+        if (e.Key == "Escape")
+        {
+            await CloseAsync();
+        }
+    }
+}

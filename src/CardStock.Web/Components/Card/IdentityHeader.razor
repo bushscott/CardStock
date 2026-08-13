@@ -1,0 +1,95 @@
+@* card.md §2.1-§2.2: art column + right column (title/actions row, tier strip, chip
+   row) -- the one card panel block #1 describes as a single flex container, so the
+   three "stacked rows" of §2.2 are rendered together here rather than split across
+   sibling components.
+
+   §3.1.1 (D-079, D-084.10): Phase 2's subline is two segments, never three. The set
+   name is a real destination that doesn't exist yet, so it renders through the same
+   deferred-disabled treatment as every other not-yet-built control (Task 14 review
+   finding, carried into this task) -- never plain text. The character segment does
+   not render at all; there is no species field to show.
+
+   Row A's actions (Open in Charts / watchlist / binder) reuse the exact label and
+   tooltip strings Task 15 already put on record in ChromeTests.DeferredTooltips, so
+   this is the second and only other place those strings are typed. *@
+@using CardStock.Application.Cards
+@using CardStock.Web.Services
+
+<div class="card-identity-panel">
+    <button type="button" class="art-col" title="Click to enlarge" @onclick="OpenLightbox">
+        @if (_imageFailed)
+        {
+            <div class="art-placeholder">card art pending</div>
+        }
+        else
+        {
+            <img id="card-art-thumb" src="@CardApiClient.ImageUrl(CardId)" alt="@Identity.Title" @onerror="OnImageError" />
+        }
+    </button>
+
+    <div class="right-col">
+        <div class="row-a">
+            <div class="title-block">
+                <h1>@Identity.Title</h1>
+                <p class="subline">
+                    <DeferredControl Label="@Identity.SetName" Tooltip="@Breadcrumb.SetTooltip" CssClass="subline-set" />
+                    @if (NumberSegment() is { } number)
+                    {
+                        <span class="subline-number">@number</span>
+                    }
+                </p>
+                <DelistedChip DelistedAt="@Identity.DelistedAt" />
+            </div>
+
+            <div class="badge-slot">@BadgeSlot</div>
+
+            <div class="row-a-actions">
+                <DeferredControl Label="Open in Charts →" Tooltip="Charts arrives in a later phase" CssClass="btn-open-charts" />
+                <DeferredControl Label="+ Watchlist ▾" Tooltip="Watchlists arrive with accounts, in a later phase" CssClass="btn-watchlist" />
+                <DeferredControl Label="+ Binder" Tooltip="The Binder arrives in Phase 4" CssClass="btn-binder" />
+            </div>
+        </div>
+
+        <TierStrip Prices="@Prices" />
+        <SignalChips Chips="@Chips" />
+    </div>
+
+    @if (_lightboxOpen)
+    {
+        <Lightbox CardId="@CardId" Title="@Identity.Title" OnClose="CloseLightbox" />
+    }
+</div>
+
+@code {
+    [Parameter, EditorRequired]
+    public IdentityDto Identity { get; set; } = default!;
+
+    [Parameter]
+    public long CardId { get; set; }
+
+    [Parameter, EditorRequired]
+    public PricesDto Prices { get; set; } = default!;
+
+    [Parameter]
+    public IReadOnlyList<ChipDto> Chips { get; set; } = Array.Empty<ChipDto>();
+
+    /// <summary>Empty reserved 28px slot until Task 20 fills it in.</summary>
+    [Parameter]
+    public RenderFragment? BadgeSlot { get; set; }
+
+    private bool _imageFailed;
+    private bool _lightboxOpen;
+
+    private void OnImageError() => _imageFailed = true;
+
+    private void OpenLightbox() => _lightboxOpen = true;
+
+    private void CloseLightbox() => _lightboxOpen = false;
+
+    // card.md §3.1.1: number segment stays plain text -- omitted when the source
+    // hasn't parsed a collector number, "#num" until the TCGdex enrichment lands a
+    // SetSize, "num/size" after.
+    private string? NumberSegment() =>
+        Identity.CollectorNumber is null ? null :
+        Identity.SetSize is { } size ? $"· {Identity.CollectorNumber}/{size}" : $"· #{Identity.CollectorNumber}";
+}

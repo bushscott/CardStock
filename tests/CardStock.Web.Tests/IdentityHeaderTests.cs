@@ -1,0 +1,105 @@
+using Bunit;
+using CardStock.Application.Cards;
+using CardStock.Web.Components.Card;
+using Microsoft.AspNetCore.Components.Web;
+using Microsoft.JSInterop;
+
+namespace CardStock.Web.Tests;
+
+public class IdentityHeaderTests : BunitContext
+{
+    private static readonly PricesDto EmptyPrices = new("2026-08", []);
+
+    public IdentityHeaderTests()
+    {
+        // Close() returns focus to the thumbnail through JS interop -- nothing under
+        // test asserts on the call itself, so Loose keeps unrelated JS calls from
+        // throwing (bUnit's default, set explicitly so it can't silently regress).
+        JSInterop.Mode = JSRuntimeMode.Loose;
+    }
+
+    private static IdentityDto Identity(
+        string? collectorNumber = "215", int? setSize = null, DateTimeOffset? delistedAt = null) =>
+        new("Umbreon VMAX (Alt Art)", collectorNumber, setSize, "Evolving Skies", HasImage: true, delistedAt);
+
+    private IRenderedComponent<IdentityHeader> RenderHeader(IdentityDto identity) =>
+        Render<IdentityHeader>(p => p
+            .Add(x => x.Identity, identity)
+            .Add(x => x.CardId, 630417L)
+            .Add(x => x.Prices, EmptyPrices)
+            .Add(x => x.Chips, Array.Empty<ChipDto>()));
+
+    [Fact]
+    public void Subline_set_segment_is_deferred_disabled_not_plain_text()
+    {
+        var cut = RenderHeader(Identity());
+
+        var setControl = cut.Find(".subline button");
+
+        Assert.True(setControl.HasAttribute("disabled"));
+        Assert.Equal("true", setControl.GetAttribute("aria-disabled"));
+        Assert.Equal("Evolving Skies", setControl.TextContent);
+        Assert.Equal(Breadcrumb.SetTooltip, setControl.GetAttribute("title"));
+    }
+
+    [Fact]
+    public void Subline_number_segment_renders_the_hash_form_and_omits_when_null()
+    {
+        var withNumber = RenderHeader(Identity(collectorNumber: "215"));
+        Assert.Contains("#215", withNumber.Find(".subline").TextContent);
+
+        var withoutNumber = RenderHeader(Identity(collectorNumber: null));
+        Assert.DoesNotContain("#", withoutNumber.Find(".subline").TextContent);
+    }
+
+    [Fact]
+    public void Subline_number_segment_prefers_the_set_size_form_when_present()
+    {
+        var cut = RenderHeader(Identity(collectorNumber: "215", setSize: 203));
+
+        Assert.Contains("215/203", cut.Find(".subline").TextContent);
+    }
+
+    [Fact]
+    public void Delisted_chip_renders_only_when_delisted_at_is_set()
+    {
+        var delisted = RenderHeader(Identity(delistedAt: new DateTimeOffset(2026, 7, 30, 0, 0, 0, TimeSpan.Zero)));
+        var chip = delisted.Find(".chip-delisted");
+        Assert.Equal("delisted 2026-07-30", chip.TextContent);
+        Assert.Equal(
+            "The source no longer lists this card; its history stands.", chip.GetAttribute("title"));
+
+        var active = RenderHeader(Identity(delistedAt: null));
+        Assert.Empty(active.FindAll(".chip-delisted"));
+    }
+
+    [Fact]
+    public void Row_a_actions_render_deferred_disabled_with_task_15s_canonical_copy()
+    {
+        var cut = RenderHeader(Identity());
+
+        var openInCharts = cut.Find(".btn-open-charts");
+        Assert.True(openInCharts.HasAttribute("disabled"));
+        Assert.Equal("Charts arrives in a later phase", openInCharts.GetAttribute("title"));
+
+        var watchlist = cut.Find(".btn-watchlist");
+        Assert.Equal("Watchlists arrive with accounts, in a later phase", watchlist.GetAttribute("title"));
+
+        var binder = cut.Find(".btn-binder");
+        Assert.Equal("The Binder arrives in Phase 4", binder.GetAttribute("title"));
+    }
+
+    [Fact]
+    public void Escape_closes_the_lightbox_opened_from_the_thumbnail()
+    {
+        var cut = RenderHeader(Identity());
+
+        cut.Find(".art-col").Click();
+        var dialog = cut.Find("[role='dialog']");
+        Assert.Equal("true", dialog.GetAttribute("aria-modal"));
+
+        dialog.KeyDown(new KeyboardEventArgs { Key = "Escape" });
+
+        Assert.Empty(cut.FindAll("[role='dialog']"));
+    }
+}

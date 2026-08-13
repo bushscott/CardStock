@@ -1,0 +1,71 @@
+@* card.md §2.3/§2.3.1 (D-077): six fixed cells, price/change/label. Absence renders a
+   dash, never a countdown (§3.2, D-075). The seeded strip price is always the current,
+   incomplete month, so honesty demands the ◌ glyph and the month-to-date tooltip --
+   both keyboard-reachable, not hover-only (a bare title on a span is invisible to
+   keyboard users). *@
+@using CardStock.Application.Cards
+@using CardStock.Web.Services
+
+<div class="tier-strip">
+    @foreach (var tier in Prices.Tiers)
+    {
+        <div class="tier-cell" title="@CellTooltip(tier)">
+            <div class="tier-label">
+                <span class="tier-label-text">@tier.Label</span>
+                @if (tier.Price.IsCurrentMonth == true)
+                {
+                    <span class="tier-glyph" tabindex="0" aria-label="@GlyphTooltip(tier.Price)" title="@GlyphTooltip(tier.Price)">◌</span>
+                }
+            </div>
+            <div class="tier-price">@PriceText(tier.Price)</div>
+            <div class="tier-change @ChangeClass(tier.Change)">@ChangeText(tier.Change)</div>
+        </div>
+    }
+</div>
+
+@code {
+    [Parameter, EditorRequired]
+    public PricesDto Prices { get; set; } = default!;
+
+    private static string PriceText(TierPriceDto price) =>
+        price.State == "available" ? Format.Money(price.Cents!.Value) : "—";
+
+    private static string ChangeText(TierChangeDto change) =>
+        change.State == "available" ? Format.ChangePercent(change.Fraction!.Value) + " 30d" : "—";
+
+    // Colour follows the *formatted* leading character (card.md §3.2: "PAL.pos iff
+    // chg[0] === '+'"), not the raw fraction's sign -- a fraction that rounds to 0.0%
+    // prints with a leading '+', so deriving colour from the unrounded value could
+    // disagree with the text sitting right next to it.
+    private static string ChangeClass(TierChangeDto change) =>
+        change.State != "available" ? "" :
+        Format.ChangePercent(change.Fraction!.Value).StartsWith('+') ? "tier-change-pos" : "tier-change-neg";
+
+    // card.md §2.3.1's two-tooltip table, verbatim, with {Month} computed from the
+    // rendered row (never hard-coded -- that was OQ-17's mistake).
+    private static string GlyphTooltip(TierPriceDto price) =>
+        $"Month-to-date. {Format.MonthLabel(price.Month!)}'s average is still forming — " +
+        "it firms up as the month's sales land, and finalizes when the month closes.";
+
+    // The corrected §2.3.1 cell copy applies exactly when the ◌ does: an available
+    // price on the current, still-forming month. A closed month's price is finished,
+    // so it keeps the plain §2.3/§3.2 "latest monthly price" phrasing instead -- calling
+    // it month-to-date would be false. Absence (stale/none) has no authored copy in
+    // card.md; the label alone is the honest minimum rather than an invented claim.
+    private static string CellTooltip(TierDto tier)
+    {
+        var chgText = tier.Change.State == "available" ? Format.ChangePercent(tier.Change.Fraction!.Value) : "—";
+
+        if (tier.Price.State == "available" && tier.Price.IsCurrentMonth == true)
+        {
+            return $"{tier.Label} — {Format.MonthLabel(tier.Price.Month!)} month-to-date. {chgText} over 30 days.";
+        }
+
+        if (tier.Price.State == "available")
+        {
+            return $"{tier.Label} latest monthly price · {chgText} over 30 days";
+        }
+
+        return tier.Label;
+    }
+}

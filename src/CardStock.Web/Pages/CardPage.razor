@@ -1,5 +1,6 @@
 @page "/card/{Id:long}"
 @using CardStock.Application.Cards
+@using CardStock.Web.Components.Card
 @using CardStock.Web.Services
 @inject CardApiClient Api
 
@@ -21,10 +22,8 @@ else if (_result.Snapshot is null)
 else
 {
     <PageTitle>@_result.Snapshot.Identity.Title</PageTitle>
-    <header class="card-identity">
-        <h1>@_result.Snapshot.Identity.Title</h1>
-        <p class="subline">@Subline(_result.Snapshot.Identity)</p>
-    </header>
+    <IdentityHeader Identity="@_result.Snapshot.Identity" CardId="@_result.Snapshot.CardId"
+                    Prices="@_result.Snapshot.Prices" Chips="@_result.Snapshot.Signals" />
 }
 
 @code {
@@ -52,10 +51,4 @@ else
         _result?.NotFoundReason == "not_a_card"
             ? $"Id {Id} isn't a card."
             : $"No card with id {Id}.";
-
-    // Two segments only in Phase 2 -- no species field exists yet (docs/screens/card.md §3.1.1).
-    private static string Subline(IdentityDto identity) =>
-        identity.SetSize is { } size
-            ? $"{identity.SetName} · {identity.CollectorNumber}/{size}"
-            : $"{identity.SetName} · #{identity.CollectorNumber}";
 }

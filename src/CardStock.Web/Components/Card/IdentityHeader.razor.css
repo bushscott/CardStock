@@ -1,0 +1,132 @@
+/* card.md Layout block #1: card panel, radius 10, padding 16, display:flex, gap 18px. */
+.card-identity-panel {
+    background: var(--card);
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    padding: 16px;
+    display: flex;
+    gap: 18px;
+    position: relative;
+}
+
+/* card.md §2.1: fixed 217x300, flex-shrink 0, zoom-in cursor. Reset the <button>. */
+.art-col {
+    flex-shrink: 0;
+    width: 217px;
+    height: 300px;
+    padding: 0;
+    border: none;
+    background: none;
+    cursor: zoom-in;
+    font: inherit;
+}
+
+.art-col img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    border-radius: 6px;
+}
+
+.art-placeholder {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 6px;
+    background: var(--mutbg);
+    color: var(--mut2);
+    font-size: 13px;
+    text-align: center;
+    padding: 8px;
+}
+
+/* card.md §2.2: flex:1, column, space-between, gap 12. */
+.right-col {
+    flex: 1;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    gap: 12px;
+}
+
+/* card.md §2.2 Row A: flex, align-items flex-start, gap 12. */
+.row-a {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+}
+
+.title-block {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 4px;
+    min-width: 0;
+}
+
+.title-block h1 {
+    font-family: 'Inter Tight', sans-serif;
+    font-weight: 700;
+    font-size: 26px;
+    letter-spacing: -0.01em;
+    margin: 0;
+    color: var(--ink);
+}
+
+/* card.md §2.2: 14.5px --mut, margin-top 3px. The set segment is a deferred control,
+   never plain text (carried Task 14 review finding) -- ::deep reaches into its
+   isolated button so it reads as inline copy, not a stray chrome button. */
+.subline {
+    font-size: 14.5px;
+    color: var(--mut);
+    margin: 3px 0 0;
+    display: flex;
+    align-items: baseline;
+    gap: 4px;
+}
+
+.subline ::deep .subline-set {
+    font: inherit;
+    color: var(--acc);
+    padding: 0;
+    border: none;
+    background: none;
+}
+
+.subline-number {
+    white-space: nowrap;
+}
+
+/* Reserved space for a badge Task 20 wires in -- empty for now. */
+.badge-slot {
+    width: 28px;
+    height: 28px;
+    flex-shrink: 0;
+}
+
+.row-a-actions {
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-left: auto;
+}
+
+/* card.md §2.2: all Row A actions are height 29px, flex-shrink 0. */
+.row-a-actions ::deep .deferred {
+    height: 29px;
+    flex-shrink: 0;
+}
+
+.row-a-actions ::deep .btn-open-charts {
+    background: var(--btn);
+    color: #FFFFFF;
+    border-radius: 6px;
+    font-size: 13.5px;
+    font-weight: 600;
+    padding: 0 12px;
+    border: none;
+}

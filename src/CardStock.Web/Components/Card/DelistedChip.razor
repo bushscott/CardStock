@@ -1,0 +1,13 @@
+@* card.md §3.1 / §8 C-24: a muted chip marking a card the source no longer lists.
+   The card's own history still stands -- delisting is a source-side fact, not a
+   verdict on the data already collected. *@
+@if (DelistedAt is { } at)
+{
+    <span class="chip chip-delisted"
+          title="The source no longer lists this card; its history stands.">delisted @at.ToString("yyyy-MM-dd", System.Globalization.CultureInfo.InvariantCulture)</span>
+}
+
+@code {
+    [Parameter]
+    public DateTimeOffset? DelistedAt { get; set; }
+}

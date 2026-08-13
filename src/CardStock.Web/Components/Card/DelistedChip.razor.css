@@ -1,0 +1,15 @@
+/* Muted -- this is a factual annotation, not a warning (card.md §3.1). */
+.chip-delisted {
+    display: inline-flex;
+    align-items: center;
+    width: fit-content;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11.5px;
+    font-weight: 500;
+    padding: 1px 6px;
+    border-radius: 4px;
+    border: 1px solid var(--line);
+    background: var(--mutbg);
+    color: var(--mut2);
+    cursor: help;
+}
