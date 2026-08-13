@@ -36,6 +36,8 @@ app.MapGet("/healthz/data", async (CardStockDbContext db) => Results.Ok(new
 {
     cards = await db.ScraperCards.LongCountAsync(),
     sets = await db.ScraperSets.LongCountAsync(),
+    populations = await db.ScraperPopulations.LongCountAsync(),
+    sales = await db.ScraperSales.LongCountAsync(),
 }));
 
 app.MapCardEndpoints();

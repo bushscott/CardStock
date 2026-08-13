@@ -27,13 +27,7 @@ public static class CardsEndpoints
             var identity = identityTask.Result;
             if (identity is null || identity.NotACardAt is not null)
             {
-                return Results.Problem(
-                    title: "No such card",
-                    statusCode: StatusCodes.Status404NotFound,
-                    extensions: new Dictionary<string, object?>
-                    {
-                        ["reason"] = identity is null ? "unknown" : "not_a_card",
-                    });
+                return NoSuchCard(identity);
             }
 
             var today = DateOnly.FromDateTime(time.GetUtcNow().UtcDateTime);
@@ -44,6 +38,66 @@ public static class CardsEndpoints
                 identity, pricesTask.Result!, censusTask.Result, chips, currentMonth));
         });
 
+        cards.MapGet("/{id:long}/sales", async (
+            long id,
+            ICardIdentityReader identityReader,
+            ICardSalesReader salesReader,
+            CancellationToken ct) =>
+        {
+            var identity = await identityReader.GetAsync(id, ct);
+            if (identity is null || identity.NotACardAt is not null)
+            {
+                return NoSuchCard(identity);
+            }
+
+            var sales = await salesReader.GetAsync(id, ct);
+            return Results.Ok(sales.Select(CardPageMapper.ToDto).ToArray());
+        });
+
+        cards.MapGet("/{id:long}/image", async (
+            long id,
+            ICardIdentityReader identityReader,
+            IConfiguration configuration,
+            HttpContext httpContext,
+            CancellationToken ct) =>
+        {
+            var identity = await identityReader.GetAsync(id, ct);
+            if (identity is null || identity.NotACardAt is not null || identity.ImageHash is null)
+            {
+                return Results.NotFound();
+            }
+
+            // Defense in depth: the hash is stored, not user-supplied, but a
+            // path-traversal-shaped value must never reach Path.Combine below.
+            var hash = identity.ImageHash;
+            if (!hash.All(char.IsAsciiLetterOrDigit))
+            {
+                return Results.NotFound();
+            }
+
+            var directory = configuration["ImageStore:Directory"]
+                ?? throw new InvalidOperationException("ImageStore:Directory is not configured.");
+            var path = Path.Combine(directory, hash, "1600.jpg");
+            if (!File.Exists(path))
+            {
+                // The site owes us this image and hasn't been asked for it yet
+                // (spec 13.1). The disk is the fact, not the database row.
+                return Results.NotFound();
+            }
+
+            httpContext.Response.Headers.CacheControl = "public, max-age=31536000, immutable";
+            return Results.File(path, "image/jpeg");
+        });
+
         return routes;
     }
+
+    private static IResult NoSuchCard(CardIdentity? identity) =>
+        Results.Problem(
+            title: "No such card",
+            statusCode: StatusCodes.Status404NotFound,
+            extensions: new Dictionary<string, object?>
+            {
+                ["reason"] = identity is null ? "unknown" : "not_a_card",
+            });
 }

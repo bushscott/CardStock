@@ -15,10 +15,15 @@ public sealed class TestApp : WebApplicationFactory<Program>
     public CardCensus Census { get; set; } = CardCensus.From([], []);
     public IReadOnlyList<LedgerSale> Sales { get; set; } = [];
 
+    /// <summary>A fresh temp directory per test instance, wired as ImageStore:Directory.</summary>
+    public string ImageDirectory { get; } =
+        Directory.CreateTempSubdirectory("cardstock-image-tests-").FullName;
+
     protected override void ConfigureWebHost(IWebHostBuilder builder)
     {
         builder.UseSetting("ConnectionStrings:CardStock",
             "Host=localhost;Database=never_used;Username=x;Password=x");
+        builder.UseSetting("ImageStore:Directory", ImageDirectory);
         builder.ConfigureServices(services =>
         {
             services.AddScoped<ICardIdentityReader>(_ => new StubIdentity(this));
@@ -26,6 +31,22 @@ public sealed class TestApp : WebApplicationFactory<Program>
             services.AddScoped<ICardCensusReader>(_ => new StubCensus(this));
             services.AddScoped<ICardSalesReader>(_ => new StubSales(this));
         });
+    }
+
+    protected override void Dispose(bool disposing)
+    {
+        base.Dispose(disposing);
+        if (disposing)
+        {
+            try
+            {
+                Directory.Delete(ImageDirectory, recursive: true);
+            }
+            catch (IOException)
+            {
+                // Best effort; the OS reclaims the temp dir eventually regardless.
+            }
+        }
     }
 
     private sealed class StubIdentity(TestApp app) : ICardIdentityReader
