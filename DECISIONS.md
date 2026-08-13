@@ -503,7 +503,7 @@ CardStock's own tables. `sales` and `populations` are a 2027 story no engineerin
 |---|---|---|
 | 0 | Walking skeleton: solution, CI, schema, deployed to the Pi | ✅ **Done** 2026-08-11 |
 | 1 | `price_months` read layer — change-only as-of semantics, encoded once, tested hard. **Plus the 30-day sales read** — see below | ✅ **Done** 2026-08-12 |
-| 2 | Card page end to end, with real `LOCKED` / `LOW DATA` states | **Next** |
+| 2 | Card page end to end, with real `LOCKED` / `LOW DATA` states | ✅ **Done** 2026-08-13 |
 | 3 | Worker: index construction first — nothing comparative exists without it | |
 | 4 | Binder — the owner's stated emotional centre, and it works on today's data | |
 | 5+ | Screener, Charts, Home feed, demo mode (D-064), marketing and landing **last** | |
@@ -531,6 +531,43 @@ crawler's schema drifts under us — `SchemaDriftTests` caught `AddCardNearMissA
 **Still open, and neither blocks Phase 2:** `SalesChange.MinimumSalesPerWindow` is 3 on no evidence and
 cannot be tuned until real windows exist (~Nov 2026); and nobody has measured how far
 PriceCharting's monthly average sits from the mean of our own captured sales.
+
+**Phase 2 shipped 2026-08-13.** Spec at `docs/superpowers/specs/2026-08-12-card-page-design.md`, plan
+at `docs/superpowers/plans/2026-08-12-card-page.md`, built as `fccbcc1..7529f0f` on
+`phase2-card-page`. 275 tests green — 96 Domain, 17 Application, 3 Infrastructure, 23 integration
+against the Pi's Postgres, 115 Web (bUnit), 21 Api — plus the CI-severity format gate. Verified on
+the Pi end to end: `/healthz/data` returns non-zero counts for all four scraper tables the phase
+reads; Charizard 630417's two live chips (`MACD +`, `clean trend R² .91`) match an independent
+recomputation of all seven signals from latest-per-cell SQL (the five silent signals are silent for
+the right reasons — ROC +12.7% sits under the ±15% band, the PSA 10/Grade 9 spread is *widening*
+9.19x from 5.91x, drawdown is 0% at peak); the delisted chip, thin-card legend degrades, true-zero
+ledger copy, and the not-found page all render their authored copy verbatim; and one page-load-driven
+express visit is attributed in the worker's own journal (`Express visit
+/game/pokemon-darkness-ablaze/corviknight-pre-release-156`, committed 15:36:19 CDT).
+
+**Four things the verification turned up:**
+- **The hosted publish was invisibly broken.** The API's publish copies the Web project's
+  `index.html` raw, still carrying the `#[.{fingerprint}]` placeholder only a Blazor WASM project's
+  own publish substitutes — a browser strips the `#` fragment, requests a file that doesn't exist,
+  and the deployed app never boots. Dev serving substitutes it, so no test and no local run could
+  see it; Task 21's bundle check caught it. Fixed in `ops/publish.sh` (`4ede994`): the client
+  publishes through its own pipeline and its processed `wwwroot` replaces the raw copy, with a
+  loud check so it cannot regress silently.
+- **The corpus is effectively fully crawled.** Exactly one active card remains never-visited
+  (13971735, Vaporeon [Reverse Holo] [Poke Ball]) — and it is unvisitable: the source 302s its URL
+  to a search page, and the crawler has quarantined it after 12 straight failures. The
+  "express visit builds a virgin page live" demo path therefore no longer exists in this corpus;
+  what exists — and was verified — is the honest amber `– never visited` badge over the all-absent
+  dress. This also settles D-071's open sparsity question: ~113 rows/card is the site's true
+  publication density, not uncrawled backlog.
+- **`cardstock_tester`'s password on the Pi had drifted** from `ops/credentials.local` (auth
+  failures; `cardstock_app` unaffected). Reset to the recorded value with owner approval
+  2026-08-13; the integration suite went 23/23 immediately after.
+- **Two production nits, owner's call, changed nothing:** EF Core logs full SQL into the journal at
+  Information level (`Logging:LogLevel` has no `Microsoft.EntityFrameworkCore` override), and a
+  renderer freeze was observed *only* inside a browser-automation extension's tab — the app is
+  healthy in plain and headless Chrome, so it is noted here purely so nobody re-debugs the product
+  for it.
 
 *Original framing, kept because it was the whole point:* Phase 1 is where the correctness risk
 concentrates — absence means "unchanged", not "missing", and "latest" is `max(observed_at)` per key
