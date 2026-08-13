@@ -1,0 +1,199 @@
+/* card.md §2.5/§3.7: card panel, radius 10, no padding -- rows are full-bleed with internal
+   16px. Toolbar, header and body share one grid-template-columns string (R-6) so a resize
+   applies to both atomically. */
+
+.ledger-panel {
+    background: var(--card);
+    border: 1px solid var(--line);
+    border-radius: 10px;
+}
+
+.lg-error {
+    padding: 16px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.lg-retry {
+    height: 29px;
+    padding: 0 10px;
+    border-radius: 6px;
+    border: 1px solid var(--line);
+    background: var(--card);
+    color: var(--ink);
+    cursor: pointer;
+}
+
+.lg-toolbar {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 13px 16px 10px;
+}
+
+.lg-toolbar h2 {
+    font: 600 17px/1.2 "Inter Tight", sans-serif;
+    margin: 0;
+}
+
+.lg-chips {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 6px;
+}
+
+.lg-count {
+    margin-left: auto;
+    font-family: "JetBrains Mono", monospace;
+    font-size: 12.5px;
+    color: var(--mut);
+    cursor: help;
+    white-space: nowrap;
+}
+
+.lg-chip, .lg-subchip {
+    font-family: "JetBrains Mono", monospace;
+    font-weight: 600;
+    background: var(--card);
+    color: var(--mut);
+    border: 1px solid var(--line);
+    cursor: pointer;
+}
+
+.lg-chip {
+    height: 24px;
+    border-radius: 5px;
+    padding: 0 9px;
+    font-size: 12px;
+}
+
+.lg-subchip {
+    height: 22px;
+    border-radius: 4px;
+    padding: 0 7px;
+    font-size: 11.5px;
+}
+
+.lg-chip-sel {
+    background: var(--acc);
+    color: var(--card);
+    border-color: var(--acc);
+}
+
+.lg-group {
+    position: relative;
+}
+
+.lg-popover {
+    position: absolute;
+    top: 26px;
+    left: 0;
+    z-index: 50;
+    min-width: 240px;
+    padding: 8px 9px;
+    border-radius: 8px;
+    background: var(--card);
+    border: 1px solid var(--line);
+    box-shadow: 0 8px 24px rgba(20, 19, 26, 0.13);
+    display: flex;
+    flex-wrap: wrap;
+    gap: 5px;
+}
+
+.lg-pop-header {
+    flex-basis: 100%;
+    font-size: 10.5px;
+    font-weight: 600;
+    letter-spacing: .07em;
+    text-transform: uppercase;
+    color: var(--mut2);
+    margin-bottom: 5px;
+}
+
+.lg-row {
+    display: grid;
+    gap: 8px;
+}
+
+.lg-header {
+    padding: 7px 16px;
+    border-top: 1px solid var(--line);
+    border-bottom: 1px solid var(--line);
+    background: var(--bg);
+    font-size: 11.5px;
+    font-weight: 600;
+    letter-spacing: .05em;
+    color: var(--mut2);
+    text-transform: uppercase;
+}
+
+.lg-h {
+    text-align: center;
+    cursor: pointer;
+}
+
+.lg-h:hover {
+    color: var(--acc);
+}
+
+.lg-grip {
+    width: 6px;
+    margin-right: -6px;
+    cursor: col-resize;
+    color: var(--line3);
+    justify-self: end;
+}
+
+.lg-grip:hover {
+    color: var(--acc);
+}
+
+.lg-body {
+    padding: 6px 16px;
+    align-items: center;
+    border-bottom: 1px solid var(--line4);
+}
+
+.lg-date, .lg-bucket, .lg-price, .lg-src {
+    font-family: "JetBrains Mono", monospace;
+    text-align: center;
+}
+
+.lg-date, .lg-src {
+    font-size: 12.5px;
+    color: var(--mut);
+}
+
+.lg-bucket {
+    font-size: 12.5px;
+    color: var(--ink);
+}
+
+.lg-price {
+    font-size: 13.5px;
+    font-weight: 700;
+    border-bottom: none;
+    cursor: default;
+}
+
+.lg-listed {
+    border-bottom: 2px dotted var(--warnInk);
+    cursor: help;
+}
+
+.lg-title {
+    font-size: 13px;
+    color: var(--mut);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.lg-empty {
+    padding: 26px 16px;
+    text-align: center;
+    font-size: 13.5px;
+    color: var(--mut2);
+}

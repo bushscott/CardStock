@@ -25,6 +25,7 @@ else
     <IdentityHeader Identity="@_result.Snapshot.Identity" CardId="@_result.Snapshot.CardId"
                     Prices="@_result.Snapshot.Prices" Chips="@_result.Snapshot.Signals" />
     <PriceChart Prices="@_result.Snapshot.Prices" />
+    <SalesLedger Sales="@_sales" Retry="LoadSalesAsync" />
 }
 
 @code {
@@ -46,6 +47,14 @@ else
 
         _sales = salesTask.Result;
         _result = snapshotTask.Result;
+    }
+
+    /// <summary>The ledger panel's own Retry (SalesLedger's error state) -- re-fetches only the
+    /// sales, not the whole snapshot, since a failed sales call is independent of the rest of
+    /// the page (CardApiClient.GetSalesAsync already returns null rather than throwing).</summary>
+    private async Task LoadSalesAsync()
+    {
+        _sales = await Api.GetSalesAsync(Id);
     }
 
     private string NotFoundCopy() =>
