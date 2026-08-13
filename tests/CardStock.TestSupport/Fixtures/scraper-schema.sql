@@ -218,3 +218,13 @@ VALUES ('20260813055713_AddTcgdexEnrichments', '10.0.10');
 
 COMMIT;
 
+START TRANSACTION;
+ALTER TABLE cards ADD gone_at timestamp with time zone;
+
+CREATE INDEX ix_cards_gone_at ON cards (gone_at) WHERE gone_at IS NOT NULL;
+
+INSERT INTO "__EFMigrationsHistory" (migration_id, product_version)
+VALUES ('20260813234040_AddCardGoneAt', '10.0.10');
+
+COMMIT;
+
