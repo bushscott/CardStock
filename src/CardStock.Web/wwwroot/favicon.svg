@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32">
+  <!-- Favicon tile — brand.md §6.2: "Simplified single card, for 16px and below."
+       Different geometry from the two-card nav mark (brand.md §6.4: never use the
+       full mark below 20px; use this filled tile instead). Literal hexes, not CSS
+       vars — a linked favicon resource does not inherit the host page's theme. -->
+  <rect width="32" height="32" rx="7" fill="#0E8A7B"/>
+  <rect x="9.5" y="6.5" width="13" height="19" rx="2" fill="none" stroke="#FFFFFF" stroke-width="2"/>
+  <polyline points="12.5,20.5 15.5,15.5 17.5,17.5 20,11.5" fill="none" stroke="#FFFFFF" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+  <circle cx="20" cy="11.5" r="1.6" fill="#FFFFFF"/>
+</svg>

@@ -1,0 +1,12 @@
+<button disabled aria-disabled="true" title="@Tooltip" class="deferred @CssClass">@Label</button>
+
+@code {
+    [Parameter]
+    public string Label { get; set; } = "";
+
+    [Parameter]
+    public string Tooltip { get; set; } = "";
+
+    [Parameter]
+    public string CssClass { get; set; } = "";
+}

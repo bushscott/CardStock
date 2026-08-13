@@ -7,11 +7,26 @@
     <title>CardStock.Web</title>
     <base href="/" />
     <link rel="preload" id="webassembly" />
-    <link rel="stylesheet" href="lib/bootstrap/dist/css/bootstrap.min.css" />
+
+    <link rel="preload" href="fonts/inter/inter-latin-400-normal.woff2" as="font" type="font/woff2" crossorigin />
+    <link rel="preload" href="fonts/inter/inter-latin-600-normal.woff2" as="font" type="font/woff2" crossorigin />
+    <link rel="preload" href="fonts/inter/inter-latin-700-normal.woff2" as="font" type="font/woff2" crossorigin />
+    <link rel="preload" href="fonts/inter-tight/inter-tight-latin-600-normal.woff2" as="font" type="font/woff2" crossorigin />
+    <link rel="preload" href="fonts/inter-tight/inter-tight-latin-700-normal.woff2" as="font" type="font/woff2" crossorigin />
+    <link rel="preload" href="fonts/jetbrains-mono/jetbrains-mono-latin-400-normal.woff2" as="font" type="font/woff2" crossorigin />
+    <link rel="preload" href="fonts/jetbrains-mono/jetbrains-mono-latin-700-normal.woff2" as="font" type="font/woff2" crossorigin />
+
     <link rel="stylesheet" href="css/app.css" />
-    <link rel="icon" type="image/png" href="favicon.png" />
+    <link rel="icon" href="favicon.svg" />
     <link href="CardStock.Web.styles.css" rel="stylesheet" />
     <script type="importmap"></script>
+    <script>
+      (function () {
+        var t = localStorage.getItem('cardstock-theme');
+        if (t === 'dark') document.documentElement.setAttribute('data-theme', 'dark');
+        if (localStorage.getItem('cardstock-cvd') === '1') document.documentElement.setAttribute('data-cvd', '1');
+      })();
+    </script>
 </head>
 
 <body>

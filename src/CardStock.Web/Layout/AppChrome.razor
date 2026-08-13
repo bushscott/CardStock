@@ -1,0 +1,25 @@
+@* Sticky global nav — card.md §1 Chrome. Every control here is deferred-disabled in
+   Phase 2 (global constraint: present, honest tooltip, never a dead link or a
+   stripped control). The logo lockup's Home link is itself deferred, so it renders
+   as an inert span rather than an anchor — the whole bar carries zero <a> elements. *@
+<nav class="app-chrome">
+    <span class="logo-lockup">
+        <AppLogo />
+        <span class="wordmark">Cardstock</span>
+    </span>
+
+    <div class="tabs">
+        <DeferredControl Label="Home" Tooltip="Home arrives in a later phase" CssClass="tab" />
+        <DeferredControl Label="Screener" Tooltip="The Screener arrives in a later phase" CssClass="tab" />
+        <DeferredControl Label="Charts" Tooltip="Charts arrives in a later phase" CssClass="tab" />
+        <DeferredControl Label="Binder" Tooltip="The Binder arrives in a later phase (Phase 4)" CssClass="tab" />
+        <DeferredControl Label="Browse" Tooltip="Browse arrives in a later phase" CssClass="tab" />
+    </div>
+
+    <div class="spacer"></div>
+
+    <input type="search" class="search-input deferred" disabled aria-disabled="true"
+           title="Search arrives with the Browse phase" placeholder="Search" />
+
+    <DeferredControl Label="O" Tooltip="Accounts arrive with the Binder phase" CssClass="avatar" />
+</nav>

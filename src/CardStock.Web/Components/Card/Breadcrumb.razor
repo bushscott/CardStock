@@ -1,0 +1,25 @@
+@* Card page breadcrumb — card.md Layout block #0, Interactions §5.1: "Browse / {SetName} / {CardTitle}".
+   Browse and the set crumb are inert "future link" spans — Browse and Set pages are both
+   deferred in Phase 2 (owner ruling: present-but-disabled with honest tooltips, never a dead
+   link). The leaf crumb is plain --ink text, not a link (card.md §5.1 item 5). *@
+<div class="breadcrumb">
+    <span class="crumb-link" title="@BrowseTooltip">Browse</span>
+    <span class="crumb-sep">/</span>
+    <span class="crumb-link" title="@SetTooltip">@SetName</span>
+    <span class="crumb-sep">/</span>
+    <span class="crumb-leaf">@CardTitle</span>
+</div>
+
+@code {
+    // Reusable single source of truth for these two tooltip strings — Task 16 renders the
+    // identity-header subline's deferred set segment and must show byte-identical copy
+    // rather than a re-typed duplicate literal.
+    public const string BrowseTooltip = "Browse arrives in a later phase";
+    public const string SetTooltip = "Set pages arrive in a later phase";
+
+    [Parameter]
+    public string SetName { get; set; } = "";
+
+    [Parameter]
+    public string CardTitle { get; set; } = "";
+}

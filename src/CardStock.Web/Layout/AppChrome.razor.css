@@ -1,0 +1,78 @@
+/* card.md §1 Chrome: sticky, top:0, z-index:20, height 48px, --card background,
+   1px --line bottom border, 24px gap, 20px horizontal padding. */
+.app-chrome {
+    position: sticky;
+    top: 0;
+    z-index: 20;
+    height: 48px;
+    background: var(--card);
+    border-bottom: 1px solid var(--line);
+    display: flex;
+    align-items: center;
+    gap: 24px;
+    padding: 0 20px;
+}
+
+/* card.md §3.4 wordmark lockups — app nav: mark 24px + wordmark 18px, gap 10px. */
+.logo-lockup {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-shrink: 0;
+}
+
+.wordmark {
+    font-family: 'Inter', sans-serif;
+    font-weight: 700;
+    font-size: 18px;
+    letter-spacing: -0.03em;
+    color: var(--ink);
+}
+
+.tabs {
+    display: flex;
+    align-items: center;
+    gap: 24px;
+    height: 100%;
+}
+
+/* No tab is ever marked active on the Card screen — card.md "Outbound navigation":
+   all five carry border-bottom: 2px solid transparent. Color comes from the shared
+   .deferred utility (muted fg) in app.css. */
+.tabs ::deep .tab {
+    height: 100%;
+    padding: 0 2px;
+    font-size: 15px;
+    border-bottom: 2px solid transparent;
+}
+
+.spacer {
+    flex: 1;
+}
+
+.search-input {
+    width: 200px;
+    height: 30px;
+    padding: 0 10px;
+    border: 1px solid var(--line);
+    border-radius: 6px;
+    background: var(--inbg);
+}
+
+.search-input::placeholder {
+    color: var(--mut2);
+}
+
+/* --mutbg's documented role (brand.md §2.2) is "Neutral chip / avatar fill". */
+.app-chrome ::deep .avatar {
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    background: var(--mutbg);
+    border: 1px solid var(--line);
+    font-size: 12.5px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}

@@ -1,0 +1,23 @@
+/* card.md Layout block #0: bare div, 13.5px, --mut2. */
+.breadcrumb {
+    font-size: 13.5px;
+    color: var(--mut2);
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+/* Styled as a future link (accent color) but inert — no href, not focusable. */
+.crumb-link {
+    color: var(--acc);
+    cursor: not-allowed;
+}
+
+.crumb-sep {
+    color: var(--mut2);
+}
+
+/* card.md §5.1 item 5: leaf crumb is plain --ink text, not a link. */
+.crumb-leaf {
+    color: var(--ink);
+}

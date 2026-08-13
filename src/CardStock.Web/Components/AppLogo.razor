@@ -1,0 +1,19 @@
+@* The static mark — two fanned cards, the front one charting. Geometry transcribed
+   verbatim from the 24px app-bar instance in "CardStock Mockup/Cardstock Logo.dc.html"
+   (the nav lockup preview). Colors are theme-aware CSS custom properties per
+   docs/brand.md §6.3 rather than that instance's literal light-mode hexes, which is
+   the documented in-app rendering rule: "inlined, not <img>, so it inherits theme
+   tokens with no asset swap." The nav logo never animates — this is the static mark only. *@
+<svg viewBox="0 0 32 32" fill="none" width="@Size" height="@Size" aria-hidden="true">
+    <g transform="rotate(-12 13 16)">
+        <rect x="5.5" y="5.5" width="15" height="21" rx="2.5" stroke="var(--ink, #1C1C1E)" stroke-width="2"></rect>
+    </g>
+    <rect x="12" y="5.5" width="15" height="21" rx="2.5" fill="var(--card, #FFFFFF)" stroke="var(--ink, #1C1C1E)" stroke-width="2"></rect>
+    <polyline points="15,21.5 17.5,17 19.5,18.5 23.5,12.5" stroke="var(--logoTeal, #0E8A7B)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></polyline>
+    <circle cx="23.5" cy="12.5" r="1.7" fill="var(--logoTeal, #0E8A7B)"></circle>
+</svg>
+
+@code {
+    [Parameter]
+    public int Size { get; set; } = 24;
+}
