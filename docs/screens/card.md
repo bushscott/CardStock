@@ -239,8 +239,8 @@ Everything the screen renders. **All monetary values pass through `money()` (:33
 |---|---|---|---|---|
 | Card name | :56, :65 | string | `Umbreon VMAX (Alt Art)` | Rendered twice: breadcrumb leaf and `<h1>`. Must match. |
 | Set name | :56, :66 | string + link | `Evolving Skies` | Rendered twice: breadcrumb crumb and subline. Both link to the Set screen. |
-| Card number | :66 | string, verbatim | `215/203` | Printed as-is between `·` separators; not zero-padded or reformatted. |
-| Character name | :66 | string + link | `Umbreon` | Links to the Character screen. |
+| Card number | :66 | string, verbatim | `215/203` | Printed as-is between `·` separators; not zero-padded or reformatted. **Phase 2: ships `#num` until enrichment lands, then `215/203` — see §3.1.1.** |
+| Character name | :66 | string + link | `Umbreon` | Links to the Character screen. **Phase 2: this segment does not render at all** — no species field exists yet; see §3.1.1 (D-079, D-084.10). |
 | Card art | :60, :104 | image, native 325×450 | `image-slot id="art-umbreon"` | Same asset id in thumbnail and lightbox. Thumbnail radius 6, lightbox radius 10. |
 
 #### 3.1.1 Corrected — the subline drops species in Phase 2 (D-079, D-084.10)
@@ -537,7 +537,7 @@ segment with the gem-rate sentence absent — not zeroed, not estimated. See §4
 | `deltas` | :371 | `[34, 41, 38, 52, 47, 61, 58]` — new PSA 10 slabs per month. |
 | `dLabels` | :373 | `['Jan','Feb','Mar','Apr','May','Jun','Jul']` — 3-letter month, no year in the label. |
 | `d.n` | :242, :472 | `'+' + n` → `+34`. Mono 11.5px `--mut`, above the bar. |
-| `d.h` | :243, :473 | `Math.round(n / maxD * 104) + 4` px; `maxD = 61` (:372) = the **actual max** of `deltas`, so the tallest bar is always 108px. (Contrast with the population panel's fixed 4020.) |
+| `d.h` | :243, :473 | `Math.round(n / maxD * 104) + 4` px; `maxD = 61` (:372) = the **actual max** of `deltas`, so the tallest bar is always 108px. (Contrast with the population panel's fixed 4020.) **Phase 2: the population panel now scales the same way — see the amended R-21 (§6).** |
 | `d.bg` | :474 | `rgba(74, 99, 208, 0.55)` for **every** bar. |
 | `d.bd` | :243, :475 | `'none'` for every bar. The `border` + `box-sizing: border-box` plumbing exists for a variant that never fires — most plausibly an outlined current/partial month. See §7 OQ-10. |
 | `d.tip` | :243, :476 | `` `+{n} new PSA 10 slabs in {label} 2026` `` — year is hard-coded into the tooltip. |
@@ -821,7 +821,7 @@ Exhaustive list of every interactive element, in document order.
 | # | Element | Line | Consequence |
 |---|---|---|---|
 | 6 | **Card art thumbnail** | :59 | `openArt()` → `artOpen = true` → lightbox mounts. `cursor: zoom-in`, `title="Click to enlarge"`. The whole 217×300 box is the hit target. |
-| 7 | Set link / character link (subline) | :66 | → Set / Character. |
+| 7 | Set link / character link (subline) | :66 | → Set / Character. **Phase 2: the set link renders deferred-disabled** (Set is a later-phase screen, per the deferred-chrome ruling); **the character segment does not render at all** — see §3.1.1. |
 | 8 | **Open in Charts →** | :69 | → Charts. Primary solid button; hover `background: var(--accH); color: #FFFFFF; text-decoration: none`. |
 | 9 | **Watchlist button** | :71 | `toggleWatch()` → flips `watchOpen`. **It does not add the card** — it only opens the picker. Label carries a ` ▾` affordance. Tooltip: `Follow this card on a watchlist — you pick which signals it tracks in Charts`. |
 | 10 | Watchlist row (per list) | :75 | `wl.pick()` → toggles this card's membership in that list (:384). The check glyph, box fill, and the row's count all update immediately; the button label and colour update too. **The popover stays open**, so several lists can be toggled in one pass. Row hover `background: var(--hov)`. Tooltip: `Add this card to this watchlist`. |
