@@ -1,0 +1,192 @@
+@* card.md §2.4/§2.4.1/§2.4.2/§5.4: the TradingView Lightweight Charts wrapper. Gaps render as
+   native whitespace breaks (never smoothed over -- CLAUDE.md rule 1); the current month is
+   always the dashed, hollow-dot-marked provisional point, never a projection. Six legend chips
+   always render (never stripped), muted with an honest tooltip when a tier has no data at all,
+   and the "at least one visible" guard makes over-hiding a silent no-op rather than an error. *@
+@using CardStock.Application.Cards
+@using CardStock.Web.Charts
+@using CardStock.Web.Services
+@implements IDisposable
+@inject IJSRuntime JS
+
+<section class="price-chart">
+    <div class="pc-header">
+        <h2>Price · 12M · monthly</h2>
+        <div class="pc-legend">
+            @foreach (var tierKey in LwcSeriesShaper.SerOrder)
+            {
+                if (_tierByKey.TryGetValue(tierKey, out var tier))
+                {
+                    var hasData = tier.Points.Any(p => p.Cents is not null);
+                    var isVisible = _visible.Contains(tierKey);
+                    <button type="button"
+                            class="pc-legend-chip@(hasData ? "" : " pc-legend-chip--muted")"
+                            data-tier="@tierKey"
+                            disabled="@(!hasData)"
+                            aria-pressed="@(isVisible ? "true" : "false")"
+                            title="@LegendTitle(tier.Label, hasData, isVisible)"
+                            @onclick="() => ToggleAsync(tierKey)">
+                        <span class="pc-legend-swatch" style="background-color:@LegendSwatchColor(tierKey, isVisible)"></span>@tier.Label
+                    </button>
+                }
+            }
+        </div>
+        <a href="/charts" class="pc-open-charts">open in Charts →</a>
+    </div>
+    <div class="pc-body">
+        <div class="pc-y-gutter">
+            <span class="pc-y-max">@(_shape?.YMaxLabel)</span>
+            <span class="pc-y-min">@(_shape?.YMinLabel)</span>
+        </div>
+        <div class="pc-plot">
+            <div id="@_elementId" class="pc-canvas"></div>
+            @if (_shape?.DotSeriesTier is not null && _shape.DotValue is not null)
+            {
+                <div class="pc-dot" tabindex="0"
+                     style="top:@((_dotTopPx ?? 0).ToString(System.Globalization.CultureInfo.InvariantCulture))px"
+                     title="@DotTooltip()"></div>
+            }
+            @if (_hoverMonthIndex is int hoverIndex)
+            {
+                <div class="pc-tooltip">
+                    <div class="pc-tooltip-month">@Format.MonthLabel(MonthAt(hoverIndex))</div>
+                    @foreach (var tierKey in LwcSeriesShaper.SerOrder)
+                    {
+                        if (_visible.Contains(tierKey) && _tierByKey.TryGetValue(tierKey, out var tier))
+                        {
+                            var cents = tier.Points[hoverIndex].Cents;
+                            if (cents is not null)
+                            {
+                                <div class="pc-tooltip-row@(tierKey == "Psa10" ? " pc-tooltip-row--bold" : "")">
+                                    @tier.Label @Format.Money(cents.Value)
+                                </div>
+                            }
+                        }
+                    }
+                </div>
+            }
+        </div>
+    </div>
+    <div class="pc-x-labels">
+        <span class="pc-x-first">@(_shape?.XFirst)</span>
+        <span class="pc-x-middle">@(_shape?.XMiddle)</span>
+        <span class="pc-x-last">@(_shape?.XLast)</span>
+    </div>
+</section>
+
+@code {
+    [Parameter, EditorRequired]
+    public PricesDto Prices { get; set; } = default!;
+
+    private readonly string _elementId = $"price-chart-{Guid.NewGuid():N}";
+    private readonly HashSet<string> _visible = ["Psa10", "Grade9", "Ungraded"];
+    private Dictionary<string, TierDto> _tierByKey = new();
+    private ChartShape? _shape;
+    private int? _hoverMonthIndex;
+    private double? _dotTopPx;
+    private DotNetObjectReference<PriceChart>? _dotNetRef;
+    private bool _jsInitialized;
+
+    protected override async Task OnParametersSetAsync()
+    {
+        _tierByKey = Prices.Tiers.ToDictionary(t => t.Tier);
+        _shape = LwcSeriesShaper.Shape(Prices, _visible);
+        if (_jsInitialized)
+        {
+            await PushDataAsync();
+        }
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            _dotNetRef = DotNetObjectReference.Create(this);
+            await JS.InvokeVoidAsync("lwcInterop.init", _elementId, _dotNetRef);
+            _jsInitialized = true;
+            await PushDataAsync();
+        }
+    }
+
+    private async Task PushDataAsync()
+    {
+        if (_shape is null)
+        {
+            return;
+        }
+
+        await JS.InvokeVoidAsync("lwcInterop.setData", _elementId, _shape);
+        _dotTopPx = _shape.DotSeriesTier is not null && _shape.DotValue is not null
+            ? await JS.InvokeAsync<double?>("lwcInterop.dotY", _elementId, _shape.DotSeriesTier, _shape.DotValue)
+            : null;
+        StateHasChanged();
+    }
+
+    private async Task ToggleAsync(string tierKey)
+    {
+        if (_visible.Contains(tierKey))
+        {
+            // The >=1-visible guard (card.md §5.4 row 18): hiding the last visible series
+            // is a silent no-op, never an error and never a forced substitution.
+            if (_visible.Count > 1)
+            {
+                _visible.Remove(tierKey);
+            }
+        }
+        else
+        {
+            _visible.Add(tierKey);
+        }
+
+        _shape = LwcSeriesShaper.Shape(Prices, _visible);
+        await PushDataAsync();
+    }
+
+    /// <summary>[JSInvokable] target for lwc-interop.js's crosshair subscription. Public and
+    /// directly callable so bUnit tests can invoke it without a real chart (task-17 brief).</summary>
+    [JSInvokable]
+    public void OnCrosshairMonth(int? monthIndex)
+    {
+        _hoverMonthIndex = monthIndex;
+        StateHasChanged();
+    }
+
+    private string MonthAt(int index) => Prices.Tiers[0].Points[index].Month;
+
+    private static string LegendTitle(string label, bool hasData, bool isVisible) =>
+        !hasData ? $"no {label} prices observed" :
+        isVisible ? $"Hide {label} (y-axis rescales to what’s visible)" :
+        $"Show {label}";
+
+    private string LegendSwatchColor(string tierKey, bool isVisible) =>
+        isVisible ? ColorToken(tierKey) : "var(--line3)";
+
+    // Mirrors LwcSeriesShaper's fixed D-084.3 palette so the legend swatch (a plain Razor <span>,
+    // not chart-drawn) matches the series color without round-tripping through JS.
+    private static string ColorToken(string tierKey) => tierKey switch
+    {
+        "Psa10" => "var(--acc)",
+        "Grade9Half" => "#7A56C9",
+        "Grade9" => "var(--warn)",
+        "Grade8" => "#4C8F8A",
+        "Grade7" => "#A96A4A",
+        _ => "var(--mut2)",
+    };
+
+    // card.md §2.4.1's dot tooltip, verbatim, with the computed current month (short form, e.g.
+    // "Aug" -- matching the frozen prototype's literal "Aug is month-to-date …" copy exactly;
+    // the straight apostrophe in "month's" matches the prototype's raw byte, not the U+2019
+    // used for MonthLabel's own year-bearing output).
+    private string DotTooltip()
+    {
+        var date = DateOnly.Parse(Prices.CurrentMonth + "-01");
+        var month = date.ToString("MMM", System.Globalization.CultureInfo.GetCultureInfo("en-US"));
+        return $"{month} is month-to-date — the point firms up as the month's sales land, and finalizes when the month closes";
+    }
+
+    public void Dispose()
+    {
+        _dotNetRef?.Dispose();
+        _ = JS.InvokeVoidAsync("lwcInterop.dispose", _elementId);
+    }
+}

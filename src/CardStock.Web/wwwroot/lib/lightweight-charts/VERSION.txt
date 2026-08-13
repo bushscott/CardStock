@@ -1,0 +1,42 @@
+TradingView Lightweight Charts (standalone production build)
+
+Resolved version: 5.2.1
+Vendored: 2026-08-13, via:
+  curl -L -o lightweight-charts.standalone.production.js \
+    https://unpkg.com/lightweight-charts@5/dist/lightweight-charts.standalone.production.js
+  curl -L -o LICENSE https://unpkg.com/lightweight-charts@5/LICENSE
+Confirmed by the file's own header comment:
+  "TradingView Lightweight Charts™ v5.2.1" / "Copyright (c) 2026 TradingView, Inc." / Apache License 2.0
+and by `https://unpkg.com/lightweight-charts@5/package.json` ("version": "5.2.1"), followed via its
+302 redirect to /lightweight-charts@5.2.1/package.json.
+
+NOTICE: not vendored. `https://unpkg.com/lightweight-charts@5/NOTICE` 404s ("Not found: /lightweight-charts@5.2.1/NOTICE")
+-- this package ships no NOTICE file, only LICENSE (Apache-2.0). Confirmed via `curl -sIL`.
+
+API surface check (v5, against the actual vendored minified file -- not assumed from memory):
+- Series are created via `chart.addSeries(LightweightCharts.LineSeries, options)`. The v4 form
+  `chart.addLineSeries(options)` is gone. Confirmed: the file exports a `LineSeries` symbol
+  (`...LineSeries:Pe...` in the top-level export object) and `addSeries(t,i={},n=0)` is the method
+  used to construct a series from a series-type descriptor + options + pane index.
+- `layout.attributionLogo` IS supported by this build (default `true`; confirmed both in the default
+  layout-options object literal `attributionLogo:!0` and in a getter `Qv(){return this.Gv.N().layout.attributionLogo}`
+  used to decide whether to render the mark). lwc-interop.js therefore passes `layout: { attributionLogo: false }`
+  in `init()` to hide it, per the brief's instruction for when the option exists.
+- `CrosshairMode` is exported (`get CrosshairMode(){return $}`). Used for `CrosshairMode.Magnet`.
+  "Vertical-only magnet" is composed from public options, not a single enum value: `crosshair.mode =
+  CrosshairMode.Magnet` (snaps to the nearest data point) plus `crosshair.horzLine.visible = false` and
+  `crosshair.horzLine.labelVisible = false` (suppresses the horizontal line/label), leaving a magnetized
+  vertical line only.
+- `handleScroll` / `handleScale` confirmed present as chart options (internally normalized to an options
+  object with sub-flags such as `horzTouchDrag`/`vertTouchDrag`/`mouseWheel`/`pressedMouseMove`); the
+  public API accepts the boolean shorthand (`handleScroll: false`, `handleScale: false`) used here.
+- `priceToCoordinate` and `subscribeCrosshairMove` are both present on the series/chart API as expected
+  and are used by lwc-interop.js's `dotY()` and the crosshair subscription in `init()`.
+
+No divergence from the brief's assumed v5 API surface was found; lwc-interop.js was written directly
+against `chart.addSeries(LightweightCharts.LineSeries, options)`.
+
+Also confirmed present (all `grep -c` hits >= 1 against the vendored file): `pointMarkersVisible` and
+`pointMarkersRadius` (LineSeries options, used for the isolated-point marker series), `LineStyle`
+export (used for `LineStyle.Dashed` on the dashed-tail overlay series), and `crosshairMarkerVisible`.
+

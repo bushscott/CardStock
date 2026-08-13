@@ -24,6 +24,7 @@ else
     <PageTitle>@_result.Snapshot.Identity.Title</PageTitle>
     <IdentityHeader Identity="@_result.Snapshot.Identity" CardId="@_result.Snapshot.CardId"
                     Prices="@_result.Snapshot.Prices" Chips="@_result.Snapshot.Signals" />
+    <PriceChart Prices="@_result.Snapshot.Prices" />
 }
 
 @code {

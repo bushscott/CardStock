@@ -11,6 +11,14 @@ public class CardPageTests : BunitContext
 {
     private const long CardId = 630417;
 
+    public CardPageTests()
+    {
+        // CardPage now mounts PriceChart, which drives lwcInterop.* on every render; loose mode
+        // auto-satisfies those calls so this file's identity/error-path tests (which don't care
+        // about the chart) don't need to configure every JS call by hand.
+        JSInterop.Mode = JSRuntimeMode.Loose;
+    }
+
     [Fact]
     public void Renders_the_title_and_subline_on_a_successful_snapshot()
     {
