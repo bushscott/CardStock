@@ -14,7 +14,7 @@
 |---|---|
 | **Screen name** | Card (`data-screen-label="Card"`, :35) |
 | **Prototype file** | `CardStock Mockup/Cardstock Card.dc.html` |
-| **Route** | **`/card/{id}`** — `CardStock Mockup/HANDOFF.md:76`, `…/uploads/CARDSTOCK_UI_SPEC_v1.md:119` and `:217`. Tier 2/3 and **not confirmable from the HTML**: the prototype is a flat file and every inbound link is a bare `Cardstock Card.dc.html` with no id. Not contradicted either. See OQ-1. |
+| **Route** | **`/card/{id}`** — `CardStock Mockup/HANDOFF.md:76`, `…/uploads/CARDSTOCK_UI_SPEC_v1.md:119` and `:217`. Tier 2/3 and **not confirmable from the HTML**: the prototype is a flat file and every inbound link is a bare `Cardstock Card.dc.html` with no id. Not contradicted either. See OQ-1. **Confirmed 2026-08-13 (OQ-1 resolved) — Phase 2 spec §1/§2:** `/card/{id}` ships as designed; `{id}` is `cards.id`, PriceCharting's own product id, never locally generated (`../PokemonInvestBatch/DATA_MODEL.md:34`, `:162`, e.g. `630417`). |
 | **Purpose** | The single-card market terminal: one card's identity, its current price across the six priced grade tiers, its 12-month price history, its raw per-sale ledger, and its grading-census supply picture — on one page, with a freshness stamp asserting the data is current as of this page view. |
 | **Priority** | Highest — thinnest end-to-end vertical slice; built first. |
 
@@ -28,7 +28,7 @@
 | `Cardstock Binder.dc.html` | :46 | "Binder" nav tab |
 | `Cardstock Browse.dc.html` | :47, :56 | "Browse" nav tab; breadcrumb root |
 | `Cardstock Set.dc.html` | :56, :66 | Breadcrumb set crumb; set name in the subline |
-| `Cardstock Character.dc.html` | :66 | Character name in the subline |
+| `Cardstock Character.dc.html` | :66 | Character name in the subline. **Phase 2: this segment does not render at all** — no species field exists yet; see §3.1.1 (D-079, D-084.10). |
 | `Cardstock Profile.dc.html` | :51 | Avatar chip (initial `O`) |
 
 No nav tab is marked active on this screen — all five carry `border-bottom: 2px solid transparent` (:43–:47). The Card screen is a leaf, not a tab.
@@ -69,7 +69,7 @@ The native art aspect ratio is **325 : 450** (0.7222); the 217×300 box matches 
 `flex: 1; min-width: 0; display:flex; flex-direction:column; justify-content: space-between; gap: 12px`. Three stacked rows:
 
 **Row A — title + actions (:63–:83).** `display:flex; align-items:flex-start; gap:12px`.
-- Left: `<h1>` card name (Inter Tight 700, 26px, `-0.01em`, margin 0) and beneath it the subline (:66, 14.5px `--mut`, `margin-top: 3px`): `{set link} · {number} · {character link}`.
+- Left: `<h1>` card name (Inter Tight 700, 26px, `-0.01em`, margin 0) and beneath it the subline (:66, 14.5px `--mut`, `margin-top: 3px`): `{set link} · {number} · {character link}` in the prototype — **Phase 2 ships two segments, not three; see §3.1.1.**
 - Flex spacer, then, left→right: **"Open in Charts →"** solid button (`--btn` bg, `#FFF` text, height 29, radius 6, 13.5px/600), **watchlist split-button + popover**, **binder button**. All `flex-shrink: 0`, all height 29px.
 
 **Row B — tier strip (:84–:92).** `display: grid; grid-template-columns: repeat(6, 1fr); gap: 8px`. See §2.3.
@@ -137,6 +137,13 @@ colourblind mode (which swaps hue only) and is read aloud.
 already caught once, where the prototype's tooltip says "Aug" while its axis ends at Jul '26.
 
 ### 2.4 Price chart (:110–:149)
+
+> **Engine ruling (D-084.7/9):** built on TradingView Lightweight Charts via the project wrapper.
+> Palette = brand.md §2.6 `TIER_COLORS` (C-20 → resolved, Charts values win). Axes stay
+> mockup-minimal via wrapper overlay. Gaps render as native whitespace breaks; an isolated month
+> renders a point marker (OQ-4 → resolved by LWC autoscale; OQ-14 → the hollow dot tracks the first
+> visible series *with a current-month value* and wears that series' colour; OQ-17 → the window is
+> 12 months ending at the current month).
 
 Header row (:111–:118): `display:flex; align-items:baseline; gap:14px; flex-wrap:wrap; margin-bottom:8px`.
 `<h2>` **"Price · 12M · monthly"** (Inter Tight 600, 17px) → legend buttons (one per series, §5.4) → flex spacer → `open in Charts →` link (13px).
@@ -236,6 +243,27 @@ Everything the screen renders. **All monetary values pass through `money()` (:33
 | Character name | :66 | string + link | `Umbreon` | Links to the Character screen. |
 | Card art | :60, :104 | image, native 325×450 | `image-slot id="art-umbreon"` | Same asset id in thumbnail and lightbox. Thumbnail radius 6, lightbox radius 10. |
 
+#### 3.1.1 Corrected — the subline drops species in Phase 2 (D-079, D-084.10)
+
+**Build this, not the prototype's version.** The prototype's subline is three segments —
+`{set link} · {number} · {character link}` (:66) — but the scraper's own columns carry no species
+field, and the TCGdex enrichment researched to fill the identity gap (D-079) was scoped to
+**collector number and official set size only**; species is out of Phase 2 and out of that
+enrichment entirely, reserved for a future Pokédex phase (D-084.10: *"in another phase, we will have
+to create a Pokedex, and it will belong in there"*). The Phase 2 identity DTO carries no `Species`
+field, so the subline is **two** segments, not three:
+
+| When | Subline |
+|---|---|
+| Today (number parsed from the title; no `SetSize` yet) | `{set} · #num` |
+| After the TCGdex enrichment lands (§9) | `{set} · 215/203` |
+
+The Character-name segment and its link return with the Pokédex phase, alongside the species data
+itself (D-084.10). This is a different case from the deferred-disabled nav tabs/search/watchlist/
+binder controls (D-084.1) — those defer a *feature* that already has data; this defers a *field*
+that does not exist yet, so there is nothing to render, disabled or otherwise. See §8 C-24 for the
+route-id, delisted-chip, and not-found additions from the same design pass.
+
 ### 3.2 Tier strip — 6 rows
 
 | Field | Line | Format | Notes |
@@ -247,6 +275,10 @@ Everything the screen renders. **All monetary values pass through `money()` (:33
 | `t.tip` | :86, :398 | string | `` `{label} latest monthly price · {chg} over 30 days` `` |
 
 **Units:** price = USD. Change = **percent over 30 days** (not 1 month, not since last observation).
+
+**Absence renders a dash:** a tier with no series (`NoPriceSeries`) or a stale newest month
+(`PriceStale`) shows `—` for price; `ChangeInsufficient` shows `—` for change (Phase 1 domain types;
+D-075: a dash, never a countdown).
 
 ### 3.3 Signal chips (:400–:404) — 3 chips, fixed
 
@@ -267,6 +299,47 @@ Rendered as `{{ sg.i }} {{ sg.t }}` (:95) — glyph, space, text. Mono 11.5px/50
 - **Triggers for the three seeded chips:** RS fires at percentile ≥ 90 or ≤ 10, label `RS 94th` (`:13`); MACD (3,6,4) fires on either side of the signal line, label `MACD +` / `MACD −` (`:16`); monthly volume fires in the corpus top decile, label `● Most active · 41 sales/30d` (`:25`).
 
 Build the chip **rendering** from the HTML and the chip **selection** from those rules — see C-13.
+
+#### 3.3.1 Phase 2 chip catalog (D-084.11)
+
+**Ships in Phase 2 — the seven signals honestly computable from the monthly six-tier price series
+alone** (`[S1]` in `docs/signals.md`'s substrate notation). Computed in **Domain, on request**,
+inside the snapshot — the price reader already loads every row, so no new data access is needed.
+Every window is **closed months only** (the revising current month is excluded, `docs/signals.md`'s
+standing caveat); below a signal's floor it never chips, and there are no pending/quiet pills on
+this page (those belong to watchlist rows, later phases).
+
+| Signal | Fires when | Chip text | Tone | Floor (closed months) |
+|---|---|---|---|---|
+| ROC 3M (A1) | \|3-mo return\| ≥ 15% | `ROC 3M +18%` | ▲ pos / ▼ neg | 4 |
+| MACD 3,6,4 (A3) | MACD above/below signal line | `MACD +` / `MACD −` | ▲ / ▼ | 10 |
+| EMA 3×9 cross (A2) | crossed within last 2 closed months | `EMA cross +` / `−` | ▲ / ▼ | 12 |
+| z vs 6M MA (B1) | \|z\| > 1.5 | `z +1.8` | ▲ / ▼ | 7 |
+| Tier-spread compression (E2) | PSA 10/PSA 9 ratio at the last closed month ≤ 0.8 × the ratio 6 closed months earlier | `spread compressing` | ▼ | 6 paired months, both tiers observed at both endpoints |
+| Trend R² (A4) | R² ≥ 0.8 over the trailing 6–12 closed months | `clean trend R² .91` | ▲ if slope +, ▼ if slope − | 6 |
+| Drawdown (B4) | ≥ 15% below trailing 12-mo peak | `−28% off peak` | ▼ | 3 |
+
+**Anchor-tier rule:** card-level chips read PSA 10's series when it clears the signal's floor,
+otherwise the highest-ranked tier (strip order) that does; the tooltip names the tier read
+(`"PSA 10 · 3-mo window · fires at ±15%"`). Tier-spread compression is inherently two-tier and
+exempt. A card with no tier clearing a floor simply doesn't chip that signal.
+
+**Compression threshold:** the 0.8× / 6-closed-months rule in the table above — the retired
+`DISPLAY_VOCABULARY.md` inventory said only "≥ threshold" and never pinned a number; this spec does.
+
+**Priority order within Phase 2** (the restored family order — composites → RS → supply → momentum →
+liquidity → the rest — applied to this roster): ROC 3M → MACD → EMA cross → z → tier-spread →
+trend R² → drawdown. Newest crossing wins ties. Cap 4, overflow `+N more` opens all — unchanged from
+the general rule above.
+
+**Silently absent until their substrates exist** (firing-only makes absence honest, not a bug): RS
+(needs the Phase 3 index); volume, churn, Amihud, dispersion, cross-market gap (post-seam floor +
+corpus ranking); Pop Δ, gem-rate drift, overhang, grading-arb EV (census deltas and gem rate);
+composite matches (need screens).
+
+**Full inventory:** `docs/signals.md` § "Chip vocabulary" (restored 2026-08-12, D-085) lists every
+chip the product can ever show, across every surface — this table is Phase 2's honestly-computable
+subset of it, for the Card page header only.
 
 ### 3.4 Watchlist control (:375–:386)
 
@@ -299,7 +372,7 @@ Tooltip (:82): `Log a purchase of this card — opens the binder transaction for
 | Series set | :326–:330 | Exactly **6**: PSA 10, Grade 9.5, Grade 9, Grade 8, Grade 7, Raw — in that order (reversed `BUCKETS` filtered to the allow-list). |
 | `arr` (per series) | :297–:302, :326 | **12** monthly values, oldest→newest, USD numbers. |
 | Months | :296 | 12 labels, `MMM ’YY` with a typographic apostrophe U+2019: `Aug ’25 … Jul ’26`. |
-| Series colour `c` | :325, :328 | PSA 10 → `PAL.acc`; Grade 9.5 → `#6E4DB8`; Grade 9 → `PAL.warn`; Grade 8 → `#2E7F78`; Grade 7 → `#B0552E`; Raw → `PAL.mut2`. (Two of the six are theme-derived, four are fixed hexes.) |
+| Series colour `c` | :325, :328 | PSA 10 → `PAL.acc`; Grade 9.5 → `#6E4DB8`; Grade 9 → `PAL.warn`; Grade 8 → `#2E7F78`; Grade 7 → `#B0552E`; Raw → `PAL.mut2`. (Two of the six are theme-derived, four are fixed hexes.) **Superseded 2026-08-13 — D-084.3 (C-20/OQ-21 resolved):** brand.md §2.6 `TIER_COLORS` wins — Grade 9.5 → `#7A56C9`, Grade 8 → `#4C8F8A`, Grade 7 → `#A96A4A`; PSA 10/Grade 9/Raw unchanged. See the §2.4 boxed note. |
 | `ps.w` | :414 | `2` for PSA 10, `1.5` otherwise. |
 | `ps.solid` | :414 | Polyline points for indices 0–10. |
 | `ps.dash` | :414 | Polyline points for indices 10–11 (the provisional segment). |
@@ -329,6 +402,11 @@ Tooltip (:82): `Log a purchase of this card — opens the binder transaction for
 
 ⚠ Column 5's resize handle is wired to key `'src'` (:458), so dragging it resizes **Source**. And column 5 is a fluid `minmax(160px, 1fr)` track that the `colW` map cannot address at all. See §7 OQ-6.
 
+**Resolved 2026-08-13 (OQ-6/I-3) — Phase 2 spec §7:** rather than fixing the routing, Phase 2 removes
+column 5's grip entirely — the fluid `minmax(160px, 1fr)` track has no fixed width for a grip to
+clamp against in the first place. Grips ship on columns 1–4 only; the shared grid template still
+updates both header and rows from one `colW` map (R-6, R-7).
+
 **Row fields** (:352):
 
 | Field | Format | Notes |
@@ -356,10 +434,24 @@ folded into the Realized cell.
 
 Note `#8F6614` is **hard-coded**, equal to the *light-theme* `PAL.warn` (:270). It does not follow the dark-theme `--warnInk` (`#D6A54A`). See §7 OQ-7.
 
-**Row count** (:190, :456): `` `${filtered.length} sales shown` `` — mono 12.5px `--mut`. Reflects the **filtered** count, not the total.
+**Resolved 2026-08-13, this element (OQ-7 partial) — Phase 2 spec §7:** build against the **theme
+token `var(--warnInk)`**, not the literal hex, so the underline follows dark mode (`#D6A54A`)
+correctly. The other three theme-blind elements OQ-7 names — the hidden-legend grey and the two
+census bar fills — are unresolved by this edit; see §4.10.
+
+**Row count** (:190, :456): `` `${filtered.length} sales shown` `` — mono 12.5px `--mut`. Reflects the **filtered** count, not the total. **Gains a help tooltip in Phase 2 (D-084.5):**
+`Each grade is complete from its own first captured sale; nothing earlier was observable.` This is
+the honesty mechanism that replaces in-ledger seam markers and captions — C-7 stands, no seam rows,
+no captions.
 
 **Grade vocabulary — 19 values** (:322), index order (this is also the sort rank, low→high):
 `Raw · Grade 1 · Grade 2 · Grade 3 · Grade 4 · Grade 5 · Grade 6 · Grade 7 · Grade 8 · Grade 9 · Grade 9.5 · PSA 10 · CGC 10 · CGC 10 Prist. · TAG 10 · ACE 10 · SGC 10 · BGS 10 · BGS 10 Black`
+
+**DB mapping (D-081):** the vocabulary above is the *display* label set. The database's
+`grade_tier` column stores `Ungraded`, not `Raw` — confirmed by the live label census (D-081:
+`Ungraded` 2,635,173 rows, the largest of the 19). **The `Raw` chip and the `Raw` tier-strip cell
+both filter/read `grade_tier = 'Ungraded'`**; every other of the 18 labels is verbatim between DB
+and display.
 
 **Filter chips**, in render order (:154–:188, :446–:453):
 
@@ -383,7 +475,7 @@ Chip tooltips: `All` → `Show sales from every grade` (:434). Individual → ``
 
 Six bars, fixed order — **all PSA grades first, then all CGC grades**:
 
-| # | `label` | `n` | Bar fill |
+| # | `label` | `n` (prototype seed) | Bar fill |
 |---|---|---|---|
 | 1 | `PSA 8` | 1,244 | `rgba(74, 99, 208, 0.55)` (accent blue) |
 | 2 | `PSA 9` | 3,865 | accent blue |
@@ -392,15 +484,32 @@ Six bars, fixed order — **all PSA grades first, then all CGC grades**:
 | 5 | `CGC 9.5` | 618 | grey |
 | 6 | `CGC 10` | 187 | grey |
 
+**Corrected 2026-08-13 — D-084.4.** `CGC 9.5` cannot exist: `populations.grade` is a `short 1–10`
+column (`../PokemonInvestBatch/DATA_MODEL.md` §3.4, D-083), so half-grade census cells are
+structurally impossible — the prototype seeded a value for a cell the schema can never produce.
+**Build the fixed six as `PSA 8 · PSA 9 · PSA 10 · CGC 8 · CGC 9 · CGC 10`** — `CGC 8` takes row 4's
+position in place of the impossible `9.5`; the prototype never seeded a `CGC 8` count, so no
+illustrative number is given for it here. The mid-grade census mass this reshuffle displaces is
+carried by a **total-slabs count in the summary line** instead of a bar (below), preserving R-20's
+grader grouping and keeping the "share of census these six bars show" framing honest.
+
 | Field | Line | Format |
 |---|---|---|
 | `p.n` | :226, :466 | `n.toLocaleString('en-US')` → `3,865`. Mono 11.5px `--mut`, above the bar. |
-| `p.h` | :227, :467 | `Math.round(n / maxPop * 104) + 4` **px**. `maxPop = 4020` (:366) — a fixed headroom constant above the seeded max of 3,865, **not** derived from the data. Range 4–108px inside a 150px row. |
+| `p.h` | :227, :467 | `Math.round(n / maxPop * 104) + 4` **px** in the prototype, against a fixed `maxPop = 4020` (:366) — headroom above the seeded max of 3,865, **not** derived from the data. Range 4–108px inside a 150px row. **Amended 2026-08-13 — D-084.4/D-084.8, R-21 amended:** the fixed constant is retired as seed fiction (real census counts exceed it — Charizard #4's PSA 8 alone is 15,931). Build **per-card max** scaling instead: `max` = the largest of the card's own six rendered bars, so the tallest always reaches 108px, matching the grading-activity panel's existing rule (§3.9's `maxD`). The `+4` floor stub is unchanged. |
 | `p.bg` | :468 | Hard-coded RGBA by grader (see table). Both are literal rgba strings, **not** theme tokens. |
 | `p.label` | :228, :466 | Grade string, 11px `--mut2`, `nowrap`, below the bar. |
 | `p.tip` | :227, :469 | `` `{grade}: {n} slabs in current census ({PSA|CGC})` `` |
 
 Census date `2026-07-30` appears **twice**: the panel subtitle "PSA + CGC · as of 2026-07-30" (:221) and the footer stamp (:255). Both are hard-coded literals in the markup.
+
+**Corrected 2026-08-13 — D-084.4, Phase 2 spec §4.** The summary line gains a **totals segment**
+ahead of the gem-rate sentence: both graders' all-grade totals — `PsaTotal`, `CgcTotal` (every
+grade, not just the six displayed bars) — so the "here's a slice of the census" framing of six fixed
+bars stays honest against the full population. **The gem-rate sentence itself is omitted until its
+inputs qualify** (restating the existing Gate rule below): today, under the 2026-09-01 floor
+(D-033), no card has 90 days of qualifying PSA submissions yet, so every card renders the totals
+segment with the gem-rate sentence absent — not zeroed, not estimated. See §4.11.
 
 **Summary sentence** (:232) — hard-coded, not templated in the seed. Structure:
 > `Gem rate ` **`27.3%`**` — of the last 90 days of PSA submissions, the share that came back 10. Drifting ` **`−0.4pp / 90d`**` (harder to gem = supply of fresh 10s slowing).`
@@ -465,7 +574,19 @@ Derivations that check out against the seed:
 | Refresh label | :253 | `Sales & prices refreshed ` + **`just now`** (mono). |
 | Refresh tooltip | :253 | `Opening a card page triggers a fresh scrape — the ledger and prices you see include sales up to right now` |
 | Census label | :255 | `Census as of ` + **`2026-07-30`** (mono, `YYYY-MM-DD`). |
-| Census tooltip | :255 | `Population data comes from PSA/CGC on their own publishing schedule — it can't be scraped on demand` |
+| Census tooltip | :255 | `Population data comes from PSA/CGC on their own publishing schedule — it can't be scraped on demand` — **prototype text; superseded, see below.** |
+
+**Corrected 2026-08-13 — C-17/OQ-13 resolved, Phase 2 spec §6.** The prototype's census tooltip is a
+false claim about the data, not just stale copy: `populations` is one of the crawler's own eight
+tables, written from the **same detail-page visit** as `price_months` and `sales`, not a separate
+PSA/CGC publishing feed (`../PokemonInvestBatch/DATA_MODEL.md:10`, `:343` — the
+`GET /game/{set}/{card}` detail crawl writes all three tables together). Verified directly against
+the sibling repo; this upgrades C-17 from a recorded Claim to Verified. **Build this tooltip
+instead:** `Census updates when the graders publish; we capture it on the same visits as prices.`
+
+**New in Phase 2 (D-084.7):** the footer gains a **TradingView attribution notice and link**,
+satisfying the Lightweight Charts Apache-2.0 licence's attribution requirement for the price chart
+(§2.4).
 
 The two stamps encode the product's central data-freshness claim: **sales and prices are on-demand fresh; census is not.** See §6 R-14.
 
@@ -588,6 +709,15 @@ Comparators (:355–:364): `date` → string compare of the ISO date; `price` �
 **Reachability.** In the prototype this state is only reachable by **filtering** to a bucket with no observed sales (e.g. selecting `BGS 10 Black`). In production it also covers a card with zero observed sales overall. **The copy is the same in both cases** and is an affirmative claim about scraper coverage — not a "data missing" message. The header row, chip toolbar, and `0 sales shown` count all still render above it.
 
 > **Note the wording is grade-scoped** ("in this grade"). It reads correctly under a single-bucket filter and awkwardly under `All` or a multi-bucket selection. See §7 OQ-5.
+>
+> **Resolved 2026-08-13 (OQ-5) — Phase 2 spec §7.** The wording now scopes to the selection instead
+> of always saying "in this grade": **one bucket selected** → `No sales observed in this grade —
+> that's a true zero: our scrapers visited and found none.`; **multiple buckets selected** →
+> `No sales observed in these grades — that's a true zero: our scrapers visited and found none.`;
+> **`All` / no filter** → `No sales observed for this card — that's a true zero: our scrapers
+> visited and found none.` All three drop the prototype's trailing `, not "no data"` clause (:213)
+> as redundant with the sentence that follows it. Build these three; the single grade-scoped string
+> above (:213) is the prototype fact, not the target.
 
 ### 4.7 Seam markers — DATA PRESENT, RENDERING ABSENT
 
@@ -633,7 +763,12 @@ Both toggle buttons animate with `transition: background 0.15s, color 0.15s` (:7
 | **Reduced motion** | `prefers-reduced-motion: reduce` (:23) | `animation-duration: 0.01ms !important` globally. Note this does **not** disable the `transition` properties on the toggle buttons. |
 | **Focus visible** | Keyboard focus (:21) | `outline: 2px solid var(--acc); outline-offset: 1px; border-radius: 2px`. |
 
-**Four elements are theme-blind** — they use hard-coded colours that do not switch: the Realized-cell amber `#8F6614` (:352), the hidden-legend grey `#D8D8D3` (:406), the population/delta bar fills `rgba(74,99,208,.55)` and `rgba(138,138,134,.45)` (:468, :474), and the chart's four fixed tier hexes (:325). See §7 OQ-7.
+**Four elements are theme-blind in the prototype** — they use hard-coded colours that do not switch: the Realized-cell amber `#8F6614` (:352), the hidden-legend grey `#D8D8D3` (:406), the population/delta bar fills `rgba(74,99,208,.55)` and `rgba(138,138,134,.45)` (:468, :474), and the chart's four fixed tier hexes (:325). See §7 OQ-7.
+
+**Two are resolved for Phase 2 (2026-08-13, OQ-7 partial / C-20):** the Realized-cell underline now
+reads the `var(--warnInk)` token (§3.7), and the chart moves to LWC + `brand.md` §2.6 `TIER_COLORS`
+entirely (§2.4, §3.6) — theme-aware tokens and CVD-stable hexes, not the prototype's four fixed
+literals. **Still hard-coded:** the hidden-legend grey and both bar fills.
 
 ### 4.11 Data-sufficiency states (app-wide vocabulary; only one is exercised here)
 
@@ -650,6 +785,20 @@ Both toggle buttons animate with `transition: background 0.15s, color 0.15s` (:7
 **This matters more than it looks.** `DECISIONS.md:22` (D-001) establishes that per-sale and census history begin at each card's own first crawler visit in **late Jul 2026**, ragged, never a shared date; `DECISIONS.md:33` calls the consequence *"the largest scope fact in the project"* — every liquidity and supply indicator is LOCKED for 6–12 months of calendar time. `DECISIONS.md:309` (D-033) adds a floor: **no post-seam metric counts observations before 2026-09-01.**
 
 So the realistic launch-day Card page is **not** the seeded one. It shows: a full 12-month price chart and tier strip (monthly history backfills to ~Dec 2020 on first visit — `DECISIONS.md:37`, D-002), a **very short or empty** sales ledger, and a census panel with **one observation** and no deltas at all. **Build the degraded paths first; the seeded density is fiction.** The three states this screen does not implement — LOCKED, UNDEFINED, UNSTABLE FIT — are the ones a real card will spend its first year in. See OQ-20.
+
+**Corrected 2026-08-13 — D-082/D-083.** The paragraph above understates launch-day readiness in two
+of its three claims, per live queries against the Pi on 2026-08-12. **The sales ledger is deep, not
+near-empty:** `sales` holds 4,406,142 rows over 79,336 cards, `sold_on` running 2016-11-17 →
+2026-08-12; the busiest dev card (1958438, Ancient Mew) carries 715 rows (D-082). Build the ledger —
+sorting, filtering, resize — for hundreds of rows as the common case, not a handful. **The
+population panel has real current-census bars for ~63% of the corpus:** 57,464 of 91,596 active
+cards carry at least one `populations` observation (D-083) — the six bars and their totals line
+render real data today, not a single-observation placeholder. **What stays degraded, and is still
+the thing to build first:** grading-activity *deltas* (need two observations; zero cards qualify
+under the 2026-09-01 floor today, D-033/D-083) and every liquidity/momentum metric gated on the
+post-seam window (D-001). The LOCKED / UNDEFINED-window / UNSTABLE-FIT states OQ-20 asks for are
+still unbuilt and still real — they now belong to the census-delta and signal-chip surfaces
+specifically, not to the ledger display or the population bars.
 
 ---
 
@@ -689,7 +838,13 @@ Exhaustive list of every interactive element, in document order.
 | 16 | Image container | :103 | `stopClick(e)` → `e.stopPropagation()` (:394). Clicking the art itself does **not** close. `cursor: default`. Sized `width: min(62vh, 78vw)` with `aspect-ratio: 325/450`. |
 | 17 | ✕ close button | :105 | `closeArt()`. 30px circle at `top:-14px; right:-14px` (deliberately overlapping the art's corner), `aria-label="Close"`, `title="Close the full-size art"`, hover `background: var(--mutbg)`. |
 
-Missing: Escape key, focus trap, `role="dialog"`, scroll lock. See §7 OQ-8.
+Missing in the prototype: Escape key, focus trap, `role="dialog"`, scroll lock, focus return.
+
+**Resolved 2026-08-13 (OQ-8) — Phase 2 spec §4, plan.** Phase 2 builds three of the five gaps above:
+the lightbox carries `role="dialog"` + `aria-modal="true"`; an `@onkeydown` handler closes it on
+Escape; and on close, focus returns to the art thumbnail via JS interop. **Not built in Phase 2: a
+focus trap and a scroll lock** — the ruling above is the complete set of what OQ-8 resolves; those
+two remain unaddressed if they matter later.
 
 ### 5.4 Price chart
 
@@ -715,7 +870,7 @@ The hover tooltip and crosshair have `pointer-events: none` (:134) / are absolut
 | 28 | Group wrapper `mouseleave` | :158, :174 | `closeLgPops()` (:452) — closes both. |
 | 29 | Document `mousedown` outside `[data-lg-pop]` | :277 | Closes both group popovers. |
 | 30 | **Header label** (×5) | :194 | `lc.sort()` (:461) — desc-first on a new column, flip on the active one. `title="Click to sort"`, hover `color: var(--acc)`, `cursor: pointer`. The label span is `flex: 1; text-align: center`, so the whole cell width minus the grip is the hit target. |
-| 31 | **Header resize grip `│`** (×5) | :194 | `onMouseDown → lc.rs` = `startResize(key)` (:282–:293). `preventDefault` + `stopPropagation` (so **resizing never triggers a sort**), then `mousemove`/`mouseup` listeners on `window`. New width = `clamp(startW + Δx, 40, 420)` px, written into `colW[key]`, which regenerates `lgGridCols` for the header **and every row simultaneously**. `cursor: col-resize`, colour `--line3` → `--acc` on hover, `margin-right: -6px`. ⚠ Grip #5 (`Listing title`) is keyed `'src'` and therefore resizes column 4. |
+| 31 | **Header resize grip `│`** (×5) | :194 | `onMouseDown → lc.rs` = `startResize(key)` (:282–:293). `preventDefault` + `stopPropagation` (so **resizing never triggers a sort**), then `mousemove`/`mouseup` listeners on `window`. New width = `clamp(startW + Δx, 40, 420)` px, written into `colW[key]`, which regenerates `lgGridCols` for the header **and every row simultaneously**. `cursor: col-resize`, colour `--line3` → `--acc` on hover, `margin-right: -6px`. ⚠ Grip #5 (`Listing title`) is keyed `'src'` and therefore resizes column 4 in the prototype. **Phase 2 (OQ-6/I-3 resolved, 2026-08-13):** grip #5 is removed rather than rerouted — four grips, not five; see §3.7. |
 | 32 | Realized value with a listed price | :204 | **Not clickable** — `cursor: help` + `title="listed $X → sold $Y"`, marked by the 2px dotted amber bottom border. Rows without a listed price get `cursor: default`, `border-bottom: none`, and an empty tooltip. |
 | 33 | Listing title cell | :206 | **Not clickable** — truncated with an ellipsis; `title` carries the full string. **There is no outbound link to the marketplace listing.** |
 | 34 | Ledger rows | :199 | **Not clickable.** No row hover style, no selection, no expansion. |
@@ -778,7 +933,7 @@ Registered in `componentDidMount` (:273–:280), removed in `componentWillUnmoun
 **Census**
 
 - **R-20.** Population bars are **PSA-first, then CGC**, and colour-coded by grader: accent blue `rgba(74,99,208,.55)` for PSA, grey `rgba(138,138,134,.45)` for CGC (:367–:369, :468). The split is by grading company, not by grade.
-- **R-21.** Population bar heights scale against a **fixed constant** `maxPop = 4020` (:366), not the data max — so bars are comparable across cards but never fill the row. Grading-activity bars scale against `maxD` = the **actual** series max (:372), so the tallest always reaches 108px. **The two panels use different scaling rules.**
+- **R-21.** ~~Population bar heights scale against a **fixed constant** `maxPop = 4020` (:366), not the data max — so bars are comparable across cards but never fill the row.~~ **Amended 2026-08-13 — D-084.4/D-084.8.** The fixed `maxPop = 4020` is seed fiction — real census counts exceed it (Charizard #4's PSA 8 alone is 15,931) — and is retired. Population bars now scale the **same way** as grading-activity bars: **per-card max**, the largest of the six rendered bars, so the tallest always reaches 108px in both panels. Grading-activity bars still scale against `maxD` = the **actual** series max (:372). **The two panels share one scaling rule now; R-20's grader-colour split is the only remaining difference between them.**
 - **R-22.** Bar height = `round(n / max × 104) + 4` px in both panels — the `+4` guarantees a visible stub for a zero or near-zero value inside the 150px row.
 - **R-23.** The grading-activity panel tracks **PSA 10 only** (heading :236, tooltip :476). CGC contributes to the population census but not to the activity deltas.
 - **R-24.** The `N OBS` badge is a **data-sufficiency warning**, styled in the warn palette, and its tooltip states the rule: *deltas need two observations* (:237). It exists because census history is short.
@@ -788,7 +943,7 @@ Registered in `componentDidMount` (:273–:280), removed in `componentWillUnmoun
 **Freshness**
 
 - **R-27.** **Opening a card page triggers a fresh scrape.** Stated in the footer tooltip (:253) and reflected in the stamp reading `just now`. Sales and prices are on-demand fresh.
-- **R-28.** **Census is not on-demand.** The tooltip states it comes from PSA/CGC on their own publishing schedule and "can't be scraped on demand" (:255). It carries an explicit as-of date, shown in two places (:221, :255), which must agree.
+- **R-28.** ~~**Census is not on-demand.** The tooltip states it comes from PSA/CGC on their own publishing schedule and "can't be scraped on demand" (:255).~~ **Corrected 2026-08-13 — C-17/OQ-13.** The prototype's *reason* was wrong — census **is** captured by the same on-demand scrape as prices, from the same crawler visit (§3.10) — but the *consequence* still holds: the census **number** only moves when PSA/CGC publish new totals upstream, on a cadence CardStock doesn't control, so a fresh visit can re-confirm today's count without changing it. It carries an explicit as-of date, shown in two places (:221, :255), which must agree.
 - **R-29.** Consequently the page carries **two different freshness clocks** and must never present census numbers as being as fresh as the ledger.
 
 **Formatting**
@@ -810,27 +965,27 @@ Registered in `componentDidMount` (:273–:280), removed in `componentWillUnmoun
 
 | # | Question | Why it is open |
 |---|---|---|
-| **OQ-1** | **Confirm the route is `/card/{id}`.** | Documented at `HANDOFF.md:76` and `CARDSTOCK_UI_SPEC_v1.md:119`/`:217`, but **Tier 2/3 and unverifiable from the HTML** — the prototype has no routing and no inbound link carries an id. Also undecided: what `{id}` is (the DB key? a slug?), and how the breadcrumb, set link, and character link derive their targets. |
+| **OQ-1** | ✅ **RESOLVED 2026-08-13 — Phase 2 spec §1/§2.** *Confirm the route is `/card/{id}`.* | Documented at `HANDOFF.md:76` and `CARDSTOCK_UI_SPEC_v1.md:119`/`:217`, but **Tier 2/3 and unverifiable from the HTML** — the prototype has no routing and no inbound link carries an id. Also undecided: what `{id}` is (the DB key? a slug?), and how the breadcrumb, set link, and character link derive their targets. **Answer: `{id}` is `cards.id` — PriceCharting's own product id, never locally generated** (`../PokemonInvestBatch/DATA_MODEL.md:34`, `:162`, e.g. `630417`). The route is confirmed `/card/{id}`. **Still separately unresolved:** how the breadcrumb and set link derive live targets, since Browse and Set are later-phase screens (deferred-disabled meanwhile) — the character link is a different case and does not render in Phase 2 at all; see §3.1.1. |
 | **OQ-2** | **What does the Binder button actually do?** | Its tooltip says "opens the binder transaction form" (:82) but the handler only flips a boolean (:390). The real behaviour — navigate to Binder, open a modal form, capture quantity/price/date — is unspecified here. Check `Cardstock Binder.dc.html`. |
 | **OQ-3** | **What are seam markers supposed to look like, and when do they render?** | `SEAMS` holds a date per grade (:321) and rows carry `isSeam` (:352), but nothing renders them and no sort-mode gate exists. The brief says "only in date sort" — **the HTML does not implement that, or anything else**. Another prototype (Charts?) may show the intended treatment; otherwise this needs a design decision before build. |
-| **OQ-4** | **What happens when a chart's visible series are all flat?** | `mx === mn` makes `(v−mn)/(mx−mn)` produce `NaN` and the polylines vanish (:342). Real single-tier views of a stable card will hit this. Needs a defined fallback (e.g. pad the range). |
-| **OQ-5** | **Should the true-zero copy change under `All` or a multi-bucket filter?** | The string is grade-scoped — "No sales observed **in this grade**" (:213) — but it also renders when `All` is active on a card with no sales at all, and when several buckets are selected. |
-| **OQ-6** | **Is the `Listing title` column meant to be resizable?** | Its grip is keyed `'src'` (:458) so it resizes Source, and its track is `minmax(160px, 1fr)` which `colW` cannot address. Either the grip should be removed from column 5 or the track should become fixed-width. |
-| **OQ-7** | **Should the hard-coded colours be theme-aware?** | The Realized amber `#8F6614` (:352) is the *light* `--warnInk`; dark theme uses `#D6A54A` (:27). Also hard-coded: the hidden-legend grey `#D8D8D3` (:406) and both bar fills (:468, :474). Contrast in dark mode is unverified. |
-| **OQ-8** | **Lightbox accessibility.** | No Escape handler, no focus trap, no `role="dialog"`/`aria-modal`, no scroll lock, and focus is not restored to the thumbnail on close (:101–:108). Add or accept? |
+| **OQ-4** | ✅ **RESOLVED 2026-08-13 — D-084.7, Phase 2 spec §5.** *What happens when a chart's visible series are all flat?* | `mx === mn` makes `(v−mn)/(mx−mn)` produce `NaN` and the polylines vanish (:342) **in the prototype's own hand-rolled SVG geometry.** Phase 2 does not port that geometry — it builds on TradingView Lightweight Charts (§2.4 boxed note), whose **autoscale** handles a flat/degenerate series natively. No padding hack needed. |
+| **OQ-5** | ✅ **RESOLVED 2026-08-13 — Phase 2 spec §7.** *Should the true-zero copy change under `All` or a multi-bucket filter?* | The string is grade-scoped — "No sales observed **in this grade**" (:213) — but it also renders when `All` is active on a card with no sales at all, and when several buckets are selected. **Answer: yes, three variants scoped to the selection** — see §4.6 for the resolved copy (in this grade / in these grades / for this card). |
+| **OQ-6** | ✅ **RESOLVED 2026-08-13 — Phase 2 spec §7.** *Is the `Listing title` column meant to be resizable?* | Its grip is keyed `'src'` (:458) so it resizes Source, and its track is `minmax(160px, 1fr)` which `colW` cannot address. Either the grip should be removed from column 5 or the track should become fixed-width. **Answer: no — the grip is removed from column 5** rather than the track becoming fixed-width; see §3.7. Also resolves I-3 (§8.2). |
+| **OQ-7** | ⚠ **PARTIALLY RESOLVED 2026-08-13 — Phase 2 spec §7.** *Should the hard-coded colours be theme-aware?* | The Realized amber `#8F6614` (:352) is the *light* `--warnInk`; dark theme uses `#D6A54A` (:27). Also hard-coded: the hidden-legend grey `#D8D8D3` (:406) and both bar fills (:468, :474). Contrast in dark mode is unverified. **Resolved for one of the four:** the Realized-cell underline now builds against the theme token `var(--warnInk)` (§3.7). The tier-hex question is separately resolved by D-084.3 (§2.4, §3.6), but that was the chart series colours, not this list's four. **Still open:** the hidden-legend grey and both population/activity bar fills remain hard-coded literals — see §4.10. |
+| **OQ-8** | ✅ **RESOLVED 2026-08-13 — Phase 2 spec §4, plan.** *Lightbox accessibility.* | No Escape handler, no focus trap, no `role="dialog"`/`aria-modal`, no scroll lock, and focus is not restored to the thumbnail on close (:101–:108). Add or accept? **Answer: add three of the five** — `role="dialog"` + `aria-modal="true"`, an Escape handler, and focus return to the thumbnail on close (see §5.3). Focus trap and scroll lock are **not** added in Phase 2. |
 | **OQ-9** | ~~What are the other branches of the two summary sentences?~~ **ANSWERED** — `DESIGN_NOTES.md:52` and `:53`, transcribed into §3.8 and §3.9. Every threshold, branch, and degrade string is specified there and reproduces the seeded output exactly. **Remaining sliver:** the gem-rate *flat* band is `±0.1pp` (`:52`) while the gem-rate *chip* elsewhere fires at `≥0.3pp` (`DISPLAY_VOCABULARY.md:32`) — confirm those are deliberately different thresholds. |
 | **OQ-10** | **What was `d.bd` for?** | Every activity bar sets `border: 'none'` yet the markup keeps `box-sizing: border-box; border: {{ d.bd }}` (:243, :475). Most plausibly an outlined treatment for the current partial month, mirroring the chart's hollow dot — unconfirmed. |
 | **OQ-11** | **How does the watchlist picker produce a card+tier row, and what is the create-list UI?** | `HANDOFF.md:155` and `DESIGN_NOTES.md:110` say watchlists are **one row per card + tier**, but the picker has no tier selector (:73–:79) — see C-14. Separately, `+ New list…` uses a native `prompt()` (:386) and the created list never appears as a row because `watchLists` is a fixed array (:380). |
-| **OQ-12** | **How are the signal chips computed?** | The *presentation* and *selection rules* are now settled (§3.3, C-13). What is not: the source of each signal. RS is "vs market index, 3M"; MACD is "(3,6,4)"; "Most active" is a corpus-wide top-decile ranking. **None of these exist in the scraper's eight tables** — all are derived, all need a computation owner, and each needs a sufficiency floor (`DISPLAY_VOCABULARY.md:7`: a signal below its floor never chips). |
-| **OQ-13** | **Is the census tooltip's factual claim correct, and is the as-of date one value or two?** | The date is hard-coded twice (:221, :255) — presumably one field; confirm PSA and CGC can never publish on different days. Separately, the tooltip asserts census *"comes from PSA/CGC on their own publishing schedule — it can't be scraped on demand"* (:255, tracing to `DESIGN_NOTES.md:54`). Sibling analysis in this batch says that is false — census rows come from the scraper's own visits. **Unverified by me against `../PokemonInvestBatch`; verify before shipping the copy.** See C-17. |
-| **OQ-14** | **Which series should the hollow dot track when PSA 10 is hidden?** | It follows the *first visible* series (:417) but its ring is always `var(--acc)` (:132) — PSA 10's colour — so with PSA 10 hidden the dot sits on another series' line wearing the wrong colour. |
+| **OQ-12** | ⚠ **PARTIALLY RESOLVED 2026-08-13 — D-084.11, Phase 2 spec §12.** *How are the signal chips computed?* | The *presentation* and *selection rules* are now settled (§3.3, C-13). What is not: the source of each signal. RS is "vs market index, 3M"; MACD is "(3,6,4)"; "Most active" is a corpus-wide top-decile ranking. **None of these exist in the scraper's eight tables** — all are derived, all need a computation owner, and each needs a sufficiency floor (`DISPLAY_VOCABULARY.md:7`: a signal below its floor never chips). **Resolved for seven of them:** ROC 3M, MACD, EMA cross, z vs 6M MA, tier-spread compression, trend R², and drawdown are computed in **Domain, on request**, purely from the price reader's own series (`[S1]` in `docs/signals.md`'s notation) — no new computation owner needed; see §3.3.1. **Still open:** RS, liquidity chips (volume/churn/Amihud/dispersion/cross-market), census-based chips (Pop Δ/gem-rate/overhang), and composites all need substrates — an index, the post-seam ledger at scale, and census deltas respectively — that arrive in later phases; each stays silently absent until then. |
+| **OQ-13** | ✅ **RESOLVED 2026-08-13 — C-17, Phase 2 spec §6.** *Is the census tooltip's factual claim correct, and is the as-of date one value or two?* | The date is hard-coded twice (:221, :255) — presumably one field; confirm PSA and CGC can never publish on different days. Separately, the tooltip asserts census *"comes from PSA/CGC on their own publishing schedule — it can't be scraped on demand"* (:255, tracing to `DESIGN_NOTES.md:54`). Sibling analysis in this batch says that is false — census rows come from the scraper's own visits. **Unverified by me against `../PokemonInvestBatch`; verify before shipping the copy.** See C-17. **Now verified directly against `../PokemonInvestBatch`** (`DATA_MODEL.md:10`, `:343`): the claim is false, and the corrected copy is in §3.10. **The as-of-date-is-one-field half stays open** — nothing in this pass confirmed or denied whether PSA and CGC could report on different days; the single `ObservedAt?` field in the Phase 2 API contract (spec §3) treats census as one as-of value across both graders, which is a working assumption baked into the contract, not an independently re-verified fact. |
+| **OQ-14** | ✅ **RESOLVED 2026-08-13 — D-084.7, Phase 2 spec §5.** *Which series should the hollow dot track when PSA 10 is hidden?* | It follows the *first visible* series (:417) but its ring is always `var(--acc)` (:132) — PSA 10's colour — so with PSA 10 hidden the dot sits on another series' line wearing the wrong colour **in the prototype.** Phase 2's custom LWC primitive draws the dot at the first visible series *with a current-month value*, in **that series' own colour** — fixing both the wrong-colour bug and the case where the first visible series has no current-month point. |
 | **OQ-15** | **Should the ledger link out to the source listing?** | The listing title is truncated text with a `title` tooltip and no link (:206). The scraper knows the marketplace; whether it retains a URL is a data question for `../PokemonInvestBatch`. |
 | **OQ-16** | **What is the ledger's time window and page size?** | 16 seeded sales span 2026-03-28 → 2026-08-01 with no pagination, no "load more", no date-range control, and no windowing copy anywhere (:151–:215). Unbounded is unlikely to be the intent. |
-| **OQ-17** | **Off-by-one in the seeded chart months.** | The x-axis and `MONTHS` end at `Jul ’26` (:147, :296) but the hollow-dot tooltip says "**Aug** is month-to-date" (:132), the ledger's newest sale is `2026-08-01` (:304), and the census is as of `2026-07-30`. If "today" is Aug 2026 the 12-month window should be Sep ’25–Aug ’26. Almost certainly stale seed data — but confirm the rule is "12 months ending at the current, incomplete month". |
+| **OQ-17** | ✅ **RESOLVED 2026-08-13 — D-084.9, Phase 2 spec §5.** *Off-by-one in the seeded chart months.* | The x-axis and `MONTHS` end at `Jul ’26` (:147, :296) but the hollow-dot tooltip says "**Aug** is month-to-date" (:132), the ledger's newest sale is `2026-08-01` (:304), and the census is as of `2026-07-30`. If "today" is Aug 2026 the 12-month window should be Sep ’25–Aug ’26. Almost certainly stale seed data — but confirm the rule is "12 months ending at the current, incomplete month". **Confirmed: the rule is 12 months ending at the current, incomplete calendar month** — build the window computed from the clock, never hard-coded, exactly as §2.3.1 already required for the tier-strip `◌` glyph's `{Month}`. |
 | **OQ-18** | **Tier-strip change window.** | Labelled `30d` (:89) and the tooltip says "over 30 days" (:398), but the underlying series is *monthly* (:112). 30 days ≠ one calendar month. Confirm which the number really is. |
 | **OQ-19** | ✅ **RESOLVED 2026-08-11 (D-077) — see §4.2.1.** *What does the page show while the on-demand scrape is in flight, or when it fails?* | The footer rendered a completed past tense — `refreshed just now` (:253) — and **no other state existed**: no spinner, no "updating…", no error, no stale fallback. **Answer:** stored prices paint immediately at full strength; an 18 px animated logo badge in a reserved 28 px slot carries the in-flight state; failure swaps it for an amber `– as of {date} · {n}d old`; prices never change, because they were never wrong. Two corrections landed with it: the endpoint returns **500, not 504** (D-076), and it is `express-visit`'s **60 s `HttpClient` cap** that bounds the wait, which is why the paint may never block on it. `CLAUDE.md`'s loopback constraint still holds — the call is proxied through `CardStock.Api`, settled by D-063. |
 | **OQ-20** | **Design the LOCKED, UNDEFINED-window, and UNSTABLE-FIT states for this screen.** | Only LOW DATA is implemented (§4.11). Given D-001/D-033, a real card at launch has a near-empty ledger and a single census observation — so the states this prototype skips are the ones users will actually see. Specifically: what does the census pair render at `N OBS < 2`? What does the chart do with a month that has no observed sales (gap, not zero)? |
-| **OQ-21** | **Do the Card and Charts tier palettes get reconciled?** | Three of six tier colours differ between `Cardstock Card.dc.html:325` and `Cardstock Charts.dc.html:375` (C-20). Both are Tier 1, so this needs an owner ruling, not an inference — and the Card page links directly into Charts twice (:69, :117). |
+| **OQ-21** | ✅ **RESOLVED 2026-08-13 — D-084.3.** *Do the Card and Charts tier palettes get reconciled?* | Three of six tier colours differ between `Cardstock Card.dc.html:325` and `Cardstock Charts.dc.html:375` (C-20). Both are Tier 1, so this needs an owner ruling, not an inference — and the Card page links directly into Charts twice (:69, :117). **Owner ruling: the Charts values win** — `brand.md` §2.6 `TIER_COLORS` is now the single palette both screens read; the Card prototype's three variant hexes are superseded. See the §2.4 boxed note and §3.6. |
 | **OQ-22** | **Does the grade vocabulary imply grader-neutrality it should not?** | `DECISIONS.md:70` (D-022) records a binding ADR consequence: *"The interface must not imply the pooled figure is company-neutral."* The ledger renders bare `Grade 9`, `Grade 9.5`, `Grade 8` labels (:203) with no grader qualification, and the tier strip does the same (:87). Whether that reads as neutral — and whether a disclosure is owed — is unresolved; `HANDOFF.md:22` already flags the related "grader-agnostic" wording as contradicted. |
 
 ---
@@ -855,18 +1010,19 @@ Paths are relative to the repo root. `MOCK/` = `CardStock Mockup/`. All doc quot
 | **C-10** | Listed prices cover *"~12% of rows"* | `MOCK/HANDOFF.md:128` | **Contradicted by `DESIGN_NOTES.md:46` (4.4%), and HANDOFF self-corrects at `:20`.** `DECISIONS.md:375` (D-031) rules 4.4% credible. The HTML cannot settle a coverage rate — the seed shows 5 of 16 rows with a listed price (:304–:319), which is ~31% and purely illustrative. **Do not treat the seed density as real.** |
 | **C-11** | *"the month-to-date point is computed with the SAME aggregation as closed months … NO projection … final chart segment dashed + hollow end dot with tooltip, no text warning"* | `MOCK/DESIGN_NOTES.md:49` | **Verified.** Solid polyline for indices 0–10, dashed `4 4` for the 10→11 segment (:414); hollow `--card`-filled, accent-ringed 8px dot at `left: 100%` (:132); tooltip only, no on-canvas text warning. |
 | **C-12** | *"Seams: … resolution seam Jul '26 **amber dashed line on price chart** ('per-sale ledger begins')"* | `MOCK/DESIGN_NOTES.md:35` | **No amber seam line on this chart.** The only non-data line is a `--line4` rule at the viewBox midpoint `y=115` (:126), which is decorative, not a seam. The only dashing is the current-month tail (:414). (`DECISIONS.md:385`, D-009, separately disputes the "Apr '25 liquidity seam" on the same doc line.) |
-| **C-13** | Card-header signal chips show **only firing** signals, *"priority-ordered, cap 4, overflow '+N more' opens all"* | `MOCK/DISPLAY_VOCABULARY.md:7`, priority order at `:37`, restated `MOCK/DESIGN_NOTES.md:57` | **None of that machinery exists.** `sigChips` is a static 3-element literal (:400–:404) with no firing test, no priority sort, no cap, and **no `+N more` control**. The container merely `flex-wrap`s (:93). The three seeded chips *do* match the documented triggers exactly (`RS 94th` ← `:13`; `MACD +` ← `:16`; `● Most active · 41 sales/30d` ← `:25`), so the vocabulary is right and only the selection logic is missing. |
+| **C-13** | Card-header signal chips show **only firing** signals, *"priority-ordered, cap 4, overflow '+N more' opens all"* | `MOCK/DISPLAY_VOCABULARY.md:7`, priority order at `:37`, restated `MOCK/DESIGN_NOTES.md:57` | **None of that machinery exists.** `sigChips` is a static 3-element literal (:400–:404) with no firing test, no priority sort, no cap, and **no `+N more` control**. The container merely `flex-wrap`s (:93). The three seeded chips *do* match the documented triggers exactly (`RS 94th` ← `:13`; `MACD +` ← `:16`; `● Most active · 41 sales/30d` ← `:25`), so the vocabulary is right and only the selection logic is missing. **Resolved 2026-08-13 — D-084.11, Phase 2 spec §12.** The selection machinery is now specced and built: firing test, priority sort, cap-4-with-`+N more`, and a concrete seven-signal Phase 2 roster with floors, an anchor-tier rule, and chip-text formatting — all pure Domain code, under test. See §3.3.1. |
 | **C-14** | Watchlists are *"one row per card + tier"*; *"Charts IS the editor, the nav watch button is the save"* | `MOCK/HANDOFF.md:155`, `MOCK/DESIGN_NOTES.md:110`, `:112` | **The Card page's picker has no tier selector** (:73–:79) — it toggles card↔list membership only. The button tooltip does defer signal choice to Charts (*"you pick which signals it tracks in Charts"*, :71), consistent with :112. But if a watchlist row is keyed by card **+ tier**, this control cannot produce one unambiguously. See OQ-11. |
 | **C-15** | *"Data honesty strip — 'as of Xh ago'"*; and app-wide, *"every data surface carries a quiet 'data as of Xh ago' stamp"* | `MOCK/uploads/CARDSTOCK_UI_SPEC_v1.md:220`, `:39` (Tier 3) | **Removed.** The footer reads *"Sales & prices refreshed just now"* (:253) with a per-source split, and there is no `AsOfStamp` anywhere. Superseded by `DESIGN_NOTES.md:54` and `:84`, and by `HANDOFF.md:99`. |
 | **C-16** | On-demand card refresh *"**must be async** (politeness gate makes sync refresh a lie)"* | `MOCK/uploads/PROJECT_LOG.md:282` (Tier 3) | **The HTML asserts a synchronous, already-complete refresh** — *"refreshed **just now**"* with the tooltip *"Opening a card page triggers a fresh scrape — the ledger and prices you see include sales up to right now"* (:253). The Tier-3 objection has since been overtaken: `CLAUDE.md:74` records a **synchronous** `POST /cards/{id}/express-visit` that bypasses the polite gate, and `DECISIONS.md:429` (D-025) maps this exact stamp to it. **Build to the HTML** — but note it renders no in-flight or failure state (OQ-19). **Update 2026-08-11:** that gap is now filled by §4.2.1 (D-077), and the `504` this row's chain of sources implies no longer exists (D-076). |
-| **C-17** | Census tooltip: *"Population data comes from PSA/CGC on their own publishing schedule — it can't be scraped on demand"* (:255), traced to `MOCK/DESIGN_NOTES.md:54` | HTML :255 vs the data repo | **Flagged as factually wrong about the data** by sibling analysis in this same `docs/screens/` batch: census rows come from the scraper's own visits, not a PSA/CGC publication feed. **Not verified by me against `../PokemonInvestBatch`** — recorded here as a Claim, not a finding. It does not change the layout; it may change the tooltip copy. See OQ-13. |
+| **C-17** | Census tooltip: *"Population data comes from PSA/CGC on their own publishing schedule — it can't be scraped on demand"* (:255), traced to `MOCK/DESIGN_NOTES.md:54` | HTML :255 vs the data repo | **Flagged as factually wrong about the data** by sibling analysis in this same `docs/screens/` batch: census rows come from the scraper's own visits, not a PSA/CGC publication feed. **Not verified by me against `../PokemonInvestBatch`** — recorded here as a Claim, not a finding. It does not change the layout; it may change the tooltip copy. See OQ-13. **Resolved 2026-08-13 — verified, not just flagged.** `../PokemonInvestBatch/DATA_MODEL.md:10` and `:343`: `populations` is written from the same `GET /game/{set}/{card}` detail-page visit as `price_months` and `sales` — one crawl, three tables, no separate PSA/CGC feed. The Claim is now Verified and false; corrected tooltip copy is in §3.10. |
 | **C-18** | Per-sale ledger begins **Apr 2025** | `MOCK/HANDOFF.md` §5, now corrected in place — see `:19`, `:126`, `:134` | **Superseded.** `HANDOFF.md:126` now reads *"Each card's first visit, late Jul 2026 onward — ragged, never a shared date"*, and `DECISIONS.md:22` (D-001) rules the same, with the scraper's first deployment at 2026-07-28. `DESIGN_NOTES.md:41` (*"per-sale scraping started Jul '26"*) was right all along. **The HTML's seed contradicts the settled answer**: sales run 2026-03-28 → 2026-08-01 (:304–:319) and `SEAMS` puts per-grade seams in Mar–Jun 2026 (:321) — all before the scraper existed. Seed fiction; ignore the dates, keep the structure. |
 | **C-19** | `price_months` carries **exactly 6** price tiers (`Ungraded, Grade7, Grade8, Grade9, Grade9Half, Psa10`); the 19-value scale is legitimate only for *sales* and *holdings* | `DECISIONS.md:44`–`:57` (D-003), reinforced by `:403`–`:404` (D-012) and `CLAUDE.md:92` | **This is the reconciliation of C-1/C-4, and the HTML implements it exactly.** Six tiers wherever a **price series** is plotted (strip :395, chart :327); nineteen wherever a **sale** is described (bucket column :203, filter chips :446–:453, sort rank :354). `DECISIONS.md` overrides all doc tiers, and `:246` (D-038) independently describes the Card page as having a *"six-tier strip"*. **Settled: six.** |
-| **C-20** | Tier colours | `MOCK/Cardstock Card.dc.html:325` vs `MOCK/Cardstock Charts.dc.html:375` | **Code vs code — both Tier 1, and they disagree.** Verified by reading both lines: Card uses `Grade 9.5 #6E4DB8`, `Grade 8 #2E7F78`, `Grade 7 #B0552E`; Charts uses `#7A56C9`, `#4C8F8A`, `#A96A4A`. PSA 10 (`PAL.acc`), Grade 9 (`PAL.warn`) and Raw (`PAL.mut2`) match. Needs an owner ruling before either is built — the Card page links straight into Charts (:69, :117), so a user will see both. |
+| **C-20** | Tier colours | `MOCK/Cardstock Card.dc.html:325` vs `MOCK/Cardstock Charts.dc.html:375` | **Code vs code — both Tier 1, and they disagree.** Verified by reading both lines: Card uses `Grade 9.5 #6E4DB8`, `Grade 8 #2E7F78`, `Grade 7 #B0552E`; Charts uses `#7A56C9`, `#4C8F8A`, `#A96A4A`. PSA 10 (`PAL.acc`), Grade 9 (`PAL.warn`) and Raw (`PAL.mut2`) match. Needs an owner ruling before either is built — the Card page links straight into Charts (:69, :117), so a user will see both. **Resolved 2026-08-13 — D-084.3.** Charts' values win: `brand.md` §2.6 `TIER_COLORS` — Grade 9.5 `#7A56C9`, Grade 8 `#4C8F8A`, Grade 7 `#A96A4A`. Also resolves OQ-21. See §2.4, §3.6. |
 | **C-21** | `7 OBS` / *"Census history begins Jan 2026 — 7 observations so far"* (:237); `Pop Δ` rows citing *"Census history starts Jan '26 — 7 observations"* and *"12M census history (7/12 mo)"* | HTML :237; `MOCK/DISPLAY_VOCABULARY.md:117`, `:118`, `:161`, `:164` | **The badge is structurally right and numerically fiction.** `DECISIONS.md:342`–`:350` (D-032) rules every such ratio wrong *in the direction that overstates readiness*: census starts **late Jul 2026**, so the true figure is ~**1/12**, unlocking ~Jul 2027. `DECISIONS.md:309` (D-033) adds a floor — no post-seam metric counts observations before **2026-09-01**. **Build the badge; do not build the number.** |
 
 | **C-22** | The tier strip labels its six prices *"latest monthly price"* (:398) and gives them no provisional marker, while the chart marks the identical number with a dashed segment and a hollow dot (:414, :132) | HTML :398 vs :414/:132, reconciled through the §2.3 invariant (:107) | **Resolved 2026-08-11 — D-077.** The invariant is the finding: each strip price equals index 11 of that tier's chart array, and R-8 establishes index 11 as the current, incomplete month. So the strip has been showing six month-to-date figures with finished-number phrasing. Fixed by adding `◌` — `brand.md` §4.2's existing *"current month provisional"* glyph — plus corrected tooltip copy. **See §2.3.1; build that, not :398.** Nothing in the prototype's layout changes. |
 | **C-23** | The page asserts a completed refresh (*"refreshed just now"*, :253) and implements no in-flight state and no failure state | HTML :253; C-16; OQ-19 | **Resolved 2026-08-11 — D-077.** `express-visit` returns 200/404/409/422/500/502 with **no timeout** (D-076), so a hung upstream costs 60 s before answering. The page therefore never blocks on it: stored prices paint at full strength, a badge carries the in-flight and failure states, and a reserved 28 px slot keeps the strip from jumping. **See §4.2.1.** |
+| **C-24** | The prototype defines the page's complete state space — no HTML claims otherwise | Phase 2 spec §4, §8, §11.7 | **Not a contradiction — a deliberate post-prototype addition.** The frozen prototype has no delisted state (no chip, no styling — `cards.delisted_at` is a scraper-schema fact the mockup predates) and no not-found treatment (`Cardstock Card.dc.html` is a single static file with no routing, so a missing-id case cannot occur in it). Phase 2 adds both: a muted `delisted {date}` chip beside the subline when `DelistedAt` is set (the page otherwise renders in full, and refresh still fires — the worker deliberately permits express-visits on delisted cards, `IntakeApi`/`ExpressVisitRunner`); and a 404 page for unknown ids and `not_a_card_at` cards — `No card with id {id}.`, chrome stays, no fake suggestions. Day arithmetic is UTC throughout. |
 
 ### 8.1 Corroborations (doc and HTML agree — recorded so they are not re-litigated)
 
@@ -892,7 +1048,7 @@ Not doc-vs-HTML, but HTML-vs-HTML — flag them so they are not faithfully repro
 |---|---|---|
 | I-1 | The hollow-dot tooltip says "**Aug** is month-to-date" but the last chart month is `Jul ’26`. | :132 vs :147, :296 |
 | I-2 | The badge says **7 observations** and its tooltip says "deltas need two", yet **7 delta bars** are drawn — 7 observations yield 6 deltas. | :237 vs :371 |
-| I-3 | Column 5's resize grip is keyed `'src'`, so it resizes column 4. | :458 |
+| I-3 | Column 5's resize grip is keyed `'src'`, so it resizes column 4. **Resolved 2026-08-13 (OQ-6) — Phase 2 spec §7:** the grip is removed from column 5 in Phase 2, not rerouted; see §3.7. | :458 |
 | I-4 | `+ New list…` adds a membership that no popover row can display. | :380 vs :386 |
 | I-5 | The hollow dot follows the first *visible* series but is always drawn in the PSA 10 accent colour. | :132 vs :417 |
 | I-6 | Per-bucket sale `counts` are computed and a `sum()` helper is defined, but no chip ever shows a count. | :347–:348, :426 |
