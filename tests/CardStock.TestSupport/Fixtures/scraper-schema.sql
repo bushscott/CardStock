@@ -198,3 +198,23 @@ VALUES ('20260812162439_AddCardNearMissAt', '10.0.10');
 
 COMMIT;
 
+START TRANSACTION;
+CREATE TABLE tcgdex_enrichments (
+    card_id bigint NOT NULL,
+    computed_at timestamp with time zone NOT NULL,
+    status smallint NOT NULL,
+    card_number character varying(32),
+    set_official_size integer,
+    tcgdex_set_id character varying(32),
+    tcgdex_card_id character varying(64),
+    tcgdex_name character varying(300),
+    tcgdex_version character varying(64) NOT NULL,
+    CONSTRAINT pk_tcgdex_enrichments PRIMARY KEY (card_id, computed_at),
+    CONSTRAINT fk_tcgdex_enrichments_cards_card_id FOREIGN KEY (card_id) REFERENCES cards (id) ON DELETE RESTRICT
+);
+
+INSERT INTO "__EFMigrationsHistory" (migration_id, product_version)
+VALUES ('20260813055713_AddTcgdexEnrichments', '10.0.10');
+
+COMMIT;
+
