@@ -113,6 +113,37 @@ public class CardPriceReaderTests : CardStockDatabaseTest
     }
 
     /// <summary>
+    /// I2: price_months.price_cents = 0 means "no sales that month," not "worthless" --
+    /// PokemonInvestBatch.Domain.Parsing.GradeMonotonicity.cs:23 says exactly that for the
+    /// same column. Rare in production (three rows across one card, verified live 2026-08-13)
+    /// but real, and rendering one as a $0 price would fabricate a value the source never
+    /// claimed. A zero row must read exactly like a month the source never published --
+    /// MissingMonth, not ObservedPrice(0) -- the same treatment as the gap test above.
+    /// </summary>
+    [SkippableFact]
+    public async Task A_zero_cent_row_renders_as_a_hole_not_a_dollar_zero()
+    {
+        Skip.IfNot(Available, "CARDSTOCK_TEST_DB is not set");
+        await using var db = NewContext();
+        await SeedCardAsync(db, 42, Now);
+        await db.Database.ExecuteSqlRawAsync(
+            """
+            INSERT INTO public.price_months (card_id, tier, month, price_cents, observed_at) VALUES
+              (42, 2, DATE '2021-08-01', 29999, now()),
+              (42, 2, DATE '2021-09-01',     0, now()),
+              (42, 2, DATE '2021-10-01',  4000, now());
+            """);
+
+        var snapshot = await Reader().GetAsync(42);
+        var grade8 = snapshot!.Tiers.Single(t => t.Tier == PriceTier.Grade8);
+        var window = PriceWindow.Of(grade8.Series, new DateOnly(2021, 10, 1), 3);
+
+        Assert.IsType<ObservedPrice>(window[0]);
+        Assert.IsType<MissingMonth>(window[1]); // the zero-cent row -- filtered at the source
+        Assert.IsType<ObservedPrice>(window[2]);
+    }
+
+    /// <summary>
     /// Two rows for one month, resolved through the real query rather than in
     /// memory. Charizard #24 held exactly this for 2026-08-01.
     /// </summary>

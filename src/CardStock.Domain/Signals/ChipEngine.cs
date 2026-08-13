@@ -107,16 +107,19 @@ public static class ChipEngine
 
         var roc = Indicators.Roc(
             At(anchor.Value.Tier, currentMonth, 0)!.Value, At(anchor.Value.Tier, currentMonth, 3)!.Value);
-        if (Math.Abs(roc) < RocBand)
+        // I2: Roc is null when the t-3 anchor price is zero (CardPriceReader filters those at
+        // the source; this is the defensive path). Treated exactly like any other
+        // insufficient-data case: no chip, not a crash.
+        if (roc is null || Math.Abs(roc.Value) < RocBand)
         {
             return;
         }
 
         chips.Add(new SignalChip(
-            roc > 0 ? "▲" : "▼",
-            $"ROC 3M {Pct(roc)}",
-            $"{anchor.Value.Label} · 3-month return {Pct(roc)} · fires at ±15% · closed months only",
-            roc > 0 ? ChipTone.Pos : ChipTone.Neg));
+            roc.Value > 0 ? "▲" : "▼",
+            $"ROC 3M {Pct(roc.Value)}",
+            $"{anchor.Value.Label} · 3-month return {Pct(roc.Value)} · fires at ±15% · closed months only",
+            roc.Value > 0 ? ChipTone.Pos : ChipTone.Neg));
     }
 
     private static void AddMacd(List<SignalChip> chips, CardPriceSnapshot prices, DateOnly currentMonth)

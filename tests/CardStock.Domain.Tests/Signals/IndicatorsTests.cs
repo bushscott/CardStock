@@ -21,6 +21,17 @@ public class IndicatorsTests
     }
 
     [Fact]
+    public void Roc_is_null_when_the_anchor_price_is_zero()
+    {
+        // I2: price_months.price_cents = 0 means "no sales that month," not "worthless"
+        // (PokemonInvestBatch.Domain.Parsing.GradeMonotonicity.cs:23) -- CardPriceReader now
+        // filters those rows at the source, but decimal division throws DivideByZeroException
+        // on a zero divisor regardless, so Indicators guards independently. Null reads exactly
+        // like every other insufficient-data case to ChipEngine: no chip, not a crash.
+        Assert.Null(Indicators.Roc(now: 120m, then: 0m));
+    }
+
+    [Fact]
     public void ZScore_uses_sample_stddev_over_the_inclusive_window()
     {
         // [10,10,10,10,10,16]: mean 11, SS = 5*1 + 25 = 30, sample var 6,
@@ -54,9 +65,34 @@ public class IndicatorsTests
     }
 
     [Fact]
+    public void LogTrend_reports_zero_confidence_when_any_value_is_non_positive()
+    {
+        // I2: log is undefined at/below zero (Math.Log(0) = -Infinity, negative = NaN), which
+        // would otherwise poison the whole regression. A non-positive price is a data defect a
+        // log-regression cannot honestly fit -- report zero confidence, not NaN/Infinity, so
+        // ChipEngine.AddTrendR2's existing R2Floor check treats it as insufficient, same as any
+        // other UNSTABLE FIT.
+        var (slope, r2) = Indicators.LogTrend([100m, 0m, 120m]);
+        Assert.Equal(0m, slope);
+        Assert.Equal(0m, r2);
+
+        var (negSlope, negR2) = Indicators.LogTrend([100m, -5m, 120m]);
+        Assert.Equal(0m, negSlope);
+        Assert.Equal(0m, negR2);
+    }
+
+    [Fact]
     public void Drawdown_measures_from_the_window_peak()
     {
         // last 90 vs peak 120 -> -25%
         Assert.Equal(-0.25m, Indicators.Drawdown([100m, 120m, 90m]));
+    }
+
+    [Fact]
+    public void Drawdown_is_zero_when_the_window_peak_is_non_positive()
+    {
+        // I2: a non-positive peak means the window carries no real price to measure a drawdown
+        // against -- report no drawdown rather than dividing by a value that shouldn't occur.
+        Assert.Equal(0m, Indicators.Drawdown([0m, 0m, 0m]));
     }
 }

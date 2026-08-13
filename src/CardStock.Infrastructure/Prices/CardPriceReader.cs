@@ -33,8 +33,15 @@ public sealed class CardPriceReader(IDbContextFactory<CardStockDbContext> dbFact
         // populated one, loading the lot rides the primary key
         // (card_id, tier, month, observed_at) and is cheaper than being clever.
         // The crawler does the same thing (CardPageWriter.cs:61).
+        // I2: price_cents = 0 means the scraper's own semantics for "no sales that month," not
+        // "worthless" -- PokemonInvestBatch.Domain.Parsing.GradeMonotonicity.cs:23 ("Latest
+        // non-zero price per tier; zero means 'no sales', not 'worthless'"). Rendering a stored
+        // zero as a $0 price would fabricate a value the source never claimed to mean that;
+        // excluding it here makes that (tier, month) cell a hole -- MissingMonth, same as a
+        // month the site never published at all -- rather than a false floor. Rare in
+        // production (three rows across one card, verified live 2026-08-13), but real.
         var prices = await db.ScraperPriceMonths.AsNoTracking()
-            .Where(p => p.CardId == cardId)
+            .Where(p => p.CardId == cardId && p.PriceCents > 0)
             .Select(p => new PriceObservation(p.Tier, p.Month, p.PriceCents, p.ObservedAt))
             .ToListAsync(cancellationToken);
 
