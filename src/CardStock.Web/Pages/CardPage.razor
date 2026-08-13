@@ -26,6 +26,12 @@ else
                     Prices="@_result.Snapshot.Prices" Chips="@_result.Snapshot.Signals" />
     <PriceChart Prices="@_result.Snapshot.Prices" />
     <SalesLedger Sales="@_sales" Retry="LoadSalesAsync" />
+    <div class="census-pair">
+        <CensusBars Census="@_result.Snapshot.Census" />
+        <GradingActivityPanel Census="@_result.Snapshot.Census" />
+    </div>
+    <FreshnessFooter LastVisitedAt="@_result.Snapshot.Freshness.LastVisitedAt"
+                      CensusObservedAt="@_result.Snapshot.Census.ObservedAt" />
 }
 
 @code {

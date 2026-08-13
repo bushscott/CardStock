@@ -1,0 +1,38 @@
+.activity-panel {
+    background: var(--card);
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    padding: 14px 16px;
+}
+
+.activity-header {
+    display: flex;
+    align-items: baseline;
+    gap: 10px;
+}
+
+.activity-header h2 {
+    margin: 0;
+}
+
+/* card.md §2.6 :237: mono 11px/600, letter-spacing .06em, --warnInk on
+   rgba(176,127,26,.12), radius 3, padding 1px 5px, cursor help. */
+.obs-badge {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: .06em;
+    color: var(--warnInk);
+    background: rgba(176, 127, 26, .12);
+    border-radius: 3px;
+    padding: 1px 5px;
+    cursor: help;
+}
+
+/* Phase 2 has no bar-row/pace-sentence inputs (see the component's top-of-file comment)
+   -- the degrade line stands alone where card.md's prototype seeds a full bar row. */
+.activity-degrade {
+    font-size: 12.5px;
+    color: var(--mut2);
+    margin-top: 14px;
+}

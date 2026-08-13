@@ -1,0 +1,63 @@
+@* card.md §2.6 (left panel) / §3.8: six fixed census bars, PSA then CGC, each scaled to
+   the CARD'S OWN max (D-084.4/D-084.8, amended R-21) -- there is no fixed 4020 ceiling;
+   real counts exceed the prototype's seed (Charizard #4's PSA 8 alone is 15,931). A cell
+   with no row was zero at every observation (the storage contract), so an all-zero census
+   renders six true 4px stubs, never a missing-data state. Totals (PsaTotal/CgcTotal) are
+   the full grader counts across every grade, not just the six displayed bars (D-084.4). *@
+@using System.Globalization
+@using CardStock.Application.Cards
+
+<div class="census-panel">
+    <div class="census-header">
+        <h2>Population · current census</h2>
+        <span class="census-sub">@HeaderSub()</span>
+    </div>
+    <div class="census-bars">
+        @foreach (var bar in Census.Bars)
+        {
+            <div class="census-bar-col">
+                <span class="census-bar-value">@N0(bar.Count)</span>
+                <div class="census-bar @(IsPsa(bar) ? "census-bar-psa" : "census-bar-cgc")"
+                     style="height: @(BarHeight(bar))px;" title="@BarTooltip(bar)"></div>
+                <span class="census-bar-label">@GradeLabel(bar)</span>
+            </div>
+        }
+    </div>
+    <p class="census-summary">@SummaryText()</p>
+</div>
+
+@code {
+    [Parameter, EditorRequired]
+    public CensusDto Census { get; set; } = default!;
+
+    private static readonly CultureInfo EnUs = CultureInfo.GetCultureInfo("en-US");
+
+    // D-084.8: max is the largest of THIS card's own six bars, not a shared ceiling.
+    private int Max => Census.Bars.Count == 0 ? 0 : Census.Bars.Max(b => b.Count);
+
+    // Every bar is a 4px stub when the card has no census data at all -- max == 0 would
+    // otherwise divide by zero, and "0/0" has no honest scaled answer anyway.
+    private int BarHeight(CensusBarDto bar)
+    {
+        var max = Max;
+        return max == 0 ? 4 : (int)(Math.Round(bar.Count / (decimal)max * 104) + 4);
+    }
+
+    private static bool IsPsa(CensusBarDto bar) =>
+        string.Equals(bar.Grader, "psa", StringComparison.OrdinalIgnoreCase);
+
+    private static string GradeLabel(CensusBarDto bar) => $"{bar.Grader.ToUpperInvariant()} {bar.Grade}";
+
+    private static string N0(int n) => n.ToString("N0", EnUs);
+
+    private static string BarTooltip(CensusBarDto bar) =>
+        $"{GradeLabel(bar)}: {N0(bar.Count)} slabs in current census ({bar.Grader.ToUpperInvariant()})";
+
+    private string SummaryText() =>
+        $"{N0(Census.PsaTotal)} PSA · {N0(Census.CgcTotal)} CGC slabs across all grades";
+
+    private string HeaderSub() =>
+        Census.ObservedAt is { } observed
+            ? $"PSA + CGC · as of {observed:yyyy-MM-dd}"
+            : "PSA + CGC · never observed";
+}

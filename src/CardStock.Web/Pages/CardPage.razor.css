@@ -1,0 +1,6 @@
+/* card.md §2.6: two equal columns, minmax(0,1fr) each, 16px gap. */
+.census-pair {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    gap: 16px;
+}

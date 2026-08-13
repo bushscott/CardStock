@@ -1,0 +1,45 @@
+@* card.md §2.7/§3.10: two freshness stamps -- sales/prices are on-demand fresh, census
+   is not (§6 R-14) -- plus TradingView attribution for the Lightweight Charts Apache-2.0
+   licence (D-084.7). The census tooltip is the corrected text (C-17/OQ-13 resolved
+   2026-08-13): `populations` is written from the SAME crawler detail-page visit as
+   `price_months` and `sales` (../PokemonInvestBatch/DATA_MODEL.md:10,343), not a separate
+   PSA/CGC publishing feed, so the prototype's "can't be scraped on demand" claim was
+   false, not just stale.
+
+   Attribution: the vendored Lightweight Charts package (wwwroot/lib/lightweight-charts/,
+   Task 17) ships a LICENSE file but no separate NOTICE file upstream. Apache-2.0 §4(d)
+   only requires reproducing NOTICE content when the upstream distribution includes one;
+   absent that, the visible link here plus the vendored LICENSE satisfy attribution, so no
+   NOTICE text is quoted in this component.
+
+   card.md's own stamps are hard-coded prototype seeds ("just now", "2026-07-30") -- the
+   prototype never has a null or stale visit. Real data can have either, so the null
+   branches below mirror CensusBars' "never observed" convention (task 19 brief) rather
+   than inventing a relative-time phrase card.md never specifies. *@
+@using CardStock.Application.Cards
+
+<div class="freshness-footer">
+    <span class="freshness-stamp"
+          title="Opening a card page triggers a fresh scrape — the ledger and prices you see include sales up to right now">@RefreshPrefix()<span class="freshness-mono">@RefreshValue()</span></span>
+    <span class="freshness-sep">·</span>
+    <span class="freshness-stamp"
+          title="Census updates when the graders publish; we capture it on the same visits as prices.">@CensusPrefix()<span class="freshness-mono">@CensusValue()</span></span>
+    <span class="freshness-flex-spacer"></span>
+    <span class="freshness-attribution">Charts by <a href="https://www.tradingview.com/">TradingView</a></span>
+</div>
+
+@code {
+    [Parameter]
+    public DateTimeOffset? LastVisitedAt { get; set; }
+
+    [Parameter]
+    public DateTimeOffset? CensusObservedAt { get; set; }
+
+    private string RefreshPrefix() => LastVisitedAt.HasValue ? "Sales & prices refreshed " : "Sales & prices ";
+
+    private string RefreshValue() => LastVisitedAt is { } visited ? $"{visited:yyyy-MM-dd}" : "never visited";
+
+    private string CensusPrefix() => CensusObservedAt.HasValue ? "Census as of " : "Census ";
+
+    private string CensusValue() => CensusObservedAt is { } observed ? $"{observed:yyyy-MM-dd}" : "never observed";
+}

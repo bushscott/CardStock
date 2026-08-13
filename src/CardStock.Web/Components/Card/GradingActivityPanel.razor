@@ -1,0 +1,24 @@
+@* card.md §2.6 (right panel) / §3.9: the prototype seeds a 7-month delta bar row and a
+   pace sentence, but Phase 2's CensusDto carries no deltas/dLabels series -- only the
+   fixed six bars and QualifyingObservations. §3.9's own LOW DATA rule ("< 2 census
+   observations" -> "census history too young to compute pace") always applies: the
+   2026-09-01 floor (D-033) means no card has two qualifying observations yet. Rule 2
+   (never compute on insufficient data): render the degrade always, never the bar row
+   or pace sentence the prototype shows. *@
+@using CardStock.Application.Cards
+
+<div class="activity-panel">
+    <div class="activity-header">
+        <h2>Grading activity · PSA 10 slabs added</h2>
+        <span class="obs-badge" title="@BadgeTooltip()">@(Census.QualifyingObservations) OBS</span>
+    </div>
+    <p class="activity-degrade">census history too young to compute pace</p>
+</div>
+
+@code {
+    [Parameter, EditorRequired]
+    public CensusDto Census { get; set; } = default!;
+
+    private string BadgeTooltip() =>
+        $"Census observations counted from 2026-09-01 — {Census.QualifyingObservations} so far; deltas need two.";
+}
