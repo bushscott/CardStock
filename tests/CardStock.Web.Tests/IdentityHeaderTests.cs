@@ -116,6 +116,14 @@ public class IdentityHeaderTests : BunitContext
         var dialog = cut.Find("[role='dialog']");
         Assert.Equal("true", dialog.GetAttribute("aria-modal"));
 
+        // I4: this test previously passed vacuously -- bUnit's KeyDown() dispatches straight to
+        // the element's registered handler regardless of real DOM focus, so Escape "worked"
+        // here even when nothing moved focus onto the backdrop. A real browser only ever
+        // delivers a keydown event to whatever element currently holds focus, so without this,
+        // Escape would never reach OnKeyDownAsync outside a test. Confirming the backdrop
+        // actually received FocusAsync() is what makes aria-modal (and Escape) real.
+        JSInterop.VerifyFocusAsyncInvoke();
+
         dialog.KeyDown(new KeyboardEventArgs { Key = "Escape" });
 
         Assert.Empty(cut.FindAll("[role='dialog']"));

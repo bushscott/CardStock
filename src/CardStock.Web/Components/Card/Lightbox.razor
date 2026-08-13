@@ -1,11 +1,16 @@
 @* card.md §5.3 / OQ-8 (resolved 2026-08-13): role="dialog" + aria-modal, Escape closes,
    backdrop click closes, the art itself does not (stopPropagation), and on close focus
    returns to the thumbnail via JS interop. A focus trap and scroll lock are explicitly
-   NOT built in Phase 2 -- that is the complete set OQ-8 resolves. *@
+   NOT built in Phase 2 -- that is the complete set OQ-8 resolves.
+
+   I4: a real browser only ever delivers a keydown event to whatever element currently
+   holds DOM focus. Without moving focus onto the backdrop, @onkeydown is wired up but
+   unreachable -- Escape would never fire outside a test harness that dispatches events
+   directly. FocusAsync() on first render is what makes @onkeydown (and aria-modal) real. *@
 @using CardStock.Web.Services
 @inject IJSRuntime JS
 
-<div class="lightbox-backdrop" role="dialog" aria-modal="true" tabindex="-1"
+<div class="lightbox-backdrop" role="dialog" aria-modal="true" tabindex="-1" @ref="_backdrop"
      @onkeydown="OnKeyDownAsync" @onclick="CloseAsync">
     <div class="lightbox-art" @onclick:stopPropagation="true">
         <img src="@CardApiClient.ImageUrl(CardId)" alt="@Title" />
@@ -23,6 +28,18 @@
 
     [Parameter]
     public EventCallback OnClose { get; set; }
+
+    private ElementReference _backdrop;
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            // I4: moves DOM focus onto the backdrop so a real browser actually delivers
+            // keydown events to it -- without this, Escape never reaches OnKeyDownAsync.
+            await _backdrop.FocusAsync();
+        }
+    }
 
     private async Task CloseAsync()
     {
