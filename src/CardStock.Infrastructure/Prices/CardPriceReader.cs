@@ -10,11 +10,13 @@ namespace CardStock.Infrastructure.Prices;
 /// semantics lives in SQL, deliberately: the rules are worth more under test
 /// than under a query planner.
 /// </summary>
-public sealed class CardPriceReader(CardStockDbContext db, TimeProvider time) : ICardPriceReader
+public sealed class CardPriceReader(IDbContextFactory<CardStockDbContext> dbFactory, TimeProvider time) : ICardPriceReader
 {
     public async Task<CardPriceSnapshot?> GetAsync(
         long cardId, CancellationToken cancellationToken = default)
     {
+        await using var db = await dbFactory.CreateDbContextAsync(cancellationToken);
+
         var card = await db.ScraperCards.AsNoTracking()
             .Where(c => c.Id == cardId)
             .Select(c => new { c.Id, c.LastVisitedAt })

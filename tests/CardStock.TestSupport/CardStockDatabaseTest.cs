@@ -130,6 +130,20 @@ public abstract class CardStockDatabaseTest : IAsyncLifetime
             .UseCardStock(ConnectionString)
             .Options);
 
+    /// <summary>
+    /// A factory over this test's own database, for readers that acquire their
+    /// own context per call instead of being handed one.
+    /// </summary>
+    protected IDbContextFactory<CardStockDbContext> NewContextFactory() => new FixedFactory(ConnectionString);
+
+    private sealed class FixedFactory(string connectionString) : IDbContextFactory<CardStockDbContext>
+    {
+        public CardStockDbContext CreateDbContext() =>
+            new(new DbContextOptionsBuilder<CardStockDbContext>()
+                .UseCardStock(connectionString)
+                .Options);
+    }
+
     /// <summary>CREATE DATABASE cannot run inside the database being created,
     /// so administration goes through the always-present <c>postgres</c>.</summary>
     private static string Maintenance() =>

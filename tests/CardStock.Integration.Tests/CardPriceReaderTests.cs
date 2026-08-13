@@ -15,7 +15,7 @@ public class CardPriceReaderTests : CardStockDatabaseTest
 {
     private static readonly DateTimeOffset Now = new(2026, 8, 12, 12, 0, 0, TimeSpan.Zero);
 
-    private static CardPriceReader Reader(CardStockDbContext db) => new(db, new FixedClock(Now));
+    private CardPriceReader Reader() => new(NewContextFactory(), new FixedClock(Now));
 
     private sealed class FixedClock(DateTimeOffset now) : TimeProvider
     {
@@ -53,9 +53,8 @@ public class CardPriceReaderTests : CardStockDatabaseTest
     public async Task An_unknown_card_id_returns_null()
     {
         Skip.IfNot(Available, "CARDSTOCK_TEST_DB is not set");
-        await using var db = NewContext();
 
-        Assert.Null(await Reader(db).GetAsync(999_999));
+        Assert.Null(await Reader().GetAsync(999_999));
     }
 
     [SkippableFact]
@@ -65,7 +64,7 @@ public class CardPriceReaderTests : CardStockDatabaseTest
         await using var db = NewContext();
         await SeedCardAsync(db, 42, Now.AddDays(-3));
 
-        var snapshot = await Reader(db).GetAsync(42);
+        var snapshot = await Reader().GetAsync(42);
 
         Assert.NotNull(snapshot);
         Assert.Equal(6, snapshot.Tiers.Count);
@@ -80,7 +79,7 @@ public class CardPriceReaderTests : CardStockDatabaseTest
         var visited = Now.AddDays(-3);
         await SeedCardAsync(db, 42, visited);
 
-        var snapshot = await Reader(db).GetAsync(42);
+        var snapshot = await Reader().GetAsync(42);
 
         Assert.NotNull(snapshot);
         Assert.Equal(visited, snapshot.LastVisitedAt);
@@ -104,7 +103,7 @@ public class CardPriceReaderTests : CardStockDatabaseTest
               (42, 2, DATE '2021-10-01',  4000, now());
             """);
 
-        var snapshot = await Reader(db).GetAsync(42);
+        var snapshot = await Reader().GetAsync(42);
         var grade8 = snapshot!.Tiers.Single(t => t.Tier == PriceTier.Grade8);
         var window = PriceWindow.Of(grade8.Series, new DateOnly(2021, 10, 1), 3);
 
@@ -130,7 +129,7 @@ public class CardPriceReaderTests : CardStockDatabaseTest
               (42, 5, DATE '2026-08-01', 2500, TIMESTAMPTZ '2026-08-11 00:00:00Z');
             """);
 
-        var snapshot = await Reader(db).GetAsync(42);
+        var snapshot = await Reader().GetAsync(42);
         var psa10 = snapshot!.Tiers.Single(t => t.Tier == PriceTier.Psa10);
 
         Assert.Equal(2500, Assert.Single(psa10.Series.Points).PriceCents);
@@ -157,7 +156,7 @@ public class CardPriceReaderTests : CardStockDatabaseTest
               (42, 'ebay', 'bgs', DATE '2026-08-10', 'BGS 10 Black', 9999, 't', now());
             """);
 
-        var snapshot = await Reader(db).GetAsync(42);
+        var snapshot = await Reader().GetAsync(42);
         var psa10 = snapshot!.Tiers.Single(t => t.Tier == PriceTier.Psa10);
 
         var change = Assert.IsType<ChangeAvailable>(psa10.Change);

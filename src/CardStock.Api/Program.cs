@@ -3,7 +3,9 @@ using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
 
-builder.Services.AddDbContext<CardStockDbContext>(options =>
+// AddDbContextFactory also registers CardStockDbContext itself as a scoped
+// service that resolves via the factory, so /healthz/data below is unchanged.
+builder.Services.AddDbContextFactory<CardStockDbContext>(options =>
     options.UseCardStock(builder.Configuration.GetConnectionString("CardStock")
         ?? throw new InvalidOperationException("ConnectionStrings:CardStock is not configured.")));
 
