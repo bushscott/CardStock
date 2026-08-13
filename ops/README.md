@@ -151,3 +151,45 @@ match.
   CardStock to deploy first and stop reading it.
 
 "Crawler first, always" is wrong for exactly the migrations that matter.
+
+## 5. Deploying the API
+
+```bash
+./ops/publish.sh publish/api
+rsync -az --delete --exclude='appsettings.Production.json*' \
+  --rsync-path='sudo rsync' publish/api/ scott@192.168.0.56:/opt/cardstock/api/
+ssh scott@192.168.0.56 'sudo chown -R cardstock:cardstock /opt/cardstock/api && sudo systemctl restart cardstock-api'
+curl -s http://192.168.0.56:5180/healthz/data
+```
+
+- `publish.sh` publishes the WASM client through its own pipeline and overlays
+  its processed `wwwroot` onto the API bundle (the script's comment says why),
+  then fails loudly if `index.html` references a script the bundle lacks.
+- **`--exclude='appsettings.Production.json*'` is load-bearing.** The
+  production config (and its dated backups) exists only on the Pi; a bare
+  `--delete` removes it and the service crash-loops on restart with no
+  connection string.
+- The unit listens on `0.0.0.0:5180` (`ASPNETCORE_URLS` in
+  `cardstock-api.service`).
+
+### Production configuration keys (Phase 2)
+
+`/opt/cardstock/api/appsettings.Production.json` carries, beyond the
+connection string:
+
+| Key | Production value | Why |
+|---|---|---|
+| `Worker:IntakeBaseUrl` | `http://127.0.0.1:5155` | the crawler's intake API — loopback-only by design (its ADR-0006), so only server-side code can reach it |
+| `ImageStore:Directory` | `/var/lib/pokemon/images` | the crawler's image store; the API serves `{hash}/1600.jpg` from it |
+
+### Image-store access — no grant needed
+
+Inspected 2026-08-13: `/var/lib/pokemon` and the whole image tree are
+world-readable (directories `drwxr-xr-x`, files `-rw-r--r--`, all
+`pokemon:pokemon`), and `sudo -u cardstock ls /var/lib/pokemon/images`
+succeeds. The setfacl/group grant the Phase 2 plan anticipated is therefore
+unnecessary — recorded so nobody adds one on reflex. If the crawler ever
+tightens those modes, the image endpoint starts returning 404s (the disk is
+the fact); the fix then is `setfacl -R -m u:cardstock:rX
+/var/lib/pokemon/images` plus a default ACL for files the crawler writes
+afterwards.
