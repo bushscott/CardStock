@@ -1623,6 +1623,23 @@ The line reads: *"Seams: liquidity seam Apr '25 (churn/vol panes), resolution se
 
 ## Open
 
+### D-086 — The sibling untracked DATA_MODEL.md; CardStock's Tier-1 pointer now targets a private scribble
+Surfaced 2026-08-13 by the enrichment agent's final report. PokemonInvestBatch commit `74eff03`
+(2026-08-01, "The data model notes go back to being private scribbles") deliberately untracked
+`DATA_MODEL.md` and gitignores it — while CardStock's `CLAUDE.md` durable-pointer table cites
+`../PokemonInvestBatch/DATA_MODEL.md` as Tier-1 authority, and this ledger cites it by line number
+throughout. The file still exists on disk and was brought current by the enrichment work (on disk
+only); the sibling's citable contract is its ADRs. **Needs an owner ruling:** repoint CardStock's
+authority table at the sibling's ADRs (+ schema tests), or re-track the file over there.
+
+Related corrections from the same report, recorded so estimates stop citing stale figures:
+production has **789 sets, not ~303** (Japanese alone 395 — the research fixture was stale), and
+measured enrichment coverage is **41.2% overall / 92.7% of numbered English** — below the research's
+45–75% band because the set denominator was wrong in the optimistic direction. Receipts:
+sibling ADR-0009, `scratchpad/tcgdex-audit/audit-report.txt`, sibling commits `80a944c`/`88c156d`
+(local, unpushed).
+
+
 ### D-079 — Metadata enrichment via TCGdex: researched, feasible, owner to implement in the sibling repo
 Raised by the owner 2026-08-12 during Phase 2 brainstorming, after learning the scraper's data cannot
 fill the Card page's `{set} · 215/203 · {character}` subline (no number column, no set size, no
