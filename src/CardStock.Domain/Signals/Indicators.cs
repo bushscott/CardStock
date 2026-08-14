@@ -78,6 +78,45 @@ public static class Indicators
         return ((decimal)slope, (decimal)(1 - residualSs / totalSs));
     }
 
+    /// <summary>Wilder's RSI over closed-month closes: simple averages over the first
+    /// <paramref name="period"/> deltas, Wilder-smoothed thereafter. Null when fewer
+    /// than period+1 values are present or any close is non-positive (the same
+    /// defensive contract as the other indicators). A window with no losses saturates
+    /// at 100; a window with no movement at all reads 50 — neither side has momentum,
+    /// and the no-loss convention would otherwise call a flat series overbought.</summary>
+    public static decimal? Rsi(IReadOnlyList<decimal> closesOldestFirst, int period)
+    {
+        if (closesOldestFirst.Count < period + 1 || closesOldestFirst.Any(v => v <= 0))
+        {
+            return null;
+        }
+
+        decimal avgGain = 0, avgLoss = 0;
+        for (var i = 1; i <= period; i++)
+        {
+            var delta = closesOldestFirst[i] - closesOldestFirst[i - 1];
+            avgGain += Math.Max(delta, 0);
+            avgLoss += Math.Max(-delta, 0);
+        }
+
+        avgGain /= period;
+        avgLoss /= period;
+
+        for (var i = period + 1; i < closesOldestFirst.Count; i++)
+        {
+            var delta = closesOldestFirst[i] - closesOldestFirst[i - 1];
+            avgGain = (avgGain * (period - 1) + Math.Max(delta, 0)) / period;
+            avgLoss = (avgLoss * (period - 1) + Math.Max(-delta, 0)) / period;
+        }
+
+        if (avgLoss == 0)
+        {
+            return avgGain == 0 ? 50m : 100m;
+        }
+
+        return 100m - 100m / (1m + avgGain / avgLoss);
+    }
+
     public static decimal Drawdown(IReadOnlyList<decimal> trailingWindowInclusive)
     {
         var peak = trailingWindowInclusive.Max();

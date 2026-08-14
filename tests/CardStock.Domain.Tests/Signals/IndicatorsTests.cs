@@ -82,6 +82,57 @@ public class IndicatorsTests
     }
 
     [Fact]
+    public void Rsi_over_the_initial_window_matches_the_hand_computation()
+    {
+        // Deltas: +10, −5, +10, +5, −2, +7 -> avgGain 32/6, avgLoss 7/6,
+        // RS = 32/7 -> RSI = 100·32/39 ≈ 82.05.
+        var rsi = Indicators.Rsi([100m, 110m, 105m, 115m, 120m, 118m, 125m], 6);
+
+        Assert.NotNull(rsi);
+        Assert.Equal(82.05m, Math.Round(rsi.Value, 2));
+    }
+
+    [Fact]
+    public void Rsi_smooths_with_wilder_weighting_beyond_the_initial_window()
+    {
+        // One Wilder step on the run above (final delta +5):
+        // avgGain (16/3·5+5)/6 = 95/18, avgLoss (7/6·5)/6 = 35/36
+        // -> RS = 38/7 -> RSI = 100 − 700/45 ≈ 84.44.
+        var rsi = Indicators.Rsi([100m, 110m, 105m, 115m, 120m, 118m, 125m, 130m], 6);
+
+        Assert.NotNull(rsi);
+        Assert.Equal(84.44m, Math.Round(rsi.Value, 2));
+    }
+
+    [Fact]
+    public void Rsi_is_null_below_period_plus_one_values()
+    {
+        Assert.Null(Indicators.Rsi([100m, 110m, 105m, 115m, 120m, 118m], 6));
+    }
+
+    [Fact]
+    public void Rsi_guards_non_positive_prices()
+    {
+        // Same defensive contract as the other indicators: a stored zero means
+        // "no sales," never a price -- null, not a fabricated reading.
+        Assert.Null(Indicators.Rsi([100m, 0m, 105m, 115m, 120m, 118m, 125m], 6));
+    }
+
+    [Fact]
+    public void Rsi_saturates_at_100_when_the_window_has_no_losses()
+    {
+        Assert.Equal(100m, Indicators.Rsi([100m, 110m, 120m, 130m, 140m, 150m, 160m], 6));
+    }
+
+    [Fact]
+    public void Rsi_reads_50_on_a_flat_run()
+    {
+        // No gains and no losses: RS is 0/0. Neither side has momentum, and 50
+        // is the only reading that says so.
+        Assert.Equal(50m, Indicators.Rsi([100m, 100m, 100m, 100m, 100m, 100m, 100m], 6));
+    }
+
+    [Fact]
     public void Drawdown_measures_from_the_window_peak()
     {
         // last 90 vs peak 120 -> -25%
