@@ -123,8 +123,13 @@ else
                 <div class="lg-row lg-body" style="grid-template-columns:@GridTemplate()">
                     <span class="lg-date">@row.SoldOn.ToString("yyyy-MM-dd")</span>
                     <span class="lg-bucket">@LedgerVocabulary.Display(row.GradeTier)</span>
-                    <span class="lg-price @(row.ListedPriceCents is not null ? "lg-listed" : "")"
-                          title="@ListedTooltip(row)">@Format.Money(row.PriceCents)</span>
+                    @* The dotted listed-price underline hugs the number, not the grid track:
+                       the cell centres an inline inner span that carries the border and
+                       tooltip, mirroring the mockup's nesting (:204). *@
+                    <span class="lg-price">
+                        <span class="@(row.ListedPriceCents is not null ? "lg-listed" : "")"
+                              title="@ListedTooltip(row)">@Format.Money(row.PriceCents)</span>
+                    </span>
                     <span class="lg-src">@row.Source</span>
                     <span class="lg-title" title="@row.Title">@row.Title</span>
                 </div>

@@ -140,8 +140,13 @@ public class SalesLedgerTests : BunitContext
 
         cut.WaitForAssertion(() => Assert.Equal(2, cut.FindAll(".lg-price").Count));
         Assert.Single(cut.FindAll(".lg-listed"));
-        var listedCell = cut.Find(".lg-listed");
-        Assert.Equal("listed $2 → sold $1", listedCell.GetAttribute("title"));
+        var listed = cut.Find(".lg-listed");
+        Assert.Equal("listed $2 → sold $1", listed.GetAttribute("title"));
+
+        // The underline element wraps ONLY the price text, nested inside the cell —
+        // a border on the cell itself would stretch across the whole grid track.
+        Assert.Contains("lg-price", listed.ParentElement!.ClassList);
+        Assert.Equal("$1", listed.TextContent);
     }
 
     [Fact]
