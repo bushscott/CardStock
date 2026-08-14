@@ -388,7 +388,9 @@ retiring the Blazor template's "Hello, world!" filler the Phase 2 plan's deletio
 
 **Known omission left un-ruled:** the census gem-rate sentence (card.md §3.8) is omitted until its
 inputs qualify; under this rule it arguably becomes a visible state line instead. Not changed —
-needs an owner call when it next comes up.
+needs an owner call when it next comes up. **Ruled later the same day:** the owner chose the state
+lines — Gem rate and Pace render as slots with `LOW DATA` chips naming the unlock condition; built
+2026-08-13, card.md §2.6 carries the copy.
 
 ### D-084 — Phase 2 scope rulings: no auth, URL-only reachability, brand.md tier palette
 Owner, 2026-08-12, at the start of the (restarted) Phase 2 brainstorming:

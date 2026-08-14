@@ -261,6 +261,13 @@ Two equal columns, `minmax(0, 1fr)` each, 16px gap. Both are card panels with `p
 - Bar row (:239–:247): same shape as the left panel but `gap: 10px`, and each bar column adds `position: relative` and each bar adds `box-sizing: border-box; border: {{ d.bd }}`.
 - Summary sentence (:248), same typography as the left.
 
+**Amended 2026-08-13 (D-087 applied) — the metric slots render as states.** The single degrade line
+("census history too young to compute pace") is replaced by the mockup's two metric rows rendered
+as slots: `Gem rate` and `Pace`, each carrying a `LOW DATA` chip (the OBS badge's warn recipe) and
+the note `needs census deltas; observations count from 2026-09-01, {n} so far — deltas need two`.
+States, never placeholder numbers — the computed sentences return with the worker phase's delta
+substrate.
+
 ### 2.7 Freshness footer (:252–:257)
 
 `display:flex; align-items:center; gap:16px`, `--mutbg` background, 1px `--line`, radius 8, padding `9px 14px`, 12.5px `--mut`. Content: refresh stamp → `·` → census stamp → `flex:1` spacer (content is left-aligned; the right side is deliberately empty).

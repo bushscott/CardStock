@@ -100,9 +100,12 @@ public class CensusPairTests : BunitContext
     [Theory]
     [InlineData(0, "0 OBS", "Census observations counted from 2026-09-01 — 0 so far; deltas need two.")]
     [InlineData(5, "5 OBS", "Census observations counted from 2026-09-01 — 5 so far; deltas need two.")]
-    public void Grading_activity_panel_always_renders_the_degrade_with_the_observation_badge(
+    public void Grading_activity_panel_renders_both_metric_slots_as_low_data_states(
         int qualifying, string expectedBadge, string expectedTooltip)
     {
+        // D-087 applied to the census metrics (owner, 2026-08-13): the mockup's two
+        // metric rows — gem rate and pace — render as slots holding LOW DATA states
+        // with their unlock condition, never a generic one-liner and never a number.
         var census = SixBars(0, 0, 0, 0, 0, 0, qualifying: qualifying);
 
         var cut = Render<GradingActivityPanel>(p => p.Add(x => x.Census, census));
@@ -111,6 +114,13 @@ public class CensusPairTests : BunitContext
         var badge = cut.Find(".obs-badge");
         Assert.Equal(expectedBadge, badge.TextContent);
         Assert.Equal(expectedTooltip, badge.GetAttribute("title"));
-        Assert.Equal("census history too young to compute pace", cut.Find(".activity-degrade").TextContent);
+
+        var names = cut.FindAll(".ga-metric-name").Select(e => e.TextContent).ToList();
+        Assert.Equal(["Gem rate", "Pace"], names);
+        Assert.All(cut.FindAll(".ga-state"), s => Assert.Equal("LOW DATA", s.TextContent));
+        Assert.Equal(2, cut.FindAll(".ga-state").Count);
+        Assert.All(cut.FindAll(".ga-metric-note"), n => Assert.Equal(
+            $"needs census deltas; observations count from 2026-09-01, {qualifying} so far — deltas need two",
+            n.TextContent));
     }
 }
