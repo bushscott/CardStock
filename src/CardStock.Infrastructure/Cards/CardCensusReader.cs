@@ -16,13 +16,9 @@ public sealed class CardCensusReader(IDbContextFactory<CardStockDbContext> dbFac
             .Select(p => new CensusObservation(p.Grader, p.Grade, p.Population, p.ObservedAt))
             .ToListAsync(cancellationToken);
 
-        var latestPerCell = rows
-            .GroupBy(r => (r.Grader, r.Grade))
-            .Select(g => g.OrderByDescending(r => r.ObservedAt).First())
-            .ToList();
-
-        var instants = rows.Select(r => r.ObservedAt).Distinct().ToList();
-
-        return CardCensus.From(latestPerCell, instants);
+        // The full history rides the domain record: latest-per-cell, the
+        // qualifying-observation count, and the census metrics all derive from
+        // it in Domain (D-093) — the reader stays a dumb fetch.
+        return CardCensus.From(rows);
     }
 }

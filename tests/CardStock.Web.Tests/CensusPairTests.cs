@@ -10,7 +10,8 @@ public class CensusPairTests : BunitContext
     // CGC 9.5 is structurally impossible, populations.grade is a short 1-10 column).
     private static CensusDto SixBars(
         int psa8, int psa9, int psa10, int cgc8, int cgc9, int cgc10,
-        int psaTotal = 0, int cgcTotal = 0, DateTimeOffset? observedAt = null, int qualifying = 0) =>
+        int psaTotal = 0, int cgcTotal = 0, DateTimeOffset? observedAt = null, int qualifying = 0,
+        IReadOnlyList<CensusMetricDto>? metrics = null) =>
         new(
             [
                 new CensusBarDto("psa", 8, psa8),
@@ -20,7 +21,17 @@ public class CensusPairTests : BunitContext
                 new CensusBarDto("cgc", 9, cgc9),
                 new CensusBarDto("cgc", 10, cgc10),
             ],
-            psaTotal, cgcTotal, observedAt, qualifying);
+            psaTotal, cgcTotal, observedAt, qualifying,
+            metrics ??
+            [
+                LowData("Gem rate",
+                    "needs 90 days of census deltas; observations count from 2026-09-01 — the window fills 2026-11-30"),
+                LowData("Pace",
+                    $"needs census deltas; observations count from 2026-09-01, {qualifying} so far — deltas need two"),
+            ]);
+
+    private static CensusMetricDto LowData(string name, string note) =>
+        new(name, "lowdata", null, [new MetricSegmentDto(note, "neutral")]);
 
     public static IEnumerable<object[]> HeightCases =>
     [
@@ -106,6 +117,7 @@ public class CensusPairTests : BunitContext
         // D-087 applied to the census metrics (owner, 2026-08-13): the mockup's two
         // metric rows — gem rate and pace — render as slots holding LOW DATA states
         // with their unlock condition, never a generic one-liner and never a number.
+        // D-093: the notes arrive computed on the wire, per metric.
         var census = SixBars(0, 0, 0, 0, 0, 0, qualifying: qualifying);
 
         var cut = Render<GradingActivityPanel>(p => p.Add(x => x.Census, census));
@@ -119,8 +131,42 @@ public class CensusPairTests : BunitContext
         Assert.Equal(["Gem rate", "Pace"], names);
         Assert.All(cut.FindAll(".ga-state"), s => Assert.Equal("LOW DATA", s.TextContent));
         Assert.Equal(2, cut.FindAll(".ga-state").Count);
-        Assert.All(cut.FindAll(".ga-metric-note"), n => Assert.Equal(
+        var notes = cut.FindAll(".ga-metric-note").Select(n => n.TextContent).ToList();
+        Assert.Contains("the window fills 2026-11-30", notes[0]);
+        Assert.Equal(
             $"needs census deltas; observations count from 2026-09-01, {qualifying} so far — deltas need two",
-            n.TextContent));
+            notes[1]);
+    }
+
+    [Fact]
+    public void A_computed_metric_renders_its_value_and_toned_segments_with_no_state_chip()
+    {
+        // D-093's unlocked form, driven entirely by the wire: headline value,
+        // sentence segments with the market-meaning tone on the number token.
+        var census = SixBars(0, 0, 1479, 0, 0, 0, qualifying: 7, metrics:
+        [
+            LowData("Gem rate",
+                "needs 90 days of census deltas; observations count from 2026-09-01 — the window fills 2026-11-30"),
+            new CensusMetricDto("Pace", "ok", "+58 / mo",
+            [
+                new MetricSegmentDto("and rising — ", "neutral"),
+                new MetricSegmentDto("331 new 10s since Sep ’26", "neutral"),
+                new MetricSegmentDto(", growing the census ", "neutral"),
+                new MetricSegmentDto("+29%", "neg"),
+                new MetricSegmentDto(" in 7 months ", "neutral"),
+                new MetricSegmentDto("(fresh supply working against the price)", "neutral"),
+            ]),
+        ]);
+
+        var cut = Render<GradingActivityPanel>(p => p.Add(x => x.Census, census));
+
+        Assert.Single(cut.FindAll(".ga-state"));  // only the still-locked gem rate
+        Assert.Equal("+58 / mo", cut.Find(".ga-metric-value").TextContent);
+        var growth = cut.FindAll(".ga-seg-neg").Single();
+        Assert.Equal("+29%", growth.TextContent);
+        Assert.Equal(
+            "and rising — 331 new 10s since Sep ’26, growing the census +29% in 7 months " +
+            "(fresh supply working against the price)",
+            cut.FindAll(".ga-metric-note")[1].TextContent);
     }
 }

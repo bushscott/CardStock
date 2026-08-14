@@ -14,8 +14,7 @@ public class CardCensusTests
     public void Bars_are_the_fixed_six_with_absent_cells_as_true_zeros()
     {
         var census = CardCensus.From(
-            [Cell("psa", 9, 8455, July), Cell("psa", 10, 486, July), Cell("cgc", 10, 4, July)],
-            [July]);
+            [Cell("psa", 9, 8455, July), Cell("psa", 10, 486, July), Cell("cgc", 10, 4, July)]);
 
         Assert.Equal(6, census.Bars.Count);
         // Fixed order: PSA 8/9/10, CGC 8/9/10 (D-084.4).
@@ -32,8 +31,7 @@ public class CardCensusTests
     {
         var census = CardCensus.From(
             [Cell("psa", 1, 4096, July), Cell("psa", 6, 17851, July), Cell("psa", 10, 486, July),
-             Cell("cgc", 3, 1, July)],
-            [July]);
+             Cell("cgc", 3, 1, July)]);
 
         Assert.Equal(4096 + 17851 + 486, census.PsaTotal);
         Assert.Equal(1, census.CgcTotal);
@@ -43,17 +41,21 @@ public class CardCensusTests
     public void Qualifying_observations_count_only_from_the_floor()
     {
         // One observation in July (pre-floor), one in October (post-floor):
-        // exactly one qualifies (D-033: nothing before 2026-09-01 counts).
-        var census = CardCensus.From([Cell("psa", 10, 500, October)], [July, October]);
+        // exactly one qualifies (D-033: nothing before 2026-09-01 counts). The
+        // October row also wins latest-per-cell, and the full history rides
+        // the record for the metrics.
+        var census = CardCensus.From([Cell("psa", 10, 480, July), Cell("psa", 10, 500, October)]);
 
         Assert.Equal(1, census.QualifyingObservations);
         Assert.Equal(October, census.ObservedAt);
+        Assert.Equal(500, census.Bars[2].Count);
+        Assert.Equal(2, census.Observations.Count);
     }
 
     [Fact]
     public void No_rows_at_all_is_an_all_zero_census()
     {
-        var census = CardCensus.From([], []);
+        var census = CardCensus.From([]);
 
         Assert.All(census.Bars, bar => Assert.Equal(0, bar.Count));
         Assert.Equal(0, census.PsaTotal);

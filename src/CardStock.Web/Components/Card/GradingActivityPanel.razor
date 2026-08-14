@@ -1,13 +1,12 @@
-@* card.md §2.6 (right panel) / §3.9: the prototype seeds a 7-month delta bar row, a
-   gem-rate sentence, and a pace sentence, but Phase 2's CensusDto carries no deltas --
-   only the fixed six bars and QualifyingObservations. §3.9's own LOW DATA rule
-   ("< 2 census observations") always applies today: the 2026-09-01 floor (D-033)
-   means no card has two qualifying observations yet.
-
-   D-087 applied (owner, 2026-08-13): the mockup's two metric rows render as SLOTS
-   holding LOW DATA states that name their unlock condition -- the panel keeps the
-   finished product's geometry. Rule 2 boundary: these are states, never placeholder
-   numbers; the numbers themselves arrive with the worker phase's delta substrate. *@
+@* card.md §2.6 (right panel) / §3.9, amended by D-093 (owner, 2026-08-13): the two
+   metric slots render whatever state the wire computed — the engine evaluates the
+   card's own observation history read-time behind per-metric data checks, so each
+   slot flips from LOW DATA to its computed sentence the moment its data qualifies,
+   with no further deploy. LOW DATA keeps D-087's form: the warn chip plus a note
+   naming the rule and when it passes. Ok renders the headline value plus the
+   sentence as toned segments — colour rides market meaning, and the words carry it
+   without the colour (never colour alone). This component never computes: the
+   header can never disagree with the wire. *@
 @using CardStock.Application.Cards
 
 <div class="activity-panel">
@@ -15,16 +14,27 @@
         <h2>Grading activity · PSA 10 slabs added</h2>
         <span class="obs-badge" title="@BadgeTooltip()">@(Census.QualifyingObservations) OBS</span>
     </div>
-    <div class="ga-metric">
-        <span class="ga-metric-name">Gem rate</span>
-        <span class="ga-state">LOW DATA</span>
-        <span class="ga-metric-note">@UnlockNote()</span>
-    </div>
-    <div class="ga-metric">
-        <span class="ga-metric-name">Pace</span>
-        <span class="ga-state">LOW DATA</span>
-        <span class="ga-metric-note">@UnlockNote()</span>
-    </div>
+    @foreach (var metric in Census.Metrics)
+    {
+        <div class="ga-metric">
+            <span class="ga-metric-name">@metric.Name</span>
+            @if (metric.State == "ok")
+            {
+                <span class="ga-metric-value">@metric.Value</span>
+                <span class="ga-metric-note">
+                    @foreach (var segment in metric.Segments)
+                    {
+                        <span class="ga-seg-@segment.Tone">@segment.Text</span>
+                    }
+                </span>
+            }
+            else
+            {
+                <span class="ga-state">LOW DATA</span>
+                <span class="ga-metric-note">@string.Concat(metric.Segments.Select(s => s.Text))</span>
+            }
+        </div>
+    }
 </div>
 
 @code {
@@ -33,7 +43,4 @@
 
     private string BadgeTooltip() =>
         $"Census observations counted from 2026-09-01 — {Census.QualifyingObservations} so far; deltas need two.";
-
-    private string UnlockNote() =>
-        $"needs census deltas; observations count from 2026-09-01, {Census.QualifyingObservations} so far — deltas need two";
 }

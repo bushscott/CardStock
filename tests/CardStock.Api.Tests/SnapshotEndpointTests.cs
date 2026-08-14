@@ -31,7 +31,7 @@ public class SnapshotEndpointTests
         {
             Identity = Identity(),
             Prices = Prices(),
-            Census = CardCensus.From([], []),
+            Census = CardCensus.From([]),
         };
         using var client = app.CreateClient();
 
@@ -68,7 +68,7 @@ public class SnapshotEndpointTests
         {
             Identity = Identity(),
             Prices = Prices(),
-            Census = CardCensus.From([], []),
+            Census = CardCensus.From([]),
             UtcNow = new DateTimeOffset(2026, 8, 13, 12, 0, 0, TimeSpan.Zero),
             Sales =
             [

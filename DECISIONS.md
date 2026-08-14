@@ -329,6 +329,31 @@ Read directly 2026-08-10, to be mirrored per D-018–D-021.
 
 ## Decided
 
+### D-093 — The census sentences: implemented now, unlocked by data checks
+Owner, 2026-08-13, immediately after confirming the collection side is already right (*"if you
+have the ability to collect the data, and we're just waiting for the data to fill in, let's write
+the code and implement the calculations and hide it behind a data check"*). This supersedes the
+§2.6 amendment's worker-phase deferral: the gem-rate and pace sentences (card.md §3.8/§3.9) are
+computed **read-time in Domain** (`CensusMetrics.Evaluate`) from the card's own `populations`
+history — which `CardCensusReader` already fetched in full — behind per-metric sufficiency gates.
+Each grading-activity slot flips from `LOW DATA` to its computed sentence the moment its own data
+qualifies, with no further deploy: pace's first monthly delta closes **2026-10-01**, gem rate's
+90-day window fills **2026-11-30**, its drift clause follows ~**2027-02-28**.
+
+The honesty mechanics: levels flat-fill from the full history (the populations storage contract —
+pre-floor levels are real) while measurement windows must start on/after the D-033 floor, so the
+first-visit backfill can never masquerade as movement; UTC day arithmetic; boundary rows close
+the earlier period; restatement-negative deltas clamp to `0 of 30`, never negative progress; the
+trend word waits for six closed months; a zero starting census omits the growth clause rather
+than divide by nothing. Referee: the §3.9 seed derivations the spec hand-checked against the
+prototype (331 new 10s · +29% · +58/mo · rising · supply-pressure red) are reproduced exactly by
+`CensusMetricsTests.Pace_reproduces_the_spec_seed_arithmetic_exactly` — 18 domain facts in all,
+353 tests green across the six suites. Live-verified on Charizard 630417 same night: both slots
+render LOW DATA with their own unlock copy (gem: *"the window fills 2026-11-30"*; pace: *"0 so
+far — deltas need two"*), truthful against its single pre-floor observation (2026-07-28).
+Wire: `CensusDto` gains `Metrics` (state + headline value + toned sentence segments);
+`CardCensus.From` now takes the full observation list and carries it.
+
 ### D-092 — The signals panel: the owner's card-page rework, adopted and built
 Owner, 2026-08-13 (evening), by authored rework file — `CardStock Mockup/Cardstock
 Card.rework-2026-08-13.html`, committed beside the frozen prototype as the authority for the

@@ -29,9 +29,20 @@ public sealed record TierChangeDto(string State, decimal? Fraction, int RecentSa
 
 public sealed record CensusDto(
     IReadOnlyList<CensusBarDto> Bars, int PsaTotal, int CgcTotal,
-    DateTimeOffset? ObservedAt, int QualifyingObservations);
+    DateTimeOffset? ObservedAt, int QualifyingObservations,
+    IReadOnlyList<CensusMetricDto> Metrics);
 
 public sealed record CensusBarDto(string Grader, short Grade, int Count);
+
+/// <summary>One census-metric slot (D-093): Gem rate or Pace. State: "ok" |
+/// "lowdata". Ok carries the headline Value and the sentence as toned segments;
+/// lowdata carries a single segment naming the rule and when it passes.</summary>
+public sealed record CensusMetricDto(
+    string Name, string State, string? Value, IReadOnlyList<MetricSegmentDto> Segments);
+
+/// <summary>Tone: "pos" | "neg" | "caution" | "neutral" — neutral renders in the
+/// note's own muted colour.</summary>
+public sealed record MetricSegmentDto(string Text, string Tone);
 
 /// <summary>The signals panel (card.md §2.3.2). Evaluated counts every row — locked
 /// included: they were evaluated and found locked. Firing counts rows in the firing

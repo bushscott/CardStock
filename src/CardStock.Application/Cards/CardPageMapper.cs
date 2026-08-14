@@ -32,7 +32,7 @@ public static class CardPageMapper
             identity.CardId,
             ToIdentityDto(identity),
             ToPricesDto(prices, currentMonth),
-            ToCensusDto(census),
+            ToCensusDto(census, today),
             ToSignalsDto(prices, sales, currentMonth, today),
             new FreshnessDto(prices.LastVisitedAt));
 
@@ -84,13 +84,21 @@ public static class CardPageMapper
         _ => throw new ArgumentOutOfRangeException(nameof(change), change, "Unknown TierChange case."),
     };
 
-    private static CensusDto ToCensusDto(CardCensus census) =>
+    private static CensusDto ToCensusDto(CardCensus census, DateOnly today) =>
         new(
             [.. census.Bars.Select(bar => new CensusBarDto(bar.Grader, bar.Grade, bar.Count))],
             census.PsaTotal,
             census.CgcTotal,
             census.ObservedAt,
-            census.QualifyingObservations);
+            census.QualifyingObservations,
+            [.. CensusMetrics.Evaluate(census.Observations, today).Select(ToMetricDto)]);
+
+    private static CensusMetricDto ToMetricDto(CensusMetric metric) =>
+        new(
+            metric.Name,
+            metric.State == MetricState.Ok ? "ok" : "lowdata",
+            metric.Value,
+            [.. metric.Segments.Select(s => new MetricSegmentDto(s.Text, s.Tone.ToString().ToLowerInvariant()))]);
 
     private static SignalsDto ToSignalsDto(
         CardPriceSnapshot prices, IReadOnlyList<LedgerSale> sales, DateOnly currentMonth, DateOnly today)

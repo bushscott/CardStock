@@ -35,7 +35,8 @@ public class CardPageMapperTests
         PsaTotal: 35,
         CgcTotal: 12,
         ObservedAt: new DateTimeOffset(2026, 8, 11, 0, 0, 0, TimeSpan.Zero),
-        QualifyingObservations: 42);
+        QualifyingObservations: 42,
+        Observations: []);
 
     /// <summary>
     /// Six tiers, always. Ungraded carries a hole mid-window (2026-02 absent
@@ -338,6 +339,44 @@ public class CardPageMapperTests
         Assert.Equal(35, dto.Census.PsaTotal);
         Assert.Equal(12, dto.Census.CgcTotal);
         Assert.Equal(42, dto.Census.QualifyingObservations);
+    }
+
+    [Fact]
+    public void Census_metrics_render_low_data_with_their_own_unlock_notes_today()
+    {
+        // Today = 2026-08-13: gem rate's 90-day window reaches pre-floor, pace
+        // has no qualifying deltas. Each slot names its OWN rule (D-093).
+        var metrics = Map().Census.Metrics;
+
+        Assert.Equal(new[] { "Gem rate", "Pace" }, metrics.Select(m => m.Name));
+        Assert.All(metrics, m => Assert.Equal("lowdata", m.State));
+        Assert.All(metrics, m => Assert.Null(m.Value));
+        Assert.Contains("the window fills 2026-11-30", metrics[0].Segments.Single().Text);
+        Assert.Equal(
+            "needs census deltas; observations count from 2026-09-01, 0 so far — deltas need two",
+            metrics[1].Segments.Single().Text);
+    }
+
+    [Fact]
+    public void Census_metric_states_and_tones_serialize_lowercase_when_computed()
+    {
+        // Two closed post-floor months (Sep +10, Oct +42) on a 1,000-slab
+        // census: pace computes, +5% over 2 months → supply-pressure red.
+        var census = CardCensus.From(
+        [
+            new CensusObservation("psa", 10, 1000, new DateTimeOffset(2026, 8, 15, 12, 0, 0, TimeSpan.Zero)),
+            new CensusObservation("psa", 10, 1010, new DateTimeOffset(2026, 9, 20, 12, 0, 0, TimeSpan.Zero)),
+            new CensusObservation("psa", 10, 1052, new DateTimeOffset(2026, 10, 15, 12, 0, 0, TimeSpan.Zero)),
+        ]);
+
+        var dto = CardPageMapper.ToDto(
+            Identity(), Snapshot(), census, [], new DateOnly(2026, 11, 1), new DateOnly(2026, 11, 5));
+
+        var pace = Assert.Single(dto.Census.Metrics, m => m.Name == "Pace");
+        Assert.Equal("ok", pace.State);
+        Assert.Equal("+42 / mo", pace.Value);
+        var growth = Assert.Single(pace.Segments, s => s.Text == "+5%");
+        Assert.Equal("neg", growth.Tone);
     }
 
     [Fact]

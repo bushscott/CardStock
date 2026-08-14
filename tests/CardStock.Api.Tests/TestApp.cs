@@ -13,7 +13,7 @@ public sealed class TestApp : WebApplicationFactory<Program>
 {
     public CardIdentity? Identity { get; set; }
     public CardPriceSnapshot? Prices { get; set; }
-    public CardCensus Census { get; set; } = CardCensus.From([], []);
+    public CardCensus Census { get; set; } = CardCensus.From([]);
     public IReadOnlyList<LedgerSale> Sales { get; set; } = [];
 
     /// <summary>Replaces the "worker-intake" named client's primary handler, so tests

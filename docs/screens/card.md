@@ -377,6 +377,33 @@ the note `needs census deltas; observations count from 2026-09-01, {n} so far �
 States, never placeholder numbers — the computed sentences return with the worker phase's delta
 substrate.
 
+**Amended again 2026-08-13 (D-093) — the sentences are implemented now, behind per-metric data
+checks; the worker-phase deferral above is superseded.** Owner: *"let's write the code and
+implement the calculations and hide it behind a data check."* The census reader already fetches
+the card's full `populations` history per request, so `CensusMetrics` (Domain) evaluates both
+§3.8/§3.9 sentences read-time — the same pattern as the price signals — and each slot flips from
+`LOW DATA` to its computed sentence the moment its own data qualifies, with no further deploy.
+The slot's filled form: `{name} {headline value} {sentence}` — value mono, the sentence as toned
+segments (colour by market meaning, never colour alone). Rules and their dates:
+- **Levels flat-fill from the full history; windows must start on/after the 2026-09-01 floor**
+  (D-033 gates the interval, not the level, so the Jul–Aug first-visit backfill can never read as
+  market movement). Day arithmetic is UTC; a row dated on a boundary closes the earlier period.
+- **Gem rate**: trailing-90-day PSA deltas, all grades as the submission denominator (§3.8's
+  operationalization). Gates: window fully post-floor (fills **2026-11-30**) and ≥ 30 new PSA
+  slabs in it (also clamps restatement-negative deltas: `{n} of 30` never goes below 0). The
+  drift clause needs the prior 90 days too (earliest **2027-02-28**); below that it is omitted
+  entirely, per §3.8. The ±0.1pp flat band acts on the rounded drift the user sees.
+- **Pace**: calendar-month deltas, closed months only, from the floor. Gates: ≥ 2 qualifying
+  observations (the D-087 note stands as its LOW DATA copy), then a closed post-floor month
+  (first closes **2026-10-01**). The rising/steady/slowing word requires ≥ 6 closed months (the
+  3-vs-3 comparison is undefined below); the growth clause is omitted when the floor-date census
+  is zero (no honest percentage of nothing). A restated-down month renders with the true minus.
+- Copy adaptations from the prototype's freestanding sentences to the slot form: the headline
+  number moves to the value position, `· drifting` joins lowercase, and the pace window label is
+  `since Sep ’26` (`MMM ’YY`, U+2019). Every branch wording and threshold is otherwise verbatim
+  from §3.8/§3.9, and the §3.9 seed arithmetic (331 · +29% · +58 · rising) is reproduced exactly
+  by a domain test as the referee.
+
 ### 2.7 Freshness footer (:252–:257)
 
 `display:flex; align-items:center; gap:16px`, `--mutbg` background, 1px `--line`, radius 8, padding `9px 14px`, 12.5px `--mut`. Content: refresh stamp → `·` → census stamp → `flex:1` spacer (content is left-aligned; the right side is deliberately empty).
