@@ -60,9 +60,20 @@ window.lwcInterop = (function () {
                 vertLines: { visible: false },
                 horzLines: { visible: false },
             },
-            rightPriceScale: { visible: false },
+            // card.md §2.4: axes stay mockup-minimal via the wrapper overlay — the
+            // y-gutter and the three-label x row ARE the axis presentation, and "there
+            // is no per-month tick." LWC's own time axis must be hidden or it renders a
+            // second, dense label row and steals ~26px from the pane, floating the
+            // price floor above the panel bottom (found live 2026-08-13).
+            rightPriceScale: {
+                visible: false,
+                // §2.4.2 normative geometry: lines span y=10..222 of the 230px box, so
+                // top margin 10/230 and bottom margin 8/230 — the floor price sits at
+                // the floor, beside the x labels, instead of LWC's default ~10% inset.
+                scaleMargins: { top: 10 / 230, bottom: 8 / 230 },
+            },
             leftPriceScale: { visible: false },
-            timeScale: { visible: true, borderVisible: false },
+            timeScale: { visible: false },
             handleScroll: false,
             handleScale: false,
             crosshair: {
