@@ -1685,6 +1685,22 @@ The line reads: *"Seams: liquidity seam Apr '25 (churn/vol panes), resolution se
 
 ## Open
 
+### D-088 — The chip row as a full signal-status surface (proposed, then held)
+Owner, 2026-08-13, reviewing the live chips: show **every** signal, graying out the ones that
+aren't firing — then held off on learning the catalog is 29 signals, not 7. Parked, not rejected.
+The shape sketched in conversation, kept so it isn't re-derived: the 7 computed signals always
+render with four states — firing (toned) · quiet (grayed, **showing its actual value**) ·
+below-floor (grayed dash, tooltip naming the floor — never a number) · locked (deferred, tooltip
+naming the substrate) — and the 22 substrate-locked signals collapse behind one deferred
+`locked signals (22) ▾` chip reusing the `+N more` popover. Adopting this would supersede the
+firing-only carve-out recorded alongside D-084.1 (DISPLAY_VOCABULARY.md:7 — "no placeholder
+chips"), and changes a chip's meaning from "signal detected" to "signal status."
+
+Independently worth doing when this reopens: the MACD chip's tooltip should carry the histogram's
+value and direction — Charizard's `MACD +` today sits on a histogram that collapsed +1,424 → +94
+over four months, and "barely positive, falling" is the answer to the owner's actual question
+("should this worry me?") that the bare `+` cannot give.
+
 ### D-086 — The sibling untracked DATA_MODEL.md; CardStock's Tier-1 pointer now targets a private scribble
 Surfaced 2026-08-13 by the enrichment agent's final report. PokemonInvestBatch commit `74eff03`
 (2026-08-01, "The data model notes go back to being private scribbles") deliberately untracked
