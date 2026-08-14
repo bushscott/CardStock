@@ -1,0 +1,175 @@
+/* card.md Layout block #3 + §2.4/§2.4.1/§5.4, values verbatim from
+   Card.dc.html :110–:149. This file was missing entirely until 2026-08-13 —
+   the component shipped class names with no stylesheet, so the panel had no
+   card dress and the hover tooltip rendered as an unstyled in-flow div. */
+
+.price-chart {
+    background: var(--card);
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    padding: 14px 16px;
+}
+
+/* Header row (:111–:118). */
+.pc-header {
+    display: flex;
+    align-items: baseline;
+    gap: 14px;
+    flex-wrap: wrap;
+    margin-bottom: 8px;
+}
+
+.pc-header h2 {
+    font-family: 'Inter Tight', sans-serif;
+    font-weight: 600;
+    font-size: 17px;
+    margin: 0;
+}
+
+.pc-legend {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    flex-wrap: wrap;
+}
+
+/* Legend chips (:114): bare mono buttons, line swatch, ink on hover. Hidden
+   series dim to 0.45 (the mockup's lg.op); the swatch color swap to --line3
+   is inline from LegendSwatchColor. */
+.pc-legend-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12.5px;
+    color: var(--mut);
+    background: none;
+    border: none;
+    padding: 0;
+    cursor: pointer;
+}
+
+.pc-legend-chip:hover:not(:disabled) {
+    color: var(--ink);
+}
+
+.pc-legend-chip[aria-pressed="false"] {
+    opacity: 0.45;
+}
+
+.pc-legend-chip--muted {
+    cursor: not-allowed;
+    opacity: 0.45;
+}
+
+.pc-legend-swatch {
+    width: 14px;
+    height: 2.5px;
+    display: inline-block;
+}
+
+.pc-header ::deep .pc-open-charts {
+    margin-left: auto;
+    font-size: 13px;
+    background: none;
+    border: none;
+    padding: 0;
+}
+
+/* Plot row (:119–:143). */
+.pc-body {
+    display: flex;
+    gap: 8px;
+}
+
+/* Y gutter (:120–:123): 44px fixed, two absolutely-positioned mono labels,
+   right-aligned — the only tick labels that exist. */
+.pc-y-gutter {
+    width: 44px;
+    flex-shrink: 0;
+    position: relative;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10.5px;
+    color: var(--mut2);
+}
+
+.pc-y-max,
+.pc-y-min {
+    position: absolute;
+    right: 0;
+}
+
+.pc-y-max {
+    top: 2px;
+}
+
+.pc-y-min {
+    bottom: 2px;
+}
+
+.pc-plot {
+    flex: 1;
+    min-width: 0;
+    position: relative;
+    cursor: crosshair;
+}
+
+.pc-canvas {
+    height: 230px;
+}
+
+/* §2.4.1: the hollow current-month dot — 8px, card-hollow, riding the plot's
+   right edge; border-color is inline (it wears the dot series' colour). */
+.pc-dot {
+    position: absolute;
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: var(--card);
+    border: 1.5px solid var(--acc);
+    left: 100%;
+    transform: translate(-50%, -50%);
+    box-sizing: border-box;
+}
+
+/* Crosshair tooltip (:135): pinned top-left, never intercepts the pointer. */
+.pc-tooltip {
+    position: absolute;
+    top: 8px;
+    left: 8px;
+    background: var(--tooltipBg);
+    border: 1px solid var(--line);
+    border-radius: 6px;
+    padding: 5px 9px;
+    pointer-events: none;
+    box-shadow: 0 4px 12px rgba(20, 19, 26, 0.08);
+    z-index: 5;
+}
+
+.pc-tooltip-month {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    color: var(--mut2);
+}
+
+.pc-tooltip-row {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12.5px;
+    font-weight: 400;
+}
+
+.pc-tooltip-row--bold {
+    font-weight: 700;
+}
+
+/* X labels (:144–:148): space-between past the 44px gutter + 8px gap, so the
+   three labels align to the plot area. */
+.pc-x-labels {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 4px;
+    margin-left: 52px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10.5px;
+    color: var(--mut2);
+}

@@ -60,6 +60,19 @@ public class PriceChartTests : BunitContext
     }
 
     [Fact]
+    public void The_chart_carries_a_scoped_stylesheet()
+    {
+        // 2026-08-13: the component shipped class names with no PriceChart.razor.css at
+        // all — no panel dress, and the hover tooltip rendered as an unstyled in-flow
+        // div. The compiler stamps a b-{hash} scope attribute on the markup only when a
+        // scoped stylesheet exists for the component, so its presence is assertable.
+        var cut = Render<PriceChart>(p => p.Add(x => x.Prices, SixTiers()));
+
+        var section = cut.Find("section.price-chart");
+        Assert.Contains(section.Attributes, a => a.Name.StartsWith("b-"));
+    }
+
+    [Fact]
     public void Open_in_charts_renders_deferred_disabled_with_no_anchor_in_the_header()
     {
         // I1: "open in Charts" used to be a dead <a href="/charts"> -- Charts doesn't exist
