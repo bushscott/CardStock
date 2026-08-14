@@ -5,6 +5,13 @@
 > Markdown docs are Tier 2/3 and were **not** used to fill gaps. Where they disagree, see §8.
 > Seeded values (Umbreon VMAX Alt Art, `$1,486`, 16 sales…) are **illustrative**. What is normative is the
 > structure, the derivation rules, and the complete state space.
+>
+> **Amended 2026-08-13 (D-092):** for the lower identity-header region **only** — the tier strip and
+> the chip row — the owner rework `CardStock Mockup/Cardstock Card.rework-2026-08-13.html`
+> supersedes the frozen prototype. It is a bundled export: the semantic content is JS state on its
+> final content line — search anchors `tierStrip`, `sigRows`, `sigCount`, `quietMore`. See §2.2
+> (amended), §2.3 (amended), §2.3.2 (new), §3.3 (amended), §8 C-25. Everything else on this page
+> keeps `Cardstock Card.dc.html` + this spec as authority.
 
 ---
 
@@ -76,7 +83,35 @@ The native art aspect ratio is **325 : 450** (0.7222); the 217×300 box matches 
 
 **Row C — signal chips (:93–:97).** `display:flex; gap:4px; flex-wrap:wrap`, one chip per `sigChips` entry.
 
+> **Amended 2026-08-13 (D-092) — Rows B and C are replaced by one wrapping row.** The lower
+> identity header becomes a single `display:flex; flex-wrap:wrap; gap:14px; align-items:stretch`
+> container of two blocks: the **tier tile grid** (§2.3, amended) and the **Signals panel**
+> (§2.3.2, new). Source: the rework file's identity-header section (the flex container preceding
+> anchor `tierStrip`). The reserved 28px badge row between Row A and this row (§4.2.1, D-077) is
+> unchanged.
+
 ### 2.3 Tier strip — SIX cells, exactly (:84–:92, logic :395–:399)
+
+> **Amended 2026-08-13 (D-092) — the strip becomes a 3×2 grid of square tiles; the six-cell
+> selection and order stand.** Geometry from the rework (the grid container preceding anchor
+> `tierStrip`):
+> - **Container:** `display:grid; grid-template-columns: repeat(3, 100px); grid-auto-rows: 100px;
+>   gap: 8px; flex: 0 0 auto` — six square tiles, PSA 10 → Raw in the order below, reading
+>   left-to-right, wrapping after the third.
+> - **Tile:** `--bg` fill, `1px solid --line`, radius 8, padding `10px 11px`, `display:flex;
+>   flex-direction:column; justify-content:space-between; box-sizing:border-box`.
+> - **Label:** 11px/600, letter-spacing .06em, `--mut2`, uppercase, `white-space:nowrap` —
+>   unchanged from the strip. **The ◌ month-to-date glyph stays**, seated after the label exactly
+>   as in the strip (owner ruling, 2026-08-13): the rework's own tile tooltip (*"latest monthly
+>   price · +6.2% over 30 days"*) and its missing ◌ are seed-copy regressions — build the new tile
+>   geometry with §2.3.1's glyph and two-tooltip table, which stand in full.
+> - **Price:** JetBrains Mono **19px**/700, `line-height: 1` (up from the strip's 18px).
+> - **Change:** JetBrains Mono 12px, text `{chg} 30d`, colour by the formatted leading sign
+>   exactly as §3.2.
+> - **Absence unchanged:** `—` for price and change (D-075) — a dash, never a countdown.
+>
+> The paragraphs below stand as the frozen prototype's record (and remain normative for the
+> six-cell selection, order, derivation, and §3.2's data contract).
 
 The grid is hard-coded to **`repeat(6, 1fr)`** (:84). The `tierStrip` list is produced by taking the 19-entry
 `BUCKETS` vocabulary (:322), **reversing it**, then filtering to a hard-coded allow-list of six
@@ -135,6 +170,77 @@ colourblind mode (which swaps hue only) and is read aloud.
 
 **`{Month}` is computed from the rendered row, never authored.** Hard-coding it is the mistake OQ-17
 already caught once, where the prototype's tooltip says "Aug" while its axis ends at Jul '26.
+
+#### 2.3.2 Signals panel (new 2026-08-13, D-092 — replaces Row C's chip row)
+
+Source: the rework file, the panel container between anchors `tierStrip` and `quietMore`. Sits
+beside the tier tile grid in §2.2's wrapping row; wraps beneath it when narrow.
+
+**Container:** `flex: 1 1 300px; min-width: 0; box-sizing: border-box`, tile dress (`--bg` fill,
+`1px solid --line`, radius 8), padding `10px 12px 9px`, `display:flex; flex-direction:column;
+gap: 8px`.
+
+**Header row** — `display:flex; align-items:baseline; gap:8px`:
+- `SIGNALS` — 11px/600, letter-spacing .06em, `--mut2`, uppercase.
+- Flex spacer.
+- **Count** — JetBrains Mono 11px, `--mut2`, `cursor:help`, text
+  `` `{evaluated} evaluated · {firing} firing` `` — both numbers computed, never authored:
+  `evaluated` = every row the engine emitted (locked rows included — they were evaluated and found
+  locked), `firing` = rows in the firing state. Tooltip verbatim:
+  > Every chip-eligible signal is evaluated on this card automatically — nothing here is opted
+  > into. Bollinger, beta, discount-to-list, and seasonality are excluded: visualization-grade,
+  > descriptive, or below coverage.
+
+**Rows grid** — `display:grid; grid-template-columns: repeat(auto-fit, minmax(196px, 1fr));
+gap: 2px 18px; flex: 1; align-content: start`. **Unbounded** (owner ruling, 2026-08-13): every
+evaluated signal renders as a row — the rework's eight rows are a sample, not a cap. More than
+eight signals can fire; every firing row always renders; the auto-fit grid wraps into columns as
+width allows.
+
+**Row** — `title = {tip}`, `display:flex; align-items:baseline; gap:7px; padding: 3px 0;
+border-bottom: 1px solid --line4; cursor:help`:
+- **Glyph** — JetBrains Mono 11px, fixed `width: 9px`, `flex-shrink: 0`, in the row's fg. The
+  glyph is text in the row's foreground colour — colour never carries the state alone.
+- **Name** — 12.5px, `white-space:nowrap; overflow:hidden; text-overflow:ellipsis`. Ink when
+  firing or neutral; `--mut` when quiet or below-floor; `--mut2` when locked.
+- Flex spacer.
+- **Value** — JetBrains Mono 11.5px/500, `white-space:nowrap`, in the row's fg.
+
+**Row states — the five-state doctrine mapped onto signals.** Every evaluated signal renders in
+exactly one:
+
+| State | Glyph | Row fg | Name | Value |
+|---|---|---|---|---|
+| **Firing** | `▲`/`▼` in the tone colour; a caution band fires `–` in amber | tone colour (`--pos` / `--neg2` / warn) | ink | the evidence number (e.g. `+18%`, `above signal`, `+1.8σ`, `.91`, `−28%`, `+ cross 2mo`) |
+| **Quiet** | `–` (U+2013) | `--mut2` | `--mut` | the live reading (e.g. `+13%`, `58`, `×3.1`) — computed, inside bands |
+| **Below floor** | `–` (U+2013) | `--mut2` | `--mut` | `—` — tooltip names the floor and what is present, never a number |
+| **Neutral** | `●` | `--mut` | ink | the reading (liquidity/state signals are never directional) |
+| **Locked** | `◌` | `--mut2` | `--mut2` | names the unlock (`locked` / `unlocks {date}`) — tooltip names the substrate |
+
+**Substrate-less rows render as locked states, never seed numbers** (owner ruling, 2026-08-13).
+The rework seeds `RS 94th` percentiles, `Pop Δ +0.4%`, and `churn · 48 recorded` — none of those
+substrates exist. Phase 2's locked rows and their exact copy:
+
+| Row | Value | Tooltip |
+|---|---|---|
+| `RS vs index 3M` | `locked` | `Relative strength needs the market index — it arrives with the worker phase` |
+| `Pop Δ 60d` | `locked` | `Needs census deltas; observations count from 2026-09-01 — deltas need two` |
+| `Churn 30d` | `unlocks 2026-10-31` | `Needs 60+ post-seam days · {n} recorded` — n = max(0, days since 2026-09-01), computed from the clock, 0 until the floor |
+
+Churn's unlock derives from the D-033 floor: 60 post-seam days from 2026-09-01 → first satisfied
+2026-10-31. The rework's `unlocks 25 Aug` / `48 recorded` seed pair assumes a pre-floor history
+that D-033 excludes.
+
+**Footer row** — `display:flex; align-items:baseline; gap:10px`:
+- `` `+{n} quiet` `` — JetBrains Mono 11px, `--mut2`, `cursor:help`, tooltip verbatim: `The
+  remaining signals are inside their quiet bands or below their sufficiency floor.` **Rendered
+  only when n > 0**, i.e. only if the panel ever folds rows away. Phase 2 folds nothing — the
+  element does not render at all yet.
+- Flex spacer.
+- `all signals in Charts →` — a **DeferredControl** (Charts doesn't exist; tooltip `Charts
+  arrives in a later phase`), JetBrains Mono 11px. The rework's live link
+  (`Cardstock Charts.dc.html#signals`) is the eventual destination, recorded for the Charts
+  phase.
 
 ### 2.4 Price chart (:110–:149)
 
@@ -337,6 +443,18 @@ guessed from the title string.
 D-075: a dash, never a countdown).
 
 ### 3.3 Signal chips (:400–:404) — 3 chips, fixed
+
+> **Amended 2026-08-13 (D-092) — the chip-row *presentation* is superseded by the Signals panel
+> (§2.3.2).** The chip ENGINE survives in full: the firing rules, floors, anchor-tier rule and
+> priority order of §3.3.1 stand, and a firing chip becomes a firing row. What retires with the
+> row: the cap-4 / `+N more` machinery (the panel is unbounded and folds nothing in Phase 2) and
+> the chip pill dress. Two roster changes land with the panel, recorded in `docs/signals.md`
+> (D-092): **RSI (6)** joins the computed set (caution fires at ≥ 70, positive at ≤ 30, else quiet
+> with the value; floor 7 closed months), and **tier spread 10/9 is redefined** — the row always
+> shows the current ratio `×{r:0.0}` and fires ▼ when the ratio ≥ 4 **or** it moved ≥ 20% in
+> either direction vs 6 closed months earlier, superseding §3.3.1's compression-only trigger.
+> This ships D-088's parked full-status surface. The paragraphs below stand as the frozen
+> prototype's record.
 
 | # | `i` (glyph) | `t` (text) | Tooltip | Palette |
 |---|---|---|---|---|
@@ -1086,6 +1204,7 @@ Paths are relative to the repo root. `MOCK/` = `CardStock Mockup/`. All doc quot
 | **C-22** | The tier strip labels its six prices *"latest monthly price"* (:398) and gives them no provisional marker, while the chart marks the identical number with a dashed segment and a hollow dot (:414, :132) | HTML :398 vs :414/:132, reconciled through the §2.3 invariant (:107) | **Resolved 2026-08-11 — D-077.** The invariant is the finding: each strip price equals index 11 of that tier's chart array, and R-8 establishes index 11 as the current, incomplete month. So the strip has been showing six month-to-date figures with finished-number phrasing. Fixed by adding `◌` — `brand.md` §4.2's existing *"current month provisional"* glyph — plus corrected tooltip copy. **See §2.3.1; build that, not :398.** Nothing in the prototype's layout changes. |
 | **C-23** | The page asserts a completed refresh (*"refreshed just now"*, :253) and implements no in-flight state and no failure state | HTML :253; C-16; OQ-19 | **Resolved 2026-08-11 — D-077.** `express-visit` returns 200/404/409/422/500/502 with **no timeout** (D-076), so a hung upstream costs 60 s before answering. The page therefore never blocks on it: stored prices paint at full strength, a badge carries the in-flight and failure states, and a reserved 28 px slot keeps the strip from jumping. **See §4.2.1.** |
 | **C-24** | The prototype defines the page's complete state space — no HTML claims otherwise | Phase 2 spec §4, §8, §11.7 | **Not a contradiction — a deliberate post-prototype addition.** The frozen prototype has no delisted state (no chip, no styling — `cards.delisted_at` is a scraper-schema fact the mockup predates) and no not-found treatment (`Cardstock Card.dc.html` is a single static file with no routing, so a missing-id case cannot occur in it). Phase 2 adds both: a muted `delisted {date}` chip beside the subline when `DelistedAt` is set (the page otherwise renders in full, and refresh still fires — the worker deliberately permits express-visits on delisted cards, `IntakeApi`/`ExpressVisitRunner`); and a 404 page for unknown ids and `not_a_card_at` cards — `No card with id {id}.`, chrome stays, no fake suggestions. Day arithmetic is UTC throughout. |
+| **C-25** | The frozen prototype's lower identity header is a 6×1 tier strip (Row B, :84–:92) and a firing-only chip row (Row C, :93–:97) | `Cardstock Card.dc.html:84–:97` vs the owner rework `Cardstock Card.rework-2026-08-13.html` (anchors `tierStrip`, `sigRows`, `sigCount`, `quietMore`) | **Superseded by design 2026-08-13 — D-092, plan `docs/superpowers/plans/2026-08-13-signals-panel.md`.** The owner reworked the region: a 3×2 grid of square tier tiles (§2.3 amended) and an unbounded Signals panel showing every evaluated signal's state (§2.3.2). The rework supersedes the frozen prototype **for this region only**. Its seed copy is not data-authoritative, per the same session's rulings: the tile tooltip drops D-077's month-to-date honesty (kept — §2.3.1 stands); `RS 94th` / `Pop Δ +0.4%` / `churn 48 recorded` assume substrates that don't exist (locked rows instead — §2.3.2); and its eight rows are a sample, not a cap (the panel is unbounded). |
 
 ### 8.1 Corroborations (doc and HTML agree — recorded so they are not re-litigated)
 
