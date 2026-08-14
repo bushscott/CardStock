@@ -49,13 +49,17 @@
             </div>
 
             <div class="row-a-actions">
-                <DeferredControl Label="Open in Charts →" Tooltip="Charts arrives in a later phase" CssClass="btn-open-charts" />
-                <DeferredControl Label="+ Watchlist ▾" Tooltip="Watchlists arrive with accounts, in a later phase" CssClass="btn-watchlist" />
-                <DeferredControl Label="+ Binder" Tooltip="The Binder arrives in Phase 4" CssClass="btn-binder" />
+                <div class="actions-row">
+                    <DeferredControl Label="Open in Charts →" Tooltip="Charts arrives in a later phase" CssClass="btn-open-charts" />
+                    <DeferredControl Label="+ Watchlist ▾" Tooltip="Watchlists arrive with accounts, in a later phase" CssClass="btn-watchlist" />
+                    <DeferredControl Label="+ Binder" Tooltip="The Binder arrives in Phase 4" CssClass="btn-binder" />
+                </div>
+                @* D-097: the badge reservation lives under the buttons now -- the dedicated
+                   full-width row surrendered its 52px so the header reads as one solid block.
+                   Still a fixed 28px slot (D-077: nothing jumps when the badge appears). *@
+                <div class="badge-slot">@BadgeSlot</div>
             </div>
         </div>
-
-        <div class="badge-slot">@BadgeSlot</div>
 
         <div class="tiles-and-signals">
             <TierStrip Prices="@Prices" />

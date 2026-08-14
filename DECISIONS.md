@@ -329,6 +329,20 @@ Read directly 2026-08-10, to be mirrored per D-018–D-021.
 
 ## Decided
 
+### D-097 — The badge row surrenders its height; the identity header is one solid block
+Owner, 2026-08-14, immediately after D-096: *"You fixed the bottom, but you moved the problem to
+the top… there's a perfect amount of white space we can utilize under [the subline]."* The dead
+band was the D-077 badge reservation: a full-width 28px row plus two 12px gaps = 52px of
+usually-empty space between the subline and the tiles. The reservation relocates **under the
+action buttons inside Row A** (`.row-a-actions` becomes a column of buttons-row + right-aligned
+28px `.badge-slot`); the dedicated row is deleted. D-077's no-jump invariant survives — the slot
+stays fixed-height, so RefreshBadge appearing never reflows the tiles; its fetching/failed pill
+now surfaces top-right under the buttons, beside the freshness it describes. Result measured
+live: right column ≈305px vs art 300 — art top flush with the buttons, bottoms flush per D-096,
+one solid block. card.md §2.1 amendment box extended; §4.2.1's "full-width row beneath row-a"
+wording superseded on placement only. The Task-16 review finding it replaces ("its own row, not
+a flex sibling of the title") was about *reserving height*, which the relocation preserves.
+
 ### D-096 — The identity header's three bottoms are flush
 Owner, 2026-08-14: *"the bottom of the card, the bottom of all of the PSA grade Sections and the
 signal box should all line up at the bottom of their encapsulated box."* Measured live before

@@ -126,17 +126,18 @@
     white-space: nowrap;
 }
 
-/* card.md §4.2.1 (D-077): a fixed FULL-WIDTH 28px row beneath the title/subline block
-   (row-a), reserved whether or not RefreshBadge has anything to show -- without it the
-   six price cells jump a moment after paint, undoing the point of painting real data
-   immediately. Carried Task 16 review finding: this must be its own row, not a flex
-   sibling of row-a's title/actions. */
+/* card.md §4.2.1 (D-077, relocated by D-097): still a fixed 28px reservation --
+   nothing jumps when RefreshBadge appears -- but it lives under the action
+   buttons now, not as a full-width row between the subline and the tiles. That
+   dedicated row (+ its two 12px gaps) was the dead 52px band the owner
+   flagged; removing it brings the right column to ~305px against the art's
+   300, so the art tops out with the buttons and the header is one solid block. */
 .badge-slot {
-    width: 100%;
     height: 28px;
     flex-shrink: 0;
     display: flex;
     align-items: center;
+    justify-content: flex-end;
 }
 
 /* card.md §2.2 (amended 2026-08-13, D-092): Rows B and C became one wrapping row --
@@ -151,9 +152,16 @@
 .row-a-actions {
     flex-shrink: 0;
     display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 4px;
+    margin-left: auto;
+}
+
+.actions-row {
+    display: flex;
     align-items: center;
     gap: 8px;
-    margin-left: auto;
 }
 
 /* card.md §2.2: all Row A actions are height 29px, flex-shrink 0. */

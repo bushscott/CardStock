@@ -87,6 +87,18 @@ The native art aspect ratio is **325 : 450** (0.7222); the 217×300 box matches 
 >   8px gap.
 > - **Panel**: already stretches with the row; its footer pins to its own bottom. Flush by
 >   construction.
+>
+> **Amended again 2026-08-14 (D-097) — the badge row surrenders its height; the header becomes a
+> solid block.** Fixing the bottoms surfaced the slack at the art's top (the tops of the card and
+> the action buttons stopped aligning). The owner identified the real culprit: the dedicated
+> full-width 28px badge row + its two 12px gaps — a dead 52px band under the subline. The
+> reservation moves **under the action buttons inside Row A** (`.row-a-actions` becomes a column:
+> buttons row, then the right-aligned 28px `.badge-slot`), the dedicated row is gone, and the
+> right column is exactly two rows: Row A, then tiles+signals. D-077's invariant survives — the
+> slot is still fixed-height, so the badge appearing never reflows the tiles. Result: right
+> column ≈ 305px vs the art's 300 — art tops out with the buttons, bottoms stay flush (D-096),
+> and §4.2.1's "full-width row beneath row-a" wording is superseded on placement (all its state
+> semantics stand).
 
 ### 2.2 Identity header — right column (:62–:98)
 

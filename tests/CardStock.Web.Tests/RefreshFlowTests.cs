@@ -206,21 +206,20 @@ public class RefreshFlowTests : BunitContext
             .Add(x => x.Signals, new SignalsDto(0, 0, []))
             .Add(x => x.BadgeSlot, "<span class=\"probe\">badge</span>"));
 
-        var children = cut.Find(".right-col").Children;
-        var classNames = children.Select(c => c.ClassName ?? string.Empty).ToList();
+        // D-097: the reservation lives under the action buttons inside row-a --
+        // the dedicated full-width row surrendered its height so the header
+        // reads as one solid block. D-077's invariant survives as a fixed-height
+        // CSS slot: the badge appearing must never reflow the tiles.
+        var badge = cut.Find(".badge-slot");
+        Assert.Contains("row-a-actions", badge.ParentElement!.ClassName ?? "");
+        Assert.Single(cut.FindAll(".probe"));
 
-        var rowAIndex = classNames.FindIndex(c => c.Contains("row-a"));
-        var badgeIndex = classNames.FindIndex(c => c.Contains("badge-slot"));
-        var tilesIndex = classNames.FindIndex(c => c.Contains("tiles-and-signals"));
-
-        Assert.True(rowAIndex >= 0, "row-a not found under .right-col");
-        Assert.True(badgeIndex >= 0, "badge-slot not found under .right-col");
-        Assert.True(tilesIndex >= 0, "tiles-and-signals not found under .right-col");
-        Assert.True(rowAIndex < badgeIndex, "badge-slot must sit beneath row-a, not beside it");
-        Assert.True(badgeIndex < tilesIndex, "badge-slot must sit above the tiles-and-signals row");
-
-        // And it must not be nested inside row-a -- a sibling row, not a flex child of it.
-        Assert.Empty(cut.Find(".row-a").QuerySelectorAll(".badge-slot"));
+        // The right column is now exactly two rows: row-a, then tiles+signals.
+        var classNames = cut.Find(".right-col").Children
+            .Select(c => c.ClassName ?? string.Empty).ToList();
+        Assert.Equal(2, classNames.Count);
+        Assert.Contains("row-a", classNames[0]);
+        Assert.Contains("tiles-and-signals", classNames[1]);
     }
 
     [Fact]
