@@ -79,7 +79,9 @@ internal static class Fixtures
             cardId,
             new IdentityDto(title, collectorNumber, setSize, setName, HasImage: true, DelistedAt: null),
             new PricesDto("2026-08", []),
-            new CensusDto([], PsaTotal: 0, CgcTotal: 0, ObservedAt: null, QualifyingObservations: 0, Metrics: []),
+            new CensusDto(
+                [], PsaTotal: 0, CgcTotal: 0, ObservedAt: null, QualifyingObservations: 0,
+                Metrics: [], DeltaBars: []),
             new SignalsDto(0, 0, []),
             new FreshnessDto(lastVisitedAt));
 }

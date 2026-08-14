@@ -11,7 +11,8 @@ public class CensusPairTests : BunitContext
     private static CensusDto SixBars(
         int psa8, int psa9, int psa10, int cgc8, int cgc9, int cgc10,
         int psaTotal = 0, int cgcTotal = 0, DateTimeOffset? observedAt = null, int qualifying = 0,
-        IReadOnlyList<CensusMetricDto>? metrics = null) =>
+        IReadOnlyList<CensusMetricDto>? metrics = null,
+        IReadOnlyList<CensusDeltaBarDto>? deltaBars = null) =>
         new(
             [
                 new CensusBarDto("psa", 8, psa8),
@@ -28,10 +29,22 @@ public class CensusPairTests : BunitContext
                     "needs 90 days of census deltas; observations count from 2026-09-01 — the window fills 2026-11-30"),
                 LowData("Pace",
                     $"needs census deltas; observations count from 2026-09-01, {qualifying} so far — deltas need two"),
-            ]);
+            ],
+            deltaBars ?? SevenGhosts());
 
     private static CensusMetricDto LowData(string name, string note) =>
         new(name, "lowdata", null, [new MetricSegmentDto(note, "neutral")]);
+
+    private static IReadOnlyList<CensusDeltaBarDto> SevenGhosts()
+    {
+        var labels = new[] { "Sep ’26", "Oct ’26", "Nov ’26", "Dec ’26", "Jan ’27", "Feb ’27", "Mar ’27" };
+        return
+        [
+            .. labels.Select((label, i) => new CensusDeltaBarDto(
+                new DateOnly(2026, 9, 1).AddMonths(i).ToString("yyyy-MM"), label, "pending", null,
+                $"new PSA 10 slabs for {label} — closes {new DateOnly(2026, 10, 1).AddMonths(i):yyyy-MM-dd}")),
+        ];
+    }
 
     public static IEnumerable<object[]> HeightCases =>
     [
@@ -136,6 +149,62 @@ public class CensusPairTests : BunitContext
         Assert.Equal(
             $"needs census deltas; observations count from 2026-09-01, {qualifying} so far — deltas need two",
             notes[1]);
+    }
+
+    [Fact]
+    public void The_ghost_chart_renders_seven_dashed_slots_with_no_numbers()
+    {
+        // D-094: before any month closes, all seven slots ghost — dashed, no
+        // value, month labels below, tooltips naming each month's unlock.
+        var cut = Render<GradingActivityPanel>(p => p.Add(x => x.Census, SixBars(0, 0, 0, 0, 0, 0)));
+
+        var ghosts = cut.FindAll(".ga-bar-pending");
+        Assert.Equal(7, ghosts.Count);
+        Assert.Empty(cut.FindAll(".ga-bar-observed"));
+        Assert.Empty(cut.FindAll(".ga-bar-value"));
+        Assert.Equal(
+            "new PSA 10 slabs for Sep ’26 — closes 2026-10-01", ghosts[0].GetAttribute("title"));
+        Assert.Equal(
+            ["Sep ’26", "Oct ’26", "Nov ’26", "Dec ’26", "Jan ’27", "Feb ’27", "Mar ’27"],
+            cut.FindAll(".ga-bar-label").Select(l => l.TextContent));
+    }
+
+    [Fact]
+    public void Observed_months_materialize_scaled_beside_the_remaining_ghosts()
+    {
+        // Sep +10 and Oct +42 observed, the rest ghost: the tallest observed bar
+        // reaches 108px, +10 scales to round(10/42·104)+4 = 29, and a ghost
+        // never carries a number.
+        var bars = new List<CensusDeltaBarDto>
+        {
+            new("2026-09", "Sep ’26", "observed", 10, "+10 new PSA 10 slabs in Sep ’26"),
+            new("2026-10", "Oct ’26", "observed", 42, "+42 new PSA 10 slabs in Oct ’26"),
+            new("2026-11", "Nov ’26", "pending", null, "new PSA 10 slabs for Nov ’26 — closes 2026-12-01"),
+        };
+        var cut = Render<GradingActivityPanel>(p => p.Add(x => x.Census,
+            SixBars(0, 0, 0, 0, 0, 0, qualifying: 2, deltaBars: bars)));
+
+        var observed = cut.FindAll(".ga-bar-observed");
+        Assert.Equal("height: 29px;", observed[0].GetAttribute("style"));
+        Assert.Equal("height: 108px;", observed[1].GetAttribute("style"));
+        Assert.Equal(["+10", "+42"], cut.FindAll(".ga-bar-value").Select(v => v.TextContent));
+        Assert.Single(cut.FindAll(".ga-bar-pending"));
+    }
+
+    [Fact]
+    public void A_restated_down_month_shows_its_minus_on_a_stub_bar()
+    {
+        var bars = new List<CensusDeltaBarDto>
+        {
+            new("2026-09", "Sep ’26", "observed", 10, "+10 new PSA 10 slabs in Sep ’26"),
+            new("2026-10", "Oct ’26", "observed", -4, "−4 new PSA 10 slabs in Oct ’26"),
+        };
+        var cut = Render<GradingActivityPanel>(p => p.Add(x => x.Census,
+            SixBars(0, 0, 0, 0, 0, 0, qualifying: 2, deltaBars: bars)));
+
+        var observed = cut.FindAll(".ga-bar-observed");
+        Assert.Equal("height: 4px;", observed[1].GetAttribute("style"));
+        Assert.Equal(["+10", "−4"], cut.FindAll(".ga-bar-value").Select(v => v.TextContent));
     }
 
     [Fact]

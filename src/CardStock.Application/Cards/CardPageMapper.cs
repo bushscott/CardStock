@@ -91,7 +91,16 @@ public static class CardPageMapper
             census.CgcTotal,
             census.ObservedAt,
             census.QualifyingObservations,
-            [.. CensusMetrics.Evaluate(census.Observations, today).Select(ToMetricDto)]);
+            [.. CensusMetrics.Evaluate(census.Observations, today).Select(ToMetricDto)],
+            [.. CensusMetrics.DeltaBars(census.Observations, today).Select(ToDeltaBarDto)]);
+
+    private static CensusDeltaBarDto ToDeltaBarDto(CensusDeltaBar bar) =>
+        new(
+            bar.Month.ToString("yyyy-MM"),
+            bar.Label,
+            bar.Observed ? "observed" : "pending",
+            bar.Delta,
+            bar.Tooltip);
 
     private static CensusMetricDto ToMetricDto(CensusMetric metric) =>
         new(

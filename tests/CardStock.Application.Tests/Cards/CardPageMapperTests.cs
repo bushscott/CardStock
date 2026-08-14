@@ -358,6 +358,22 @@ public class CardPageMapperTests
     }
 
     [Fact]
+    public void The_ghost_chart_ships_seven_pending_slots_before_the_floor()
+    {
+        // Today = 2026-08-13: the D-094 window is the first seven post-floor
+        // months, all pending, each naming its close date.
+        var bars = Map().Census.DeltaBars;
+
+        Assert.Equal(7, bars.Count);
+        Assert.All(bars, b => Assert.Equal("pending", b.State));
+        Assert.All(bars, b => Assert.Null(b.Delta));
+        Assert.Equal("2026-09", bars[0].Month);
+        Assert.Equal("Sep ’26", bars[0].Label);
+        Assert.Equal("new PSA 10 slabs for Sep ’26 — closes 2026-10-01", bars[0].Tooltip);
+        Assert.Equal("2027-03", bars[6].Month);
+    }
+
+    [Fact]
     public void Census_metric_states_and_tones_serialize_lowercase_when_computed()
     {
         // Two closed post-floor months (Sep +10, Oct +42) on a 1,000-slab

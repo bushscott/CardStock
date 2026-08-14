@@ -329,6 +329,24 @@ Read directly 2026-08-10, to be mirrored per D-018–D-021.
 
 ## Decided
 
+### D-094 — The ghost delta chart: the grading-activity bar row ships as its own placeholder
+Owner, 2026-08-14: *"I would like a 'ghost' chart show up under Grading activity · PSA 10 slabs
+added"* (metric-slot copy free to rework; it wasn't needed — both notes stand). The prototype's
+seeded 7-bar delta row, absent since D-087 reduced the panel to metric slots, returns as a
+**ghost chart**: seven month slots ending at the current month, window start clamped to the
+D-033 floor's month (`max(Sep ’26, currentMonth − 6)`) so a month that can never fill is never
+promised. Each slot materializes as a real bar — prototype fill, `+N` mono value, `maxD` scaling,
+restated months as 4px stubs with a true `−N` — the moment its month closes with the pace gate
+met (≥ 2 qualifying observations); until then it renders a dashed `--line3` outline at uniform
+44px with **no number** (rule 2: a ghost may never read as data) and a tooltip naming its own
+unlock (`closes {date}`, or the gate copy on under-observed cards). The current month always
+rides as the trailing ghost — giving purpose to the prototype's vestigial `d.bd` border plumbing
+(§3.9/OQ-10's suspected "outlined current/partial month"). Wire: `CensusDto.DeltaBars`
+(`{month, label, state: observed|pending, delta, tooltip}`), computed read-time beside D-093's
+metrics in `CensusMetrics.DeltaBars`. At launch every card shows Sep ’26 – Mar ’27 as seven
+ghosts; the first bar materializes 2026-10-01 with no deploy. Spec: card.md §2.6 (D-094 box).
+Suites 362 green; live-verified on Charizard 630417 the same day.
+
 ### D-093 — The census sentences: implemented now, unlocked by data checks
 Owner, 2026-08-13, immediately after confirming the collection side is already right (*"if you
 have the ability to collect the data, and we're just waiting for the data to fill in, let's write

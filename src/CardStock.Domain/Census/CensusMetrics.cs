@@ -22,9 +22,56 @@ public static class CensusMetrics
     private const int PaceTrendMonths = 6;
     private const decimal PaceSupplyBandPctPerMonth = 2m;
 
+    private const int DeltaChartSlots = 7;
+
     public static IReadOnlyList<CensusMetric> Evaluate(
         IReadOnlyList<CensusObservation> observations, DateOnly today) =>
         [GemRate(observations, today), Pace(observations, today)];
+
+    /// <summary>
+    /// The ghost delta chart (D-094): seven month slots ending at the current
+    /// month, never starting before the floor's month. A slot materializes as
+    /// an observed bar once its month has closed AND the pace gate holds
+    /// (≥ 2 qualifying observations — a closed month on an unobserved card is
+    /// not a fabricated zero); otherwise it ghosts with a tooltip naming its
+    /// unlock. The current month is always the trailing ghost.
+    /// </summary>
+    public static IReadOnlyList<CensusDeltaBar> DeltaBars(
+        IReadOnlyList<CensusObservation> observations, DateOnly today)
+    {
+        var firstOfCurrent = new DateOnly(today.Year, today.Month, 1);
+        var floorMonth = new DateOnly(
+            CardCensus.ObservationFloor.Year, CardCensus.ObservationFloor.Month, 1);
+        var sliding = firstOfCurrent.AddMonths(-(DeltaChartSlots - 1));
+        var start = sliding > floorMonth ? sliding : floorMonth;
+
+        var qualifying = QualifyingCount(observations);
+        var bars = new List<CensusDeltaBar>(DeltaChartSlots);
+        for (var i = 0; i < DeltaChartSlots; i++)
+        {
+            var month = start.AddMonths(i);
+            var closes = month.AddMonths(1);
+            if (closes > firstOfCurrent)
+            {
+                bars.Add(new CensusDeltaBar(month, MonthLabel(month), false, null,
+                    $"new PSA 10 slabs for {MonthLabel(month)} — closes {closes:yyyy-MM-dd}"));
+            }
+            else if (qualifying < PaceObservationFloor)
+            {
+                bars.Add(new CensusDeltaBar(month, MonthLabel(month), false, null,
+                    $"new PSA 10 slabs for {MonthLabel(month)} — needs census deltas; observations " +
+                    $"count from {CardCensus.ObservationFloor:yyyy-MM-dd}, {qualifying} so far"));
+            }
+            else
+            {
+                var delta = PsaTenAt(observations, closes) - PsaTenAt(observations, month);
+                bars.Add(new CensusDeltaBar(month, MonthLabel(month), true, delta,
+                    $"{DeltaText(delta)} new PSA 10 slabs in {MonthLabel(month)}"));
+            }
+        }
+
+        return bars;
+    }
 
     // -- gem rate ------------------------------------------------------------
 
@@ -97,10 +144,7 @@ public static class CensusMetrics
 
     private static CensusMetric Pace(IReadOnlyList<CensusObservation> observations, DateOnly today)
     {
-        var qualifying = observations
-            .Select(o => o.ObservedAt)
-            .Distinct()
-            .Count(at => UtcDate(at) >= CardCensus.ObservationFloor);
+        var qualifying = QualifyingCount(observations);
         if (qualifying < PaceObservationFloor)
         {
             return LowData("Pace",
@@ -174,6 +218,16 @@ public static class CensusMetrics
     private static CensusMetric LowData(string name, string note) =>
         new(name, MetricState.LowData, null, [new MetricSegment(note, ChipTone.Neutral)]);
 
+    private static int QualifyingCount(IReadOnlyList<CensusObservation> observations) =>
+        observations
+            .Select(o => o.ObservedAt)
+            .Distinct()
+            .Count(at => UtcDate(at) >= CardCensus.ObservationFloor);
+
+    /// <summary>The prototype's `'+' + n` value form with the true minus: `+42` / `+0` / `−4`.</summary>
+    private static string DeltaText(int delta) =>
+        delta >= 0 ? $"+{delta}" : $"−{Math.Abs(delta)}";
+
     private static DateOnly UtcDate(DateTimeOffset at) => DateOnly.FromDateTime(at.UtcDateTime);
 
     /// <summary>Flat-fill: the cell's newest row dated on or before <paramref name="date"/>;
@@ -205,5 +259,13 @@ public static class CensusMetrics
     private static string SignedWhole(decimal value) =>
         value > 0 ? $"+{value:0}" : value < 0 ? $"−{Math.Abs(value):0}" : "0";
 
-    private static string MonthLabel(DateOnly month) => $"{month:MMM} ’{month:yy}";
+    /// <summary>`Sep ’26` — explicit en-US like every other MMM site (Format.cs,
+    /// PriceChart): the repo deliberately does NOT set InvariantGlobalization
+    /// (Directory.Build.props, D-070), and the Pi's own en ICU culture renders
+    /// September as "Sept" under a bare format string — caught live, 2026-08-14.</summary>
+    private static string MonthLabel(DateOnly month)
+    {
+        var en = System.Globalization.CultureInfo.GetCultureInfo("en-US");
+        return month.ToString("MMM", en) + " ’" + month.ToString("yy", en);
+    }
 }

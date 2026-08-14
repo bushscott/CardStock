@@ -30,7 +30,8 @@ public sealed record TierChangeDto(string State, decimal? Fraction, int RecentSa
 public sealed record CensusDto(
     IReadOnlyList<CensusBarDto> Bars, int PsaTotal, int CgcTotal,
     DateTimeOffset? ObservedAt, int QualifyingObservations,
-    IReadOnlyList<CensusMetricDto> Metrics);
+    IReadOnlyList<CensusMetricDto> Metrics,
+    IReadOnlyList<CensusDeltaBarDto> DeltaBars);
 
 public sealed record CensusBarDto(string Grader, short Grade, int Count);
 
@@ -43,6 +44,12 @@ public sealed record CensusMetricDto(
 /// <summary>Tone: "pos" | "neg" | "caution" | "neutral" — neutral renders in the
 /// note's own muted colour.</summary>
 public sealed record MetricSegmentDto(string Text, string Tone);
+
+/// <summary>One slot of the ghost delta chart (D-094). Month is "yyyy-MM".
+/// State: "observed" (Delta present, bar filled and scaled) | "pending" (dashed
+/// ghost, no number; the tooltip names the unlock).</summary>
+public sealed record CensusDeltaBarDto(
+    string Month, string Label, string State, int? Delta, string Tooltip);
 
 /// <summary>The signals panel (card.md §2.3.2). Evaluated counts every row — locked
 /// included: they were evaluated and found locked. Firing counts rows in the firing

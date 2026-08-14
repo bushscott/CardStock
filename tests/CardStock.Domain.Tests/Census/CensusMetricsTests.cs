@@ -368,4 +368,93 @@ public class CensusMetricsTests
         Assert.Equal(new[] { "Gem rate", "Pace" }, metrics.Select(m => m.Name));
         Assert.All(metrics, m => Assert.Equal(MetricState.LowData, m.State));
     }
+
+    // -- the ghost delta chart (D-094) ---------------------------------------
+
+    [Fact]
+    public void Before_the_floor_the_chart_is_seven_ghosts_naming_their_close_dates()
+    {
+        var bars = CensusMetrics.DeltaBars([], new DateOnly(2026, 8, 14));
+
+        Assert.Equal(7, bars.Count);
+        Assert.All(bars, b => Assert.False(b.Observed));
+        Assert.All(bars, b => Assert.Null(b.Delta));
+        Assert.Equal(
+            ["Sep ’26", "Oct ’26", "Nov ’26", "Dec ’26", "Jan ’27", "Feb ’27", "Mar ’27"],
+            bars.Select(b => b.Label));
+        Assert.Equal("new PSA 10 slabs for Sep ’26 — closes 2026-10-01", bars[0].Tooltip);
+        Assert.Equal("new PSA 10 slabs for Mar ’27 — closes 2027-04-01", bars[6].Tooltip);
+    }
+
+    [Fact]
+    public void Closed_months_materialize_and_the_current_month_stays_a_ghost()
+    {
+        // Sep +10 and Oct +42 observed; November is the in-progress ghost, the
+        // outlined partial month the prototype's border plumbing anticipated (OQ-10).
+        List<CensusObservation> rows =
+        [
+            Row("psa", 10, 1000, 2026, 8, 15),
+            Row("psa", 10, 1010, 2026, 9, 20),
+            Row("psa", 10, 1052, 2026, 10, 15),
+        ];
+
+        var bars = CensusMetrics.DeltaBars(rows, new DateOnly(2026, 11, 5));
+
+        Assert.Equal("Sep ’26", bars[0].Label);
+        Assert.True(bars[0].Observed);
+        Assert.Equal(10, bars[0].Delta);
+        Assert.Equal("+10 new PSA 10 slabs in Sep ’26", bars[0].Tooltip);
+        Assert.True(bars[1].Observed);
+        Assert.Equal(42, bars[1].Delta);
+        Assert.False(bars[2].Observed);
+        Assert.Equal("new PSA 10 slabs for Nov ’26 — closes 2026-12-01", bars[2].Tooltip);
+        Assert.All(bars.Skip(3), b => Assert.False(b.Observed));
+    }
+
+    [Fact]
+    public void A_closed_month_stays_a_ghost_while_the_pace_gate_is_unmet()
+    {
+        // One qualifying observation: closed months exist but no delta can be
+        // claimed, so they ghost with the gate's own copy, never a fabricated 0.
+        List<CensusObservation> rows =
+        [
+            Row("psa", 10, 1000, 2026, 7, 28),
+            Row("psa", 10, 1010, 2026, 9, 10),
+        ];
+
+        var bars = CensusMetrics.DeltaBars(rows, new DateOnly(2026, 11, 5));
+
+        Assert.False(bars[0].Observed);
+        Assert.Equal(
+            "new PSA 10 slabs for Sep ’26 — needs census deltas; observations count from 2026-09-01, 1 so far",
+            bars[0].Tooltip);
+        Assert.False(bars[1].Observed);
+    }
+
+    [Fact]
+    public void The_window_slides_once_seven_months_have_passed()
+    {
+        var bars = CensusMetrics.DeltaBars([], new DateOnly(2027, 6, 10));
+
+        Assert.Equal(7, bars.Count);
+        Assert.Equal("Dec ’26", bars[0].Label);
+        Assert.Equal("Jun ’27", bars[6].Label);
+        Assert.Equal(new DateOnly(2026, 12, 1), bars[0].Month);
+    }
+
+    [Fact]
+    public void A_restated_down_month_charts_with_the_true_minus()
+    {
+        List<CensusObservation> rows =
+        [
+            Row("psa", 10, 1000, 2026, 8, 15),
+            Row("psa", 10, 1010, 2026, 9, 20),
+            Row("psa", 10, 1006, 2026, 10, 15),
+        ];
+
+        var bars = CensusMetrics.DeltaBars(rows, new DateOnly(2026, 11, 5));
+
+        Assert.Equal(-4, bars[1].Delta);
+        Assert.Equal("−4 new PSA 10 slabs in Oct ’26", bars[1].Tooltip);
+    }
 }

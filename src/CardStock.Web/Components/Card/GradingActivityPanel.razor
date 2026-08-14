@@ -14,6 +14,28 @@
         <h2>Grading activity · PSA 10 slabs added</h2>
         <span class="obs-badge" title="@BadgeTooltip()">@(Census.QualifyingObservations) OBS</span>
     </div>
+    @* D-094: the ghost delta chart -- seven month slots ending at the current month.
+       A slot materializes as a filled, scaled bar once its month closed and the data
+       qualifies; until then it renders a dashed ghost with NO number (rule 2: a ghost
+       may never read as data) and a tooltip naming its unlock. The current month is
+       always the trailing ghost -- the outlined partial month OQ-10 anticipated. *@
+    <div class="ga-bars">
+        @foreach (var bar in Census.DeltaBars)
+        {
+            <div class="ga-bar-col">
+                @if (bar.State == "observed")
+                {
+                    <span class="ga-bar-value">@DeltaText(bar.Delta!.Value)</span>
+                    <div class="ga-bar ga-bar-observed" style="height: @(BarHeight(bar.Delta.Value))px;" title="@bar.Tooltip"></div>
+                }
+                else
+                {
+                    <div class="ga-bar ga-bar-pending" title="@bar.Tooltip"></div>
+                }
+                <span class="ga-bar-label">@bar.Label</span>
+            </div>
+        }
+    </div>
     @foreach (var metric in Census.Metrics)
     {
         <div class="ga-metric">
@@ -43,4 +65,22 @@
 
     private string BadgeTooltip() =>
         $"Census observations counted from 2026-09-01 — {Census.QualifyingObservations} so far; deltas need two.";
+
+    // §3.9's maxD rule, observed bars only: the tallest reaches 104+4; a
+    // restated-down (≤ 0) month keeps the 4px stub with its true value above.
+    private int Max => Census.DeltaBars
+        .Where(b => b.State == "observed" && b.Delta > 0)
+        .Select(b => b.Delta!.Value)
+        .DefaultIfEmpty(0)
+        .Max();
+
+    private int BarHeight(int delta)
+    {
+        var max = Max;
+        return delta <= 0 || max == 0 ? 4 : (int)(Math.Round(delta / (decimal)max * 104) + 4);
+    }
+
+    // The prototype's `'+' + n` value form with the true minus: +42 / +0 / −4.
+    private static string DeltaText(int delta) =>
+        delta >= 0 ? $"+{delta}" : $"−{Math.Abs(delta)}";
 }

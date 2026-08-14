@@ -21,3 +21,12 @@ public sealed record MetricSegment(string Text, ChipTone Tone);
 /// </summary>
 public sealed record CensusMetric(
     string Name, MetricState State, string? Value, IReadOnlyList<MetricSegment> Segments);
+
+/// <summary>
+/// One slot of the ghost delta chart (D-094): a month that either materialized
+/// (Observed, with its delta) or still ghosts — dashed outline, no number, a
+/// tooltip naming its unlock. The current month is always the trailing ghost:
+/// the outlined partial month the prototype's border plumbing anticipated (OQ-10).
+/// </summary>
+public sealed record CensusDeltaBar(
+    DateOnly Month, string Label, bool Observed, int? Delta, string Tooltip);

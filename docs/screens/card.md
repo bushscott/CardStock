@@ -404,6 +404,26 @@ segments (colour by market meaning, never colour alone). Rules and their dates:
   from §3.8/§3.9, and the §3.9 seed arithmetic (331 · +29% · +58 · rising) is reproduced exactly
   by a domain test as the referee.
 
+**Amended 2026-08-14 (D-094) — the ghost delta chart.** Owner: a "ghost" chart occupies the bar
+row the prototype seeds (§3.9's `deltas`), between the header and the metric slots. Rules:
+- **Seven month slots, ending at the current month, never starting before the floor's month** —
+  window start = `max(Sep ’26, currentMonth − 6)`. At launch that is Sep ’26 – Mar ’27, a visible
+  pipeline of the months that will fill; at steady state, the newest six closed months plus the
+  current month.
+- A slot **materializes** as a real bar (the prototype's fill `rgba(74,99,208,0.55)`, `+N` value
+  above in mono, §3.9's `maxD` scaling over observed bars, 4px stub for a restated ≤ 0 month with
+  its true `−N` above) once its month has **closed** AND the pace gate holds (≥ 2 qualifying
+  observations — a closed month on an unobserved card is not a fabricated zero).
+- Otherwise it **ghosts**: `1.5px dashed --line3` outline, uniform 44px (uniform carries no data
+  claim), **no number ever**, month label below, `cursor:help`, tooltip naming its unlock —
+  `new PSA 10 slabs for {Mon ’YY} — closes {YYYY-MM-DD}` for unclosed months, or
+  `… — needs census deltas; observations count from 2026-09-01, {n} so far` for closed months on
+  a card below the gate.
+- **The current month is always the trailing ghost** — the outlined partial-month variant the
+  prototype's vestigial `d.bd` border plumbing anticipated (§3.9 / OQ-10, now purposed).
+- Row geometry mirrors the population panel: flex-end, 150px, gap 10, values above, labels below.
+  The metric slots (D-093) sit beneath the chart, copy unchanged.
+
 ### 2.7 Freshness footer (:252–:257)
 
 `display:flex; align-items:center; gap:16px`, `--mutbg` background, 1px `--line`, radius 8, padding `9px 14px`, 12.5px `--mut`. Content: refresh stamp → `·` → census stamp → `flex:1` spacer (content is left-aligned; the right side is deliberately empty).
