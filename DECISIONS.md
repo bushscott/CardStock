@@ -329,6 +329,22 @@ Read directly 2026-08-10, to be mirrored per D-018–D-021.
 
 ## Decided
 
+### D-096 — The identity header's three bottoms are flush
+Owner, 2026-08-14: *"the bottom of the card, the bottom of all of the PSA grade Sections and the
+signal box should all line up at the bottom of their encapsulated box."* Measured live before
+fixing (headless Chrome + pixel scan, 1500px): container content bottom y=459, signals panel
+flush at 459, tile grid 16px short at 443, art 45px short at 414 — and which element floats
+varies with viewport, because the row's height is driven by whichever of tiles (208px) or the
+content-sized panel is taller, while the art was a fixed 217×300 against a ~345px column. Fix
+(card.md §2.1 amendment box): art pinned to the bottom of a stretched fixed-width slot via
+`margin-top: auto` (auto margin, not `justify-content` — button UA content-centering fights the
+latter; measured, not guessed), tiles absorb slack between their two rows via
+`align-content: space-between`, panel already flush by construction. Rejected on measurement: a
+stretch-to-fit aspect-locked art — its computed width fed back into the flex row's wrap
+negotiation and the container ballooned 476 → 605. Verified flush at 1500px and 1800px after.
+The column's residual slack (~29–48px) now reads as breathing room above the art, beside the
+title.
+
 ### D-095 — Full dates display MM-DD-YYYY, app-wide
 Owner, 2026-08-14, after seeing the footer's ISO stamps: *"going forward and in general, if
 we're using the full date, use month month day day, year year year year."* Supersedes the

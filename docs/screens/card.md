@@ -71,6 +71,23 @@ Fixed **217 × 300 px**, `flex-shrink: 0`, `cursor: zoom-in`, `title="Click to e
 Contains `<image-slot id="art-umbreon" shape="rounded" radius="6" placeholder="card art 325×450">`.
 The native art aspect ratio is **325 : 450** (0.7222); the 217×300 box matches it exactly.
 
+> **Amended 2026-08-14 (D-096) — the header's three bottoms are flush.** Owner: the art, the tier
+> tiles, and the signals panel must all end at the container's inner bottom edge. The real right
+> column runs taller than the prototype's 300px (its panel is content-sized), so three rules make
+> the bottoms meet at every viewport, with no magic numbers:
+> - **Art**: the 217px-wide slot spans the column (`align-self: stretch`) and the 217×300 art is
+>   **pinned to the slot's bottom** (`margin-top: auto` — an auto margin, because buttons carry UA
+>   content-centering that fights `justify-content`). The column's extra height surfaces as
+>   breathing room above the art, beside the title — never dead space below it. A
+>   stretch-to-fit art (aspect-locked width) was tried and rejected: its width fed back into the
+>   flex row and the layout ballooned.
+> - **Tiles**: the 3×2 grid gets `align-content: space-between` — when the panel makes the row
+>   taller than 208px, the slack moves into the gap *between* the two tile rows; tops stay
+>   aligned with the panel, bottoms land flush. At exactly 208px it is identical to the plain
+>   8px gap.
+> - **Panel**: already stretches with the row; its footer pins to its own bottom. Flush by
+>   construction.
+
 ### 2.2 Identity header — right column (:62–:98)
 
 `flex: 1; min-width: 0; display:flex; flex-direction:column; justify-content: space-between; gap: 12px`. Three stacked rows:

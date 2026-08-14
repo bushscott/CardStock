@@ -1,11 +1,16 @@
 /* card.md §2.3 (amended 2026-08-13, D-092): a 3×2 grid of 100px square tiles,
-   fixed-size beside the signals panel in §2.2's wrapping row. */
+   fixed-size beside the signals panel in §2.2's wrapping row. align-content
+   space-between (D-096): when the signals panel makes the row taller than the
+   tiles' 208px, the slack moves into the gap BETWEEN the two tile rows — tops
+   stay aligned with the panel, bottoms land flush with the container. At
+   exactly 208px this is byte-identical to a plain 8px gap. */
 .tier-strip {
     display: grid;
     grid-template-columns: repeat(3, 100px);
     grid-auto-rows: 100px;
     gap: 8px;
     flex: 0 0 auto;
+    align-content: space-between;
 }
 
 /* Tile dress: --bg fill, 1px --line, radius 8, padding 10px 11px; label at the
