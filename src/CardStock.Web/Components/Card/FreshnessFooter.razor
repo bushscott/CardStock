@@ -37,9 +37,9 @@
 
     private string RefreshPrefix() => LastVisitedAt.HasValue ? "Sales & prices refreshed " : "Sales & prices ";
 
-    private string RefreshValue() => LastVisitedAt is { } visited ? $"{visited:yyyy-MM-dd}" : "never visited";
+    private string RefreshValue() => LastVisitedAt is { } visited ? Dates.Full(visited) : "never visited";
 
     private string CensusPrefix() => CensusObservedAt.HasValue ? "Census as of " : "Census ";
 
-    private string CensusValue() => CensusObservedAt is { } observed ? $"{observed:yyyy-MM-dd}" : "never observed";
+    private string CensusValue() => CensusObservedAt is { } observed ? Dates.Full(observed) : "never observed";
 }

@@ -121,7 +121,7 @@ else
             @foreach (var row in _state.Slice(Filtered))
             {
                 <div class="lg-row lg-body" style="grid-template-columns:@GridTemplate()">
-                    <span class="lg-date">@row.SoldOn.ToString("yyyy-MM-dd")</span>
+                    <span class="lg-date">@Dates.Full(row.SoldOn)</span>
                     <span class="lg-bucket">@LedgerVocabulary.Display(row.GradeTier)</span>
                     @* The dotted listed-price underline hugs the number, not the grid track:
                        the cell centres an inline inner span that carries the border and

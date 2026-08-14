@@ -1,3 +1,4 @@
+using CardStock.Domain;
 using CardStock.Domain.Census;
 using CardStock.Domain.Prices;
 using CardStock.Domain.Signals;
@@ -123,7 +124,7 @@ public static class CardPageMapper
             "Relative strength needs the market index — it arrives with the worker phase",
             SignalState.Locked, ChipTone.Neutral));
         rows.Add(new SignalRow("◌", "Pop Δ 60d", "locked",
-            "Needs census deltas; observations count from 2026-09-01 — deltas need two",
+            $"Needs census deltas; observations count from {Dates.Full(SeamFloor)} — deltas need two",
             SignalState.Locked, ChipTone.Neutral));
         rows.Add(ChurnRow(today));
 
@@ -148,7 +149,7 @@ public static class CardPageMapper
     private static SignalRow ChurnRow(DateOnly today)
     {
         var recorded = Math.Max(0, today.DayNumber - SeamFloor.DayNumber);
-        return new SignalRow("◌", "Churn 30d", $"unlocks {ChurnUnlock:yyyy-MM-dd}",
+        return new SignalRow("◌", "Churn 30d", $"unlocks {Dates.Full(ChurnUnlock)}",
             $"Needs 60+ post-seam days · {recorded} recorded",
             SignalState.Locked, ChipTone.Neutral);
     }

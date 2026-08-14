@@ -30,6 +30,9 @@ public class SalesLedgerTests : BunitContext
         var headers = cut.FindAll(".lg-h-label").Select(h => h.TextContent).ToList();
         Assert.Equal(["Date ▾", "Grade bucket", "Realized", "Source", "Listing title"], headers);
 
+        // D-095: full dates display MM-DD-YYYY app-wide; the sort key stays the DateOnly.
+        Assert.Equal("08-01-2026", cut.Find(".lg-date").TextContent);
+
         // Flip the active column: ascending arrow replaces the descending one.
         cut.FindAll(".lg-h")[0].Click();
         Assert.Equal("Date ▴", cut.FindAll(".lg-h-label")[0].TextContent);

@@ -329,6 +329,22 @@ Read directly 2026-08-10, to be mirrored per D-018–D-021.
 
 ## Decided
 
+### D-095 — Full dates display MM-DD-YYYY, app-wide
+Owner, 2026-08-14, after seeing the footer's ISO stamps: *"going forward and in general, if
+we're using the full date, use month month day day, year year year year."* Supersedes the
+`YYYY-MM-DD` display convention (the card-page plan's global constraint) wherever a full
+month-day-year date RENDERS: freshness footer, refresh badge, census "as of" stamps, the
+ledger's Date column, the delisted chip, and every date-bearing tooltip/note (locked unlocks,
+census-metric gates, ghost-chart closes). Separator: dashes — `08-14-2026` — first built with slashes as the default US reading, corrected
+by the owner to dashes the same day. One helper enforces it: `CardStock.Domain.Dates.Full`,
+explicit en-US per D-070's deliberate no-InvariantGlobalization stance. **Display only**: wire
+payloads (`yyyy-MM`), chart time keys, and ledger sort keys stay ISO (sorting is on the
+`DateOnly`, so the display change cannot break date order), and month-only labels (`Sep ’26`)
+are untouched. Tradeoff noted once, not relitigated: ISO is internationally unambiguous;
+MM/DD/YYYY matches the product's US audience — the owner's call. Swept 8 display sites + every
+test expectation; 362 green; live-verified on Charizard 630417 the same day. Spec: card.md §3
+convention box + §3.7 Date column row.
+
 ### D-094 — The ghost delta chart: the grading-activity bar row ships as its own placeholder
 Owner, 2026-08-14: *"I would like a 'ghost' chart show up under Grading activity · PSA 10 slabs
 added"* (metric-slot copy free to rework; it wasn't needed — both notes stand). The prototype's

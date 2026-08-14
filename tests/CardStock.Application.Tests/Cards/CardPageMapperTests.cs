@@ -265,10 +265,10 @@ public class CardPageMapperTests
 
         var pop = Assert.Single(rows, r => r.Name == "Pop Δ 60d");
         Assert.Equal("locked", pop.Value);
-        Assert.Equal("Needs census deltas; observations count from 2026-09-01 — deltas need two", pop.Tooltip);
+        Assert.Equal("Needs census deltas; observations count from 09-01-2026 — deltas need two", pop.Tooltip);
 
         var churn = Assert.Single(rows, r => r.Name == "Churn 30d");
-        Assert.Equal("unlocks 2026-10-31", churn.Value);
+        Assert.Equal("unlocks 10-31-2026", churn.Value);
         Assert.Equal("Needs 60+ post-seam days · 0 recorded", churn.Tooltip);
     }
 
@@ -351,9 +351,9 @@ public class CardPageMapperTests
         Assert.Equal(new[] { "Gem rate", "Pace" }, metrics.Select(m => m.Name));
         Assert.All(metrics, m => Assert.Equal("lowdata", m.State));
         Assert.All(metrics, m => Assert.Null(m.Value));
-        Assert.Contains("the window fills 2026-11-30", metrics[0].Segments.Single().Text);
+        Assert.Contains("the window fills 11-30-2026", metrics[0].Segments.Single().Text);
         Assert.Equal(
-            "needs census deltas; observations count from 2026-09-01, 0 so far — deltas need two",
+            "needs census deltas; observations count from 09-01-2026, 0 so far — deltas need two",
             metrics[1].Segments.Single().Text);
     }
 
@@ -369,7 +369,7 @@ public class CardPageMapperTests
         Assert.All(bars, b => Assert.Null(b.Delta));
         Assert.Equal("2026-09", bars[0].Month);
         Assert.Equal("Sep ’26", bars[0].Label);
-        Assert.Equal("new PSA 10 slabs for Sep ’26 — closes 2026-10-01", bars[0].Tooltip);
+        Assert.Equal("new PSA 10 slabs for Sep ’26 — closes 10-01-2026", bars[0].Tooltip);
         Assert.Equal("2027-03", bars[6].Month);
     }
 

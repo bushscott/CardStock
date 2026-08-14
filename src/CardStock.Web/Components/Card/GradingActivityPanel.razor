@@ -64,7 +64,7 @@
     public CensusDto Census { get; set; } = default!;
 
     private string BadgeTooltip() =>
-        $"Census observations counted from 2026-09-01 — {Census.QualifyingObservations} so far; deltas need two.";
+        $"Census observations counted from {Dates.Full(new DateOnly(2026, 9, 1))} — {Census.QualifyingObservations} so far; deltas need two.";
 
     // §3.9's maxD rule, observed bars only: the tallest reaches 104+4; a
     // restated-down (≤ 0) month keeps the 4px stub with its true value above.

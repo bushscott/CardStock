@@ -435,6 +435,17 @@ row the prototype seeds (§3.9's `deltas`), between the header and the metric sl
 Everything the screen renders. **All monetary values pass through `money()` (:334) unless noted**:
 `'$' + Math.round(n).toLocaleString('en-US')` → USD, whole dollars, comma thousands separators, no currency code, no cents.
 
+> **Amended 2026-08-14 (D-095) — full calendar dates display `MM-DD-YYYY`, app-wide.** Owner
+> ruling ("going forward and in general"; separator corrected to dashes the same day), superseding the `YYYY-MM-DD` display convention
+> everywhere a month-day-year date renders: the freshness footer, the refresh badge, the census
+> "as of" stamps, the ledger's Date column, the delisted chip, and every tooltip or note that
+> names a date (locked-signal unlocks, census-metric gates, ghost-chart closes). One helper is
+> the law: `CardStock.Domain.Dates.Full` (explicit en-US per D-070's no-invariant stance).
+> **Display only** — wire payloads (`yyyy-MM` months), chart time keys, and sort keys stay ISO,
+> and month-only labels (`Sep ’26`) are unchanged. Every quoted date-bearing string in the
+> sections and amendment boxes below reads through this rule; quoted copy predating it keeps
+> its original form as the historical record.
+
 ### 3.1 Card identity
 
 | Field | Line | Type / format | Seeded | Notes |
@@ -618,7 +629,7 @@ Tooltip (:82): `Log a purchase of this card — opens the binder transaction for
 
 | # | Header | Sort key | Resize key | Cell format (line) |
 |---|---|---|---|---|
-| 1 | `Date` | `date` | `date` | `YYYY-MM-DD` verbatim; mono 12.5px, `--mut`, centred (:202) |
+| 1 | `Date` | `date` | `date` | `MM-DD-YYYY` (amended 2026-08-14, D-095; the prototype's `YYYY-MM-DD` is superseded); mono 12.5px, `--mut`, centred (:202). Sorting stays on the underlying date, never the string. |
 | 2 | `Grade bucket` | `bucket` | `bucket` | One of the 19 `BUCKETS` strings verbatim; mono 12.5px, `--ink`, centred (:203) |
 | 3 | `Realized` | `price` | `price` | `money(p)`; mono **13.5px, weight 700**, centred, plus the listed-price affordance below (:204) |
 | 4 | `Source` | `src` | `src` | lowercase marketplace slug; mono 12.5px, `--mut`, centred (:205) |

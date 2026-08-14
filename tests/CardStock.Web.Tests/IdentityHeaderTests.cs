@@ -87,7 +87,7 @@ public class IdentityHeaderTests : BunitContext
     {
         var delisted = RenderHeader(Identity(delistedAt: new DateTimeOffset(2026, 7, 30, 0, 0, 0, TimeSpan.Zero)));
         var chip = delisted.Find(".chip-delisted");
-        Assert.Equal("delisted 2026-07-30", chip.TextContent);
+        Assert.Equal("delisted 07-30-2026", chip.TextContent);
         Assert.Equal(
             "The source no longer lists this card; its history stands.", chip.GetAttribute("title"));
 

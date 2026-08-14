@@ -54,13 +54,13 @@ public static class CensusMetrics
             if (closes > firstOfCurrent)
             {
                 bars.Add(new CensusDeltaBar(month, MonthLabel(month), false, null,
-                    $"new PSA 10 slabs for {MonthLabel(month)} — closes {closes:yyyy-MM-dd}"));
+                    $"new PSA 10 slabs for {MonthLabel(month)} — closes {Dates.Full(closes)}"));
             }
             else if (qualifying < PaceObservationFloor)
             {
                 bars.Add(new CensusDeltaBar(month, MonthLabel(month), false, null,
                     $"new PSA 10 slabs for {MonthLabel(month)} — needs census deltas; observations " +
-                    $"count from {CardCensus.ObservationFloor:yyyy-MM-dd}, {qualifying} so far"));
+                    $"count from {Dates.Full(CardCensus.ObservationFloor)}, {qualifying} so far"));
             }
             else
             {
@@ -83,7 +83,7 @@ public static class CensusMetrics
             var fills = CardCensus.ObservationFloor.AddDays(GemWindowDays);
             return LowData("Gem rate",
                 $"needs {GemWindowDays} days of census deltas; observations count from " +
-                $"{CardCensus.ObservationFloor:yyyy-MM-dd} — the window fills {fills:yyyy-MM-dd}");
+                $"{Dates.Full(CardCensus.ObservationFloor)} — the window fills {Dates.Full(fills)}");
         }
 
         var deltaAll = PsaAllDelta(observations, windowStart, today);
@@ -148,7 +148,7 @@ public static class CensusMetrics
         if (qualifying < PaceObservationFloor)
         {
             return LowData("Pace",
-                $"needs census deltas; observations count from {CardCensus.ObservationFloor:yyyy-MM-dd}, " +
+                $"needs census deltas; observations count from {Dates.Full(CardCensus.ObservationFloor)}, " +
                 $"{qualifying} so far — deltas need two");
         }
 
@@ -167,7 +167,7 @@ public static class CensusMetrics
         {
             var firstClose = CardCensus.ObservationFloor.AddMonths(1);
             return LowData("Pace",
-                $"first monthly delta closes {firstClose:yyyy-MM-dd} — {qualifying} observations so far");
+                $"first monthly delta closes {Dates.Full(firstClose)} — {qualifying} observations so far");
         }
 
         var latest = months[^1].Delta;

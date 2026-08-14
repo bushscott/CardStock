@@ -58,6 +58,6 @@
 
     private string HeaderSub() =>
         Census.ObservedAt is { } observed
-            ? $"PSA + CGC · as of {observed:yyyy-MM-dd}"
+            ? $"PSA + CGC · as of {Dates.Full(observed)}"
             : "PSA + CGC · never observed";
 }

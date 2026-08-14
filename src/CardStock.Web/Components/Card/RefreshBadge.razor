@@ -29,7 +29,7 @@ else if (State == RefreshState.Failed)
     // En dash (U+2013), brand.md §4.2's "caution, directionless" -- never a hyphen.
     private string FailedCopy() =>
         LastVisitedAt is { } visited
-            ? $"– as of {visited:yyyy-MM-dd} · {DaysOld(visited)}d old"
+            ? $"– as of {Dates.Full(visited)} · {DaysOld(visited)}d old"
             : "– never visited";
 
     private int DaysOld(DateTimeOffset visited) => (int)Math.Floor((Now - visited).TotalDays);

@@ -36,7 +36,7 @@ public class CensusMetricsTests
         Assert.Equal(MetricState.LowData, gem.State);
         Assert.Null(gem.Value);
         Assert.Equal(
-            "needs 90 days of census deltas; observations count from 2026-09-01 — the window fills 2026-11-30",
+            "needs 90 days of census deltas; observations count from 09-01-2026 — the window fills 11-30-2026",
             Text(gem));
     }
 
@@ -180,7 +180,7 @@ public class CensusMetricsTests
 
         Assert.Equal(MetricState.LowData, pace.State);
         Assert.Equal(
-            "needs census deltas; observations count from 2026-09-01, 1 so far — deltas need two",
+            "needs census deltas; observations count from 09-01-2026, 1 so far — deltas need two",
             Text(pace));
     }
 
@@ -196,7 +196,7 @@ public class CensusMetricsTests
         var pace = Pace(rows, new DateOnly(2026, 9, 25));
 
         Assert.Equal(MetricState.LowData, pace.State);
-        Assert.Equal("first monthly delta closes 2026-10-01 — 2 observations so far", Text(pace));
+        Assert.Equal("first monthly delta closes 10-01-2026 — 2 observations so far", Text(pace));
     }
 
     [Fact]
@@ -338,7 +338,7 @@ public class CensusMetricsTests
 
         Assert.Equal(MetricState.LowData, pace.State);
         Assert.Equal(
-            "needs census deltas; observations count from 2026-09-01, 1 so far — deltas need two",
+            "needs census deltas; observations count from 09-01-2026, 1 so far — deltas need two",
             Text(pace));
     }
 
@@ -382,8 +382,8 @@ public class CensusMetricsTests
         Assert.Equal(
             ["Sep ’26", "Oct ’26", "Nov ’26", "Dec ’26", "Jan ’27", "Feb ’27", "Mar ’27"],
             bars.Select(b => b.Label));
-        Assert.Equal("new PSA 10 slabs for Sep ’26 — closes 2026-10-01", bars[0].Tooltip);
-        Assert.Equal("new PSA 10 slabs for Mar ’27 — closes 2027-04-01", bars[6].Tooltip);
+        Assert.Equal("new PSA 10 slabs for Sep ’26 — closes 10-01-2026", bars[0].Tooltip);
+        Assert.Equal("new PSA 10 slabs for Mar ’27 — closes 04-01-2027", bars[6].Tooltip);
     }
 
     [Fact]
@@ -407,7 +407,7 @@ public class CensusMetricsTests
         Assert.True(bars[1].Observed);
         Assert.Equal(42, bars[1].Delta);
         Assert.False(bars[2].Observed);
-        Assert.Equal("new PSA 10 slabs for Nov ’26 — closes 2026-12-01", bars[2].Tooltip);
+        Assert.Equal("new PSA 10 slabs for Nov ’26 — closes 12-01-2026", bars[2].Tooltip);
         Assert.All(bars.Skip(3), b => Assert.False(b.Observed));
     }
 
@@ -426,7 +426,7 @@ public class CensusMetricsTests
 
         Assert.False(bars[0].Observed);
         Assert.Equal(
-            "new PSA 10 slabs for Sep ’26 — needs census deltas; observations count from 2026-09-01, 1 so far",
+            "new PSA 10 slabs for Sep ’26 — needs census deltas; observations count from 09-01-2026, 1 so far",
             bars[0].Tooltip);
         Assert.False(bars[1].Observed);
     }

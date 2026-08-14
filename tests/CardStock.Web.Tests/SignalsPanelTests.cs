@@ -27,7 +27,7 @@ public class SignalsPanelTests : BunitContext
         Row("RS vs index 3M", state: "locked", glyph: "◌", value: "locked",
             tooltip: "Relative strength needs the market index — it arrives with the worker phase"),
         Row("Pop Δ 60d", state: "locked", glyph: "◌", value: "locked"),
-        Row("Churn 30d", state: "locked", glyph: "◌", value: "unlocks 2026-10-31",
+        Row("Churn 30d", state: "locked", glyph: "◌", value: "unlocks 10-31-2026",
             tooltip: "Needs 60+ post-seam days · 0 recorded"),
     ]);
 
@@ -72,7 +72,7 @@ public class SignalsPanelTests : BunitContext
             "Relative strength needs the market index — it arrives with the worker phase",
             rows[9].GetAttribute("title"));
 
-        Assert.Equal("unlocks 2026-10-31", rows[11].QuerySelector(".sig-value")!.TextContent);
+        Assert.Equal("unlocks 10-31-2026", rows[11].QuerySelector(".sig-value")!.TextContent);
         Assert.Equal("Needs 60+ post-seam days · 0 recorded", rows[11].GetAttribute("title"));
     }
 

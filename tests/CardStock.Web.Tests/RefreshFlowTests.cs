@@ -73,13 +73,13 @@ public class RefreshFlowTests : BunitContext
         cut.WaitForAssertion(() =>
             Assert.Contains("Checking for a newer price", cut.Find(".refresh-badge-fetching").TextContent));
         Assert.Equal(1, refreshCalls);
-        Assert.Contains(staleVisited.ToString("yyyy-MM-dd"), cut.Markup);
+        Assert.Contains(CardStock.Domain.Dates.Full(staleVisited), cut.Markup);
 
         refreshGate.SetResult(new HttpResponseMessage(HttpStatusCode.OK));
 
         // Landed: refetched snapshot painted in place (the footer's as-of date moves to
         // "now"), badge slot empties, and the refresh POST never fires a second time.
-        cut.WaitForAssertion(() => Assert.Contains(Now.ToString("yyyy-MM-dd"), cut.Markup));
+        cut.WaitForAssertion(() => Assert.Contains(CardStock.Domain.Dates.Full(Now), cut.Markup));
         cut.WaitForAssertion(() => Assert.Empty(cut.FindAll(".refresh-badge")));
         Assert.Equal(1, refreshCalls);
         Assert.Equal(2, snapshotCalls);
@@ -114,7 +114,7 @@ public class RefreshFlowTests : BunitContext
         var cut = Render<CardPage>(p => p.Add(x => x.Id, CardId));
 
         cut.WaitForAssertion(() => Assert.NotEmpty(cut.FindAll(".refresh-badge-failed")));
-        Assert.Equal("– as of 2026-08-01 · 11d old", cut.Find(".refresh-badge-failed").TextContent);
+        Assert.Equal("– as of 08-01-2026 · 11d old", cut.Find(".refresh-badge-failed").TextContent);
 
         // The prices were never wrong, only old -- the failure changes nothing else on screen.
         Assert.Equal("Umbreon VMAX (Alt Art)", cut.Find("h1").TextContent);

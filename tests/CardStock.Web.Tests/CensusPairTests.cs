@@ -26,9 +26,9 @@ public class CensusPairTests : BunitContext
             metrics ??
             [
                 LowData("Gem rate",
-                    "needs 90 days of census deltas; observations count from 2026-09-01 — the window fills 2026-11-30"),
+                    "needs 90 days of census deltas; observations count from 09-01-2026 — the window fills 11-30-2026"),
                 LowData("Pace",
-                    $"needs census deltas; observations count from 2026-09-01, {qualifying} so far — deltas need two"),
+                    $"needs census deltas; observations count from 09-01-2026, {qualifying} so far — deltas need two"),
             ],
             deltaBars ?? SevenGhosts());
 
@@ -42,7 +42,7 @@ public class CensusPairTests : BunitContext
         [
             .. labels.Select((label, i) => new CensusDeltaBarDto(
                 new DateOnly(2026, 9, 1).AddMonths(i).ToString("yyyy-MM"), label, "pending", null,
-                $"new PSA 10 slabs for {label} — closes {new DateOnly(2026, 10, 1).AddMonths(i):yyyy-MM-dd}")),
+                $"new PSA 10 slabs for {label} — closes {CardStock.Domain.Dates.Full(new DateOnly(2026, 10, 1).AddMonths(i))}")),
         ];
     }
 
@@ -108,7 +108,7 @@ public class CensusPairTests : BunitContext
         var cut = Render<CensusBars>(p => p.Add(x => x.Census, census));
 
         Assert.Equal("15,931 PSA · 618 CGC slabs across all grades", cut.Find(".census-summary").TextContent);
-        Assert.Equal("PSA + CGC · as of 2026-07-30", cut.Find(".census-sub").TextContent);
+        Assert.Equal("PSA + CGC · as of 07-30-2026", cut.Find(".census-sub").TextContent);
     }
 
     [Fact]
@@ -122,8 +122,8 @@ public class CensusPairTests : BunitContext
     }
 
     [Theory]
-    [InlineData(0, "0 OBS", "Census observations counted from 2026-09-01 — 0 so far; deltas need two.")]
-    [InlineData(5, "5 OBS", "Census observations counted from 2026-09-01 — 5 so far; deltas need two.")]
+    [InlineData(0, "0 OBS", "Census observations counted from 09-01-2026 — 0 so far; deltas need two.")]
+    [InlineData(5, "5 OBS", "Census observations counted from 09-01-2026 — 5 so far; deltas need two.")]
     public void Grading_activity_panel_renders_both_metric_slots_as_low_data_states(
         int qualifying, string expectedBadge, string expectedTooltip)
     {
@@ -145,9 +145,9 @@ public class CensusPairTests : BunitContext
         Assert.All(cut.FindAll(".ga-state"), s => Assert.Equal("LOW DATA", s.TextContent));
         Assert.Equal(2, cut.FindAll(".ga-state").Count);
         var notes = cut.FindAll(".ga-metric-note").Select(n => n.TextContent).ToList();
-        Assert.Contains("the window fills 2026-11-30", notes[0]);
+        Assert.Contains("the window fills 11-30-2026", notes[0]);
         Assert.Equal(
-            $"needs census deltas; observations count from 2026-09-01, {qualifying} so far — deltas need two",
+            $"needs census deltas; observations count from 09-01-2026, {qualifying} so far — deltas need two",
             notes[1]);
     }
 
@@ -163,7 +163,7 @@ public class CensusPairTests : BunitContext
         Assert.Empty(cut.FindAll(".ga-bar-observed"));
         Assert.Empty(cut.FindAll(".ga-bar-value"));
         Assert.Equal(
-            "new PSA 10 slabs for Sep ’26 — closes 2026-10-01", ghosts[0].GetAttribute("title"));
+            "new PSA 10 slabs for Sep ’26 — closes 10-01-2026", ghosts[0].GetAttribute("title"));
         Assert.Equal(
             ["Sep ’26", "Oct ’26", "Nov ’26", "Dec ’26", "Jan ’27", "Feb ’27", "Mar ’27"],
             cut.FindAll(".ga-bar-label").Select(l => l.TextContent));
@@ -179,7 +179,7 @@ public class CensusPairTests : BunitContext
         {
             new("2026-09", "Sep ’26", "observed", 10, "+10 new PSA 10 slabs in Sep ’26"),
             new("2026-10", "Oct ’26", "observed", 42, "+42 new PSA 10 slabs in Oct ’26"),
-            new("2026-11", "Nov ’26", "pending", null, "new PSA 10 slabs for Nov ’26 — closes 2026-12-01"),
+            new("2026-11", "Nov ’26", "pending", null, "new PSA 10 slabs for Nov ’26 — closes 12-01-2026"),
         };
         var cut = Render<GradingActivityPanel>(p => p.Add(x => x.Census,
             SixBars(0, 0, 0, 0, 0, 0, qualifying: 2, deltaBars: bars)));
@@ -215,7 +215,7 @@ public class CensusPairTests : BunitContext
         var census = SixBars(0, 0, 1479, 0, 0, 0, qualifying: 7, metrics:
         [
             LowData("Gem rate",
-                "needs 90 days of census deltas; observations count from 2026-09-01 — the window fills 2026-11-30"),
+                "needs 90 days of census deltas; observations count from 09-01-2026 — the window fills 11-30-2026"),
             new CensusMetricDto("Pace", "ok", "+58 / mo",
             [
                 new MetricSegmentDto("and rising — ", "neutral"),

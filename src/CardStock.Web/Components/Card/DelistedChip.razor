@@ -4,7 +4,7 @@
 @if (DelistedAt is { } at)
 {
     <span class="chip chip-delisted"
-          title="The source no longer lists this card; its history stands.">delisted @at.ToString("yyyy-MM-dd", System.Globalization.CultureInfo.InvariantCulture)</span>
+          title="The source no longer lists this card; its history stands.">delisted @Dates.Full(at)</span>
 }
 
 @code {

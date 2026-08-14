@@ -15,12 +15,12 @@ public class FreshnessFooterTests : BunitContext
         var stamps = cut.FindAll(".freshness-stamp");
         Assert.Equal(2, stamps.Count);
 
-        Assert.Equal("Sales & prices refreshed 2026-08-13", stamps[0].TextContent);
+        Assert.Equal("Sales & prices refreshed 08-13-2026", stamps[0].TextContent);
         Assert.Equal(
             "Opening a card page triggers a fresh scrape — the ledger and prices you see include sales up to right now",
             stamps[0].GetAttribute("title"));
 
-        Assert.Equal("Census as of 2026-07-30", stamps[1].TextContent);
+        Assert.Equal("Census as of 07-30-2026", stamps[1].TextContent);
         Assert.Equal(
             "Census updates when the graders publish; we capture it on the same visits as prices.",
             stamps[1].GetAttribute("title"));
