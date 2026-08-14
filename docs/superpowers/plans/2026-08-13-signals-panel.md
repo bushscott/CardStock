@@ -150,8 +150,8 @@ Commit: `Tier tiles and the unbounded signals panel replace the strip row and ch
   compression-only row, dated), and the count-line exclusion sentence (Bollinger/beta/
   discount-to-list/seasonality — 25 eligible of 29).
 - `DECISIONS.md`: **D-092** — the rework adopted; rulings 1–3 above; D-088 resolved by it (mark
-  D-088 with a pointer); the logo-size mystery (no diff found between exports — owner to clarify
-  what it was; nothing built).
+  D-088 with a pointer). The suspected logo-size change was a false alarm — the exports are
+  identical there and the owner confirmed it; nothing to build or investigate.
 - Full gates (`dotnet test` all suites with `CARDSTOCK_TEST_DB`, format at CI severity), deploy
   per ops/README §5, live-verify on Charizard: tiles render 3×2 with ◌ on current month, panel
   shows every computable row with real values (hand-check RSI(6) and the ratio against SQL like
