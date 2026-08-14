@@ -1,6 +1,6 @@
 # CardStock
 
-A market-data terminal for the Pokémon card aftermarket. Design is complete; implementation has not started. Data comes from the scraper and Postgres database in the sibling repo `../PokemonInvestBatch`.
+A market-data terminal for the Pokémon card aftermarket. Design is complete. **Phase 2 — the Card page vertical slice — is built, deployed to the Pi, and live** (as of 2026-08-14: identity header with tier tiles and the signals panel, price chart, sales ledger, census pair with metrics armed behind data checks, refresh flow). Later phases (worker/index, screener, accounts/watchlists, Binder, Charts) are not started; open pointers live in `DECISIONS.md` (D-098, D-039, D-079). Data comes from the scraper and Postgres database in the sibling repo `../PokemonInvestBatch`.
 
 ## What CardStock is, and the two rules it is built on
 
