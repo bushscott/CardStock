@@ -40,10 +40,14 @@
     text-overflow: ellipsis;
 }
 
-/* card.md §2.3.1: current-month provisional marker, --mut2, ~12px, keyboard-reachable. */
+/* card.md §2.3.1: current-month provisional marker, --mut2, ~12px, keyboard-reachable.
+   JetBrains Mono explicitly: Inter has no U+25CC, and the system fallback's ◌ is wide
+   enough (~12px vs mono's 7.1px) to overflow the 100px tile's label row and ellipsize
+   GRADE 9.5 -- measured 2026-08-13, D-092 build. Glyphs are mono app-wide. */
 .tier-glyph {
     flex-shrink: 0;
     color: var(--mut2);
+    font-family: 'JetBrains Mono', monospace;
     font-size: 12px;
     cursor: help;
 }

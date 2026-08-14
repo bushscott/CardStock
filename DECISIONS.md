@@ -329,6 +329,68 @@ Read directly 2026-08-10, to be mirrored per D-018–D-021.
 
 ## Decided
 
+### D-092 — The signals panel: the owner's card-page rework, adopted and built
+Owner, 2026-08-13 (evening), by authored rework file — `CardStock Mockup/Cardstock
+Card.rework-2026-08-13.html`, committed beside the frozen prototype as the authority for the
+lower identity-header region **only**. The tier strip became a 3×2 grid of square tiles; the chip
+row became an unbounded **Signals panel**: every evaluated signal as a row in exactly one of five
+states (firing · quiet · below-floor · neutral · locked), a computed
+`{evaluated} evaluated · {firing} firing` count line, locked rows naming their unlock. Ships
+D-088's parked full-status surface (its entry moved to this section with a pointer). Three owner
+rulings from the same session bound the build:
+1. **Unbounded rows.** The mockup's eight rows are a sample, not a cap; more than eight signals
+   can fire and every firing row always renders; the auto-fit grid wraps.
+2. **Keep D-077.** The rework's tile tooltip (*"latest monthly price · +6.2% over 30 days"*) and
+   its missing ◌ are seed-copy regressions — the new tile geometry keeps the ◌ month-to-date
+   glyph and card.md §2.3.1's two-tooltip table.
+3. **No fake values.** Substrate-less rows render as locked states, never seed numbers:
+   `RS vs index 3M` (needs the Phase 3 market index) · `Pop Δ 60d` (needs census deltas;
+   observations count from 2026-09-01) · `Churn 30d` (`unlocks 2026-10-31` — derived as the
+   D-033 floor + 60 days, `{n} recorded` counting days since the floor, 0 until it arrives).
+
+Built and shipped the same night (plan `docs/superpowers/plans/2026-08-13-signals-panel.md`):
+`ChipEngine.EvaluateRows` — the 8 price signals three-state, **RSI (6)** new (caution ≥ 70,
+positive ≤ 30, floor 7 closed months), **tier spread 10/9 redefined** (ratio always shown; fires
+at ×4 or a ≥ 20% move vs 6 closed months earlier); `SignalsDto {evaluated, firing, rows}` with
+counts computed from the rows; mapper composition (volume row over `(today−30, today]`, the three
+locked rows, display order firing → neutral → quiet → below-floor → locked); web (3×2 `TierStrip`
+tiles, `SignalsPanel`, `SignalChips` retired). Spec updated with the build: card.md §2.2/§2.3
+amended, §2.3.2 new, §3.3 amended, §8 C-25. Commits `95bde9b` · `8a6cfb7` · `e5f1f3c`.
+
+**The math carries an external referee (owner challenge, mid-build).** The owner questioned
+hand-written indicator formulas — *"just because … it compiles and spits out a number doesn't
+mean they're accurate."* Resolved with receipts, not reassurance: **`Skender.Stock.Indicators`
+2.7.3** (test-only dependency, itself validated against TA-Lib) cross-validates the arithmetic on
+every run — RSI matches the hand fixtures to 1e-6 (`82.05128…` = 100·32/39 by hand fraction),
+EMA(3/6/9) and MACD(3,6,4) converge on a 120-month series where seeding influence has decayed
+(agreement proves the recursion coefficients; a wrong α diverges), ROC and the log-trend
+regression (slope and R²) match directly. Receipt:
+`tests/CardStock.Domain.Tests/Signals/IndicatorsCrossValidationTests.cs` — 8 facts, green. The
+z-score keeps its hand fixture plus a stdlib receipt (`python3 statistics.stdev` → `2.0412`,
+sample n−1) because Skender's z uses population stddev — a convention difference, not an error.
+Two deliberate deviations, documented in code: our EMA seeds with the first value (pandas
+`ewm(adjust=False)`) so the 7–12-month authored windows yield full-length values, where the
+SMA-seeded classic would push most of the corpus below-floor; and a flat RSI window reads **50**,
+not the no-loss convention's 100 — a dead-flat card is not "overbought." Production stays
+hand-written decimal for the floors and honesty semantics; the library referees it.
+
+**Live-verified on Charizard 630417, 2026-08-13, predictions locked before reading the API.**
+From the Pi's `price_months` (latest-per-`(tier, month)`, closed months Jan–Jul 2026): PSA 10
+closes 14072.29 → 16358.00 → 18055.00 → 26698.31 → 29871.57 → 30100.00 → 30100.00 — six deltas,
+zero losses → predicted RSI 100 → live row `– RSI (6) · overbought`, tooltip `RSI(6) 100` ✓.
+Spread: 30100.00/3275.00 = ×9.2 (≥ ×4, and +55% vs Jan's 14072.29/2380.64 = ×5.9) → live
+`▼ ×9.2 … ×5.9 six closed months ago` ✓. ROC: 30100/26698.31 − 1 = +12.7% → live quiet `+13%` ✓.
+Corroboration: the live MACD tooltip's `histogram +94` equals the +94 this ledger's D-088 entry
+recorded for Charizard independently, a day earlier, from the chips era. Count line
+`12 evaluated · 4 firing` = 4 firing + 1 neutral + 4 quiet + 3 locked rows ✓ — two firings are
+old rules preserved (MACD, R²), two are tonight's roster changes (RSI new, spread redefined).
+Headless-Chrome screenshots (per the browser-quirks memory) confirmed the 3×2 tiles with ◌, the
+panel's five states, and the deferred Charts link. One rendering bug found and fixed live: the ◌
+inherited Inter, which lacks U+25CC — the system-fallback glyph is ~12px wide vs JetBrains Mono's
+7.1px (canvas-measured), overflowing the 100px tile's 76px content box and ellipsizing
+`GRADE 9.5` to `GRADE …`. Fix: the glyph is explicitly JetBrains Mono (`TierStrip.razor.css`);
+label 61.5px + gap 4 + glyph 7.1 = 72.6px fits with margin.
+
 ### D-091 — The ledger cap moves to the bucket: newest 300 per grade, lifetime
 Owner, 2026-08-13, minutes after D-090 shipped — seeing PSA 10 Charizard hold exactly 30 lifetime
 sales reaching to Dec 2023 exposed the twelve-month window as backwards: it hid a slow bucket's
@@ -364,6 +426,31 @@ and the owner chose the offered compromise: **horizontal-follow** — the box ri
 cursor, top fixed at 8px, clamped to the pane so it parks at the edges, falling back to the pinned
 corner when no pointer x exists. Recorded because it deliberately deviates from the frozen mockup;
 card.md §5.4 carries the amendment.
+
+### D-088 — The chip row as a full signal-status surface (held, then shipped by D-092)
+**Resolved 2026-08-13, the same day it was parked — the owner returned with the rework D-092
+adopts, and the panel shipped that night.** What shipped differs from the sketch below in two
+ways: nothing collapses (the panel is unbounded, so there is no `locked signals (22) ▾` fold — the
+three currently-evaluable locked rows render inline), and a fifth state exists (neutral, for
+never-directional liquidity rows). The MACD-tooltip note at the bottom shipped too: firing MACD
+tooltips carry the histogram in rounded dollars (`· histogram +94 ·`); the "and direction" half
+was deliberately kept simple — magnitude only, no trend. Entry moved from Open; original text
+kept below for the record.
+
+Owner, 2026-08-13, reviewing the live chips: show **every** signal, graying out the ones that
+aren't firing — then held off on learning the catalog is 29 signals, not 7. Parked, not rejected.
+The shape sketched in conversation, kept so it isn't re-derived: the 7 computed signals always
+render with four states — firing (toned) · quiet (grayed, **showing its actual value**) ·
+below-floor (grayed dash, tooltip naming the floor — never a number) · locked (deferred, tooltip
+naming the substrate) — and the 22 substrate-locked signals collapse behind one deferred
+`locked signals (22) ▾` chip reusing the `+N more` popover. Adopting this would supersede the
+firing-only carve-out recorded alongside D-084.1 (DISPLAY_VOCABULARY.md:7 — "no placeholder
+chips"), and changes a chip's meaning from "signal detected" to "signal status."
+
+Independently worth doing when this reopens: the MACD chip's tooltip should carry the histogram's
+value and direction — Charizard's `MACD +` today sits on a histogram that collapsed +1,424 → +94
+over four months, and "barely positive, falling" is the answer to the owner's actual question
+("should this worry me?") that the bare `+` cannot give.
 
 ### D-087 — Placeholder-first UI: every slot ships, labeled honestly, before its data or feature
 Owner, 2026-08-13, reviewing the live card page: *"Even if you don't have the functionality wired
@@ -1722,22 +1809,6 @@ The line reads: *"Seams: liquidity seam Apr '25 (churn/vol panes), resolution se
 ---
 
 ## Open
-
-### D-088 — The chip row as a full signal-status surface (proposed, then held)
-Owner, 2026-08-13, reviewing the live chips: show **every** signal, graying out the ones that
-aren't firing — then held off on learning the catalog is 29 signals, not 7. Parked, not rejected.
-The shape sketched in conversation, kept so it isn't re-derived: the 7 computed signals always
-render with four states — firing (toned) · quiet (grayed, **showing its actual value**) ·
-below-floor (grayed dash, tooltip naming the floor — never a number) · locked (deferred, tooltip
-naming the substrate) — and the 22 substrate-locked signals collapse behind one deferred
-`locked signals (22) ▾` chip reusing the `+N more` popover. Adopting this would supersede the
-firing-only carve-out recorded alongside D-084.1 (DISPLAY_VOCABULARY.md:7 — "no placeholder
-chips"), and changes a chip's meaning from "signal detected" to "signal status."
-
-Independently worth doing when this reopens: the MACD chip's tooltip should carry the histogram's
-value and direction — Charizard's `MACD +` today sits on a histogram that collapsed +1,424 → +94
-over four months, and "barely positive, falling" is the answer to the owner's actual question
-("should this worry me?") that the bare `+` cannot give.
 
 ### D-086 — The sibling untracked DATA_MODEL.md; CardStock's Tier-1 pointer now targets a private scribble
 Surfaced 2026-08-13 by the enrichment agent's final report. PokemonInvestBatch commit `74eff03`

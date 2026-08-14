@@ -104,7 +104,10 @@ The native art aspect ratio is **325 : 450** (0.7222); the 217×300 box matches 
 >   unchanged from the strip. **The ◌ month-to-date glyph stays**, seated after the label exactly
 >   as in the strip (owner ruling, 2026-08-13): the rework's own tile tooltip (*"latest monthly
 >   price · +6.2% over 30 days"*) and its missing ◌ are seed-copy regressions — build the new tile
->   geometry with §2.3.1's glyph and two-tooltip table, which stand in full.
+>   geometry with §2.3.1's glyph and two-tooltip table, which stand in full. The glyph renders in
+>   **JetBrains Mono explicitly** — Inter has no U+25CC, and the system fallback's ◌ (~12px vs
+>   mono's 7.1px) overflows the 100px tile's 76px content box and ellipsizes `GRADE 9.5`
+>   (measured and fixed live, 2026-08-13).
 > - **Price:** JetBrains Mono **19px**/700, `line-height: 1` (up from the strip's 18px).
 > - **Change:** JetBrains Mono 12px, text `{chg} 30d`, colour by the formatted leading sign
 >   exactly as §3.2.

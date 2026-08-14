@@ -156,6 +156,13 @@ match.
 
 ```bash
 ./ops/publish.sh publish/api
+./ops/deploy.sh
+```
+
+`deploy.sh` is this section's steps, executable (added 2026-08-13): the rsync,
+the ownership fix + unit restart, and the health probe:
+
+```bash
 rsync -az --delete --exclude='appsettings.Production.json*' \
   --rsync-path='sudo rsync' publish/api/ scott@192.168.0.56:/opt/cardstock/api/
 ssh scott@192.168.0.56 'sudo chown -R cardstock:cardstock /opt/cardstock/api && sudo systemctl restart cardstock-api'

@@ -323,6 +323,26 @@ One chip grammar everywhere: `icon + short name + evidence number`, tooltip = on
 **Card page header**: shows only FIRING chips (a signal in a notable state), priority-ordered, cap 4, overflow "+N more" opens all. A signal below its sufficiency floor never chips.
 **Watchlist rows**: chips are the user's TRACKED signals for that card — all render regardless of state, including quiet (`–` grey muted) and insufficient (`◌` grey, tooltip = unlock countdown). Glance rule: **colored = hit** (green ▲ bullish · red ▼ bearish · amber – caution/directionless), **grey = nothing to report** (quiet or not yet computable).
 
+> **Amended 2026-08-13 (D-092) — the Card page header rule above is superseded by the Signals
+> panel.** The chip row became an unbounded panel (card.md §2.3.2): every chip-eligible signal
+> the engine can evaluate renders as a ROW in exactly one of five states — **firing** (toned;
+> value = the evidence number) · **quiet** (computed, inside its bands; value = the live
+> reading) · **below-floor** (value `—`; tooltip names the floor and the computed progress
+> toward it, never a number) · **neutral** (`●`; liquidity/state signals, never directional) ·
+> **locked** (substrate missing product-wide; value names the unlock). Firing-only display,
+> cap 4, and `+N more` retire with the row. The count line
+> `{evaluated} evaluated · {firing} firing` is computed from the rows, and its exclusion
+> sentence is authored: Bollinger, beta, discount-to-list, and seasonality are not chip-eligible
+> — **25 eligible of 29**. The watchlist-pill rules below are untouched (they were always
+> all-states).
+>
+> Phase 2's computed roster is **eight price signals + one liquidity row**: the original seven
+> plus **RSI (6)** (new to the computed set) and the always-on neutral **Sales volume** row
+> (`{n} / 30d` over the trailing 30 days — no "most active" superlative until corpus ranking
+> exists). Substrate-locked signals render as locked rows (`RS vs index 3M`, `Pop Δ 60d`,
+> `Churn 30d` in Phase 2), never seed numbers. Three inventory rows are superseded on the Card
+> page surface — see the dated notes under the table.
+
 Full chip inventory (trigger → chip text):
 | Signal | Fires when | Chip | Dir |
 |---|---|---|---|
@@ -351,6 +371,20 @@ Full chip inventory (trigger → chip text):
 
 Not chip-eligible: Bollinger (visualization-grade, spec §8.3), beta (descriptive), discount-to-list (4.4% coverage), seasonality (corpus-locked until ~Nov 2028).
 Priority when > cap: composites → RS → supply (pop/overhang) → momentum (ROC/MACD/EMA/RSI/z) → liquidity → the rest. Newest crossing wins ties.
+
+Dated supersessions (2026-08-13, D-092) — **Card page panel only**; watchlist pills keep the
+inventory readings until their own phase re-derives them:
+- **RSI (6):** the panel fires caution `–` at **≥ 70** (value `overbought`) and positive ▲ at
+  **≤ 30** (value `oversold`), quiet otherwise with the reading (`58`) — replacing the
+  `> 80 / < 20` bands + amber 70–80 scheme on this surface. Floor: 7 closed months, Wilder
+  smoothing, flat window reads 50.
+- **Tier-spread:** the compression-only trigger is replaced. The row always shows the current
+  PSA 10 / Grade 9 ratio (`×3.1`) and fires ▼ at ratio **≥ 4** or a **≥ 20% move in either
+  direction** vs 6 closed months earlier; below-floor when either tier lacks the last closed
+  month.
+- **Monthly volume:** the Card page renders the always-on neutral `Sales volume` row
+  (`{n} / 30d`, `(today−30, today]`); the top-decile `Most active` chip and the `thin` variant
+  need corpus ranking, which doesn't exist yet.
 
 ### Tracked-pill states (watchlist rows) — the complete pill set
 A tracked signal ALWAYS renders exactly one pill, in exactly one of five states; no other pill forms exist:
