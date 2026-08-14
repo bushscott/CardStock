@@ -99,6 +99,22 @@ The native art aspect ratio is **325 : 450** (0.7222); the 217×300 box matches 
 > column ≈ 305px vs the art's 300 — art tops out with the buttons, bottoms stay flush (D-096),
 > and §4.2.1's "full-width row beneath row-a" wording is superseded on placement (all its state
 > semantics stand).
+>
+> **Amended a third time 2026-08-14 (D-099) — the art fills its slot; both edges flush by
+> construction.** D-097's "art tops out with the buttons" held only at widths where the right
+> column happens to match the art's ~300px (1400–1800px measured 0 slack). At 1280px the signals
+> panel wraps one line taller, the right column runs 314px, and the bottom-pinned art floated
+> 13.7px below the buttons' top — flagged by the owner the same day. Supersedes the **Art**
+> bullet of the D-096 box only: the slot still spans the column at a fixed 217px width (no width
+> feedback — the rejected balloon stays rejected), but the art image now **fills the slot**
+> (`flex: auto`; the `margin-top: auto` bottom-pin is gone, the placeholder follows suit), so its
+> top meets the buttons' top and its bottom meets the tiles'/panel's bottom at every width.
+> `object-fit: cover` absorbs the height mismatch as a symmetric horizontal sliver — ≤5px per
+> side at every non-wrapped width measured, 0 where the column matches the art. The
+> `aspect-ratio` stays as the slot's natural 300px basis, so the art still drives the row height
+> when the right column runs shorter. Below the tiles+signals wrap width the column jumps to
+> ~480px and the crop turns severe — the narrow-viewport composition is an open owner decision,
+> D-100. The tiles and panel rules of D-096 stand unchanged.
 
 ### 2.2 Identity header — right column (:62–:98)
 

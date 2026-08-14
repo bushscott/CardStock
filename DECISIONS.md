@@ -329,6 +329,31 @@ Read directly 2026-08-10, to be mirrored per D-018–D-021.
 
 ## Decided
 
+### D-099 — The art fills its slot; the header's top and bottom edges are flush by construction
+Owner, 2026-08-14, screenshot in hand, immediately after D-097: the card's top no longer lines
+up with the action buttons, the title is a little off too — *"The top and the bottom of the card
+need to line up with the top and the bottom of everything else."* Measured live (headless Chrome
+CDP, `getBoundingClientRect`, card 630417): at **1280px** the art's top sat **13.7px** below the
+buttons'/title's top — the signals panel wraps one line taller there, the right column runs
+314.3px against the art's 300.5, and D-096's bottom-pin surfaces every slack pixel above the
+art. At 1400/1500/1800px the slack is 0.0 — which is why D-097's "flush" verification passed:
+it was true only at widths where the slack happened to be zero. Fix
+(`IdentityHeader.razor.css`): the art image **fills its stretched slot** — `flex: auto` replaces
+the `margin-top: auto` bottom-pin (placeholder follows suit; the slot's obsolete
+`justify-content: flex-end` removed) — so top and bottom meet the neighbours by construction at
+every width. The already-present `object-fit: cover` (inert while the img self-sized) absorbs
+the height mismatch as a symmetric horizontal sliver: ≤5px per side at every non-wrapped width
+measured, 0 at 1400–1800, invisible against the artwork's own border (screenshot check).
+`aspect-ratio` stays — it hands the slot its natural 300px basis, so the art still drives the
+row height when the right column runs shorter, with no width feedback (D-096's rejected balloon
+stays rejected). Verified before deploy by injecting exactly the changed rules over the live
+page via CDP: **every edge delta 0.0 at 1000/1280/1400/1500/1800px**. Tradeoff logged, not
+hidden: below the tiles+signals wrap (~1000px) the column jumps to ~480px and the sliver
+becomes a ~65px-per-side crop — that regime was already broken (a 180px dead band above the
+bottom-pinned art) and is now differently broken; the narrow composition needs an owner ruling
+→ D-100 (Open). Spec: card.md §2.1, third amendment box. Suites green (207 run; the 22
+DB-backed integration tests skipped — CSS-only change, no data path touched).
+
 ### D-097 — The badge row surrenders its height; the identity header is one solid block
 Owner, 2026-08-14, immediately after D-096: *"You fixed the bottom, but you moved the problem to
 the top… there's a perfect amount of white space we can utilize under [the subline]."* The dead
@@ -1898,6 +1923,18 @@ The line reads: *"Seams: liquidity seam Apr '25 (churn/vol panes), resolution se
 ---
 
 ## Open
+
+### D-100 — The identity header below the tiles+signals wrap width
+Surfaced by D-099's measurements, needs an owner ruling. When the viewport is narrow enough that
+the signals panel wraps under the tile grid (wrapped at 1000px, not at 1280px), the right column
+jumps to ~480px and no art rule survives: D-096's bottom-pin left a ~180px dead band above the
+art; D-099's fill-the-slot cover-crops ~65px per side off the artwork. Neither is shippable, and
+nothing guards the width — no `min-width` anywhere in the app shell, and the Card mockup has
+none either. Candidate shapes, none chosen: a page-shell `min-width` (terminal-style horizontal
+scroll below it, arguably true to the persona), the art capping at its natural 300px and
+top-aligning once the column wraps, or a genuine narrow rework of the header's stacking. Until
+ruled, desktop widths (1280–1800 measured) are correct per D-099 and the wrap regime remains
+cosmetically broken — as it already was.
 
 ### D-098 — The watchlist picker and the active watch/binder states await their phases
 Owner, 2026-08-14, closing the signals-panel session: *"on the mock watchlist has a drop down of

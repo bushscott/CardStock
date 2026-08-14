@@ -9,22 +9,21 @@
     position: relative;
 }
 
-/* card.md §2.1, amended 2026-08-14 (D-096): the art slot keeps its authored
-   217px width (fixed width = no layout feedback) but spans the column height,
-   with the 217×300 art PINNED TO THE BOTTOM — so the art's bottom edge is
-   always flush with the tiles' and the panel's at any viewport, and the
-   right column's extra height (~29-48px; it runs taller than the prototype's
-   300 because the real panel is taller) surfaces as breathing room above the
-   art, beside the title, never as dead space under it. A stretch-to-fit art
-   was tried first and rejected: aspect-ratio width fed back into the flex row
-   and the layout ballooned. Reset the <button>. */
+/* card.md §2.1, amended 2026-08-14 (D-096, then D-099): the art slot keeps its
+   authored 217px width (fixed width = no feedback into the flex row — the
+   aspect-locked stretch D-096 rejected ballooned the container) and spans the
+   column height. D-096 pinned the fixed-height art to the slot's BOTTOM, which
+   made the column's slack a visible band above the art at any viewport where
+   the right column outgrows 300px (13.7px at 1280, measured live — D-097's
+   "flush" held only at widths where the slack happens to be zero). D-099: the
+   art fills the slot instead, so its top and bottom are flush with the buttons
+   and the tiles/panel by construction, at every width. Reset the <button>. */
 .art-col {
     flex-shrink: 0;
     width: 217px;
     align-self: stretch;
     display: flex;
     flex-direction: column;
-    justify-content: flex-end;
     padding: 0;
     border: none;
     background: none;
@@ -32,22 +31,25 @@
     font: inherit;
 }
 
-/* margin-top auto, not justify-content: buttons carry UA content-centering
-   that fights justify-content; an auto margin pins the art to the slot's
-   bottom unconditionally. */
+/* flex: auto, not a fixed height: aspect-ratio keeps handing the slot its
+   natural 300px basis, so the art still drives the row height whenever the
+   right column runs shorter — and when the column runs taller, the box grows
+   with it and object-fit: cover absorbs the difference as a symmetric
+   horizontal sliver (≤5px per side at every non-wrapped width measured,
+   D-099). Below the tiles+signals wrap width the crop turns severe; the
+   narrow-viewport composition is its own open decision, D-100. */
 .art-col img {
     width: 100%;
     aspect-ratio: 325 / 450;
-    height: auto;
+    flex: auto;
     object-fit: cover;
     border-radius: 6px;
-    margin-top: auto;
 }
 
 .art-placeholder {
     width: 100%;
     aspect-ratio: 325 / 450;
-    height: auto;
+    flex: auto;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -58,7 +60,6 @@
     text-align: center;
     padding: 8px;
     box-sizing: border-box;
-    margin-top: auto;
 }
 
 /* card.md §2.2: flex:1, column, space-between, gap 12. */
