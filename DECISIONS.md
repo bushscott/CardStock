@@ -1899,6 +1899,25 @@ The line reads: *"Seams: liquidity seam Apr '25 (churn/vol panes), resolution se
 
 ## Open
 
+### D-098 — The watchlist picker and the active watch/binder states await their phases
+Owner, 2026-08-14, closing the signals-panel session: *"on the mock watchlist has a drop down of
+what watchlist the card is currently on, and this does not… also the add to binder and watchlist
+state of a green button with a green check mark isn't done."* Flagged so it isn't lost — **not
+built now, deliberately**: both need substrates that don't exist yet (watchlists need accounts;
+the Binder is Phase 4), so today's build renders them as D-084.1 deferred-disabled controls with
+honest tooltips. Everything needed to build them is already specced in card.md and needs no
+re-derivation:
+- **§3.4 Watchlist control**: the split-button + popover (checkbox rows, per-list counts with
+  this card's membership applied, `+ New list…`, click-outside dismiss), the label states
+  `+ Watchlist` / `Watching ✓` / `Watching ✓ (N)`, and the active green recipe (bg
+  `posBg(0.10)`, fg `pos`, border `posBg(0.35)`). Note OQ-11/C-14 still open there: the mockup's
+  picker toggles card↔list membership while `HANDOFF.md` claims watchlist rows are keyed card +
+  tier — needs an owner ruling when the phase starts.
+- **§3.5 Binder control**: `+ Binder` ↔ `In binder ✓` with the same green active pair.
+
+When the accounts/watchlist phase and the Binder phase land, the Card page revisits Row A to wire
+these against the real tables. Until then the deferred treatment stands.
+
 ### D-086 — The sibling untracked DATA_MODEL.md; CardStock's Tier-1 pointer now targets a private scribble
 Surfaced 2026-08-13 by the enrichment agent's final report. PokemonInvestBatch commit `74eff03`
 (2026-08-01, "The data model notes go back to being private scribbles") deliberately untracked
