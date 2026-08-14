@@ -67,6 +67,10 @@ public class ChromeTests : BunitContext
             .Add(x => x.SetName, "Evolving Skies")
             .Add(x => x.CardTitle, "Umbreon VMAX (Alt Art)"));
 
+        // The separator is the mockup's › (U+203A, Card.dc.html:56) — never a slash.
+        Assert.All(cut.FindAll(".crumb-sep"), sep => Assert.Equal("›", sep.TextContent));
+        Assert.Equal(2, cut.FindAll(".crumb-sep").Count);
+
         var crumbs = cut.FindAll(".crumb-link");
         Assert.Equal(2, crumbs.Count);
         Assert.Equal("Browse", crumbs[0].TextContent);

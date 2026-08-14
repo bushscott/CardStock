@@ -824,7 +824,7 @@ Exhaustive list of every interactive element, in document order.
 | 2 | Home / Screener / Charts / Binder / Browse tabs | :43–:47 | Navigate. None marked active here. |
 | 3 | `<cardstock-search>` | :50 | Custom element from `cardstock-search.js` (:32). Out of scope for this screen — treat as the shared global search component. |
 | 4 | Avatar `O` | :51 | → Profile. `aria-label="Account"`, `title="Profile & settings"`. |
-| 5 | Breadcrumb `Browse` / set crumb | :56 | → Browse / Set. Leaf crumb is plain `--ink` text, not a link. |
+| 5 | Breadcrumb `Browse` / set crumb | :56 | → Browse / Set. Leaf crumb is plain `--ink` text, not a link. **Glyphs and colors, from :56 verbatim:** separator `›` (U+203A) in the container's `--mut2`; crumb links `--mut`; leaf `--ink`. *(Corrected 2026-08-13: the build briefly shipped `/` separators and accent crumbs — a plan-prose shorthand read as spec; mockup values restored.)* |
 
 ### 5.2 Identity header
 

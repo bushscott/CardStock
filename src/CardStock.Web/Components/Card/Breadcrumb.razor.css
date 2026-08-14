@@ -7,9 +7,10 @@
     gap: 6px;
 }
 
-/* Styled as a future link (accent color) but inert — no href, not focusable. */
+/* Future links, inert — no href, not focusable. The mockup's breadcrumb links
+   are muted (Card.dc.html:56: color var(--mut)), not accent. */
 .crumb-link {
-    color: var(--acc);
+    color: var(--mut);
     cursor: not-allowed;
 }
 
