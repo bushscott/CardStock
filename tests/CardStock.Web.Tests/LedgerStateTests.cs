@@ -279,4 +279,51 @@ public class LedgerStateTests
         Assert.Same(b, ordered[1]);
         Assert.Same(c, ordered[2]);
     }
+
+    // ---- D-090: client-side paging over the filtered/sorted set ----
+
+    [Fact]
+    public void Paging_slices_fifty_rows_and_clamps_at_both_ends()
+    {
+        var state = new LedgerState();
+        var rows = Enumerable.Range(0, 120)
+            .Select(i => Sale("2026-08-01", "PSA 10", i))
+            .ToList();
+
+        Assert.Equal(3, LedgerState.PageCount(120));
+        Assert.Equal(1, LedgerState.PageCount(0));      // an empty set is one empty page
+
+        Assert.Equal(50, state.Slice(rows).Count);
+        Assert.Equal(0, state.Slice(rows)[0].PriceCents);
+
+        state.PrevPage();                                // already first -> no-op
+        Assert.Equal(0, state.Page);
+
+        state.NextPage(120);
+        Assert.Equal(50, state.Slice(rows)[0].PriceCents);
+
+        state.NextPage(120);
+        Assert.Equal(20, state.Slice(rows).Count);       // the 120-row tail page
+
+        state.NextPage(120);                             // already last -> no-op
+        Assert.Equal(2, state.Page);
+    }
+
+    [Fact]
+    public void Filter_sort_and_clear_changes_reset_to_the_first_page()
+    {
+        var state = new LedgerState();
+
+        state.NextPage(120);
+        state.Toggle("PSA 10");
+        Assert.Equal(0, state.Page);
+
+        state.NextPage(120);
+        state.Sort("price");
+        Assert.Equal(0, state.Page);
+
+        state.NextPage(120);
+        state.ClearAll();
+        Assert.Equal(0, state.Page);
+    }
 }

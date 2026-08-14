@@ -194,6 +194,24 @@ Y-axis labels are **`'$' + n.toLocaleString('en-US')`** on the raw `mx`/`mn` (:4
 
 ### 2.5 Sales ledger (:151–:215)
 
+> **Amended 2026-08-13 (D-090) — a twelve-month window, paged on the client.** Owner rulings after
+> seeing the live 615-row ledger, deviating from the prototype's uncapped endless list:
+> - **The query is capped at a rolling twelve months** (`sold_on >= today − 12 months`, cutoff
+>   inclusive), enforced in `CardSalesReader` so older rows never leave the database. No server
+>   pagination — measured corpus max is 717 rows/card lifetime, and the window bounds growth to a
+>   card's annual sales rate.
+> - **The display pages at 50 rows client-side** ("looking at 600 rows is dumb"); filters and
+>   sorts still act instantly on the complete window, and any filter/sort change snaps back to
+>   page one. Pager renders only when the set overflows a page: `‹ Prev · Rows 1–50 of N · Next ›`,
+>   ends honestly disabled.
+> - **Copy scopes to the window:** panel title `Sales ledger · 12M` (the chart's idiom); count
+>   line `{n} sales · last 12 months` with tooltip "Shows the last 12 months of captured sales.
+>   Each grade is complete from its own first captured sale; nothing earlier was observable.";
+>   every empty state gains "in the last 12 months" so the true-zero claim never denies older
+>   sales beyond the window.
+> - **Tripwire, recorded not built:** keyset pagination becomes its own designed task only if a
+>   card's twelve-month window ever crosses ~5,000 rows or real sustained multi-user load arrives.
+
 Four stacked bands inside one card panel:
 
 1. **Toolbar** (:152–:191) — `display:flex; align-items:center; gap:10px; padding: 13px 16px 10px`. `<h2>` "Sales ledger" → filter chip group (`flex-wrap`) → flex spacer → row count (mono 12.5px `--mut`).

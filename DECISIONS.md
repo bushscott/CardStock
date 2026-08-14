@@ -329,6 +329,20 @@ Read directly 2026-08-10, to be mirrored per D-018–D-021.
 
 ## Decided
 
+### D-090 — The sales ledger: twelve-month window, 50-row client pages, no server pagination
+Owner, 2026-08-13, after seeing the live 615-row ledger and weighing multi-user database load.
+Claude's measurements framed the call: corpus max 717 sales/card lifetime (p99 288, median 46), the
+615-row query serving in 2ms off `sales(card_id, sold_on)`, so server pagination would trade the
+ledger's instant complete-set filters/sorts for a payload problem that doesn't exist. Rulings:
+**(1)** the query caps at a rolling twelve months, cutoff inclusive, in `CardSalesReader` — older
+rows never leave the DB, and growth is bounded by a card's annual sales rate; **(2)** the display
+pages at 50 rows client-side over the fully filtered/sorted window (*"looking at 600 rows is
+dumb"*), resetting to page one on any filter/sort change; **(3)** no server pagination, with the
+revisit condition authored: it becomes its own designed task (keyset cursors, server-side
+sort/filter, honest counts) only if a card's window crosses ~5,000 rows or sustained multi-user
+load arrives. All window-scoped copy amended so the true-zero empty states never deny sales older
+than the window. card.md §2.5 carries the build detail.
+
 ### D-089 — The chart tooltip follows the crosshair horizontally (owner, over the mockup's pin)
 2026-08-13, on the live page. The prototype pins the hover box top-left (:135); the owner asked for
 cursor-following, Claude recommended keeping the pin (occlusion, jitter, TradingView precedent),

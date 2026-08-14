@@ -47,15 +47,27 @@ public sealed class LedgerState
     public string SortKey { get; private set; } = "date";
     public bool Descending { get; private set; } = true;
 
+    /// <summary>D-090: current zero-based page over the filtered/sorted set. Any change
+    /// to filters or sort snaps back to the first page — the set under it changed.</summary>
+    public int Page { get; private set; }
+
+    public const int PageSize = 50;
+
     public void Toggle(string dbLabel)
     {
         if (!Selected.Remove(dbLabel))
         {
             Selected.Add(dbLabel);
         }
+
+        Page = 0;
     }
 
-    public void ClearAll() => Selected.Clear();
+    public void ClearAll()
+    {
+        Selected.Clear();
+        Page = 0;
+    }
 
     /// <summary>New key -> descending. Same key clicked again -> flip (R-13, desc-first).</summary>
     public void Sort(string key)
@@ -69,7 +81,31 @@ public sealed class LedgerState
             SortKey = key;
             Descending = true;
         }
+
+        Page = 0;
     }
+
+    public static int PageCount(int total) => Math.Max(1, (int)Math.Ceiling(total / (double)PageSize));
+
+    public void NextPage(int total)
+    {
+        if (Page < PageCount(total) - 1)
+        {
+            Page++;
+        }
+    }
+
+    public void PrevPage()
+    {
+        if (Page > 0)
+        {
+            Page--;
+        }
+    }
+
+    /// <summary>The current page's window of an already filtered/sorted list.</summary>
+    public IReadOnlyList<SaleDto> Slice(IReadOnlyList<SaleDto> sorted) =>
+        [.. sorted.Skip(Page * PageSize).Take(PageSize)];
 
     /// <summary>
     /// Filters (OR across <see cref="Selected"/>, empty = all, R-16) then sorts by

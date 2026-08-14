@@ -197,3 +197,40 @@
     font-size: 13.5px;
     color: var(--mut2);
 }
+
+/* D-090: the client-side pager under the 50-row page. Buttons wear the bucket
+   chips' recipe; the range label is mono like the count line. */
+.lg-pager {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    padding: 10px 16px;
+    border-top: 1px solid var(--line);
+}
+
+.lg-page-btn {
+    height: 24px;
+    border-radius: 5px;
+    padding: 0 9px;
+    font-size: 12px;
+    background: var(--card);
+    color: var(--ink);
+    border: 1px solid var(--line);
+    cursor: pointer;
+}
+
+.lg-page-btn:hover:not(:disabled) {
+    background: var(--hov);
+}
+
+.lg-page-btn:disabled {
+    color: var(--mut2);
+    cursor: not-allowed;
+}
+
+.lg-page-label {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11.5px;
+    color: var(--mut2);
+}

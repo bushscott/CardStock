@@ -12,7 +12,16 @@ namespace CardStock.Integration.Tests;
 /// </summary>
 public class CardSalesReaderTests : CardStockDatabaseTest
 {
-    private CardSalesReader Reader() => new(NewContextFactory());
+    // Fixed so the D-090 twelve-month window is deterministic: "today" is 2026-08-15,
+    // making 2025-08-15 the cutoff every time this suite runs, forever.
+    private static readonly DateTimeOffset Now = new(2026, 8, 15, 12, 0, 0, TimeSpan.Zero);
+
+    private CardSalesReader Reader() => new(NewContextFactory(), new FixedClock(Now));
+
+    private sealed class FixedClock(DateTimeOffset now) : TimeProvider
+    {
+        public override DateTimeOffset GetUtcNow() => now;
+    }
 
     private static async Task SeedCardAsync(CardStockDbContext db, long cardId)
     {
@@ -86,6 +95,33 @@ public class CardSalesReaderTests : CardStockDatabaseTest
 
         Assert.Equal(12000, withListed.ListedPriceCents);
         Assert.Null(withoutListed.ListedPriceCents);
+    }
+
+    [SkippableFact]
+    public async Task The_ledger_is_capped_at_twelve_months_of_sales()
+    {
+        // D-090: the owner capped the ledger query at a rolling twelve months —
+        // sold_on on or after the cutoff returns; anything older never leaves the DB.
+        Skip.IfNot(Available, "CARDSTOCK_TEST_DB is not set");
+        await using var db = NewContext();
+        await SeedCardAsync(db, 42);
+
+        var inside = new DateOnly(2025, 8, 16);       // one day inside the window
+        var boundary = new DateOnly(2025, 8, 15);     // exactly the cutoff — included
+        var outside = new DateOnly(2025, 8, 14);      // one day too old — excluded
+
+        await db.Database.ExecuteSqlInterpolatedAsync(
+            $"""
+             INSERT INTO public.sales (card_id, source, source_id, sold_on, grade_tier, price_cents, listed_price_cents, title, captured_at)
+             VALUES ({42}, 'ebay', 'in',  {inside},   'PSA 10', {10000}, null, 'Inside',   now()),
+                    ({42}, 'ebay', 'bd',  {boundary}, 'PSA 10', {10000}, null, 'Boundary', now()),
+                    ({42}, 'ebay', 'out', {outside},  'PSA 10', {10000}, null, 'Outside',  now());
+             """);
+
+        var sales = await Reader().GetAsync(42);
+
+        Assert.Equal(2, sales.Count);
+        Assert.DoesNotContain(sales, s => s.Title == "Outside");
     }
 
     [SkippableFact]

@@ -6,7 +6,6 @@
 @using CardStock.Application.Cards
 @using CardStock.Web.Ledger
 @using CardStock.Web.Services
-@using Microsoft.AspNetCore.Components.Web.Virtualization
 @inject IJSRuntime JS
 @implements IDisposable
 
@@ -21,7 +20,7 @@ else
 {
     <div class="ledger-panel">
         <div class="lg-toolbar">
-            <h2>Sales ledger</h2>
+            <h2>Sales ledger · 12M</h2>
             <div class="lg-chips">
                 <button type="button" class="lg-chip @(_state.Selected.Count == 0 ? "lg-chip-sel" : "")"
                         title="Show sales from every grade" @onclick="SelectAll">All</button>
@@ -75,7 +74,7 @@ else
                         title="@ChipTooltip(raw)" @onclick="() => ToggleBucket(raw)">@LedgerVocabulary.Display(raw)</button>
             </div>
             <span class="lg-count"
-                  title="Each grade is complete from its own first captured sale; nothing earlier was observable.">@Filtered.Count sales shown</span>
+                  title="Shows the last 12 months of captured sales. Each grade is complete from its own first captured sale; nothing earlier was observable.">@Filtered.Count sales · last 12 months</span>
         </div>
 
         <div class="lg-row lg-header" style="grid-template-columns:@GridTemplate()">
@@ -98,7 +97,11 @@ else
         }
         else
         {
-            <Virtualize Items="Filtered" ItemSize="32" Context="row">
+            @* D-090: a fixed 50-row page of the filtered/sorted set replaces the endless
+               scroll — "looking at 600 rows is dumb" (owner). Filters and sorts still act
+               on the complete window instantly; only the display is paged. *@
+            @foreach (var row in _state.Slice(Filtered))
+            {
                 <div class="lg-row lg-body" style="grid-template-columns:@GridTemplate()">
                     <span class="lg-date">@row.SoldOn.ToString("yyyy-MM-dd")</span>
                     <span class="lg-bucket">@LedgerVocabulary.Display(row.GradeTier)</span>
@@ -107,7 +110,18 @@ else
                     <span class="lg-src">@row.Source</span>
                     <span class="lg-title" title="@row.Title">@row.Title</span>
                 </div>
-            </Virtualize>
+            }
+
+            @if (Filtered.Count > LedgerState.PageSize)
+            {
+                <div class="lg-pager">
+                    <button type="button" class="lg-page-btn" disabled="@(_state.Page == 0)"
+                            @onclick="PrevPage">‹ Prev</button>
+                    <span class="lg-page-label">Rows @(_state.Page * LedgerState.PageSize + 1)–@(Math.Min((_state.Page + 1) * LedgerState.PageSize, Filtered.Count)) of @Filtered.Count</span>
+                    <button type="button" class="lg-page-btn" disabled="@(_state.Page == LedgerState.PageCount(Filtered.Count) - 1)"
+                            @onclick="NextPage">Next ›</button>
+                </div>
+            }
         }
     </div>
 }
@@ -227,12 +241,19 @@ else
     private string Arrow(string key) =>
         _state.SortKey != key ? "" : _state.Descending ? " ▾" : " ▴";
 
+    // D-090: the ledger is a rolling 12-month window, so the true-zero claim scopes
+    // itself to that window — older sales may exist beyond it, and the copy must not
+    // deny them.
     private string EmptyStateCopy() => _state.Selected.Count switch
     {
-        0 => "No sales observed for this card — that's a true zero: our scrapers visited and found none.",
-        1 => "No sales observed in this grade — that's a true zero: our scrapers visited and found none.",
-        _ => "No sales observed in these grades — that's a true zero: our scrapers visited and found none.",
+        0 => "No sales observed for this card in the last 12 months — that's a true zero: our scrapers visited and found none.",
+        1 => "No sales observed in this grade in the last 12 months — that's a true zero: our scrapers visited and found none.",
+        _ => "No sales observed in these grades in the last 12 months — that's a true zero: our scrapers visited and found none.",
     };
+
+    private void NextPage() => _state.NextPage(Filtered.Count);
+
+    private void PrevPage() => _state.PrevPage();
 
     private static string ListedTooltip(SaleDto row) => row.ListedPriceCents is int listed
         ? $"listed {Format.Money(listed)} → sold {Format.Money(row.PriceCents)}"
