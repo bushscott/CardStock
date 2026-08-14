@@ -77,18 +77,36 @@ else
                   title="Grades with @ICardSalesReader.BucketCap or fewer captured sales show their complete history; busier grades show their newest @ICardSalesReader.BucketCap. Each grade is complete from its own first captured sale; nothing earlier was observable.">@Filtered.Count sales · newest @ICardSalesReader.BucketCap per grade</span>
         </div>
 
+        @* Five children exactly — the row shares the body's five-track grid, so the
+           resize grips live INSIDE their header cells (mockup :194, grip glyph │ with
+           margin-right:-6px), never as siblings that would eat grid tracks. A grip's
+           mousedown/click stops propagation so resizing never triggers a sort (§5.5 #31).
+           @(Arrow(...)) not @Arrow(...): an @ between word characters ("Date@Arrow")
+           hits Razor's email-address heuristic and renders as literal text. *@
         <div class="lg-row lg-header" style="grid-template-columns:@GridTemplate()">
-            @* @(Arrow(...)) not @Arrow(...): an @ between word characters ("Date@Arrow")
-               hits Razor's email-address heuristic and renders as literal text. *@
-            <span class="lg-h" title="Click to sort" @onclick='() => SortBy("date")'>Date@(Arrow("date"))</span>
-            <span class="lg-grip" @onmousedown='e => StartDrag("date", e)'></span>
-            <span class="lg-h" title="Click to sort" @onclick='() => SortBy("bucket")'>Grade bucket@(Arrow("bucket"))</span>
-            <span class="lg-grip" @onmousedown='e => StartDrag("bucket", e)'></span>
-            <span class="lg-h" title="Click to sort" @onclick='() => SortBy("price")'>Realized@(Arrow("price"))</span>
-            <span class="lg-grip" @onmousedown='e => StartDrag("price", e)'></span>
-            <span class="lg-h" title="Click to sort" @onclick='() => SortBy("src")'>Source@(Arrow("src"))</span>
-            <span class="lg-grip" @onmousedown='e => StartDrag("src", e)'></span>
-            <span class="lg-h" title="Click to sort" @onclick='() => SortBy("title")'>Listing title@(Arrow("title"))</span>
+            <span class="lg-h" title="Click to sort" @onclick='() => SortBy("date")'>
+                <span class="lg-h-label">Date@(Arrow("date"))</span>
+                <span class="lg-grip" @onmousedown='e => StartDrag("date", e)'
+                      @onmousedown:stopPropagation @onclick:stopPropagation>│</span>
+            </span>
+            <span class="lg-h" title="Click to sort" @onclick='() => SortBy("bucket")'>
+                <span class="lg-h-label">Grade bucket@(Arrow("bucket"))</span>
+                <span class="lg-grip" @onmousedown='e => StartDrag("bucket", e)'
+                      @onmousedown:stopPropagation @onclick:stopPropagation>│</span>
+            </span>
+            <span class="lg-h" title="Click to sort" @onclick='() => SortBy("price")'>
+                <span class="lg-h-label">Realized@(Arrow("price"))</span>
+                <span class="lg-grip" @onmousedown='e => StartDrag("price", e)'
+                      @onmousedown:stopPropagation @onclick:stopPropagation>│</span>
+            </span>
+            <span class="lg-h" title="Click to sort" @onclick='() => SortBy("src")'>
+                <span class="lg-h-label">Source@(Arrow("src"))</span>
+                <span class="lg-grip" @onmousedown='e => StartDrag("src", e)'
+                      @onmousedown:stopPropagation @onclick:stopPropagation>│</span>
+            </span>
+            <span class="lg-h" title="Click to sort" @onclick='() => SortBy("title")'>
+                <span class="lg-h-label">Listing title@(Arrow("title"))</span>
+            </span>
         </div>
 
         @if (Filtered.Count == 0)

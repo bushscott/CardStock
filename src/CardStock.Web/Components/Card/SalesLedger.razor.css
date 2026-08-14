@@ -130,7 +130,8 @@
 }
 
 .lg-h {
-    text-align: center;
+    display: flex;
+    align-items: center;
     cursor: pointer;
 }
 
@@ -138,12 +139,18 @@
     color: var(--acc);
 }
 
+/* §5.5 #30: the label takes the whole cell width minus the grip, centred. */
+.lg-h-label {
+    flex: 1;
+    text-align: center;
+}
+
 .lg-grip {
     width: 6px;
     margin-right: -6px;
+    flex-shrink: 0;
     cursor: col-resize;
     color: var(--line3);
-    justify-self: end;
 }
 
 .lg-grip:hover {
