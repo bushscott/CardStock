@@ -7,7 +7,7 @@ public sealed record CardPageSnapshotDto(
     IdentityDto Identity,
     PricesDto Prices,
     CensusDto Census,
-    IReadOnlyList<ChipDto> Signals,
+    SignalsDto Signals,
     FreshnessDto Freshness);
 
 public sealed record IdentityDto(
@@ -33,7 +33,15 @@ public sealed record CensusDto(
 
 public sealed record CensusBarDto(string Grader, short Grade, int Count);
 
-public sealed record ChipDto(string Glyph, string Text, string Tooltip, string Tone); // "pos" | "neg" | "caution" | "neutral"
+/// <summary>The signals panel (card.md §2.3.2). Evaluated counts every row — locked
+/// included: they were evaluated and found locked. Firing counts rows in the firing
+/// state. Both are computed, never authored.</summary>
+public sealed record SignalsDto(int Evaluated, int Firing, IReadOnlyList<SignalRowDto> Rows);
+
+/// <summary>One signals-panel row. State: "firing" | "quiet" | "belowfloor" |
+/// "neutral" | "locked". Tone: "pos" | "neg" | "caution" | "neutral".</summary>
+public sealed record SignalRowDto(
+    string Glyph, string Name, string Value, string Tooltip, string State, string Tone);
 
 public sealed record FreshnessDto(DateTimeOffset? LastVisitedAt);
 

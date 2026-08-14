@@ -20,6 +20,10 @@ public sealed class TestApp : WebApplicationFactory<Program>
     /// never make a real HTTP call.</summary>
     public HttpMessageHandler? WorkerIntakeHandler { get; set; }
 
+    /// <summary>Fixes the endpoint's clock when set — the signals panel's volume and
+    /// churn rows count days from it.</summary>
+    public DateTimeOffset? UtcNow { get; set; }
+
     /// <summary>Overrides RateLimits:ExpressPerHour for a single test's host.</summary>
     public int? ExpressPerHour { get; set; }
 
@@ -44,6 +48,10 @@ public sealed class TestApp : WebApplicationFactory<Program>
             services.AddScoped<ICardPriceReader>(_ => new StubPrices(this));
             services.AddScoped<ICardCensusReader>(_ => new StubCensus(this));
             services.AddScoped<ICardSalesReader>(_ => new StubSales(this));
+            if (UtcNow is not null)
+            {
+                services.AddSingleton<TimeProvider>(new FixedTimeProvider(UtcNow.Value));
+            }
 
             var handler = WorkerIntakeHandler;
             if (handler is not null)
@@ -92,5 +100,10 @@ public sealed class TestApp : WebApplicationFactory<Program>
     {
         public Task<IReadOnlyList<LedgerSale>> GetAsync(long id, CancellationToken ct = default) =>
             Task.FromResult(app.Sales);
+    }
+
+    private sealed class FixedTimeProvider(DateTimeOffset now) : TimeProvider
+    {
+        public override DateTimeOffset GetUtcNow() => now;
     }
 }

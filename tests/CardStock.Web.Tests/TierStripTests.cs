@@ -52,4 +52,16 @@ public class TierStripTests : BunitContext
         Assert.Equal("$710", cells[3].QuerySelector(".tier-price")!.TextContent);
         Assert.Equal("—", cells[3].QuerySelector(".tier-change")!.TextContent);
     }
+
+    [Fact]
+    public void The_strip_carries_a_scoped_stylesheet()
+    {
+        // The 3×2 tile geometry (card.md §2.3 amended, D-092) lives entirely in the
+        // scoped stylesheet; the compiler stamps a b-{hash} attribute only when one
+        // exists for the component, so its presence is assertable.
+        var cut = Render<TierStrip>(p => p.Add(x => x.Prices, FourTiers));
+
+        var strip = cut.Find(".tier-strip");
+        Assert.Contains(strip.Attributes, a => a.Name.StartsWith("b-"));
+    }
 }

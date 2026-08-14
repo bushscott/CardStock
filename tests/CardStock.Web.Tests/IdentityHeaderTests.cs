@@ -27,7 +27,7 @@ public class IdentityHeaderTests : BunitContext
             .Add(x => x.Identity, identity)
             .Add(x => x.CardId, 630417L)
             .Add(x => x.Prices, EmptyPrices)
-            .Add(x => x.Chips, Array.Empty<ChipDto>()));
+            .Add(x => x.Signals, new SignalsDto(0, 0, [])));
 
     [Fact]
     public void Subline_set_segment_is_deferred_disabled_not_plain_text()

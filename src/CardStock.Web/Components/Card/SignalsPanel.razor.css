@@ -1,0 +1,111 @@
+/* card.md §2.3.2: tile dress, flex 1 1 300px beside the tier tile grid. */
+.sig-panel {
+    flex: 1 1 300px;
+    min-width: 0;
+    box-sizing: border-box;
+    background: var(--bg);
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    padding: 10px 12px 9px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.sig-header {
+    display: flex;
+    align-items: baseline;
+    gap: 8px;
+}
+
+.sig-title {
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: .06em;
+    color: var(--mut2);
+    text-transform: uppercase;
+}
+
+.sig-spacer {
+    flex: 1;
+}
+
+.sig-count {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    color: var(--mut2);
+    cursor: help;
+}
+
+/* Unbounded rows (owner ruling 1): auto-fit columns wrap, nothing caps or folds. */
+.sig-rows {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(196px, 1fr));
+    gap: 2px 18px;
+    flex: 1;
+    align-content: start;
+}
+
+.sig-row {
+    display: flex;
+    align-items: baseline;
+    gap: 7px;
+    padding: 3px 0;
+    border-bottom: 1px solid var(--line4);
+    cursor: help;
+    min-width: 0;
+}
+
+.sig-glyph {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    width: 9px;
+    flex-shrink: 0;
+}
+
+.sig-name {
+    font-size: 12.5px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.sig-value {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11.5px;
+    font-weight: 500;
+    white-space: nowrap;
+}
+
+/* Row fg by state (card.md §2.3.2 table): the glyph and value wear the row's fg;
+   the name carries its own colour per state. Colour never alone -- the glyph is
+   text, so every state survives colourblind mode and reads aloud. */
+.sig-firing.sig-tone-pos { color: var(--pos); }
+.sig-firing.sig-tone-neg { color: var(--neg2); }
+.sig-firing.sig-tone-caution { color: var(--warnInk); }
+.sig-firing .sig-name { color: var(--ink); }
+
+.sig-neutral { color: var(--mut); }
+.sig-neutral .sig-name { color: var(--ink); }
+
+.sig-quiet,
+.sig-belowfloor { color: var(--mut2); }
+.sig-quiet .sig-name,
+.sig-belowfloor .sig-name { color: var(--mut); }
+
+.sig-locked { color: var(--mut2); }
+.sig-locked .sig-name { color: var(--mut2); }
+
+.sig-footer {
+    display: flex;
+    align-items: baseline;
+    gap: 10px;
+}
+
+.sig-footer ::deep .sig-charts-link {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    padding: 0;
+    border: none;
+    background: none;
+}

@@ -43,7 +43,48 @@ public class SnapshotEndpointTests
         Assert.Equal("Charizard #4/102", dto!.Identity.Title);
         Assert.Equal(6, dto.Prices.Tiers.Count);
         Assert.Equal(6, dto.Census.Bars.Count);
-        Assert.NotNull(dto.Signals);
+
+        // An empty card still evaluates everything: 8 price rows below their
+        // floors, the volume row at zero, and the three locked rows. The counts
+        // are computed from the rows, and every state string is lowercase.
+        Assert.Equal(12, dto.Signals.Evaluated);
+        Assert.Equal(0, dto.Signals.Firing);
+        Assert.Equal(12, dto.Signals.Rows.Count);
+        Assert.Equal("0 / 30d", Assert.Single(dto.Signals.Rows, r => r.Name == "Sales volume").Value);
+        var rs = Assert.Single(dto.Signals.Rows, r => r.Name == "RS vs index 3M");
+        Assert.Equal("locked", rs.State);
+        Assert.Equal(
+            "Relative strength needs the market index — it arrives with the worker phase",
+            rs.Tooltip);
+        Assert.All(dto.Signals.Rows, r => Assert.Equal(r.State, r.State.ToLowerInvariant()));
+    }
+
+    [Fact]
+    public async Task Snapshot_sales_volume_counts_from_the_endpoint_clock()
+    {
+        // Clock fixed at 2026-08-13: a sale 29 days back counts, the sale on the
+        // 30-day boundary does not.
+        using var app = new TestApp
+        {
+            Identity = Identity(),
+            Prices = Prices(),
+            Census = CardCensus.From([], []),
+            UtcNow = new DateTimeOffset(2026, 8, 13, 12, 0, 0, TimeSpan.Zero),
+            Sales =
+            [
+                new LedgerSale(new DateOnly(2026, 7, 15), "PSA 10", 100_00, null, "ebay", "counts"),
+                new LedgerSale(new DateOnly(2026, 7, 14), "PSA 10", 100_00, null, "ebay", "boundary, does not"),
+            ],
+        };
+        using var client = app.CreateClient();
+
+        var dto = await client.GetFromJsonAsync<CardPageSnapshotDto>("/api/v1/cards/42", JsonOptions);
+
+        Assert.NotNull(dto);
+        Assert.Equal("1 / 30d", Assert.Single(dto!.Signals.Rows, r => r.Name == "Sales volume").Value);
+        Assert.Equal(
+            "Needs 60+ post-seam days · 0 recorded",
+            Assert.Single(dto.Signals.Rows, r => r.Name == "Churn 30d").Tooltip);
     }
 
     [Fact]

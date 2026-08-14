@@ -120,6 +120,15 @@
     align-items: center;
 }
 
+/* card.md §2.2 (amended 2026-08-13, D-092): Rows B and C became one wrapping row --
+   the tile grid and the signals panel, stretched to equal heights. */
+.tiles-and-signals {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 14px;
+    align-items: stretch;
+}
+
 .row-a-actions {
     flex-shrink: 0;
     display: flex;

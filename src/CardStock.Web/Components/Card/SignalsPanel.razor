@@ -1,0 +1,43 @@
+@* card.md §2.3.2 (D-092): the unbounded signals panel -- every evaluated signal as a
+   row. Rows are never capped or folded in Phase 2: the rework's eight are a sample,
+   not a cap, so there is no "+N quiet" element at all until something folds. The
+   count line arrives computed on the wire -- this component never counts for
+   itself, so the header can never disagree with the rows. The Charts link is a
+   DeferredControl, never an anchor (Charts doesn't exist yet). Every glyph is text
+   in the row's fg -- colour never carries the state alone. The count tooltip gets
+   tabindex + aria-label per the §2.3.1 precedent: a title on a bare span is
+   invisible to keyboard users; row tooltips stay hover-only because their values
+   are already visible in the row itself. *@
+@using CardStock.Application.Cards
+
+<div class="sig-panel">
+    <div class="sig-header">
+        <span class="sig-title">Signals</span>
+        <span class="sig-spacer"></span>
+        <span class="sig-count" tabindex="0" title="@CountTooltip" aria-label="@CountTooltip">@Signals.Evaluated evaluated · @Signals.Firing firing</span>
+    </div>
+    <div class="sig-rows">
+        @foreach (var row in Signals.Rows)
+        {
+            <div class="sig-row sig-@row.State sig-tone-@row.Tone" title="@row.Tooltip">
+                <span class="sig-glyph">@row.Glyph</span>
+                <span class="sig-name">@row.Name</span>
+                <span class="sig-spacer"></span>
+                <span class="sig-value">@row.Value</span>
+            </div>
+        }
+    </div>
+    <div class="sig-footer">
+        <span class="sig-spacer"></span>
+        <DeferredControl Label="all signals in Charts →" Tooltip="Charts arrives in a later phase" CssClass="sig-charts-link" />
+    </div>
+</div>
+
+@code {
+    private const string CountTooltip =
+        "Every chip-eligible signal is evaluated on this card automatically — nothing here is opted into. " +
+        "Bollinger, beta, discount-to-list, and seasonality are excluded: visualization-grade, descriptive, or below coverage.";
+
+    [Parameter, EditorRequired]
+    public SignalsDto Signals { get; set; } = new(0, 0, []);
+}

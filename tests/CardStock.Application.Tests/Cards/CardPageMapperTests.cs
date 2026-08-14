@@ -93,14 +93,20 @@ public class CardPageMapperTests
             Tiers: [ungraded, grade7, grade8, grade9, grade9Half, psa10]);
     }
 
-    private static IReadOnlyList<SignalChip> Chips() =>
+    private static readonly DateOnly Today = new(2026, 8, 13);
+
+    private static IReadOnlyList<LedgerSale> Sales() =>
     [
-        new SignalChip("▲", "ROC 3M +20%", "PSA 10 · 3-month return +20% · fires at ±15% · closed months only", ChipTone.Pos),
-        new SignalChip("!", "thin data", "Fewer than 3 sales in the trailing window", ChipTone.Caution),
+        new LedgerSale(new DateOnly(2026, 8, 13), "PSA 10", 12345, null, "ebay", "today, counts"),
+        new LedgerSale(new DateOnly(2026, 8, 1), "PSA 10", 12345, null, "ebay", "this month, counts"),
+        new LedgerSale(new DateOnly(2026, 7, 15), "Grade 9", 9345, null, "ebay", "inside the window, counts"),
+        new LedgerSale(new DateOnly(2026, 7, 14), "Grade 9", 9345, null, "ebay", "the 31st day back, does not"),
+        new LedgerSale(new DateOnly(2026, 1, 1), "Ungraded", 345, null, "ebay", "ancient, does not"),
+        new LedgerSale(new DateOnly(2026, 9, 1), "Ungraded", 345, null, "ebay", "future-dated, does not"),
     ];
 
     private static CardPageSnapshotDto Map() =>
-        CardPageMapper.ToDto(Identity(), Snapshot(), Census(), Chips(), CurrentMonth);
+        CardPageMapper.ToDto(Identity(), Snapshot(), Census(), Sales(), CurrentMonth, Today);
 
     [Fact]
     public void Windows_twelve_months_oldest_to_newest_with_the_hole_null_in_place()
@@ -205,18 +211,98 @@ public class CardPageMapperTests
     }
 
     [Fact]
-    public void Chip_tones_lowercase()
+    public void Signals_compose_engine_volume_and_locked_rows_in_display_order_with_true_counts()
     {
-        var dto = Map();
+        // The fixture's only usable series is Ungraded: rising 1000→2000 over the
+        // closed months with the 2026-02 hole. So the engine fires ROC (+18%) and
+        // Trend R² (monotone rise), drawdown reads quiet at 0%, and every
+        // consecutive-run signal sits below its floor on the hole. The mapper
+        // splices Sales volume after the firing block and appends the three
+        // locked rows.
+        var signals = Map().Signals;
 
-        Assert.Equal(new[] { "pos", "caution" }, dto.Signals.Select(c => c.Tone));
-        Assert.Equal(new[] { "ROC 3M +20%", "thin data" }, dto.Signals.Select(c => c.Text));
+        Assert.Equal(
+            new[]
+            {
+                "ROC 3M", "Trend R²",
+                "Sales volume",
+                "Drawdown",
+                "MACD (3,6,4)", "EMA 3/9 cross", "RSI (6)", "z vs 6M", "Tier spread 10/9",
+                "RS vs index 3M", "Pop Δ 60d", "Churn 30d",
+            },
+            signals.Rows.Select(r => r.Name));
+        Assert.Equal(12, signals.Evaluated);
+        Assert.Equal(2, signals.Firing);
+    }
+
+    [Fact]
+    public void Sales_volume_counts_only_the_last_thirty_days()
+    {
+        // today − 30 = 2026-07-14: strictly-after counts, the boundary day and
+        // anything future-dated do not. Fixture: 3 of 6 qualify.
+        var volume = Assert.Single(Map().Signals.Rows, r => r.Name == "Sales volume");
+
+        Assert.Equal("●", volume.Glyph);
+        Assert.Equal("3 / 30d", volume.Value);
+        Assert.Equal("neutral", volume.State);
+        Assert.Equal("neutral", volume.Tone);
+        Assert.Equal(
+            "Sales captured in the last 30 days. Liquidity signals are never directional.",
+            volume.Tooltip);
+    }
+
+    [Fact]
+    public void Locked_rows_carry_their_exact_copy()
+    {
+        var rows = Map().Signals.Rows;
+
+        var rs = Assert.Single(rows, r => r.Name == "RS vs index 3M");
+        Assert.Equal("◌", rs.Glyph);
+        Assert.Equal("locked", rs.Value);
+        Assert.Equal("locked", rs.State);
+        Assert.Equal("Relative strength needs the market index — it arrives with the worker phase", rs.Tooltip);
+
+        var pop = Assert.Single(rows, r => r.Name == "Pop Δ 60d");
+        Assert.Equal("locked", pop.Value);
+        Assert.Equal("Needs census deltas; observations count from 2026-09-01 — deltas need two", pop.Tooltip);
+
+        var churn = Assert.Single(rows, r => r.Name == "Churn 30d");
+        Assert.Equal("unlocks 2026-10-31", churn.Value);
+        Assert.Equal("Needs 60+ post-seam days · 0 recorded", churn.Tooltip);
+    }
+
+    [Fact]
+    public void Churn_counts_days_since_the_seam_floor_never_negative()
+    {
+        var beforeFloor = CardPageMapper.ToDto(
+            Identity(), Snapshot(), Census(), [], CurrentMonth, new DateOnly(2026, 8, 13));
+        var afterFloor = CardPageMapper.ToDto(
+            Identity(), Snapshot(), Census(), [], new DateOnly(2026, 9, 1), new DateOnly(2026, 9, 11));
+
+        Assert.Equal(
+            "Needs 60+ post-seam days · 0 recorded",
+            Assert.Single(beforeFloor.Signals.Rows, r => r.Name == "Churn 30d").Tooltip);
+        Assert.Equal(
+            "Needs 60+ post-seam days · 10 recorded",
+            Assert.Single(afterFloor.Signals.Rows, r => r.Name == "Churn 30d").Tooltip);
+    }
+
+    [Fact]
+    public void Row_states_and_tones_serialize_lowercase()
+    {
+        var rows = Map().Signals.Rows;
+
+        Assert.Equal("firing", Assert.Single(rows, r => r.Name == "ROC 3M").State);
+        Assert.Equal("pos", Assert.Single(rows, r => r.Name == "ROC 3M").Tone);
+        Assert.Equal("quiet", Assert.Single(rows, r => r.Name == "Drawdown").State);
+        Assert.Equal("belowfloor", Assert.Single(rows, r => r.Name == "MACD (3,6,4)").State);
+        Assert.Equal("locked", Assert.Single(rows, r => r.Name == "Churn 30d").State);
     }
 
     [Fact]
     public void SetSize_passes_through_as_null_until_enrichment_lands()
     {
-        var dto = CardPageMapper.ToDto(Identity(setSize: null), Snapshot(), Census(), Chips(), CurrentMonth);
+        var dto = CardPageMapper.ToDto(Identity(setSize: null), Snapshot(), Census(), Sales(), CurrentMonth, Today);
 
         Assert.Null(dto.Identity.SetSize);
     }
@@ -224,7 +310,7 @@ public class CardPageMapperTests
     [Fact]
     public void SetSize_passes_through_when_present()
     {
-        var dto = CardPageMapper.ToDto(Identity(setSize: 102), Snapshot(), Census(), Chips(), CurrentMonth);
+        var dto = CardPageMapper.ToDto(Identity(setSize: 102), Snapshot(), Census(), Sales(), CurrentMonth, Today);
 
         Assert.Equal(102, dto.Identity.SetSize);
     }
@@ -234,7 +320,7 @@ public class CardPageMapperTests
     [InlineData("abc123", true)]
     public void HasImage_derives_from_whether_the_image_hash_is_null(string? imageHash, bool expected)
     {
-        var dto = CardPageMapper.ToDto(Identity(imageHash: imageHash), Snapshot(), Census(), Chips(), CurrentMonth);
+        var dto = CardPageMapper.ToDto(Identity(imageHash: imageHash), Snapshot(), Census(), Sales(), CurrentMonth, Today);
 
         Assert.Equal(expected, dto.Identity.HasImage);
     }

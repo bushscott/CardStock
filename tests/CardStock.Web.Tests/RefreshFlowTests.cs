@@ -203,7 +203,7 @@ public class RefreshFlowTests : BunitContext
             .Add(x => x.Identity, identity)
             .Add(x => x.CardId, CardId)
             .Add(x => x.Prices, prices)
-            .Add(x => x.Chips, Array.Empty<ChipDto>())
+            .Add(x => x.Signals, new SignalsDto(0, 0, []))
             .Add(x => x.BadgeSlot, "<span class=\"probe\">badge</span>"));
 
         var children = cut.Find(".right-col").Children;
@@ -211,13 +211,13 @@ public class RefreshFlowTests : BunitContext
 
         var rowAIndex = classNames.FindIndex(c => c.Contains("row-a"));
         var badgeIndex = classNames.FindIndex(c => c.Contains("badge-slot"));
-        var stripIndex = classNames.FindIndex(c => c.Contains("tier-strip"));
+        var tilesIndex = classNames.FindIndex(c => c.Contains("tiles-and-signals"));
 
         Assert.True(rowAIndex >= 0, "row-a not found under .right-col");
         Assert.True(badgeIndex >= 0, "badge-slot not found under .right-col");
-        Assert.True(stripIndex >= 0, "tier-strip not found under .right-col");
+        Assert.True(tilesIndex >= 0, "tiles-and-signals not found under .right-col");
         Assert.True(rowAIndex < badgeIndex, "badge-slot must sit beneath row-a, not beside it");
-        Assert.True(badgeIndex < stripIndex, "badge-slot must sit above the tier strip");
+        Assert.True(badgeIndex < tilesIndex, "badge-slot must sit above the tiles-and-signals row");
 
         // And it must not be nested inside row-a -- a sibling row, not a flex child of it.
         Assert.Empty(cut.Find(".row-a").QuerySelectorAll(".badge-slot"));

@@ -1,17 +1,25 @@
-/* card.md §2.3 Row B: display:grid; grid-template-columns: repeat(6, 1fr); gap: 8px. */
+/* card.md §2.3 (amended 2026-08-13, D-092): a 3×2 grid of 100px square tiles,
+   fixed-size beside the signals panel in §2.2's wrapping row. */
 .tier-strip {
     display: grid;
-    grid-template-columns: repeat(6, 1fr);
+    grid-template-columns: repeat(3, 100px);
+    grid-auto-rows: 100px;
     gap: 8px;
+    flex: 0 0 auto;
 }
 
-/* card.md §2.3 line :86-:90: --bg background, 1px --line, radius 8, padding 9px 11px. */
+/* Tile dress: --bg fill, 1px --line, radius 8, padding 10px 11px; label at the
+   head, price and change at the foot via space-between. */
 .tier-cell {
     background: var(--bg);
     border: 1px solid var(--line);
     border-radius: 8px;
-    padding: 9px 11px;
+    padding: 10px 11px;
     min-width: 0;
+    box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
 }
 
 .tier-label {
@@ -40,12 +48,13 @@
     cursor: help;
 }
 
-/* JetBrains Mono, 18px/700 (card.md §2.3 line 2). */
+/* JetBrains Mono, 19px/700, line-height 1 (card.md §2.3 amended, D-092). The
+   tile's space-between distributes the three lines; no margins. */
 .tier-price {
     font-family: 'JetBrains Mono', monospace;
-    font-size: 18px;
+    font-size: 19px;
     font-weight: 700;
-    margin-top: 3px;
+    line-height: 1;
     color: var(--ink);
 }
 
@@ -53,7 +62,6 @@
 .tier-change {
     font-family: 'JetBrains Mono', monospace;
     font-size: 12px;
-    margin-top: 1px;
     color: var(--mut2);
 }
 

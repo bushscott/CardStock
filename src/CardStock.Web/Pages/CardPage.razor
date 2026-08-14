@@ -26,7 +26,7 @@ else
     <PageTitle>@_result.Snapshot.Identity.Title</PageTitle>
     <Breadcrumb SetName="@_result.Snapshot.Identity.SetName" CardTitle="@_result.Snapshot.Identity.Title" />
     <IdentityHeader Identity="@_result.Snapshot.Identity" CardId="@_result.Snapshot.CardId"
-                    Prices="@_result.Snapshot.Prices" Chips="@_result.Snapshot.Signals">
+                    Prices="@_result.Snapshot.Prices" Signals="@_result.Snapshot.Signals">
         <BadgeSlot>
             <RefreshBadge State="@_refreshState" LastVisitedAt="@_result.Snapshot.Freshness.LastVisitedAt" Now="@_now" />
         </BadgeSlot>

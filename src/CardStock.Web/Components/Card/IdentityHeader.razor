@@ -1,8 +1,7 @@
-@* card.md §2.1-§2.2: art column + right column (title/actions row, tier strip, chip
-   row) -- the one card panel block #1 describes as a single flex container, so the
-   three "stacked rows" of §2.2 are rendered together here rather than split across
-   sibling components. §4.2.1 (D-077) inserts a fourth row between row-a and the tier
-   strip: a fixed 28px full-width badge slot, never a flex sibling beside the title
+@* card.md §2.1-§2.2: art column + right column. §2.2 amended 2026-08-13 (D-092):
+   Rows B and C became one wrapping row -- the 3×2 tier tile grid and the Signals
+   panel, stretched to equal heights. §4.2.1 (D-077) keeps the fixed 28px full-width
+   badge slot between row-a and that row, never a flex sibling beside the title
    (Task 16 review finding, carried into Task 20, which wires RefreshBadge into it).
 
    §3.1.1 (D-079, D-084.10, amended by D-087): all three subline slots render. The set
@@ -58,8 +57,10 @@
 
         <div class="badge-slot">@BadgeSlot</div>
 
-        <TierStrip Prices="@Prices" />
-        <SignalChips Chips="@Chips" />
+        <div class="tiles-and-signals">
+            <TierStrip Prices="@Prices" />
+            <SignalsPanel Signals="@Signals" />
+        </div>
     </div>
 
     @if (_lightboxOpen)
@@ -79,7 +80,7 @@
     public PricesDto Prices { get; set; } = default!;
 
     [Parameter]
-    public IReadOnlyList<ChipDto> Chips { get; set; } = Array.Empty<ChipDto>();
+    public SignalsDto Signals { get; set; } = new(0, 0, []);
 
     /// <summary>The reserved 28px slot's content -- CardPage supplies a RefreshBadge
     /// here (task 20). Empty renders as a blank row; the reservation is CSS

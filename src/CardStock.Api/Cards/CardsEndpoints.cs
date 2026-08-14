@@ -1,6 +1,5 @@
 using CardStock.Application.Cards;
 using CardStock.Application.Prices;
-using CardStock.Domain.Signals;
 
 namespace CardStock.Api.Cards;
 
@@ -15,14 +14,18 @@ public static class CardsEndpoints
             ICardIdentityReader identityReader,
             ICardPriceReader priceReader,
             ICardCensusReader censusReader,
+            ICardSalesReader salesReader,
             TimeProvider time,
             CancellationToken ct) =>
         {
-            // Three readers, three connections, one wait (D-084.6).
+            // Four readers, four connections, one wait (D-084.6). Sales feed the
+            // panel's volume row, so the snapshot fetches them now too; the
+            // /sales endpoint below is unchanged.
             var identityTask = identityReader.GetAsync(id, ct);
             var pricesTask = priceReader.GetAsync(id, ct);
             var censusTask = censusReader.GetAsync(id, ct);
-            await Task.WhenAll(identityTask, pricesTask, censusTask);
+            var salesTask = salesReader.GetAsync(id, ct);
+            await Task.WhenAll(identityTask, pricesTask, censusTask, salesTask);
 
             var identity = identityTask.Result;
             if (identity is null || identity.NotACardAt is not null)
@@ -32,10 +35,9 @@ public static class CardsEndpoints
 
             var today = DateOnly.FromDateTime(time.GetUtcNow().UtcDateTime);
             var currentMonth = new DateOnly(today.Year, today.Month, 1);
-            var chips = ChipEngine.Evaluate(pricesTask.Result!, currentMonth);
 
             return Results.Ok(CardPageMapper.ToDto(
-                identity, pricesTask.Result!, censusTask.Result, chips, currentMonth));
+                identity, pricesTask.Result!, censusTask.Result, salesTask.Result, currentMonth, today));
         });
 
         cards.MapGet("/{id:long}/sales", async (

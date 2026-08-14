@@ -7,22 +7,33 @@ namespace CardStock.Application.Cards;
 /// <summary>
 /// Flattens the domain snapshot into the JSON the card page eats. Every union
 /// becomes a "state" string here, once, so no downstream code re-implements
-/// the switch. The 12-month window is computed here with PriceWindow.Of.
+/// the switch. The 12-month window is computed here with PriceWindow.Of, and
+/// the signals panel is composed here: the engine's price rows, the sales
+/// volume row (sales stay out of Domain purity), and the locked rows whose
+/// substrates do not exist yet (card.md §2.3.2 — never seed numbers).
 /// </summary>
 public static class CardPageMapper
 {
+    /// <summary>The D-033 floor: post-seam observation counting starts here.</summary>
+    private static readonly DateOnly SeamFloor = new(2026, 9, 1);
+
+    /// <summary>Churn 30d needs 60 post-seam days, so the unlock date is derived
+    /// from the floor, never authored: 2026-10-31.</summary>
+    private static readonly DateOnly ChurnUnlock = SeamFloor.AddDays(60);
+
     public static CardPageSnapshotDto ToDto(
         CardIdentity identity,
         CardPriceSnapshot prices,
         CardCensus census,
-        IReadOnlyList<SignalChip> chips,
-        DateOnly currentMonth) =>
+        IReadOnlyList<LedgerSale> sales,
+        DateOnly currentMonth,
+        DateOnly today) =>
         new(
             identity.CardId,
             ToIdentityDto(identity),
             ToPricesDto(prices, currentMonth),
             ToCensusDto(census),
-            [.. chips.Select(ToChipDto)],
+            ToSignalsDto(prices, sales, currentMonth, today),
             new FreshnessDto(prices.LastVisitedAt));
 
     public static SaleDto ToDto(LedgerSale sale) =>
@@ -81,8 +92,53 @@ public static class CardPageMapper
             census.ObservedAt,
             census.QualifyingObservations);
 
-    private static ChipDto ToChipDto(SignalChip chip) =>
-        new(chip.Glyph, chip.Text, chip.Tooltip, chip.Tone.ToString().ToLowerInvariant());
+    private static SignalsDto ToSignalsDto(
+        CardPriceSnapshot prices, IReadOnlyList<LedgerSale> sales, DateOnly currentMonth, DateOnly today)
+    {
+        // Display order (card.md §2.3.2): firing → neutral → quiet → below-floor
+        // → locked. The engine hands back firing → quiet → below-floor; splice
+        // the volume row after the firing block, append the locked rows.
+        var rows = new List<SignalRow>(ChipEngine.EvaluateRows(prices, currentMonth));
+        var firstNotFiring = rows.FindIndex(r => r.State != SignalState.Firing);
+        rows.Insert(firstNotFiring < 0 ? rows.Count : firstNotFiring, VolumeRow(sales, today));
+
+        rows.Add(new SignalRow("◌", "RS vs index 3M", "locked",
+            "Relative strength needs the market index — it arrives with the worker phase",
+            SignalState.Locked, ChipTone.Neutral));
+        rows.Add(new SignalRow("◌", "Pop Δ 60d", "locked",
+            "Needs census deltas; observations count from 2026-09-01 — deltas need two",
+            SignalState.Locked, ChipTone.Neutral));
+        rows.Add(ChurnRow(today));
+
+        return new SignalsDto(
+            rows.Count,
+            rows.Count(r => r.State == SignalState.Firing),
+            [.. rows.Select(ToRowDto)]);
+    }
+
+    /// <summary>Neutral, always: liquidity signals are never directional. The window
+    /// is (today − 30, today] — a sale on the boundary day is outside it, and a
+    /// future-dated sale (restatements happen) never counts.</summary>
+    private static SignalRow VolumeRow(IReadOnlyList<LedgerSale> sales, DateOnly today)
+    {
+        var floor = today.AddDays(-30);
+        var count = sales.Count(s => s.SoldOn > floor && s.SoldOn <= today);
+        return new SignalRow("●", "Sales volume", $"{count} / 30d",
+            "Sales captured in the last 30 days. Liquidity signals are never directional.",
+            SignalState.Neutral, ChipTone.Neutral);
+    }
+
+    private static SignalRow ChurnRow(DateOnly today)
+    {
+        var recorded = Math.Max(0, today.DayNumber - SeamFloor.DayNumber);
+        return new SignalRow("◌", "Churn 30d", $"unlocks {ChurnUnlock:yyyy-MM-dd}",
+            $"Needs 60+ post-seam days · {recorded} recorded",
+            SignalState.Locked, ChipTone.Neutral);
+    }
+
+    private static SignalRowDto ToRowDto(SignalRow row) =>
+        new(row.Glyph, row.Name, row.Value, row.Tooltip,
+            row.State.ToString().ToLowerInvariant(), row.Tone.ToString().ToLowerInvariant());
 
     private static string FormatMonth(DateOnly month) => month.ToString("yyyy-MM");
 }
