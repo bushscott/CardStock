@@ -79,15 +79,17 @@ else
         </div>
 
         <div class="lg-row lg-header" style="grid-template-columns:@GridTemplate()">
-            <span class="lg-h" title="Click to sort" @onclick='() => SortBy("date")'>Date@Arrow("date")</span>
+            @* @(Arrow(...)) not @Arrow(...): an @ between word characters ("Date@Arrow")
+               hits Razor's email-address heuristic and renders as literal text. *@
+            <span class="lg-h" title="Click to sort" @onclick='() => SortBy("date")'>Date@(Arrow("date"))</span>
             <span class="lg-grip" @onmousedown='e => StartDrag("date", e)'></span>
-            <span class="lg-h" title="Click to sort" @onclick='() => SortBy("bucket")'>Grade bucket@Arrow("bucket")</span>
+            <span class="lg-h" title="Click to sort" @onclick='() => SortBy("bucket")'>Grade bucket@(Arrow("bucket"))</span>
             <span class="lg-grip" @onmousedown='e => StartDrag("bucket", e)'></span>
-            <span class="lg-h" title="Click to sort" @onclick='() => SortBy("price")'>Realized@Arrow("price")</span>
+            <span class="lg-h" title="Click to sort" @onclick='() => SortBy("price")'>Realized@(Arrow("price"))</span>
             <span class="lg-grip" @onmousedown='e => StartDrag("price", e)'></span>
-            <span class="lg-h" title="Click to sort" @onclick='() => SortBy("src")'>Source@Arrow("src")</span>
+            <span class="lg-h" title="Click to sort" @onclick='() => SortBy("src")'>Source@(Arrow("src"))</span>
             <span class="lg-grip" @onmousedown='e => StartDrag("src", e)'></span>
-            <span class="lg-h" title="Click to sort" @onclick='() => SortBy("title")'>Listing title@Arrow("title")</span>
+            <span class="lg-h" title="Click to sort" @onclick='() => SortBy("title")'>Listing title@(Arrow("title"))</span>
         </div>
 
         @if (Filtered.Count == 0)

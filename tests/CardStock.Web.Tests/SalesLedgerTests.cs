@@ -20,6 +20,22 @@ public class SalesLedgerTests : BunitContext
         new(DateOnly.Parse(date), bucket, priceCents, listedCents, src, title);
 
     [Fact]
+    public void Headers_render_their_labels_and_the_active_sort_arrow_not_razor_source()
+    {
+        // 'Date@Arrow("date")' hit Razor's email-address heuristic — an @ between word
+        // characters never transitions to C#, so every header printed its own source
+        // text verbatim. The explicit @(...) form is the fix; this pins the rendered text.
+        var cut = Render<SalesLedger>(p => p.Add(x => x.Sales, new[] { Sale("2026-08-01", "PSA 10", 100) }));
+
+        var headers = cut.FindAll(".lg-h").Select(h => h.TextContent).ToList();
+        Assert.Equal(["Date ▾", "Grade bucket", "Realized", "Source", "Listing title"], headers);
+
+        // Flip the active column: ascending arrow replaces the descending one.
+        cut.FindAll(".lg-h")[0].Click();
+        Assert.Equal("Date ▴", cut.FindAll(".lg-h")[0].TextContent);
+    }
+
+    [Fact]
     public void A_chip_click_filters_the_rows_and_updates_the_count()
     {
         var sales = new[]
