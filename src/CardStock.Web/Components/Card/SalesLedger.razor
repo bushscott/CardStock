@@ -20,7 +20,7 @@ else
 {
     <div class="ledger-panel">
         <div class="lg-toolbar">
-            <h2>Sales ledger · 12M</h2>
+            <h2>Sales ledger</h2>
             <div class="lg-chips">
                 <button type="button" class="lg-chip @(_state.Selected.Count == 0 ? "lg-chip-sel" : "")"
                         title="Show sales from every grade" @onclick="SelectAll">All</button>
@@ -74,7 +74,7 @@ else
                         title="@ChipTooltip(raw)" @onclick="() => ToggleBucket(raw)">@LedgerVocabulary.Display(raw)</button>
             </div>
             <span class="lg-count"
-                  title="Shows the last 12 months of captured sales. Each grade is complete from its own first captured sale; nothing earlier was observable.">@Filtered.Count sales · last 12 months</span>
+                  title="Grades with @ICardSalesReader.BucketCap or fewer captured sales show their complete history; busier grades show their newest @ICardSalesReader.BucketCap. Each grade is complete from its own first captured sale; nothing earlier was observable.">@Filtered.Count sales · newest @ICardSalesReader.BucketCap per grade</span>
         </div>
 
         <div class="lg-row lg-header" style="grid-template-columns:@GridTemplate()">
@@ -241,14 +241,13 @@ else
     private string Arrow(string key) =>
         _state.SortKey != key ? "" : _state.Descending ? " ▾" : " ▴";
 
-    // D-090: the ledger is a rolling 12-month window, so the true-zero claim scopes
-    // itself to that window — older sales may exist beyond it, and the copy must not
-    // deny them.
+    // D-091: under the per-bucket cap an empty selection means zero captured sales
+    // ever in those grades, so the true-zero claim needs no time scoping.
     private string EmptyStateCopy() => _state.Selected.Count switch
     {
-        0 => "No sales observed for this card in the last 12 months — that's a true zero: our scrapers visited and found none.",
-        1 => "No sales observed in this grade in the last 12 months — that's a true zero: our scrapers visited and found none.",
-        _ => "No sales observed in these grades in the last 12 months — that's a true zero: our scrapers visited and found none.",
+        0 => "No sales observed for this card — that's a true zero: our scrapers visited and found none.",
+        1 => "No sales observed in this grade — that's a true zero: our scrapers visited and found none.",
+        _ => "No sales observed in these grades — that's a true zero: our scrapers visited and found none.",
     };
 
     private void NextPage() => _state.NextPage(Filtered.Count);

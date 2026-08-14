@@ -45,11 +45,11 @@ public class SalesLedgerTests : BunitContext
             Sale("2026-08-03", "Grade 9", 300),
         };
         var cut = Render<SalesLedger>(p => p.Add(x => x.Sales, sales));
-        Assert.Equal("3 sales · last 12 months", cut.Find(".lg-count").TextContent);
+        Assert.Equal("3 sales · newest 300 per grade", cut.Find(".lg-count").TextContent);
 
         cut.Find("button[data-bucket='PSA 10']").Click();
 
-        Assert.Equal("2 sales · last 12 months", cut.Find(".lg-count").TextContent);
+        Assert.Equal("2 sales · newest 300 per grade", cut.Find(".lg-count").TextContent);
     }
 
     [Fact]
@@ -61,11 +61,11 @@ public class SalesLedgerTests : BunitContext
         cut.Find("button[data-bucket='PSA 10']").Click();
         cut.FindAll("button.lg-chip").First(b => b.TextContent.StartsWith("other 10s")).Click();
         Assert.NotEmpty(cut.FindAll(".lg-popover"));
-        Assert.Equal("1 sales · last 12 months", cut.Find(".lg-count").TextContent);
+        Assert.Equal("1 sales · newest 300 per grade", cut.Find(".lg-count").TextContent);
 
         cut.FindAll("button.lg-chip").First(b => b.TextContent == "All").Click();
 
-        Assert.Equal("2 sales · last 12 months", cut.Find(".lg-count").TextContent);
+        Assert.Equal("2 sales · newest 300 per grade", cut.Find(".lg-count").TextContent);
         Assert.Empty(cut.FindAll(".lg-popover"));
     }
 
@@ -78,7 +78,7 @@ public class SalesLedgerTests : BunitContext
         cut.Find("button[data-bucket='PSA 10']").Click();
 
         Assert.Equal(
-            "No sales observed in this grade in the last 12 months — that's a true zero: our scrapers visited and found none.",
+            "No sales observed in this grade — that's a true zero: our scrapers visited and found none.",
             cut.Find(".lg-empty").TextContent);
     }
 
@@ -92,7 +92,7 @@ public class SalesLedgerTests : BunitContext
         cut.Find("button[data-bucket='Grade 7']").Click();
 
         Assert.Equal(
-            "No sales observed in these grades in the last 12 months — that's a true zero: our scrapers visited and found none.",
+            "No sales observed in these grades — that's a true zero: our scrapers visited and found none.",
             cut.Find(".lg-empty").TextContent);
     }
 
@@ -102,7 +102,7 @@ public class SalesLedgerTests : BunitContext
         var cut = Render<SalesLedger>(p => p.Add(x => x.Sales, Array.Empty<SaleDto>()));
 
         Assert.Equal(
-            "No sales observed for this card in the last 12 months — that's a true zero: our scrapers visited and found none.",
+            "No sales observed for this card — that's a true zero: our scrapers visited and found none.",
             cut.Find(".lg-empty").TextContent);
     }
 
@@ -150,7 +150,7 @@ public class SalesLedgerTests : BunitContext
     }
 
     [Fact]
-    public void Fifty_row_pages_with_a_pager_when_the_set_overflows()
+    public void Twenty_five_row_pages_with_a_pager_when_the_set_overflows()
     {
         // D-090: display pages at 50 rows; filters/sorts still act on the whole set.
         var sales = Enumerable.Range(0, 120)
@@ -158,13 +158,15 @@ public class SalesLedgerTests : BunitContext
             .ToArray();
         var cut = Render<SalesLedger>(p => p.Add(x => x.Sales, sales));
 
-        Assert.Equal(50, cut.FindAll(".lg-body").Count);
-        Assert.Equal("Rows 1–50 of 120", cut.Find(".lg-page-label").TextContent);
+        Assert.Equal(25, cut.FindAll(".lg-body").Count);
+        Assert.Equal("Rows 1–25 of 120", cut.Find(".lg-page-label").TextContent);
         Assert.True(cut.FindAll(".lg-page-btn")[0].HasAttribute("disabled"));   // Prev at start
 
         cut.FindAll(".lg-page-btn")[1].Click();                                 // Next
-        Assert.Equal("Rows 51–100 of 120", cut.Find(".lg-page-label").TextContent);
+        Assert.Equal("Rows 26–50 of 120", cut.Find(".lg-page-label").TextContent);
 
+        cut.FindAll(".lg-page-btn")[1].Click();
+        cut.FindAll(".lg-page-btn")[1].Click();
         cut.FindAll(".lg-page-btn")[1].Click();
         Assert.Equal("Rows 101–120 of 120", cut.Find(".lg-page-label").TextContent);
         Assert.Equal(20, cut.FindAll(".lg-body").Count);                        // the tail page
@@ -172,7 +174,7 @@ public class SalesLedgerTests : BunitContext
 
         // A filter change lands back on page one of the new set.
         cut.Find("button[data-bucket='PSA 10']").Click();
-        Assert.Equal("Rows 1–50 of 120", cut.Find(".lg-page-label").TextContent);
+        Assert.Equal("Rows 1–25 of 120", cut.Find(".lg-page-label").TextContent);
     }
 
     [Fact]

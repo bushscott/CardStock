@@ -12,5 +12,11 @@ public sealed record LedgerSale(
 
 public interface ICardSalesReader
 {
+    /// <summary>D-091: the ledger ships the newest this-many sales per grade bucket,
+    /// lifetime — a bucket truncates only once its captured history exceeds the cap,
+    /// so rare buckets show their complete lives while fast buckets stay bounded.
+    /// One constant shared by the reader's query and the ledger's copy.</summary>
+    const int BucketCap = 300;
+
     Task<IReadOnlyList<LedgerSale>> GetAsync(long cardId, CancellationToken cancellationToken = default);
 }

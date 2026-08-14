@@ -194,8 +194,9 @@ Y-axis labels are **`'$' + n.toLocaleString('en-US')`** on the raw `mx`/`mn` (:4
 
 ### 2.5 Sales ledger (:151–:215)
 
-> **Amended 2026-08-13 (D-090) — a twelve-month window, paged on the client.** Owner rulings after
-> seeing the live 615-row ledger, deviating from the prototype's uncapped endless list:
+> **Amended 2026-08-13 (D-090) — a twelve-month window, paged on the client.**
+> **⚠ The time window was superseded the same day by D-091 (next box) — the client paging and the
+> pager stand.** Kept for the audit trail:
 > - **The query is capped at a rolling twelve months** (`sold_on >= today − 12 months`, cutoff
 >   inclusive), enforced in `CardSalesReader` so older rows never leave the database. No server
 >   pagination — measured corpus max is 717 rows/card lifetime, and the window bounds growth to a
@@ -211,6 +212,26 @@ Y-axis labels are **`'$' + n.toLocaleString('en-US')`** on the raw `mx`/`mn` (:4
 >   sales beyond the window.
 > - **Tripwire, recorded not built:** keyset pagination becomes its own designed task only if a
 >   card's twelve-month window ever crosses ~5,000 rows or real sustained multi-user load arrives.
+
+> **Amended again 2026-08-13 (D-091) — newest 300 per grade bucket, lifetime; the time window is
+> retired.** The twelve-month cap broke the rare buckets: PSA 10 Charizard holds exactly 30
+> lifetime sales reaching to Dec 2023, and a flat window hid most of a slow bucket's life while
+> fast buckets are what actually grow without bound. So the cap moved onto the axis the ledger is
+> already organized around:
+> - **The query ships the newest `BucketCap = 300` rows per `grade_tier`, lifetime, no time
+>   window** (`ICardSalesReader.BucketCap`; a correlated `SelectMany`/LATERAL in
+>   `CardSalesReader`). A bucket truncates only once its captured history exceeds 300 — rare
+>   buckets show their complete lives; the hard ceiling is 19 × 300 rows however long the crawler
+>   runs. The database keeps everything; this is a read window.
+> - **Copy:** the panel title reverts to `Sales ledger`; the count line reads
+>   `{n} sales · newest 300 per grade` with tooltip "Grades with 300 or fewer captured sales show
+>   their complete history; busier grades show their newest 300. Each grade is complete from its
+>   own first captured sale; nothing earlier was observable." The true-zero empty states revert to
+>   their unscoped form — under a per-bucket cap, an empty selection means zero captured sales
+>   ever.
+> - The client paging (D-090) stands, resized to **25 rows per page** (owner, same session). Revisit conditions for the query shape and
+>   deep-history-on-demand were deliberately **not** authored yet (owner: "don't do the tripwires
+>   yet").
 
 Four stacked bands inside one card panel:
 

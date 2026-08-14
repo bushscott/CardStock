@@ -51,7 +51,7 @@ public sealed class LedgerState
     /// to filters or sort snaps back to the first page — the set under it changed.</summary>
     public int Page { get; private set; }
 
-    public const int PageSize = 50;
+    public const int PageSize = 25;   // owner-tuned 2026-08-13, down from 50
 
     public void Toggle(string dbLabel)
     {

@@ -12,16 +12,7 @@ namespace CardStock.Integration.Tests;
 /// </summary>
 public class CardSalesReaderTests : CardStockDatabaseTest
 {
-    // Fixed so the D-090 twelve-month window is deterministic: "today" is 2026-08-15,
-    // making 2025-08-15 the cutoff every time this suite runs, forever.
-    private static readonly DateTimeOffset Now = new(2026, 8, 15, 12, 0, 0, TimeSpan.Zero);
-
-    private CardSalesReader Reader() => new(NewContextFactory(), new FixedClock(Now));
-
-    private sealed class FixedClock(DateTimeOffset now) : TimeProvider
-    {
-        public override DateTimeOffset GetUtcNow() => now;
-    }
+    private CardSalesReader Reader() => new(NewContextFactory());
 
     private static async Task SeedCardAsync(CardStockDbContext db, long cardId)
     {
@@ -98,30 +89,40 @@ public class CardSalesReaderTests : CardStockDatabaseTest
     }
 
     [SkippableFact]
-    public async Task The_ledger_is_capped_at_twelve_months_of_sales()
+    public async Task Each_grade_bucket_ships_its_newest_cap_while_small_buckets_ship_whole()
     {
-        // D-090: the owner capped the ledger query at a rolling twelve months —
-        // sold_on on or after the cutoff returns; anything older never leaves the DB.
+        // D-091: newest 300 per grade bucket, lifetime, no time window. A bucket over
+        // the cap loses only its oldest rows; a bucket under it ships complete —
+        // that is the whole point: rare buckets keep their entire lives.
         Skip.IfNot(Available, "CARDSTOCK_TEST_DB is not set");
         await using var db = NewContext();
         await SeedCardAsync(db, 42);
 
-        var inside = new DateOnly(2025, 8, 16);       // one day inside the window
-        var boundary = new DateOnly(2025, 8, 15);     // exactly the cutoff — included
-        var outside = new DateOnly(2025, 8, 14);      // one day too old — excluded
+        // 302 Ungraded sales, one per day from 2024-01-01 — the two oldest must drop.
+        await db.Database.ExecuteSqlRawAsync(
+            """
+            INSERT INTO public.sales (card_id, source, source_id, sold_on, grade_tier, price_cents, listed_price_cents, title, captured_at)
+            SELECT 42, 'ebay', 'fast-' || i, DATE '2024-01-01' + i, 'Ungraded', 1000 + i, null, 'Fast ' || i, now()
+            FROM generate_series(0, 301) AS i;
+            """);
 
-        await db.Database.ExecuteSqlInterpolatedAsync(
-            $"""
-             INSERT INTO public.sales (card_id, source, source_id, sold_on, grade_tier, price_cents, listed_price_cents, title, captured_at)
-             VALUES ({42}, 'ebay', 'in',  {inside},   'PSA 10', {10000}, null, 'Inside',   now()),
-                    ({42}, 'ebay', 'bd',  {boundary}, 'PSA 10', {10000}, null, 'Boundary', now()),
-                    ({42}, 'ebay', 'out', {outside},  'PSA 10', {10000}, null, 'Outside',  now());
-             """);
+        // A 3-row rare bucket, older than everything above — ships in full regardless.
+        await db.Database.ExecuteSqlRawAsync(
+            """
+            INSERT INTO public.sales (card_id, source, source_id, sold_on, grade_tier, price_cents, listed_price_cents, title, captured_at)
+            VALUES (42, 'ebay', 'rare-1', DATE '2016-05-01', 'CGC 10 Prist.', 500000, null, 'Rare 1', now()),
+                   (42, 'ebay', 'rare-2', DATE '2019-11-20', 'CGC 10 Prist.', 700000, null, 'Rare 2', now()),
+                   (42, 'ebay', 'rare-3', DATE '2023-02-14', 'CGC 10 Prist.', 900000, null, 'Rare 3', now());
+            """);
 
         var sales = await Reader().GetAsync(42);
 
-        Assert.Equal(2, sales.Count);
-        Assert.DoesNotContain(sales, s => s.Title == "Outside");
+        Assert.Equal(303, sales.Count);
+        Assert.Equal(300, sales.Count(s => s.GradeTier == "Ungraded"));
+        Assert.Equal(3, sales.Count(s => s.GradeTier == "CGC 10 Prist."));
+        Assert.DoesNotContain(sales, s => s.Title is "Fast 0" or "Fast 1"); // the two oldest fast rows
+        Assert.Contains(sales, s => s.Title == "Rare 1");                   // 2016 survives
+        Assert.Equal(sales.OrderByDescending(s => s.SoldOn).Select(s => s.SoldOn), sales.Select(s => s.SoldOn));
     }
 
     [SkippableFact]

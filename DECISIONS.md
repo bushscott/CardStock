@@ -329,7 +329,21 @@ Read directly 2026-08-10, to be mirrored per D-018–D-021.
 
 ## Decided
 
+### D-091 — The ledger cap moves to the bucket: newest 300 per grade, lifetime
+Owner, 2026-08-13, minutes after D-090 shipped — seeing PSA 10 Charizard hold exactly 30 lifetime
+sales reaching to Dec 2023 exposed the twelve-month window as backwards: it hid a slow bucket's
+whole life while doing nothing about the fast buckets that actually grow without bound (the
+source's own ~30-row-per-bucket display means slow buckets arrive deep and fast buckets accumulate
+forever). Ruling: **the query ships the newest 300 rows per grade bucket, lifetime, no time
+window** (`ICardSalesReader.BucketCap`, one constant shared by query and copy). A bucket truncates
+only past 300 captured sales, so every rare bucket shows its complete history — the owner’s stated
+requirement — while the ceiling is 19 × 300 however long the crawler runs. Proven at the boundary
+against real Postgres (a 302-row bucket drops exactly its two oldest; a 3-row 2016 bucket ships
+whole). D-090’s client paging stands at an owner-tuned **25 rows per page** (down from 50); its time window is superseded. Revisit conditions
+deliberately not authored yet (owner: “don’t do the tripwires yet”).
+
 ### D-090 — The sales ledger: twelve-month window, 50-row client pages, no server pagination
+**⚠ The twelve-month window was superseded the same day by D-091; the client paging stands.**
 Owner, 2026-08-13, after seeing the live 615-row ledger and weighing multi-user database load.
 Claude's measurements framed the call: corpus max 717 sales/card lifetime (p99 288, median 46), the
 615-row query serving in 2ms off `sales(card_id, sold_on)`, so server pagination would trade the
