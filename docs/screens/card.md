@@ -868,6 +868,13 @@ two remain unaddressed if they matter later.
 
 The hover tooltip and crosshair have `pointer-events: none` (:134) / are absolutely positioned out of the way (:135), so they never interfere with tracking.
 
+**Amended 2026-08-13 (D-089) — the tooltip follows the crosshair horizontally.** Owner ruling,
+deviating from the prototype's pinned top-left box (:135) after weighing occlusion against eye
+travel: the box rides 12px right of the cursor's x, `top: 8px` fixed, clamped to the pane (8px
+left inset; right clamp at `width − 150`, the estimated box width, so it parks at the edge while
+the crosshair continues). With no pointer x — keyboard, a missing `param.point` — it falls back to
+the pinned corner. `pointer-events: none` unchanged.
+
 ### 5.5 Sales ledger
 
 | # | Element | Line | Consequence |

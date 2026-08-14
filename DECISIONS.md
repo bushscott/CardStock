@@ -329,6 +329,14 @@ Read directly 2026-08-10, to be mirrored per D-018–D-021.
 
 ## Decided
 
+### D-089 — The chart tooltip follows the crosshair horizontally (owner, over the mockup's pin)
+2026-08-13, on the live page. The prototype pins the hover box top-left (:135); the owner asked for
+cursor-following, Claude recommended keeping the pin (occlusion, jitter, TradingView precedent),
+and the owner chose the offered compromise: **horizontal-follow** — the box rides 12px right of the
+cursor, top fixed at 8px, clamped to the pane so it parks at the edges, falling back to the pinned
+corner when no pointer x exists. Recorded because it deliberately deviates from the frozen mockup;
+card.md §5.4 carries the amendment.
+
 ### D-087 — Placeholder-first UI: every slot ships, labeled honestly, before its data or feature
 Owner, 2026-08-13, reviewing the live card page: *"Even if you don't have the functionality wired
 up, put the UI in with placeholder controls or labels."* A standing rule for all remaining

@@ -169,6 +169,30 @@ public class PriceChartTests : BunitContext
     }
 
     [Fact]
+    public async Task Tooltip_follows_the_crosshair_horizontally_with_an_edge_clamp()
+    {
+        // D-089: owner chose horizontal-follow over the mockup's pinned corner. The box
+        // rides 12px right of the crosshair, clamps at both edges, keeps top fixed, and
+        // with no x (keyboard, tests, missing point) falls back to the pinned corner.
+        var cut = Render<PriceChart>(p => p.Add(x => x.Prices, SixTiers()));
+
+        await cut.InvokeAsync(() => cut.Instance.OnCrosshairMonth(5, 100, 800));
+        Assert.Contains("left:112px", cut.Find(".pc-tooltip").GetAttribute("style"));
+
+        // Near the right edge: clamped to width - 150 (the estimated box width), not x+12.
+        await cut.InvokeAsync(() => cut.Instance.OnCrosshairMonth(5, 760, 800));
+        Assert.Contains("left:650px", cut.Find(".pc-tooltip").GetAttribute("style"));
+
+        // Near the left edge: never below the 8px inset.
+        await cut.InvokeAsync(() => cut.Instance.OnCrosshairMonth(5, 0, 800));
+        Assert.Contains("left:12px", cut.Find(".pc-tooltip").GetAttribute("style"));
+
+        // No x at all: the pinned-corner fallback.
+        await cut.InvokeAsync(() => cut.Instance.OnCrosshairMonth(5));
+        Assert.Contains("left:8px", cut.Find(".pc-tooltip").GetAttribute("style"));
+    }
+
+    [Fact]
     public async Task OnCrosshairMonth_out_of_range_index_clears_the_tooltip_without_throwing()
     {
         // C1: lwc-interop.js's index-rule bug could land the crosshair on the CURRENT month at

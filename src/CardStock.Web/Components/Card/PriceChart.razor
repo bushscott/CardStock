@@ -48,7 +48,7 @@
             }
             @if (_hoverMonthIndex is int hoverIndex)
             {
-                <div class="pc-tooltip">
+                <div class="pc-tooltip" style="left:@(TooltipLeftPx())px">
                     <div class="pc-tooltip-month">@Format.MonthLabel(MonthAt(hoverIndex))</div>
                     @foreach (var tierKey in LwcSeriesShaper.SerOrder)
                     {
@@ -85,6 +85,8 @@
     private ChartShape? _shape;
     private int? _hoverMonthIndex;
     private double? _dotTopPx;
+    private double? _hoverX;
+    private double? _paneWidth;
     private DotNetObjectReference<PriceChart>? _dotNetRef;
     private bool _jsInitialized;
 
@@ -156,11 +158,23 @@
     /// degrade to "no tooltip" rather than let MonthAt/tier.Points[hoverIndex] throw
     /// ArgumentOutOfRangeException and take the page down mid-hover.</summary>
     [JSInvokable]
-    public void OnCrosshairMonth(int? monthIndex)
+    public void OnCrosshairMonth(int? monthIndex, double? crosshairX = null, double? paneWidth = null)
     {
         _hoverMonthIndex = monthIndex is >= 0 and < MonthSlotCount ? monthIndex : null;
+        _hoverX = crosshairX;
+        _paneWidth = paneWidth;
         StateHasChanged();
     }
+
+    /// <summary>D-089: the tooltip rides 12px right of the crosshair, clamped to the pane
+    /// (8px inset on the left, an estimated 150px box width on the right, so the box parks
+    /// at the edge while the crosshair continues). No x — keyboard, tests, a missing
+    /// param.point — falls back to the mockup's pinned corner.</summary>
+    private string TooltipLeftPx() =>
+        _hoverX is { } x && _paneWidth is { } width
+            ? Math.Round(Math.Max(8, Math.Min(x + 12, width - 150)))
+                .ToString(System.Globalization.CultureInfo.InvariantCulture)
+            : "8";
 
     // C1: derived from CurrentMonth by date arithmetic -- mirrors LwcSeriesShaper.Shape's own
     // XFirst/XMiddle/XLast derivation (current.AddMonths(-11) etc.) -- rather than indexing

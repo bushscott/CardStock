@@ -96,7 +96,11 @@ window.lwcInterop = (function () {
         chart.subscribeCrosshairMove((param) => {
             const key = timeKey(param.time);
             const idx = key != null && state.monthIndex.has(key) ? state.monthIndex.get(key) : null;
-            dotnetRef.invokeMethodAsync("OnCrosshairMonth", idx);
+            // D-089: the raw cursor x (pane-relative; the pane spans the whole container
+            // since every internal axis is hidden) rides along so the tooltip can follow
+            // the crosshair horizontally, with the clamp computed on the .NET side.
+            const x = param.point ? param.point.x : null;
+            dotnetRef.invokeMethodAsync("OnCrosshairMonth", idx, x, el.clientWidth);
         });
 
         window.addEventListener("resize", state.onResize);
