@@ -377,8 +377,12 @@ rulings from the same exchange:
   else (~530 Japanese/Chinese/Korean/unmapped sets), hand-alias curation as an ongoing backlog
   rather than an up-front push. See also the D-107 v2 register: AI Japanese↔English matching is
   parked as the eventual backlog-collapser.
-- **Delivery:** per the D-079 precedent — written handoff brief, then a subagent scoped to
-  `../PokemonInvestBatch` after the design wraps.
+- **Delivery:** per the D-079 precedent — written handoff brief, then implementation inside
+  `../PokemonInvestBatch`. *Amended same day:* the owner runs it in a **fresh session opened in
+  that repo** rather than a spawned subagent — same brief
+  (`docs/superpowers/plans/2026-08-14-pokedex-phase.md` + the design spec), different vehicle.
+  Acceptance stays on this side: the spec's §7 receipts are re-run live from a CardStock session
+  before the phase closes in this ledger.
 
 ### D-104 — The Character page shows a species icon image, not an initial-on-gradient
 Owner, 2026-08-14, during the Pokédex-phase brainstorm: *"The CardStock character page will have an
