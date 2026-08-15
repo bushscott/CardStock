@@ -81,7 +81,9 @@ internal static class Fixtures
             new PricesDto("2026-08", []),
             new CensusDto(
                 [], PsaTotal: 0, CgcTotal: 0, ObservedAt: null, QualifyingObservations: 0,
-                Metrics: [], DeltaBars: []),
+                GemRate: new CensusMetricDto("lowdata", [], GateNote: null),
+                Pace: new CensusMetricDto("lowdata", [], GateNote: null),
+                DeltaBars: []),
             new SignalsDto(0, 0, []),
             new FreshnessDto(lastVisitedAt));
 }

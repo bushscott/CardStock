@@ -1,0 +1,27 @@
+@* card.md §3.8/§3.9 summary sentences, D-102 form: always printed, in the
+   mockup's own panel-foot position. The wire supplies the whole sentence as
+   toned runs — value runs mono, the – glyph standing in below a gate — and
+   this component never computes or re-words anything. LowData adds the ◌
+   pending glyph (brand.md §4: label carries its unlock ETA) with the gate
+   note as its tooltip; keyboard reachable like the tier tiles' glyph. *@
+@using CardStock.Application.Cards
+
+<p class="census-sentence">
+    <span class="cs-name">@Label</span>
+    @if (Metric.State == "lowdata")
+    {
+        <span class="cs-gate" tabindex="0" title="@Metric.GateNote" aria-label="@Metric.GateNote">◌</span>
+    }
+    @foreach (var segment in Metric.Segments)
+    {
+        <span class="cs-seg cs-tone-@segment.Tone @(segment.Mono ? "cs-mono" : null)">@segment.Text</span>
+    }
+</p>
+
+@code {
+    [Parameter, EditorRequired]
+    public string Label { get; set; } = default!;
+
+    [Parameter, EditorRequired]
+    public CensusMetricDto Metric { get; set; } = default!;
+}

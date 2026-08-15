@@ -5,7 +5,10 @@ namespace CardStock.Domain.Tests.Census;
 
 /// <summary>
 /// The census sentences (card.md §3.8/§3.9), computed read-time behind data
-/// checks (owner ruling 2026-08-13, D-093). Levels flat-fill from the FULL row
+/// checks (D-093), rendered as ALWAYS-PRINTED sentences (owner ruling
+/// 2026-08-14, D-102): the skeleton is permanent copy, the value runs are the
+/// – glyph until their own gate passes, and GateNote carries the ◌ tooltip
+/// naming the rule and when it passes. Levels flat-fill from the FULL row
 /// history (the populations storage contract — pre-floor levels are real);
 /// measurement WINDOWS are valid only wholly on/after the 2026-09-01 floor
 /// (D-033 gates the interval, not the level). The pace fixture reproduces
@@ -17,31 +20,33 @@ public class CensusMetricsTests
     private static CensusObservation Row(string grader, short grade, int pop, int y, int m, int d) =>
         new(grader, grade, pop, new DateTimeOffset(y, m, d, 12, 0, 0, TimeSpan.Zero));
 
-    private static CensusMetric Gem(IReadOnlyList<CensusObservation> rows, DateOnly today) =>
-        Assert.Single(CensusMetrics.Evaluate(rows, today), m => m.Name == "Gem rate");
-
-    private static CensusMetric Pace(IReadOnlyList<CensusObservation> rows, DateOnly today) =>
-        Assert.Single(CensusMetrics.Evaluate(rows, today), m => m.Name == "Pace");
-
     private static string Text(CensusMetric metric) => string.Concat(metric.Segments.Select(s => s.Text));
+
+    private const string GemSkeleton =
+        "– — of the last 90 days of PSA submissions, the share that came back 10.";
+
+    private const string PaceSkeleton = "– / mo — – new 10s since Sep ’26.";
 
     // -- gem rate ------------------------------------------------------------
 
     [Fact]
-    public void Gem_rate_low_data_until_the_window_is_fully_post_floor()
+    public void Gem_rate_prints_the_dashed_skeleton_until_the_window_is_fully_post_floor()
     {
         // 2026-11-29: the trailing 90 days reach back to Aug 31, before the floor.
-        var gem = Gem([], new DateOnly(2026, 11, 29));
+        var gem = CensusMetrics.GemRate([], new DateOnly(2026, 11, 29));
 
         Assert.Equal(MetricState.LowData, gem.State);
-        Assert.Null(gem.Value);
+        Assert.Equal(GemSkeleton, Text(gem));
         Assert.Equal(
             "needs 90 days of census deltas; observations count from 09-01-2026 — the window fills 11-30-2026",
-            Text(gem));
+            gem.GateNote);
+        Assert.True(gem.Segments[0].Mono);   // the – sits in the value run
+        Assert.Equal("–", gem.Segments[0].Text);
+        Assert.All(gem.Segments, s => Assert.Equal(ChipTone.Neutral, s.Tone));
     }
 
     [Fact]
-    public void Gem_rate_low_data_below_thirty_submissions_names_the_progress()
+    public void Gem_rate_below_thirty_submissions_keeps_the_skeleton_and_names_the_progress()
     {
         // Window valid (2026-11-30) but only 29 new PSA slabs inside it.
         List<CensusObservation> rows =
@@ -52,12 +57,13 @@ public class CensusMetricsTests
             Row("psa", 9, 5019, 2026, 11, 25),   // Δ9 = 19 → Δall = 29
         ];
 
-        var gem = Gem(rows, new DateOnly(2026, 11, 30));
+        var gem = CensusMetrics.GemRate(rows, new DateOnly(2026, 11, 30));
 
         Assert.Equal(MetricState.LowData, gem.State);
+        Assert.Equal(GemSkeleton, Text(gem));
         Assert.Equal(
             "fewer than 30 PSA slabs graded in the last 90 days · 29 of 30 — rate withheld",
-            Text(gem));
+            gem.GateNote);
     }
 
     [Fact]
@@ -70,10 +76,10 @@ public class CensusMetricsTests
             Row("psa", 9, 4995, 2026, 11, 25),
         ];
 
-        var gem = Gem(rows, new DateOnly(2026, 12, 15));
+        var gem = CensusMetrics.GemRate(rows, new DateOnly(2026, 12, 15));
 
         Assert.Equal(MetricState.LowData, gem.State);
-        Assert.Contains("0 of 30", Text(gem));
+        Assert.Contains("0 of 30", gem.GateNote);
     }
 
     [Fact]
@@ -89,11 +95,15 @@ public class CensusMetricsTests
             Row("psa", 9, 5029, 2026, 11, 20),   // Δ9 = 29 → Δall = 40
         ];
 
-        var gem = Gem(rows, new DateOnly(2026, 12, 15));
+        var gem = CensusMetrics.GemRate(rows, new DateOnly(2026, 12, 15));
 
         Assert.Equal(MetricState.Ok, gem.State);
-        Assert.Equal("27.5%", gem.Value);  // 11/40
-        Assert.Equal("of the last 90 days of PSA submissions, the share that came back 10", Text(gem));
+        Assert.Null(gem.GateNote);
+        Assert.Equal(
+            "27.5% — of the last 90 days of PSA submissions, the share that came back 10.",
+            Text(gem));
+        Assert.Equal("27.5%", gem.Segments[0].Text);  // 11/40
+        Assert.True(gem.Segments[0].Mono);
     }
 
     [Fact]
@@ -111,16 +121,16 @@ public class CensusMetricsTests
             Row("psa", 9, 5133, 2027, 3, 1),
         ];
 
-        var gem = Gem(rows, new DateOnly(2027, 3, 10));
+        var gem = CensusMetrics.GemRate(rows, new DateOnly(2027, 3, 10));
 
         Assert.Equal(MetricState.Ok, gem.State);
-        Assert.Equal("27.0%", gem.Value);
         Assert.Equal(
-            "of the last 90 days of PSA submissions, the share that came back 10 · drifting " +
-            "−13.0pp / 90d (harder to gem = supply of fresh 10s slowing)",
+            "27.0% — of the last 90 days of PSA submissions, the share that came back 10. " +
+            "Drifting −13.0pp / 90d (harder to gem = supply of fresh 10s slowing).",
             Text(gem));
         var drift = gem.Segments.Single(s => s.Text.Contains("pp / 90d"));
         Assert.Equal(ChipTone.Pos, drift.Tone);  // falling gem rate is bullish for holders
+        Assert.True(drift.Mono);
     }
 
     [Fact]
@@ -136,9 +146,9 @@ public class CensusMetricsTests
             Row("psa", 9, 5133, 2027, 3, 1),
         ];
 
-        var gem = Gem(rows, new DateOnly(2027, 3, 10));
+        var gem = CensusMetrics.GemRate(rows, new DateOnly(2027, 3, 10));
 
-        Assert.Contains("(easier to gem = fresh 10s arriving faster)", Text(gem));
+        Assert.EndsWith("(easier to gem = fresh 10s arriving faster).", Text(gem));
         var drift = gem.Segments.Single(s => s.Text.Contains("pp / 90d"));
         Assert.Equal("+13.0pp / 90d", drift.Text);
         Assert.Equal(ChipTone.Neg, drift.Tone);
@@ -158,16 +168,16 @@ public class CensusMetricsTests
             Row("psa", 9, 6459, 2027, 3, 1),
         ];
 
-        var gem = Gem(rows, new DateOnly(2027, 3, 10));
+        var gem = CensusMetrics.GemRate(rows, new DateOnly(2027, 3, 10));
 
-        Assert.EndsWith("−0.1pp / 90d steady", Text(gem));
+        Assert.EndsWith("Drifting −0.1pp / 90d steady.", Text(gem));
         Assert.All(gem.Segments, s => Assert.Equal(ChipTone.Neutral, s.Tone));
     }
 
     // -- pace ----------------------------------------------------------------
 
     [Fact]
-    public void Pace_low_data_below_two_qualifying_observations()
+    public void Pace_prints_the_dashed_skeleton_below_two_qualifying_observations()
     {
         // One pre-floor row and one post-floor row: 1 qualifying (D-033).
         List<CensusObservation> rows =
@@ -176,16 +186,19 @@ public class CensusMetricsTests
             Row("psa", 10, 1010, 2026, 9, 10),
         ];
 
-        var pace = Pace(rows, new DateOnly(2026, 9, 20));
+        var pace = CensusMetrics.Pace(rows, new DateOnly(2026, 9, 20));
 
         Assert.Equal(MetricState.LowData, pace.State);
+        Assert.Equal(PaceSkeleton, Text(pace));
         Assert.Equal(
             "needs census deltas; observations count from 09-01-2026, 1 so far — deltas need two",
-            Text(pace));
+            pace.GateNote);
+        Assert.Equal("– / mo", pace.Segments[0].Text);
+        Assert.True(pace.Segments[0].Mono);
     }
 
     [Fact]
-    public void Pace_low_data_until_a_post_floor_month_has_closed()
+    public void Pace_keeps_the_skeleton_until_a_post_floor_month_has_closed()
     {
         List<CensusObservation> rows =
         [
@@ -193,10 +206,11 @@ public class CensusMetricsTests
             Row("psa", 10, 1010, 2026, 9, 20),
         ];
 
-        var pace = Pace(rows, new DateOnly(2026, 9, 25));
+        var pace = CensusMetrics.Pace(rows, new DateOnly(2026, 9, 25));
 
         Assert.Equal(MetricState.LowData, pace.State);
-        Assert.Equal("first monthly delta closes 10-01-2026 — 2 observations so far", Text(pace));
+        Assert.Equal(PaceSkeleton, Text(pace));
+        Assert.Equal("first monthly delta closes 10-01-2026 — 2 observations so far", pace.GateNote);
     }
 
     [Fact]
@@ -217,16 +231,21 @@ public class CensusMetricsTests
             Row("psa", 10, 1479, 2027, 3, 25),   // Mar +58
         ];
 
-        var pace = Pace(rows, new DateOnly(2027, 4, 5));
+        var pace = CensusMetrics.Pace(rows, new DateOnly(2027, 4, 5));
 
         Assert.Equal(MetricState.Ok, pace.State);
-        Assert.Equal("+58 / mo", pace.Value);
+        Assert.Null(pace.GateNote);
         Assert.Equal(
-            "and rising — 331 new 10s since Sep ’26, growing the census +29% in 7 months " +
-            "(fresh supply working against the price)",
+            "+58 / mo and rising — 331 new 10s since Sep ’26, growing the census +29% in 7 months " +
+            "(fresh supply working against the price).",
             Text(pace));
+        Assert.Equal("+58 / mo", pace.Segments[0].Text);
+        Assert.True(pace.Segments[0].Mono);
         var growth = pace.Segments.Single(s => s.Text == "+29%");
         Assert.Equal(ChipTone.Neg, growth.Tone);  // supply growth is bearish
+        Assert.True(growth.Mono);
+        var count = pace.Segments.Single(s => s.Text == "331");
+        Assert.True(count.Mono);
     }
 
     [Fact]
@@ -240,11 +259,11 @@ public class CensusMetricsTests
             rows.Add(Row("psa", 10, 1002 + 2 * m, month.Year, month.Month, 15));
         }
 
-        var pace = Pace(rows, new DateOnly(2027, 4, 5));
+        var pace = CensusMetrics.Pace(rows, new DateOnly(2027, 4, 5));
 
         Assert.Equal(MetricState.Ok, pace.State);
-        Assert.Equal("+2 / mo", pace.Value);
-        Assert.Contains("(supply nearly frozen — scarcity intact)", Text(pace));
+        Assert.Equal("+2 / mo", pace.Segments[0].Text);
+        Assert.EndsWith("(supply nearly frozen — scarcity intact).", Text(pace));
         var growth = pace.Segments.Single(s => s.Text == "+1%");
         Assert.Equal(ChipTone.Pos, growth.Tone);
     }
@@ -260,28 +279,29 @@ public class CensusMetricsTests
             Row("psa", 10, 1022, 2026, 10, 15),
         ];
 
-        var pace = Pace(rows, new DateOnly(2026, 11, 5));
+        var pace = CensusMetrics.Pace(rows, new DateOnly(2026, 11, 5));
 
         Assert.Equal(MetricState.Ok, pace.State);
-        Assert.Equal("+12 / mo", pace.Value);
-        Assert.StartsWith("— 22 new 10s since Sep ’26", Text(pace));
+        Assert.StartsWith("+12 / mo — 22 new 10s since Sep ’26", Text(pace));
         Assert.DoesNotContain("rising", Text(pace));
     }
 
     [Fact]
     public void Pace_omits_the_growth_clause_when_the_starting_census_is_zero()
     {
-        // No PSA 10 slabs existed at the floor: percentage growth is undefined.
+        // No PSA 10 slabs existed at the floor: percentage growth is undefined,
+        // and the sentence still closes with its period. Sep +8, Oct +4 —
+        // latest month is the pace, the sum is the count.
         List<CensusObservation> rows =
         [
             Row("psa", 10, 8, 2026, 9, 20),
             Row("psa", 10, 12, 2026, 10, 15),
         ];
 
-        var pace = Pace(rows, new DateOnly(2026, 11, 5));
+        var pace = CensusMetrics.Pace(rows, new DateOnly(2026, 11, 5));
 
         Assert.Equal(MetricState.Ok, pace.State);
-        Assert.Equal("— 12 new 10s since Sep ’26", Text(pace));
+        Assert.Equal("+4 / mo — 12 new 10s since Sep ’26.", Text(pace));
     }
 
     [Fact]
@@ -295,9 +315,9 @@ public class CensusMetricsTests
             Row("psa", 10, 1006, 2026, 10, 15),
         ];
 
-        var pace = Pace(rows, new DateOnly(2026, 11, 5));
+        var pace = CensusMetrics.Pace(rows, new DateOnly(2026, 11, 5));
 
-        Assert.Equal("−4 / mo", pace.Value);
+        Assert.Equal("−4 / mo", pace.Segments[0].Text);
     }
 
     // -- window plumbing -----------------------------------------------------
@@ -316,10 +336,10 @@ public class CensusMetricsTests
             Row("psa", 10, 1040, 2026, 10, 20),
         ];
 
-        var pace = Pace(rows, new DateOnly(2026, 11, 5));
+        var pace = CensusMetrics.Pace(rows, new DateOnly(2026, 11, 5));
 
         // Sep = 1015 − 1000 = +15; Oct = count(Nov 1) − count(Oct 1) = 1040 − 1015.
-        Assert.Equal("+25 / mo", pace.Value);
+        Assert.Equal("+25 / mo", pace.Segments[0].Text);
         Assert.Contains("40 new 10s", Text(pace));
     }
 
@@ -334,12 +354,12 @@ public class CensusMetricsTests
             new("psa", 10, 1010, new DateTimeOffset(2026, 9, 15, 12, 0, 0, TimeSpan.Zero)),
         ];
 
-        var pace = Pace(rows, new DateOnly(2026, 9, 20));
+        var pace = CensusMetrics.Pace(rows, new DateOnly(2026, 9, 20));
 
         Assert.Equal(MetricState.LowData, pace.State);
         Assert.Equal(
             "needs census deltas; observations count from 09-01-2026, 1 so far — deltas need two",
-            Text(pace));
+            pace.GateNote);
     }
 
     [Fact]
@@ -354,19 +374,22 @@ public class CensusMetricsTests
             Row("cgc", 10, 900, 2026, 10, 10),
         ];
 
-        var pace = Pace(rows, new DateOnly(2026, 11, 5));
+        var pace = CensusMetrics.Pace(rows, new DateOnly(2026, 11, 5));
 
-        Assert.Equal("+12 / mo", pace.Value);
+        Assert.Equal("+12 / mo", pace.Segments[0].Text);
         Assert.Contains("22 new 10s", Text(pace));
     }
 
     [Fact]
-    public void Both_metrics_evaluate_in_slot_order()
+    public void An_empty_history_prints_both_dashed_skeletons()
     {
-        var metrics = CensusMetrics.Evaluate([], new DateOnly(2026, 8, 13));
+        var gem = CensusMetrics.GemRate([], new DateOnly(2026, 8, 13));
+        var pace = CensusMetrics.Pace([], new DateOnly(2026, 8, 13));
 
-        Assert.Equal(new[] { "Gem rate", "Pace" }, metrics.Select(m => m.Name));
-        Assert.All(metrics, m => Assert.Equal(MetricState.LowData, m.State));
+        Assert.Equal(MetricState.LowData, gem.State);
+        Assert.Equal(MetricState.LowData, pace.State);
+        Assert.Equal(GemSkeleton, Text(gem));
+        Assert.Equal(PaceSkeleton, Text(pace));
     }
 
     // -- the ghost delta chart (D-094) ---------------------------------------

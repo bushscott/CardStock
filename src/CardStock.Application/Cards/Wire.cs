@@ -30,20 +30,23 @@ public sealed record TierChangeDto(string State, decimal? Fraction, int RecentSa
 public sealed record CensusDto(
     IReadOnlyList<CensusBarDto> Bars, int PsaTotal, int CgcTotal,
     DateTimeOffset? ObservedAt, int QualifyingObservations,
-    IReadOnlyList<CensusMetricDto> Metrics,
+    CensusMetricDto GemRate, CensusMetricDto Pace,
     IReadOnlyList<CensusDeltaBarDto> DeltaBars);
 
 public sealed record CensusBarDto(string Grader, short Grade, int Count);
 
-/// <summary>One census-metric slot (D-093): Gem rate or Pace. State: "ok" |
-/// "lowdata". Ok carries the headline Value and the sentence as toned segments;
-/// lowdata carries a single segment naming the rule and when it passes.</summary>
+/// <summary>One census sentence (D-093 gates, D-102 form), always printed —
+/// gem rate at the population panel's foot, pace at the grading-activity
+/// panel's. State: "ok" | "lowdata". The segments are the whole sentence;
+/// below a gate the value runs hold the – glyph and GateNote carries the
+/// ◌ tooltip naming the rule and when it passes (null when ok).</summary>
 public sealed record CensusMetricDto(
-    string Name, string State, string? Value, IReadOnlyList<MetricSegmentDto> Segments);
+    string State, IReadOnlyList<MetricSegmentDto> Segments, string? GateNote);
 
 /// <summary>Tone: "pos" | "neg" | "caution" | "neutral" — neutral renders in the
-/// note's own muted colour.</summary>
-public sealed record MetricSegmentDto(string Text, string Tone);
+/// note's own muted colour. Mono marks the runs the mockup sets in the mono
+/// face: the value and every number token, the – placeholders included.</summary>
+public sealed record MetricSegmentDto(string Text, string Tone, bool Mono);
 
 /// <summary>One slot of the ghost delta chart (D-094). Month is "yyyy-MM".
 /// State: "observed" (Delta present, bar filled and scaled) | "pending" (dashed

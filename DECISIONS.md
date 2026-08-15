@@ -340,6 +340,33 @@ Read directly 2026-08-10, to be mirrored per D-018–D-021.
 
 ## Decided
 
+### D-102 — The census sentences print permanently; dashes and the ◌ glyph carry the gates
+Owner, 2026-08-14, on discovering the gem-rate sentence had become a slot in the other panel:
+*"Why did we move data from one panel to the next? Both of those panels should just have the
+sentence printed in static code and numbers that we fill in. If we don't have the data for the
+numbers, then just put a dash in a note. In fact, don't we already use a circle as an indication
+of not enough data?"* Supersedes the D-087 rider's state-line ruling (made 08-13) — and corrects
+an **unruled placement drift**: D-093's build stacked both slots under the grading-activity
+chart; no entry ever decided that. Now each sentence sits at its mockup panel's foot (gem :232
+left, pace :248 right), always printed via one shared `CensusSentence` component — skeleton as
+permanent copy, value runs holding the – glyph (`ChipEngine.GlyphDash`, made public so the glyph
+keeps one definition) in the mono face below their gates, the ◌ pending glyph beside the label
+carrying the gate note as tooltip (brand.md §4 semantics — the same vocabulary as the tier tiles
+and locked signal rows, keyboard-reachable). Clauses whose *words* are data (drift
+direction/tone, trend word, growth clause) still omit rather than dash — a dashed "Drifting"
+would imply a direction nobody measured. All D-093 gates, dates, thresholds, and branch wording
+unchanged; the §3.9 seed referee reproduces 331 / +29% / +58 / rising exactly against the new
+segment shape. **Deleted, per the owner's ask:** `CensusMetrics.Evaluate` + the `LowData`
+helper (Domain); `CensusMetric.Name`/`.Value`; the wire's `CensusDto.Metrics` list → named
+`GemRate`/`Pace` objects (state + toned/mono runs + gate note); the GradingActivityPanel slot
+stack with `.ga-metric*`/`.ga-state`/`.ga-seg-*` styles; `CensusBars.SummaryText` +
+`.census-summary` — D-084.4's all-grade totals ride the population header sub instead
+(`{N} PSA · {M} CGC · as of {date}`, all-grades tooltip; never-observed copy unchanged).
+**Added:** `CensusSentence.razor(.css)`; `Mono` on `MetricSegment`/`MetricSegmentDto` (the
+mockup's mono runs, – placeholders included). No schema or table changes — read-time
+presentation only. Suites 343 green; CI's exact format gate clean. Spec: card.md §2.6 D-102
+box + §3.8 supersession note.
+
 ### D-099 — The art fills its slot; the header's top and bottom edges are flush by construction
 Owner, 2026-08-14, screenshot in hand, immediately after D-097: the card's top no longer lines
 up with the action buttons, the title is a little off too — *"The top and the bottom of the card

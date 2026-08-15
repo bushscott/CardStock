@@ -1,0 +1,34 @@
+/* card.md §3.8/§3.9: 12.5px --mut2, margin-top 10 — the mockup's summary-line
+   recipe (:232/:248), shared by both panels' sentences. */
+.census-sentence {
+    font-size: 12.5px;
+    color: var(--mut2);
+    margin: 10px 0 0;
+}
+
+.cs-name {
+    margin-right: 5px;
+}
+
+/* brand.md §4: ◌ = pending/insufficient, --mut2, tooltip carries the unlock. */
+.cs-gate {
+    cursor: help;
+    margin-right: 5px;
+}
+
+/* The mockup sets value and number runs in the mono face, one step less muted
+   than the sentence body (:232/:248: mono, --mut). */
+.cs-mono {
+    font-family: 'JetBrains Mono', monospace;
+    color: var(--mut);
+}
+
+/* Market-meaning tones on number runs (§3.8/§3.9's sign convention: coloured
+   by meaning, never by arithmetic sign). They override the mono grey. */
+.cs-tone-pos {
+    color: var(--pos);
+}
+
+.cs-tone-neg {
+    color: var(--neg2);
+}

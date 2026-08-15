@@ -92,7 +92,8 @@ public static class CardPageMapper
             census.CgcTotal,
             census.ObservedAt,
             census.QualifyingObservations,
-            [.. CensusMetrics.Evaluate(census.Observations, today).Select(ToMetricDto)],
+            ToMetricDto(CensusMetrics.GemRate(census.Observations, today)),
+            ToMetricDto(CensusMetrics.Pace(census.Observations, today)),
             [.. CensusMetrics.DeltaBars(census.Observations, today).Select(ToDeltaBarDto)]);
 
     private static CensusDeltaBarDto ToDeltaBarDto(CensusDeltaBar bar) =>
@@ -105,10 +106,9 @@ public static class CardPageMapper
 
     private static CensusMetricDto ToMetricDto(CensusMetric metric) =>
         new(
-            metric.Name,
             metric.State == MetricState.Ok ? "ok" : "lowdata",
-            metric.Value,
-            [.. metric.Segments.Select(s => new MetricSegmentDto(s.Text, s.Tone.ToString().ToLowerInvariant()))]);
+            [.. metric.Segments.Select(s => new MetricSegmentDto(s.Text, s.Tone.ToString().ToLowerInvariant(), s.Mono))],
+            metric.GateNote);
 
     private static SignalsDto ToSignalsDto(
         CardPriceSnapshot prices, IReadOnlyList<LedgerSale> sales, DateOnly currentMonth, DateOnly today)

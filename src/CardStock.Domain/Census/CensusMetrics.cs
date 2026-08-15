@@ -24,9 +24,11 @@ public static class CensusMetrics
 
     private const int DeltaChartSlots = 7;
 
-    public static IReadOnlyList<CensusMetric> Evaluate(
-        IReadOnlyList<CensusObservation> observations, DateOnly today) =>
-        [GemRate(observations, today), Pace(observations, today)];
+    /// <summary>The mockup's own sentence body (:232), permanent copy — the
+    /// skeleton prints with the – glyph in the value run until the gate passes
+    /// (D-102).</summary>
+    private static readonly MetricSegment GemDefinition = new(
+        " — of the last 90 days of PSA submissions, the share that came back 10.", ChipTone.Neutral);
 
     /// <summary>
     /// The ghost delta chart (D-094): seven month slots ending at the current
@@ -75,13 +77,16 @@ public static class CensusMetrics
 
     // -- gem rate ------------------------------------------------------------
 
-    private static CensusMetric GemRate(IReadOnlyList<CensusObservation> observations, DateOnly today)
+    /// <summary>The population panel's sentence (card.md §3.8, mockup :232),
+    /// always printed. Below a gate the value run is the – glyph and GateNote
+    /// carries the ◌ tooltip (D-102).</summary>
+    public static CensusMetric GemRate(IReadOnlyList<CensusObservation> observations, DateOnly today)
     {
         var windowStart = today.AddDays(-GemWindowDays);
         if (windowStart < CardCensus.ObservationFloor)
         {
             var fills = CardCensus.ObservationFloor.AddDays(GemWindowDays);
-            return LowData("Gem rate",
+            return GemSkeleton(
                 $"needs {GemWindowDays} days of census deltas; observations count from " +
                 $"{Dates.Full(CardCensus.ObservationFloor)} — the window fills {Dates.Full(fills)}");
         }
@@ -89,65 +94,74 @@ public static class CensusMetrics
         var deltaAll = PsaAllDelta(observations, windowStart, today);
         if (deltaAll < GemSubmissionFloor)
         {
-            return LowData("Gem rate",
+            return GemSkeleton(
                 $"fewer than {GemSubmissionFloor} PSA slabs graded in the last {GemWindowDays} days · " +
                 $"{Math.Max(0, deltaAll)} of {GemSubmissionFloor} — rate withheld");
         }
 
         var rate = PsaTenDelta(observations, windowStart, today) / (decimal)deltaAll * 100;
-        var definition = "of the last 90 days of PSA submissions, the share that came back 10";
+        var rateRun = new MetricSegment($"{rate:0.0}%", ChipTone.Neutral, Mono: true);
 
         // Drift needs the prior 90-day window, wholly post-floor and above the
         // same submission floor; below either, the drift clause is omitted
-        // entirely (§3.8's gate — never a fabricated comparison).
+        // entirely (§3.8's gate — never a fabricated comparison, and never a
+        // dashed one: the clause's words are themselves the data).
         var priorStart = windowStart.AddDays(-GemWindowDays);
         var priorAll = priorStart >= CardCensus.ObservationFloor
             ? PsaAllDelta(observations, priorStart, windowStart)
             : 0;
         if (priorStart < CardCensus.ObservationFloor || priorAll < GemSubmissionFloor)
         {
-            return new CensusMetric("Gem rate", MetricState.Ok, $"{rate:0.0}%",
-                [new MetricSegment(definition, ChipTone.Neutral)]);
+            return new CensusMetric(MetricState.Ok, [rateRun, GemDefinition]);
         }
 
         // The band acts on the ROUNDED drift, so the branch always agrees with
         // the number the user is shown (−0.14 displays −0.1 and reads steady).
         var priorRate = PsaTenDelta(observations, priorStart, windowStart) / (decimal)priorAll * 100;
         var drift = Math.Round(rate - priorRate, 1, MidpointRounding.AwayFromZero);
-        var driftText = $"{SignedOneDecimal(drift)}pp / 90d";
+        var driftRun = $"{SignedOneDecimal(drift)}pp / 90d";
 
         if (Math.Abs(drift) <= GemFlatBandPp)
         {
-            return new CensusMetric("Gem rate", MetricState.Ok, $"{rate:0.0}%",
+            return new CensusMetric(MetricState.Ok,
             [
-                new MetricSegment($"{definition} · drifting ", ChipTone.Neutral),
-                new MetricSegment(driftText, ChipTone.Neutral),
-                new MetricSegment(" steady", ChipTone.Neutral),
+                rateRun, GemDefinition,
+                new MetricSegment(" Drifting ", ChipTone.Neutral),
+                new MetricSegment(driftRun, ChipTone.Neutral, Mono: true),
+                new MetricSegment(" steady.", ChipTone.Neutral),
             ]);
         }
 
         // A falling gem rate is bullish for holders of existing 10s (§3.8).
         var falling = drift < 0;
-        return new CensusMetric("Gem rate", MetricState.Ok, $"{rate:0.0}%",
+        return new CensusMetric(MetricState.Ok,
         [
-            new MetricSegment($"{definition} · drifting ", ChipTone.Neutral),
-            new MetricSegment(driftText, falling ? ChipTone.Pos : ChipTone.Neg),
+            rateRun, GemDefinition,
+            new MetricSegment(" Drifting ", ChipTone.Neutral),
+            new MetricSegment(driftRun, falling ? ChipTone.Pos : ChipTone.Neg, Mono: true),
             new MetricSegment(
                 falling
-                    ? " (harder to gem = supply of fresh 10s slowing)"
-                    : " (easier to gem = fresh 10s arriving faster)",
+                    ? " (harder to gem = supply of fresh 10s slowing)."
+                    : " (easier to gem = fresh 10s arriving faster).",
                 ChipTone.Neutral),
         ]);
     }
 
+    private static CensusMetric GemSkeleton(string gateNote) =>
+        new(MetricState.LowData,
+            [new MetricSegment(ChipEngine.GlyphDash, ChipTone.Neutral, Mono: true), GemDefinition],
+            gateNote);
+
     // -- pace ----------------------------------------------------------------
 
-    private static CensusMetric Pace(IReadOnlyList<CensusObservation> observations, DateOnly today)
+    /// <summary>The grading-activity panel's sentence (card.md §3.9, mockup
+    /// :248), always printed — same D-102 form as the gem rate.</summary>
+    public static CensusMetric Pace(IReadOnlyList<CensusObservation> observations, DateOnly today)
     {
         var qualifying = QualifyingCount(observations);
         if (qualifying < PaceObservationFloor)
         {
-            return LowData("Pace",
+            return PaceSkeleton(
                 $"needs census deltas; observations count from {Dates.Full(CardCensus.ObservationFloor)}, " +
                 $"{qualifying} so far — deltas need two");
         }
@@ -166,13 +180,16 @@ public static class CensusMetrics
         if (months.Count == 0)
         {
             var firstClose = CardCensus.ObservationFloor.AddMonths(1);
-            return LowData("Pace",
+            return PaceSkeleton(
                 $"first monthly delta closes {Dates.Full(firstClose)} — {qualifying} observations so far");
         }
 
         var latest = months[^1].Delta;
         var sum = months.Sum(m => m.Delta);
-        var segments = new List<MetricSegment>();
+        var segments = new List<MetricSegment>
+        {
+            new($"{SignedWhole(latest)} / mo", ChipTone.Neutral, Mono: true),
+        };
 
         // The trend word needs two full 3-month windows; below that it is
         // undefined and omitted, not guessed.
@@ -181,42 +198,56 @@ public static class CensusMetrics
             var recent = months.TakeLast(3).Sum(m => m.Delta);
             var prior = months.Skip(months.Count - 6).Take(3).Sum(m => m.Delta);
             var word = recent > prior ? "rising" : recent < prior ? "slowing" : "steady";
-            segments.Add(new MetricSegment($"and {word} — ", ChipTone.Neutral));
+            segments.Add(new MetricSegment($" and {word} — ", ChipTone.Neutral));
         }
         else
         {
-            segments.Add(new MetricSegment("— ", ChipTone.Neutral));
+            segments.Add(new MetricSegment(" — ", ChipTone.Neutral));
         }
 
-        segments.Add(new MetricSegment(
-            $"{sum} new 10s since {MonthLabel(CardCensus.ObservationFloor)}", ChipTone.Neutral));
+        segments.Add(new MetricSegment($"{sum}", ChipTone.Neutral, Mono: true));
 
         // Growth is a share of the census at the window start; a zero start has
-        // no honest percentage, so the clause is omitted.
+        // no honest percentage, so the clause is omitted and the sentence
+        // closes on the count.
         var startCount = PsaTenAt(observations, CardCensus.ObservationFloor);
         if (startCount > 0)
         {
             var pct = Math.Round(sum / (decimal)startCount * 100, MidpointRounding.AwayFromZero);
             var supplyPressure = pct / months.Count > PaceSupplyBandPctPerMonth;
+            segments.Add(new MetricSegment($" new 10s since {PaceSince}", ChipTone.Neutral));
             segments.Add(new MetricSegment(", growing the census ", ChipTone.Neutral));
             segments.Add(new MetricSegment(
                 $"{SignedWhole(pct)}%",
-                supplyPressure ? ChipTone.Neg : ChipTone.Pos));
+                supplyPressure ? ChipTone.Neg : ChipTone.Pos, Mono: true));
             segments.Add(new MetricSegment($" in {months.Count} months ", ChipTone.Neutral));
             segments.Add(new MetricSegment(
                 supplyPressure
-                    ? "(fresh supply working against the price)"
-                    : "(supply nearly frozen — scarcity intact)",
+                    ? "(fresh supply working against the price)."
+                    : "(supply nearly frozen — scarcity intact).",
                 ChipTone.Neutral));
         }
+        else
+        {
+            segments.Add(new MetricSegment($" new 10s since {PaceSince}.", ChipTone.Neutral));
+        }
 
-        return new CensusMetric("Pace", MetricState.Ok, $"{SignedWhole(latest)} / mo", segments);
+        return new CensusMetric(MetricState.Ok, segments);
     }
 
-    // -- window plumbing -----------------------------------------------------
+    /// <summary>`Sep ’26` — the floor month every pace window opens at.</summary>
+    private static readonly string PaceSince = MonthLabel(CardCensus.ObservationFloor);
 
-    private static CensusMetric LowData(string name, string note) =>
-        new(name, MetricState.LowData, null, [new MetricSegment(note, ChipTone.Neutral)]);
+    private static CensusMetric PaceSkeleton(string gateNote) =>
+        new(MetricState.LowData,
+        [
+            new MetricSegment($"{ChipEngine.GlyphDash} / mo", ChipTone.Neutral, Mono: true),
+            new MetricSegment(" — ", ChipTone.Neutral),
+            new MetricSegment(ChipEngine.GlyphDash, ChipTone.Neutral, Mono: true),
+            new MetricSegment($" new 10s since {PaceSince}.", ChipTone.Neutral),
+        ], gateNote);
+
+    // -- window plumbing -----------------------------------------------------
 
     private static int QualifyingCount(IReadOnlyList<CensusObservation> observations) =>
         observations

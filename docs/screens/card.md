@@ -467,7 +467,30 @@ row the prototype seeds (§3.9's `deltas`), between the header and the metric sl
 - **The current month is always the trailing ghost** — the outlined partial-month variant the
   prototype's vestigial `d.bd` border plumbing anticipated (§3.9 / OQ-10, now purposed).
 - Row geometry mirrors the population panel: flex-end, 150px, gap 10, values above, labels below.
-  The metric slots (D-093) sit beneath the chart, copy unchanged.
+  The metric slots (D-093) sit beneath the chart, copy unchanged. *(Slot placement superseded the
+  same week — D-102 below.)*
+
+**Amended 2026-08-14 (D-102) — the sentences print permanently; the slot stack is gone.** Owner:
+*"Both of those panels should just have the sentence printed in static code and numbers that we
+fill in. If we don't have the data for the numbers, then just put a dash in a note… don't we
+already use a circle as an indication of not enough data?"* Supersedes the D-087 rider's
+state-line form AND the slot stack's unruled placement under this panel's chart — each sentence
+returns to its mockup position: **gem rate at the population panel's foot (:232), pace at the
+grading-activity panel's (:248)**, both rendered by one shared `CensusSentence` component:
+
+- The **skeleton is permanent copy**; below a gate the value runs hold the **–** glyph
+  (brand.md §4's absent-value dash — `ChipEngine.GlyphDash`, one definition) in the mono face,
+  and the **◌** pending glyph beside the label carries the gate note as its tooltip
+  (keyboard-reachable, same vocabulary as the tier tiles and locked signal rows).
+- **Clauses whose words are data still omit rather than dash** — drift direction/tone, the
+  trend word, the growth clause: a dashed "Drifting" would imply a direction nobody measured.
+- Every D-093 **gate, date, threshold, and branch wording is unchanged**; the §3.9 seed referee
+  reproduces 331 / +29% / +58 / rising exactly against the new segment shape.
+- **D-084.4's totals move into the population header sub** — `{N} PSA · {M} CGC · as of {date}`,
+  tooltip "Totals across every grade, not only the six bars shown" — so the foot belongs to the
+  sentence, as in the mockup. Never-observed keeps its copy, no fabricated zeros.
+- Wire: `CensusDto.Metrics` (name/state/value slots) became named `GemRate`/`Pace` sentence
+  objects — state + toned/mono runs + gate note; `CensusMetric.Name`/`.Value` deleted.
 
 ### 2.7 Freshness footer (:252–:257)
 
@@ -790,6 +813,8 @@ bars stays honest against the full population. **The gem-rate sentence itself is
 inputs qualify** (restating the existing Gate rule below): today, under the 2026-09-01 floor
 (D-033), no card has 90 days of qualifying PSA submissions yet, so every card renders the totals
 segment with the gem-rate sentence absent — not zeroed, not estimated. See §4.11.
+**Superseded on the omission and the totals' seat 2026-08-14 (D-102, §2.6):** the sentence
+prints always — dashed value runs, ◌ gate tooltip — and the totals ride the header sub.
 
 **Summary sentence** (:232) — hard-coded, not templated in the seed. Structure:
 > `Gem rate ` **`27.3%`**` — of the last 90 days of PSA submissions, the share that came back 10. Drifting ` **`−0.4pp / 90d`**` (harder to gem = supply of fresh 10s slowing).`

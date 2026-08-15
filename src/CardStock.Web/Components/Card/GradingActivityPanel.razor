@@ -1,12 +1,9 @@
-@* card.md §2.6 (right panel) / §3.9, amended by D-093 (owner, 2026-08-13): the two
-   metric slots render whatever state the wire computed — the engine evaluates the
-   card's own observation history read-time behind per-metric data checks, so each
-   slot flips from LOW DATA to its computed sentence the moment its data qualifies,
-   with no further deploy. LOW DATA keeps D-087's form: the warn chip plus a note
-   naming the rule and when it passes. Ok renders the headline value plus the
-   sentence as toned segments — colour rides market meaning, and the words carry it
-   without the colour (never colour alone). This component never computes: the
-   header can never disagree with the wire. *@
+@* card.md §2.6 (right panel) / §3.9, D-093 gates, D-102 form: the pace sentence
+   prints permanently at the panel foot — dashed value runs and a ◌ gate tooltip
+   until the card's own observation history qualifies, the computed sentence the
+   moment it does, with no further deploy. The engine evaluates read-time behind
+   per-metric data checks; this component never computes, so the panel can never
+   disagree with the wire. *@
 @using CardStock.Application.Cards
 
 <div class="activity-panel">
@@ -36,27 +33,10 @@
             </div>
         }
     </div>
-    @foreach (var metric in Census.Metrics)
-    {
-        <div class="ga-metric">
-            <span class="ga-metric-name">@metric.Name</span>
-            @if (metric.State == "ok")
-            {
-                <span class="ga-metric-value">@metric.Value</span>
-                <span class="ga-metric-note">
-                    @foreach (var segment in metric.Segments)
-                    {
-                        <span class="ga-seg-@segment.Tone">@segment.Text</span>
-                    }
-                </span>
-            }
-            else
-            {
-                <span class="ga-state">LOW DATA</span>
-                <span class="ga-metric-note">@string.Concat(metric.Segments.Select(s => s.Text))</span>
-            }
-        </div>
-    }
+    @* D-102: the mockup's :248 pace sentence, permanent copy at the panel foot —
+       the D-093 slot stack it replaces carried the same gates, which now ride
+       the sentence's – runs and ◌ tooltip. *@
+    <CensusSentence Label="Pace" Metric="@Census.Pace" />
 </div>
 
 @code {

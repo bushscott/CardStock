@@ -24,7 +24,9 @@ public static class ChipEngine
 
     private const string GlyphUp = "▲";
     private const string GlyphDown = "▼";
-    private const string GlyphDash = "–"; // U+2013: caution firing, quiet, below-floor
+    // U+2013: caution firing, quiet, below-floor — and the absent-value runs in
+    // the census sentences (D-102), so the glyph has exactly one definition.
+    public const string GlyphDash = "–";
     private const string NoValue = "—";
 
     // Anchor preference = strip order, best first (spec §12).

@@ -84,59 +84,6 @@
     white-space: nowrap;
 }
 
-/* D-087: two metric slots, each a name + LOW DATA state + unlock note. The state
-   chip mirrors the OBS badge's warn recipe — colour never alone, the word carries
-   the meaning. */
-.ga-metric {
-    display: flex;
-    align-items: baseline;
-    gap: 8px;
-    margin-top: 12px;
-}
-
-.ga-metric-name {
-    font-size: 13px;
-    font-weight: 600;
-    flex-shrink: 0;
-}
-
-.ga-state {
-    font-family: 'JetBrains Mono', monospace;
-    font-size: 10.5px;
-    font-weight: 600;
-    letter-spacing: .06em;
-    color: var(--warnInk);
-    background: rgba(176, 127, 26, .12);
-    border-radius: 3px;
-    padding: 1px 5px;
-    flex-shrink: 0;
-}
-
-.ga-metric-note {
-    font-size: 12px;
-    color: var(--mut2);
-}
-
-/* D-093: the computed state's headline number, mono like every numeric. */
-.ga-metric-value {
-    font-family: 'JetBrains Mono', monospace;
-    font-size: 12.5px;
-    font-weight: 600;
-    color: var(--ink);
-    flex-shrink: 0;
-}
-
-/* Sentence segments: colour rides market meaning (a falling gem rate is green,
-   census growth is red); neutral inherits the note's muted colour. The toned
-   token is always a number-plus-words run, never colour alone. */
-.ga-seg-pos {
-    color: var(--pos);
-}
-
-.ga-seg-neg {
-    color: var(--neg2);
-}
-
-.ga-seg-caution {
-    color: var(--warnInk);
-}
+/* The D-087/D-093 metric-slot styles (.ga-metric*, .ga-state, .ga-seg-*) were
+   deleted by D-102 — the panel foot is CensusSentence now, which owns its own
+   sentence styling. */

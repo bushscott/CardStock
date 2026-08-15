@@ -342,19 +342,22 @@ public class CardPageMapperTests
     }
 
     [Fact]
-    public void Census_metrics_render_low_data_with_their_own_unlock_notes_today()
+    public void Census_sentences_print_dashed_skeletons_with_their_own_gate_notes_today()
     {
         // Today = 2026-08-13: gem rate's 90-day window reaches pre-floor, pace
-        // has no qualifying deltas. Each slot names its OWN rule (D-093).
-        var metrics = Map().Census.Metrics;
+        // has no qualifying deltas. Each sentence prints its dashed skeleton
+        // and names its OWN rule in the gate note (D-093 gates, D-102 form).
+        var census = Map().Census;
 
-        Assert.Equal(new[] { "Gem rate", "Pace" }, metrics.Select(m => m.Name));
-        Assert.All(metrics, m => Assert.Equal("lowdata", m.State));
-        Assert.All(metrics, m => Assert.Null(m.Value));
-        Assert.Contains("the window fills 11-30-2026", metrics[0].Segments.Single().Text);
+        Assert.Equal("lowdata", census.GemRate.State);
+        Assert.Equal("lowdata", census.Pace.State);
+        Assert.Contains("the window fills 11-30-2026", census.GemRate.GateNote);
         Assert.Equal(
             "needs census deltas; observations count from 09-01-2026, 0 so far — deltas need two",
-            metrics[1].Segments.Single().Text);
+            census.Pace.GateNote);
+        Assert.Equal("–", census.GemRate.Segments[0].Text);
+        Assert.True(census.GemRate.Segments[0].Mono);
+        Assert.Equal("– / mo", census.Pace.Segments[0].Text);
     }
 
     [Fact]
@@ -388,9 +391,11 @@ public class CardPageMapperTests
         var dto = CardPageMapper.ToDto(
             Identity(), Snapshot(), census, [], new DateOnly(2026, 11, 1), new DateOnly(2026, 11, 5));
 
-        var pace = Assert.Single(dto.Census.Metrics, m => m.Name == "Pace");
+        var pace = dto.Census.Pace;
         Assert.Equal("ok", pace.State);
-        Assert.Equal("+42 / mo", pace.Value);
+        Assert.Null(pace.GateNote);
+        Assert.Equal("+42 / mo", pace.Segments[0].Text);
+        Assert.True(pace.Segments[0].Mono);
         var growth = Assert.Single(pace.Segments, s => s.Text == "+5%");
         Assert.Equal("neg", growth.Tone);
     }

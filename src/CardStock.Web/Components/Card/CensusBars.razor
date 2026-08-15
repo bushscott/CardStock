@@ -10,7 +10,7 @@
 <div class="census-panel">
     <div class="census-header">
         <h2>Population · current census</h2>
-        <span class="census-sub">@HeaderSub()</span>
+        <span class="census-sub" title="@SubTooltip()">@HeaderSub()</span>
     </div>
     <div class="census-bars">
         @foreach (var bar in Census.Bars)
@@ -23,7 +23,10 @@
             </div>
         }
     </div>
-    <p class="census-summary">@SummaryText()</p>
+    @* D-102: the mockup's :232 gem-rate sentence, restored to this panel's foot
+       as permanent copy — dashed and ◌-gated until its window qualifies. The
+       D-084.4 totals moved up into the header sub. *@
+    <CensusSentence Label="Gem rate" Metric="@Census.GemRate" />
 </div>
 
 @code {
@@ -53,11 +56,16 @@
     private static string BarTooltip(CensusBarDto bar) =>
         $"{GradeLabel(bar)}: {N0(bar.Count)} slabs in current census ({bar.Grader.ToUpperInvariant()})";
 
-    private string SummaryText() =>
-        $"{N0(Census.PsaTotal)} PSA · {N0(Census.CgcTotal)} CGC slabs across all grades";
-
+    // D-084.4's all-grade totals, relocated into the header sub by D-102 so the
+    // panel foot belongs to the gem-rate sentence; the honesty framing ("the six
+    // bars are a slice") rides the sub's tooltip. Never-observed keeps its copy —
+    // zero totals on an unobserved card would read as a claim.
     private string HeaderSub() =>
         Census.ObservedAt is { } observed
-            ? $"PSA + CGC · as of {Dates.Full(observed)}"
+            ? $"{N0(Census.PsaTotal)} PSA · {N0(Census.CgcTotal)} CGC · as of {Dates.Full(observed)}"
             : "PSA + CGC · never observed";
+
+    // No tooltip on the never-observed copy — there are no totals to frame.
+    private string? SubTooltip() =>
+        Census.ObservedAt is null ? null : "Totals across every grade, not only the six bars shown";
 }
