@@ -102,6 +102,10 @@ code run once over the full corpus.
 - **Statuses:** ≥1 match → `tagged` + junction rows (`title-match`). Zero matches →
   `no-species` (trainers/energy/items — legitimate, countable). ≥4 species in one title, or a
   denylist-vs-match conflict → `quarantined` for review.
+  *(Amended 2026-08-14 during execution, D-108: the two bullets above conflicted — this bullet's
+  "denylist-vs-match conflict → quarantined" clause is retired. A denylist hit forces `no-species`
+  even when species names appear, exactly as the denylist bullet's own examples state;
+  `quarantined` is reserved for ≥4 species. The shipped matcher and ADR-0011 implement this.)*
 - **Manual override:** a console verb — `tag-card <id> <dex…>` / `tag-card <id> none` — writing
   `method = manual` junction rows and the status. The lane never modifies manual rows (tested).
 - **Performance envelope** (owner asked; answered with numbers 2026-08-14): steady-state daily

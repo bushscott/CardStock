@@ -35,9 +35,9 @@
 **Interfaces:**
 - Produces: `ScraperOptions.PokeapiDataBaseUrl`, `PokeapiSpritesBaseUrl`, `PokeapiDataPin`, `PokeapiSpritesPin`, `PokedexMirrorDirectory` (default `"pokeapi-mirror"`), `SpeciesIconDirectory` (default `"species-icons"`), `PokedexTaggingIntervalHours` (default `24`), `TcgdexSeriesEraPath` (default `"tcgdex-series-eras.json"` — reserved, unused until Task 10).
 
-- [ ] **Step 1: Write the ADR** — Nygard format, matching the tone of `0009-tcgdex-metadata-enrichment.md`. It must state: context (CardStock's Character/Browse surfaces need species data; owner ruled tagging is scraping — CardStock D-106 reversed D-069.10); the decision (seven scraper-owned tables, pinned PokéAPI dataset + sprites as local mirrors fetched once, longest-match-first title tagging, named-species rule — art cameos are untaggable); the two deviations and why (**current-state tables** because they are derived and rebuildable, unlike observation history; **targeted `DELETE`/`UPDATE` grants** on exactly these tables for `pokemon_app`, since re-tagging after a title correction must remove stale junction rows); manual overrides are operator SQL like delisting; and the pins (record the exact commit SHAs chosen in Step 2).
-- [ ] **Step 2: Pick and record the pins.** Browse GitHub for the current default-branch commit SHA of `PokeAPI/api-data` and `PokeAPI/sprites` (e.g. `git ls-remote https://github.com/PokeAPI/api-data.git HEAD`). Put both SHAs in the ADR and as the option defaults.
-- [ ] **Step 3: Append options** to `ScraperOptions.cs`, doc-commented in the file's style:
+- [x] **Step 1: Write the ADR** — Nygard format, matching the tone of `0009-tcgdex-metadata-enrichment.md`. It must state: context (CardStock's Character/Browse surfaces need species data; owner ruled tagging is scraping — CardStock D-106 reversed D-069.10); the decision (seven scraper-owned tables, pinned PokéAPI dataset + sprites as local mirrors fetched once, longest-match-first title tagging, named-species rule — art cameos are untaggable); the two deviations and why (**current-state tables** because they are derived and rebuildable, unlike observation history; **targeted `DELETE`/`UPDATE` grants** on exactly these tables for `pokemon_app`, since re-tagging after a title correction must remove stale junction rows); manual overrides are operator SQL like delisting; and the pins (record the exact commit SHAs chosen in Step 2).
+- [x] **Step 2: Pick and record the pins.** Browse GitHub for the current default-branch commit SHA of `PokeAPI/api-data` and `PokeAPI/sprites` (e.g. `git ls-remote https://github.com/PokeAPI/api-data.git HEAD`). Put both SHAs in the ADR and as the option defaults.
+- [x] **Step 3: Append options** to `ScraperOptions.cs`, doc-commented in the file's style:
 
 ```csharp
     /// <summary>Raw-content base for the pinned PokéAPI dataset (ADR-0011).
@@ -63,8 +63,8 @@
 ```
 
 (The literal `"<SHA from Step 2>"` placeholders are filled with the real SHAs in this same step — they must never survive to a commit.)
-- [ ] **Step 4: Validate** in `Program.cs`, appended to the existing chain: `.Validate(o => o.PokedexTaggingIntervalHours >= 1, "Scraper:PokedexTaggingIntervalHours must be at least 1.")` and non-empty checks for both pins.
-- [ ] **Step 5: Build, then commit** — `dotnet build` (warnings are errors); `git add docs/adr src/PokemonInvestBatch.Worker && git commit -m "ADR-0011: the Pokédex lives in the scraper"`.
+- [x] **Step 4: Validate** in `Program.cs`, appended to the existing chain: `.Validate(o => o.PokedexTaggingIntervalHours >= 1, "Scraper:PokedexTaggingIntervalHours must be at least 1.")` and non-empty checks for both pins.
+- [x] **Step 5: Build, then commit** — `dotnet build` (warnings are errors); `git add docs/adr src/PokemonInvestBatch.Worker && git commit -m "ADR-0011: the Pokédex lives in the scraper"`.
 
 ---
 
@@ -80,8 +80,8 @@
 **Interfaces:**
 - Produces: entities `Species`, `SpeciesType`, `SpeciesEggGroup`, `SpeciesName`, `CardSpeciesLink`, `CardTagging`, `SetDetail`; enums `TagStatus { Tagged, NoSpecies, Quarantined }`, `TagMethod { TitleMatch, Manual }`, `SetMatchStatus { Matched, Pending }` (all `: short`, values appended-only like `VisitOutcome`); DbSets `SpeciesRows` (→ table `species` via explicit `ToTable`), `SpeciesTypes`, `SpeciesEggGroups`, `SpeciesNames`, `CardSpecies`, `CardTagging`, `SetDetails`.
 
-- [ ] **Step 1: Write the enums** in `TagEnums.cs` (Application, beside `TcgdexMatchStatus`), each doc-commented; `TagStatus.NoSpecies` comment states it covers trainers/energy/items and is a legitimate terminal state, not a failure.
-- [ ] **Step 2: Write the entities**, mirroring `Entities.cs` style. The contract:
+- [x] **Step 1: Write the enums** in `TagEnums.cs` (Application, beside `TcgdexMatchStatus`), each doc-commented; `TagStatus.NoSpecies` comment states it covers trainers/energy/items and is a legitimate terminal state, not a failure.
+- [x] **Step 2: Write the entities**, mirroring `Entities.cs` style. The contract:
 
 ```csharp
 /// <summary>One Pokédex species (ADR-0011). PK is the national dex number,
@@ -128,11 +128,11 @@ public class SetDetail
 ```
 
 (Write the compact one-line classes as normal `{ get; set; }` properties — the shorthand above is layout, not field syntax. Add `SpeciesStatus { Ordinary, Legendary, Mythical } : short` to `TagEnums.cs`.)
-- [ ] **Step 3: DbContext config** in `OnModelCreating`, matching existing style: `Species` → `ToTable("species")`, `Id` `ValueGeneratedNever()`, unique index on `Slug`, max lengths (Name/Slug 200, Region/Color/Habitat 24, Gradient 7); `SpeciesType` PK `(SpeciesId, Slot)`, Type max 16; `SpeciesEggGroup` PK `(SpeciesId, EggGroup)`, EggGroup max 24; `SpeciesName` PK `(SpeciesId, Language)`, Language max 12, Name max 200; `CardSpeciesLink` → `ToTable("card_species")`, PK `(CardId, SpeciesId)`, FK → cards Restrict, FK → species Restrict, **extra index `(SpeciesId, CardId)`** (the Character-page direction); `CardTagging` → `ToTable("card_tagging")`, PK `CardId`, FK → cards Restrict, TaggedName max 300; `SetDetail` PK `SetId`, FK → sets Restrict, Code max 32, Series max 100, Era max 24. All species-side FKs from `SpeciesType`/`SpeciesEggGroup`/`SpeciesName` → species Restrict.
-- [ ] **Step 4: Generate the migration** — `dotnet ef migrations add AddPokedex --project src/PokemonInvestBatch.Infrastructure --startup-project src/PokemonInvestBatch.Worker`. Open it and verify table names are exactly the seven in Global Constraints.
-- [ ] **Step 5: Write the failing persistence test** in `PokedexPersistenceTests.cs`, using the same throwaway-database harness as the existing Infrastructure tests (see `tests/PokemonInvestBatch.TestSupport`): insert a `Species` (with types/egg groups/names), a `Card` + `CardSpeciesLink` + `CardTagging`, a `SetDetail`; read them back; assert round-trip equality and that inserting a duplicate `(CardId, SpeciesId)` link throws.
-- [ ] **Step 6: Run** `dotnet test tests/PokemonInvestBatch.Infrastructure.Tests --filter PokedexPersistence` — expect fail before the migration is applied by the harness, pass after.
-- [ ] **Step 7: Commit** — `git commit -m "Pokedex schema: seven tables (ADR-0011)"`.
+- [x] **Step 3: DbContext config** in `OnModelCreating`, matching existing style: `Species` → `ToTable("species")`, `Id` `ValueGeneratedNever()`, unique index on `Slug`, max lengths (Name/Slug 200, Region/Color/Habitat 24, Gradient 7); `SpeciesType` PK `(SpeciesId, Slot)`, Type max 16; `SpeciesEggGroup` PK `(SpeciesId, EggGroup)`, EggGroup max 24; `SpeciesName` PK `(SpeciesId, Language)`, Language max 12, Name max 200; `CardSpeciesLink` → `ToTable("card_species")`, PK `(CardId, SpeciesId)`, FK → cards Restrict, FK → species Restrict, **extra index `(SpeciesId, CardId)`** (the Character-page direction); `CardTagging` → `ToTable("card_tagging")`, PK `CardId`, FK → cards Restrict, TaggedName max 300; `SetDetail` PK `SetId`, FK → sets Restrict, Code max 32, Series max 100, Era max 24. All species-side FKs from `SpeciesType`/`SpeciesEggGroup`/`SpeciesName` → species Restrict.
+- [x] **Step 4: Generate the migration** — `dotnet ef migrations add AddPokedex --project src/PokemonInvestBatch.Infrastructure --startup-project src/PokemonInvestBatch.Worker`. Open it and verify table names are exactly the seven in Global Constraints.
+- [x] **Step 5: Write the failing persistence test** in `PokedexPersistenceTests.cs`, using the same throwaway-database harness as the existing Infrastructure tests (see `tests/PokemonInvestBatch.TestSupport`): insert a `Species` (with types/egg groups/names), a `Card` + `CardSpeciesLink` + `CardTagging`, a `SetDetail`; read them back; assert round-trip equality and that inserting a duplicate `(CardId, SpeciesId)` link throws.
+- [x] **Step 6: Run** `dotnet test tests/PokemonInvestBatch.Infrastructure.Tests --filter PokedexPersistence` — expect fail before the migration is applied by the harness, pass after.
+- [x] **Step 7: Commit** — `git commit -m "Pokedex schema: seven tables (ADR-0011)"`.
 
 ---
 
@@ -145,7 +145,7 @@ public class SetDetail
 **Interfaces:**
 - Produces: `static string TitleNormalizer.Normalize(string title)` — used by the matcher on **both** card titles and species names.
 
-- [ ] **Step 1: Write the failing tests** — the contract as data:
+- [x] **Step 1: Write the failing tests** — the contract as data:
 
 ```csharp
 [Theory]
@@ -161,10 +161,10 @@ public void Normalizes(string title, string expected)
     => Assert.Equal(expected, TitleNormalizer.Normalize(title));
 ```
 
-- [ ] **Step 2: Run to verify failure** — `dotnet test tests/PokemonInvestBatch.Application.Tests --filter TitleNormalizer` → FAIL (type not found).
-- [ ] **Step 3: Implement**: lowercase (invariant); strip one trailing `#<token>` (regex `\s*#\S+\s*$`); remove `[...]` groups; map U+2010/2011/2012/2013 → `-`, U+2018/2019 → `'`; fold diacritics via `string.Normalize(NormalizationForm.FormD)` dropping `NonSpacingMark` — **but pass `♀` (U+2640) and `♂` (U+2642) through untouched**; collapse runs of whitespace to one space; trim.
-- [ ] **Step 4: Run to verify pass.**
-- [ ] **Step 5: Commit** — `"Pokedex: title normalizer"`.
+- [x] **Step 2: Run to verify failure** — `dotnet test tests/PokemonInvestBatch.Application.Tests --filter TitleNormalizer` → FAIL (type not found).
+- [x] **Step 3: Implement**: lowercase (invariant); strip one trailing `#<token>` (regex `\s*#\S+\s*$`); remove `[...]` groups; map U+2010/2011/2012/2013 → `-`, U+2018/2019 → `'`; fold diacritics via `string.Normalize(NormalizationForm.FormD)` dropping `NonSpacingMark` — **but pass `♀` (U+2640) and `♂` (U+2642) through untouched**; collapse runs of whitespace to one space; trim.
+- [x] **Step 4: Run to verify pass.**
+- [x] **Step 5: Commit** — `"Pokedex: title normalizer"`.
 
 ---
 
@@ -177,10 +177,10 @@ public void Normalizes(string title, string expected)
 **Interfaces:**
 - Produces: `static bool ItemCardDenylist.IsItemCard(string normalizedTitle)` — called with `TitleNormalizer.Normalize` output.
 
-- [ ] **Step 1: Failing tests**: `"charizard spirit link #75"`→normalized→true; `"clefairy doll #70"`→true; `"growing grass energy #104"`→true; `"dome fossil #155"`→true; `"lillie's poke doll #197"`→true; and the guard rail — `"charizard [1st edition] #4"`→false, `"flareon #13"`→false (no species name contains any denylist term; assert that with a loop once the species fixture exists in Task 6 — here, just the literals).
-- [ ] **Step 2: Run** → FAIL.
-- [ ] **Step 3: Implement**: normalized-substring rules — ends with `" energy"` or equals `"energy"`; contains `"spirit link"`, `" doll"`, `" fossil"`, `"poke ball"`, `"'s pokedex"`. Keep the list a `private static readonly string[]` pair (suffixes, substrings) with a doc comment saying it grows via quarantine spot-checks (spec §4).
-- [ ] **Step 4: Run** → PASS. **Step 5: Commit** — `"Pokedex: item-card denylist"`.
+- [x] **Step 1: Failing tests**: `"charizard spirit link #75"`→normalized→true; `"clefairy doll #70"`→true; `"growing grass energy #104"`→true; `"dome fossil #155"`→true; `"lillie's poke doll #197"`→true; and the guard rail — `"charizard [1st edition] #4"`→false, `"flareon #13"`→false (no species name contains any denylist term; assert that with a loop once the species fixture exists in Task 6 — here, just the literals).
+- [x] **Step 2: Run** → FAIL.
+- [x] **Step 3: Implement**: normalized-substring rules — ends with `" energy"` or equals `"energy"`; contains `"spirit link"`, `" doll"`, `" fossil"`, `"poke ball"`, `"'s pokedex"`. Keep the list a `private static readonly string[]` pair (suffixes, substrings) with a doc comment saying it grows via quarantine spot-checks (spec §4).
+- [x] **Step 4: Run** → PASS. **Step 5: Commit** — `"Pokedex: item-card denylist"`.
 
 ---
 
@@ -205,7 +205,7 @@ public static class SpeciesMatcher
 }
 ```
 
-- [ ] **Step 1: Failing trap-fixture tests** (spec §6 verbatim — every family):
+- [x] **Step 1: Failing trap-fixture tests** (spec §6 verbatim — every family):
 
 ```csharp
 // fixture species: (25,"Pikachu")(26,"Raichu")(172,"Pichu")(150,"Mewtwo")(151,"Mew")
@@ -243,8 +243,8 @@ public void NoSpecies(string title) { /* assert Status=NoSpecies, empty ids */ }
 ```
 
 Plus one quarantine test: a synthetic title naming five fixture species → `Status=Quarantined` with the ids preserved for review.
-- [ ] **Step 2: Run** → FAIL. **Step 3: Implement**: normalize title; if `IsItemCard` → `NoSpecies`; else scan candidates in given order — for each, repeated case-sensitive `IndexOf` over the normalized title (both sides already normalized), accept only where both neighbors are word boundaries (`!char.IsLetterOrDigit`, with `♀`/`♂` counting as name characters, not boundaries), blank out accepted spans in a char buffer so consumed text can't re-match; distinct species ids in first-match order; 0 → `NoSpecies`, 1–3 → `Tagged`, ≥4 → `Quarantined`. `BuildCandidates` normalizes each English name and sorts length-descending, then ordinal.
-- [ ] **Step 4: Run** → PASS. **Step 5: Commit** — `"Pokedex: species matcher with trap fixture"`.
+- [x] **Step 2: Run** → FAIL. **Step 3: Implement**: normalize title; if `IsItemCard` → `NoSpecies`; else scan candidates in given order — for each, repeated case-sensitive `IndexOf` over the normalized title (both sides already normalized), accept only where both neighbors are word boundaries (`!char.IsLetterOrDigit`, with `♀`/`♂` counting as name characters, not boundaries), blank out accepted spans in a char buffer so consumed text can't re-match; distinct species ids in first-match order; 0 → `NoSpecies`, 1–3 → `Tagged`, ≥4 → `Quarantined`. `BuildCandidates` normalizes each English name and sorts length-descending, then ordinal.
+- [x] **Step 4: Run** → PASS. **Step 5: Commit** — `"Pokedex: species matcher with trap fixture"`.
 
 ---
 
@@ -275,11 +275,11 @@ public static class PokeapiDataset
 }
 ```
 
-- [ ] **Step 1: Failing tests**: `Load` over the fixture directory returns Umbreon as `(197, "Umbreon", "umbreon", 2, "Johto", "Black", "Urban", Ordinary, Stage 1, EvolvesFrom 133, Types ["Dark"], EggGroups ["Field"], names include ja, gradient non-empty)`; Pikachu derives `Stage 1, EvolvesFrom 172` (the pinned baby-case from spec §3); Type: Null has `Habitat = null`; an egg group absent from the display map throws with the group named in the message; same for an unmapped type or generation.
-- [ ] **Step 2: Run** → FAIL. **Step 3: Implement**:
+- [x] **Step 1: Failing tests**: `Load` over the fixture directory returns Umbreon as `(197, "Umbreon", "umbreon", 2, "Johto", "Black", "Urban", Ordinary, Stage 1, EvolvesFrom 133, Types ["Dark"], EggGroups ["Field"], names include ja, gradient non-empty)`; Pikachu derives `Stage 1, EvolvesFrom 172` (the pinned baby-case from spec §3); Type: Null has `Habitat = null`; an egg group absent from the display map throws with the group named in the message; same for an unmapped type or generation.
+- [x] **Step 2: Run** → FAIL. **Step 3: Implement**:
   - Parse `pokemon-species/{n}.json` for name/slug (`names` array `en` entry is the display name; the resource `name` is the slug), generation (`generation.name` → `"generation-ii"` → 2), color, habitat (nullable), `is_legendary`/`is_mythical`, `evolves_from_species`, egg groups, all 12 `names` languages; `pokemon/{id}.json` (the default variety from `varieties`) for types; `evolution-chain/{n}.json` for stage = depth of this species from the chain root.
   - `PokedexMaps`: `Region(short generation)` — 9-entry switch (Kanto, Johto, Hoenn, Sinnoh, Unova, Kalos, Alola, Galar, Paldea; anything else throws); `EggGroupDisplay(string apiName)` — `monster`→Monster, `water1`→Water 1, `water2`→Water 2, `water3`→Water 3, `bug`→Bug, `flying`→Flying, `ground`→**Field**, `fairy`→Fairy, `plant`→**Grass**, `humanshape`→**Human-Like**, `mineral`→Mineral, `indeterminate`→**Amorphous**, `ditto`→Ditto, `dragon`→Dragon, `no-eggs`→**No eggs**; unmapped throws. `TypeGradient(string primaryType)` — an 18-row map of tasteful two-stop hex pairs, e.g. Fire `("#B4522A","#E8A46B")`, Water `("#3D6FA8","#8FC1E8")`, Grass `("#3F7A4A","#9BC98F")`, Electric `("#B08A1E","#EAD06B")`, Psychic `("#7A4E8F","#C79BD6")`, Dark `("#2B2D42","#5C6B9E")` (the existing Umbreon pair from the prototypes), Dragon `("#4A5AA8","#8FA0E0")`, Fairy `("#A85A88","#E0A8C8")`, Normal `("#8A8A86","#C9C9C4")`, Fighting `("#8F4E3A","#D69B7A")`, Flying `("#6E8AB8","#B8CCE8")`, Poison `("#6E4E8F","#B08AC9")`, Ground `("#8F7A4E","#D6C08A")`, Rock `("#7A6E5A","#B8AC94")`, Bug `("#6E8F3A","#B8D68A")`, Ghost `("#4E4E7A","#9494C9")`, Steel `("#6E7A8A","#B0BCC9")`, Ice `("#5A9BB8","#B0E0F0")`; unmapped throws.
-- [ ] **Step 4: Run** → PASS. **Step 5: Commit** — `"Pokedex: dataset parser and authored maps"`.
+- [x] **Step 4: Run** → PASS. **Step 5: Commit** — `"Pokedex: dataset parser and authored maps"`.
 
 ---
 
@@ -293,9 +293,9 @@ public static class PokeapiDataset
 - Consumes: `ScraperOptions.PokeapiDataBaseUrl` + `PokeapiDataPin`.
 - Produces: `static bool Exists(string dir)`, `static Task<PokeapiMirrorManifest> FetchAsync(HttpClient http, string baseUrl, string pin, string dir, TimeProvider time, CancellationToken ct)`, `static string Version(string dir)` — manifest JSON (`pokeapi-mirror.manifest.json`: pin, fetched-at, file count) mirrors `TcgdexMirror`'s shape.
 
-- [ ] **Step 1: Failing tests**: `Exists` false on empty dir; `FetchAsync` against a stubbed `HttpMessageHandler` (serving three fixture species and their dependencies) writes `pokemon-species/197.json`, `pokemon/197.json`, `evolution-chain/67.json` under the dir + a manifest carrying the pin; `Version` reads it back.
-- [ ] **Step 2: Run** → FAIL. **Step 3: Implement**: fetch per-file from `{baseUrl}{pin}/data/api/v2/...` — first `pokemon-species/index.json` for the species list, then each species file, its default-variety `pokemon` file, its evolution chain (deduplicated), and the 15 `egg-group` files. Sequential with a small delay is fine (one-time, ~2,900 small files against GitHub's raw host; dedicated client, UA header like the TCGdex client). Any non-200 fails the fetch loudly — a partial mirror is worse than none; delete the directory on failure.
-- [ ] **Step 4: Run** → PASS. **Step 5: Commit** — `"Pokedex: pinned PokeAPI mirror"`.
+- [x] **Step 1: Failing tests**: `Exists` false on empty dir; `FetchAsync` against a stubbed `HttpMessageHandler` (serving three fixture species and their dependencies) writes `pokemon-species/197.json`, `pokemon/197.json`, `evolution-chain/67.json` under the dir + a manifest carrying the pin; `Version` reads it back.
+- [x] **Step 2: Run** → FAIL. **Step 3: Implement**: fetch per-file from `{baseUrl}{pin}/data/api/v2/...` — first `pokemon-species/index.json` for the species list, then each species file, its default-variety `pokemon` file, its evolution chain (deduplicated), and the 15 `egg-group` files. Sequential with a small delay is fine (one-time, ~2,900 small files against GitHub's raw host; dedicated client, UA header like the TCGdex client). Any non-200 fails the fetch loudly — a partial mirror is worse than none; delete the directory on failure.
+- [x] **Step 4: Run** → PASS. **Step 5: Commit** — `"Pokedex: pinned PokeAPI mirror"`.
 
 ---
 
@@ -308,8 +308,8 @@ public static class PokeapiDataset
 **Interfaces:**
 - Produces: `static Task<IconFetchResult> FetchMissingAsync(HttpClient http, string baseUrl, string pin, string iconDirectory, IReadOnlyList<int> dexNumbers, ILogger log, CancellationToken ct)` where `IconFetchResult` carries `FromMenuIcons`, `FromDefaultSprites`, `Missing` (counts + missing dex list). Files land as `{iconDirectory}/{dex}.png`.
 
-- [ ] **Step 1: Failing tests** against a stubbed handler: dex 197 served at the gen-viii icon path → written from `sprites/pokemon/versions/generation-viii/icons/197.png`; dex 1002 404s there but exists at `sprites/pokemon/1002.png` → written from the fallback; dex 9999 404s at both → counted `Missing`, no file, no throw. Existing files are skipped (idempotent).
-- [ ] **Step 2: Run** → FAIL. **Step 3: Implement** the two-step fallback chain exactly (menu icon → default front sprite → recorded gap; spec §3 icons). **Step 4: Run** → PASS. **Step 5: Commit** — `"Pokedex: species icon store with fallback chain"`.
+- [x] **Step 1: Failing tests** against a stubbed handler: dex 197 served at the gen-viii icon path → written from `sprites/pokemon/versions/generation-viii/icons/197.png`; dex 1002 404s there but exists at `sprites/pokemon/1002.png` → written from the fallback; dex 9999 404s at both → counted `Missing`, no file, no throw. Existing files are skipped (idempotent).
+- [x] **Step 2: Run** → FAIL. **Step 3: Implement** the two-step fallback chain exactly (menu icon → default front sprite → recorded gap; spec §3 icons). **Step 4: Run** → PASS. **Step 5: Commit** — `"Pokedex: species icon store with fallback chain"`.
 
 ---
 
@@ -323,8 +323,8 @@ public static class PokeapiDataset
 - Consumes: `PokeapiDataset.Load`, the Task 2 entities.
 - Produces: `Task<SpeciesImportResult> ImportAsync(PokemonDbContext db, IReadOnlyList<SpeciesImport> species, CancellationToken ct)` — upsert by dex number across all four species tables; result carries `Inserted`, `Updated`, `Unchanged`.
 
-- [ ] **Step 1: Failing tests**: import two fixture species into an empty DB → 2 inserted, child rows present; re-import unchanged → `Unchanged=2`, zero writes (assert row `xmin`s or use change-tracker count); mutate one name and re-import → 1 updated, types/egg-groups/names replaced not duplicated.
-- [ ] **Step 2: Run** → FAIL. **Step 3: Implement** (load-all-compare-write; ~1,025 rows, no chunking needed; child tables replaced per changed species inside one transaction). **Step 4: Run** → PASS. **Step 5: Commit** — `"Pokedex: species importer, idempotent"`.
+- [x] **Step 1: Failing tests**: import two fixture species into an empty DB → 2 inserted, child rows present; re-import unchanged → `Unchanged=2`, zero writes (assert row `xmin`s or use change-tracker count); mutate one name and re-import → 1 updated, types/egg-groups/names replaced not duplicated.
+- [x] **Step 2: Run** → FAIL. **Step 3: Implement** (load-all-compare-write; ~1,025 rows, no chunking needed; child tables replaced per changed species inside one transaction). **Step 4: Run** → PASS. **Step 5: Commit** — `"Pokedex: species importer, idempotent"`.
 
 ---
 
@@ -361,10 +361,10 @@ public sealed class SetDetailsSweep
 }
 ```
 
-- [ ] **Step 1: Failing TaggingSweep tests** (throwaway DB, fixture species from Task 5's list): fresh card "Umbreon VMAX #215" → `card_tagging(Tagged, TitleMatch, "Umbreon VMAX #215")` + link (card, 197); trainer "Rare Candy #85" → `NoSpecies`, zero links; card with a `Manual` link and a machine re-run → manual link intact; rename "Mewtwo #10" → "Mew #8" (update `cards.name`, re-run) → old 150-link deleted, 151-link inserted, `tagged_name` updated; `not_a_card_at` card → never examined; second run over unchanged data → `Examined=0`.
-- [ ] **Step 2: Failing SetDetailsSweep tests**: mapped set (alias fixture) → `Matched` with code/date/series; unmapped Japanese set name → `Pending` row exists; era file maps "Sword & Shield"→"SWSH"; re-run → no changes.
-- [ ] **Step 3: Run both** → FAIL. **Step 4: Implement.** The series→era file follows the alias-file posture verbatim (absent = empty, malformed refuses loudly); ship `tcgdex-series-eras.json.example` seeding: Base/Gym/Neo/E-Card series → `WOTC`, EX → `EX`, Diamond & Pearl/Platinum/HeartGold & SoulSilver → `DP`, Black & White → `BW`, XY → `XY`, Sun & Moon → `SM`, Sword & Shield → `SWSH`, Scarlet & Violet → `SV`.
-- [ ] **Step 5: Run** → PASS. **Step 6: Commit** — `"Pokedex: tagging and set-details sweeps"`.
+- [x] **Step 1: Failing TaggingSweep tests** (throwaway DB, fixture species from Task 5's list): fresh card "Umbreon VMAX #215" → `card_tagging(Tagged, TitleMatch, "Umbreon VMAX #215")` + link (card, 197); trainer "Rare Candy #85" → `NoSpecies`, zero links; card with a `Manual` link and a machine re-run → manual link intact; rename "Mewtwo #10" → "Mew #8" (update `cards.name`, re-run) → old 150-link deleted, 151-link inserted, `tagged_name` updated; `not_a_card_at` card → never examined; second run over unchanged data → `Examined=0`.
+- [x] **Step 2: Failing SetDetailsSweep tests**: mapped set (alias fixture) → `Matched` with code/date/series; unmapped Japanese set name → `Pending` row exists; era file maps "Sword & Shield"→"SWSH"; re-run → no changes.
+- [x] **Step 3: Run both** → FAIL. **Step 4: Implement.** The series→era file follows the alias-file posture verbatim (absent = empty, malformed refuses loudly); ship `tcgdex-series-eras.json.example` seeding: Base/Gym/Neo/E-Card series → `WOTC`, EX → `EX`, Diamond & Pearl/Platinum/HeartGold & SoulSilver → `DP`, Black & White → `BW`, XY → `XY`, Sun & Moon → `SM`, Sword & Shield → `SWSH`, Scarlet & Violet → `SV`.
+- [x] **Step 5: Run** → PASS. **Step 6: Commit** — `"Pokedex: tagging and set-details sweeps"`.
 
 ---
 
@@ -379,10 +379,10 @@ public sealed class SetDetailsSweep
 - Consumes: everything above.
 - Produces: `PokedexLane : BackgroundService` with `public const string HttpClientName = "pokeapi"` and a public `RunSweepAsync(CancellationToken)` returning a composite result record — the testable unit, exactly like `EnrichmentLane.RunSweepAsync`.
 
-- [ ] **Step 1: Write the lane**, structurally cloned from `EnrichmentLane`: loop with `PokedexTaggingIntervalHours` delay, try/catch log-and-continue; `RunSweepAsync` = ensure PokéAPI mirror (fetch if absent, pin from options) → `PokeapiDataset.Load` → `SpeciesImporter.ImportAsync` → `SpeciesIconStore.FetchMissingAsync` → `SpeciesMatcher.BuildCandidates` (from the imported species' English names) → `TaggingSweep.RunAsync` → `SetDetailsSweep.RunAsync` → one structured `LogInformation` carrying every count (species inserted/updated, icons by source + missing, examined/tagged/no-species/quarantined/links written/removed, sets matched/pending) — these are the spec §7 receipt numbers.
-- [ ] **Step 2: Wire** in `Program.cs`: `AddHttpClient(PokedexLane.HttpClientName, ...)` with the UA convention from the TCGdex client, and `AddHostedService<PokedexLane>()` after `EnrichmentLane`.
-- [ ] **Step 3: Test** — a Worker.Tests smoke test invoking `RunSweepAsync` against the fixture mirror + throwaway DB end-to-end (three species, four cards incl. a trainer and a not-a-card) asserting the composite counts.
-- [ ] **Step 4: Run full suite** — `dotnet test` (all projects) and `dotnet format --verify-no-changes`. **Step 5: Commit** — `"Pokedex: lane wired; first sweep self-bootstraps"`.
+- [x] **Step 1: Write the lane**, structurally cloned from `EnrichmentLane`: loop with `PokedexTaggingIntervalHours` delay, try/catch log-and-continue; `RunSweepAsync` = ensure PokéAPI mirror (fetch if absent, pin from options) → `PokeapiDataset.Load` → `SpeciesImporter.ImportAsync` → `SpeciesIconStore.FetchMissingAsync` → `SpeciesMatcher.BuildCandidates` (from the imported species' English names) → `TaggingSweep.RunAsync` → `SetDetailsSweep.RunAsync` → one structured `LogInformation` carrying every count (species inserted/updated, icons by source + missing, examined/tagged/no-species/quarantined/links written/removed, sets matched/pending) — these are the spec §7 receipt numbers.
+- [x] **Step 2: Wire** in `Program.cs`: `AddHttpClient(PokedexLane.HttpClientName, ...)` with the UA convention from the TCGdex client, and `AddHostedService<PokedexLane>()` after `EnrichmentLane`.
+- [x] **Step 3: Test** — a Worker.Tests smoke test invoking `RunSweepAsync` against the fixture mirror + throwaway DB end-to-end (three species, four cards incl. a trainer and a not-a-card) asserting the composite counts.
+- [x] **Step 4: Run full suite** — `dotnet test` (all projects) and `dotnet format --verify-no-changes`. **Step 5: Commit** — `"Pokedex: lane wired; first sweep self-bootstraps"`.
 
 ---
 
@@ -392,7 +392,7 @@ public sealed class SetDetailsSweep
 - Modify: `ops/README.md` (§4 grants list + a new Pokédex operations subsection)
 - No code.
 
-- [ ] **Step 1: Extend ops/README §4** (the single source of truth for post-migration grants) with, run as postgres after `dotnet ef database update`:
+- [x] **Step 1: Extend ops/README §4** (the single source of truth for post-migration grants) with, run as postgres after `dotnet ef database update`:
 
 ```sql
 GRANT UPDATE ON species, species_types, species_egg_groups, species_names,
@@ -402,7 +402,7 @@ GRANT DELETE ON species_types, species_egg_groups, species_names TO pokemon_app;
 ```
 
 with one sentence citing ADR-0011's rationale (derived current-state tables; the append-only posture protects observations, and these are not observations). Note explicitly: `cardstock_app`'s SELECT arrives via the existing default privileges — verify, don't assume, in Step 4.
-- [ ] **Step 2: Document manual overrides** in the same subsection — the operator SQL, ADR-0002 style:
+- [x] **Step 2: Document manual overrides** in the same subsection — the operator SQL, ADR-0002 style:
 
 ```sql
 -- Pin a card's species by hand (survives every sweep):
@@ -415,8 +415,8 @@ UPDATE card_tagging SET status = 1, method = 1, updated_at = now() WHERE card_id
 ```
 
 (0/1 enum values per `TagStatus`/`TagMethod` ordering from Task 2 — state them in the doc.)
-- [ ] **Step 3: Deploy** per the existing ops/README flow: migrate as `pokemon_owner`, apply Step 1 grants, publish `linux-arm64` self-contained, restart the unit. The first sweep self-bootstraps: mirror fetch (~2,900 files + ~1,025 icons, one-time), import, full backfill (minutes, chunked — spec §4's performance envelope).
-- [ ] **Step 4: Acceptance receipts** (spec §7 — run on the Pi, paste results into the completion report):
+- [x] **Step 3: Deploy** per the existing ops/README flow: migrate as `pokemon_owner`, apply Step 1 grants, publish `linux-arm64` self-contained, restart the unit. The first sweep self-bootstraps: mirror fetch (~2,900 files + ~1,025 icons, one-time), import, full backfill (minutes, chunked — spec §4's performance envelope).
+- [x] **Step 4: Acceptance receipts** (spec §7 — run on the Pi, paste results into the completion report):
 
 ```sql
 -- 1. Invariants (expect 0 and 0):
@@ -441,7 +441,7 @@ SELECT count(*) FROM card_species WHERE species_id = 197;
 SELECT count(*) FROM species;
 ```
 
-- [ ] **Step 5: Commit** ops docs — `"Pokedex: grants, manual-override SQL, acceptance queries (ADR-0011)"`.
+- [x] **Step 5: Commit** ops docs — `"Pokedex: grants, manual-override SQL, acceptance queries (ADR-0011)"`.
 
 ---
 

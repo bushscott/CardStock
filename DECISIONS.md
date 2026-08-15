@@ -352,7 +352,39 @@ Read directly 2026-08-10, to be mirrored per D-018–D-021.
 
 ## Decided
 
-### D-106 — The Pokédex is scraper-side; D-069.10's species carve-out is deliberately reversed
+### D-109 — The Pokédex phase is closed on receipts
+Closed 2026-08-15 with the owner's sign-off, one day after the spec. Scraper-side per D-106:
+twelve plan tasks plus a final-review fix wave landed as 16 commits on the sibling's `main`
+(`ba7c98c..c728d75`), deployed to the Pi the same day. First sweep, verbatim from the lane's
+receipt log: 1,025 species imported; 1,025 icons (898 menu sprites, 127 default-sprite fallback,
+0 missing); 91,701 cards examined → 74,182 tagged · 17,514 no-species · 5 quarantined; 75,102
+links written; sets 167 matched · 622 pending of 789. §7 acceptance passed live (re-runnable:
+the sibling's `ops/README.md` §8 queries): both invariants 0; species 1,025; the Umbreon smoke
+223 links; `cardstock_app` SELECT verified by running as that role. The five quarantined cards —
+every one a genuine ≥4-species item — were owner-reviewed and pinned Manual (§8 pattern) the
+same day; quarantine now reads 0. Execution rulings with product effect, beyond D-108:
+trainer-kit multi-target sets carry their **first** alias target's set code (deterministic,
+refinable via alias curation). Open curation, owner ruling pending: "Flaffy [Pikachu 37] #108"
+(upstream typo for Flaaffy) and glyph-less "Nidoran #29" (names neither gendered form; the card
+is the ♀) sit no-species — §8 pin statements cover both whenever ruled. The ~622 pending sets
+remain D-106's accepted backlog. Next per D-103: the Catalog phase.
+
+### D-108 — Denylist beats species matches: no-species, never quarantine (build-time ruling)
+Settled 2026-08-14 during Pokédex phase execution. The phase spec's §4 carried two contradictory
+sentences: the denylist bullet (*"forces `no-species` even when a species name appears — 'Clefairy
+Doll', 'Charizard Spirit Link'"*) and the statuses bullet (*"a denylist-vs-match conflict →
+`quarantined`"*). The approved implementation plan's trap tests encode the first; the shipped
+matcher (scraper `SpeciesMatcher.cs`, per ADR-0011) implements it: a denylist hit returns
+`no-species` with empty ids before any candidate scan, and `quarantined` is reserved for ≥4
+species in one title. Chosen because the spec's own named examples sit under the denylist bullet
+and the owner-approved plan operationalized exactly that. Spec §4 amended with a dated note the
+same day. Cost if wrong: species-naming item cards skip the review queue — recoverable by
+re-running the sweep after a denylist edit; the 100-card acceptance sample checks for systematics.
+
+### D-106 — The Pokédex is scraper-side; D-084.10's species carve-out is deliberately reversed
+*(Citation corrected 2026-08-14 during ADR-0011 drafting: the reversed item is D-084.10 — D-069 is
+the backups deferral. The stale "D-069.10" pointer propagated into the Pokédex phase spec and plan,
+left untouched there as approved artifacts; the scraper's ADR-0011 cites D-084.10.)*
 Owner, 2026-08-14: *"I consider this scraping and would like it to be in the scraping app,"*
 confirming the shape: **`species`, `card_species`, and the per-card tag-status table are
 sibling-owned** — the scraper's schema, its migrations, written by a new tagging lane (daily-ish,
