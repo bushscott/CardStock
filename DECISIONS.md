@@ -19,6 +19,18 @@ Entries keep their ID forever and move between status sections as they settle. S
 
 ## Verified
 
+### D-105 — Card names are anglicized corpus-wide; the multi-language problem lives in set names, not card titles
+Live query, 2026-08-14, during the Pokédex-phase brainstorm, prompted by the owner's "we need to
+figure out how to do that for other languages also." Only **51 of 91,646** active cards carry any
+non-ASCII character in `cards.name` — and the sample is punctuation, not language: `Nidoran♀`/`♂`,
+`Chien‑Pao` (U+2011 non-breaking hyphen), a few energy names. Japanese-set cards carry English
+names ("Meganium #4" in "Pokemon Japanese Golden Sky, Silvery Ocean"). Set counts: **395** match
+`%japanese%`, **139** match `%chinese%`/`%korean%`. **Consequence:** English-first title matching
+covers the whole corpus for species tagging, with the 51 handled by the alias table; the real
+multi-language work concentrates in SET-metadata joining (TCGdex `ja` locale, hand aliases —
+D-079's known gap). Receipt (re-runnable):
+`SELECT count(*) FILTER (WHERE name ~ '[^[:ascii:]]'), count(*) FROM cards WHERE delisted_at IS NULL AND not_a_card_at IS NULL;` → 51, 91646.
+
 ### D-101 — Card art displays at one fixed size for every card; source resolution never touches layout
 Owner rule, stated 2026-08-14 (anticipating later, higher-resolution images): *"when other cards
 load in, that might be a higher resolution, they load in to the exact same size that Charizard is
@@ -339,6 +351,83 @@ Read directly 2026-08-10, to be mirrored per D-018–D-021.
 ---
 
 ## Decided
+
+### D-106 — The Pokédex is scraper-side; D-069.10's species carve-out is deliberately reversed
+Owner, 2026-08-14: *"I consider this scraping and would like it to be in the scraping app,"*
+confirming the shape: **`species`, `card_species`, and the per-card tag-status table are
+sibling-owned** — the scraper's schema, its migrations, written by a new tagging lane (daily-ish,
+beside its enrichment lane), sprite icons stored beside its image corpus. CardStock reads all of
+it through the SELECT grants it already has; no cross-schema writes exist anywhere. Companion
+rulings from the same exchange:
+- **Data source:** vendored PokéAPI static dataset (BSD-3-Clause, verified live 2026-08-14 —
+  color, habitat, egg groups, generation, legendary/mythical flags, evolution chains, names in 12
+  languages incl. Japanese). Not a runtime API: pinned files, zero production network calls.
+  Authored by us: region map (9 rows), egg-group display names (~15 rows), evolution-stage
+  derivation rule, identity gradients.
+- **Icons:** retro pixel menu sprites from the PokeAPI sprites repo (bulk clone, no scraping;
+  IP posture rides D-104/D-011). **pokemondb.net rejected as a source** — its own About page says
+  "Do not steal our content!" and recommends PokeAPI; its data also lacks color and habitat.
+- **Tagging:** plain longest-name-first title matching with word boundaries (no TCGdex), alias
+  table (♀/♂, hyphens), a denylist for Pokémon-named item cards ("Charizard Spirit Link",
+  "Clefairy Doll"), quarantine + manual-override table trumping all. English-only matching is
+  safe corpus-wide per D-105. Named-species rule stands — art cameos are untaggable.
+- **Set metadata (ruled same day, owner: "Okay. I agree."):** also sibling-side — era/series,
+  release date, and set code per set, auto-populated from the TCGdex mapping where set names join
+  (~150 English sets, where most market value lives), honest "metadata pending" states everywhere
+  else (~530 Japanese/Chinese/Korean/unmapped sets), hand-alias curation as an ongoing backlog
+  rather than an up-front push. See also the D-107 v2 register: AI Japanese↔English matching is
+  parked as the eventual backlog-collapser.
+- **Delivery:** per the D-079 precedent — written handoff brief, then a subagent scoped to
+  `../PokemonInvestBatch` after the design wraps.
+
+### D-104 — The Character page shows a species icon image, not an initial-on-gradient
+Owner, 2026-08-14, during the Pokédex-phase brainstorm: *"The CardStock character page will have an
+icon sized image of the Pokemon that is not specific to a card."* Supersedes the prototype's
+initial-on-gradient avatar (`Character:61`, character.md §3.1) for the Character page. Sourcing,
+exact size, and whether Browse's species tiles get the same treatment are settled in the Pokédex
+phase design (character.md's spec row lands with that design, per the maintenance rule). Adds a
+**species-icon corpus** to the Pokédex substrate — one icon-sized image per species, not
+card-specific — and with it a second instance of the D-010-class question: species artwork is
+Nintendo/TPC-copyrighted regardless of which aggregator serves it, so the serving/licensing
+posture rides with D-011 exactly as the card photos do.
+
+### D-103 — The build order after the Card page: the worker lands whole, late, behind honestly-deferred slots
+Owner, 2026-08-14, closing the sequencing half of the Phase 3 brainstorm: *"Let's do exactly what
+you just laid out."* The worker is **not** split and **not** built early; it lands once, whole —
+all five D-039 jobs — after every table it reads exists. Adopted order (**named phases**; ordinal
+references in older entries and specs — "the Phase 3 index", "Binder is Phase 4", "Phase 5+
+marketing" — are superseded by these names):
+
+1. **Pokédex** — species + card-tagging substrate (next; its data-vs-UI scope is the brainstorm in
+   progress as this is written)
+2. **Catalog** — Browse, Set, Character, the About-data rewrite (+ set-metadata curation unless
+   folded into Pokédex)
+3. **Accounts + watchlists** — sign-in surfaces (email delivery is a new ops dependency),
+   watchlist tables, the D-098 Card-page wiring
+4. **Screener page** — composition, rail, saved-screens table; results and backtest render
+   honestly locked ("metrics arrive with the analytics worker")
+5. **Binder** — transactions/FIFO ledger and holdings; the EST mechanism and the performance tab
+   lock (both are defined against the index — binder.md §7.3)
+6. **Worker, all at once** — index, per-card metric materialization, sufficiency states, ticker
+   aggregates, saved-screen evaluation — ending with one arming pass across the deferred slots on
+   Card, Set, Browse, Screener, Binder, and watchlist chips
+7. **Home** — ticker + feed + peek, on live worker output
+8. **Charts** — the workbench, tracked-signal editor, saved views
+9. **Marketing** — after the worker, because the Landing ticker is the Home ticker's 16 stats
+   live (marketing.md §3.1), plus the six-instance Apr-'25 seam copy rewrite
+
+**Why late-and-whole is safe** (established this session): the append-only store makes index and
+metric history honestly backfillable later — deferral loses no data; a worker built today would
+emit months of `LOCKED` anyway (D-033 floor), while one landing after the floor ripens switches on
+over data that actually fires; and every input table exists by the time the worker is designed
+against it — the owner's original concern. **Costs accepted with eyes open:** analytics value
+concentrates late; the Screener ships before it can screen; watchlist tracked-signal sets stay
+default-only until Charts (the only editor); Binder EST values lock pre-worker.
+
+**Receipts:** the full per-page dependency audit in
+`docs/superpowers/handoffs/2026-08-14-worker-demand-inventory.md`, built by reading all 14
+`docs/screens/*.md` in full this session; D-004 (the index is load-bearing on 5 of 10 screens);
+D-039 (the worker's job list); D-033 (floor mechanics).
 
 ### D-102 — The census sentences print permanently; dashes and the ◌ glyph carry the gates
 Owner, 2026-08-14, on discovering the gem-rate sentence had become a slot in the other panel:
@@ -1961,6 +2050,22 @@ The line reads: *"Seams: liquidity seam Apr '25 (churn/vol panes), resolution se
 ---
 
 ## Open
+
+### D-107 — The v2 register: ideas deliberately parked until v1 is complete
+Created 2026-08-14 at the owner's request for a place *"where I don't forget about them."* Nothing
+here is designed, scheduled, or committed — revisit when v1 wraps. **Append future v2 ideas to
+this entry.**
+
+1. **AI matching of Japanese cards to their English equivalents**, so metadata (set era/release/
+   code, card attributes) transfers across automatically — this would collapse the ~530-set
+   "metadata pending" curation backlog accepted in D-106. Note for whenever it's picked up: a
+   deterministic first pass exists (TCGdex's `ja` locale mirrors set structure), so AI likely
+   handles the tail, not the whole.
+2. **Camera-based binder intake** — point a camera at a card, AI identifies the card (and
+   possibly the slab/grade), and pre-fills the binder transaction form.
+
+Owner's observation, recorded with the ideas: both likely share a card-image
+recognition/matching core, so they may be one investment, not two.
 
 ### D-100 — The identity header below the tiles+signals wrap width
 Surfaced by D-099's measurements, needs an owner ruling. When the viewport is narrow enough that

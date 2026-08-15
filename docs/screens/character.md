@@ -65,6 +65,16 @@ exists (needs a non-scraped table, `DECISIONS.md:199`, or the external Pokédex 
 
 ### 3.1 Species header
 
+> **Amended 2026-08-14 (D-104, D-106, Pokédex-phase design).** The avatar row below is
+> superseded: the Character page renders an **icon-sized species image** (retro pixel menu
+> sprite, `species-icons/{dex}.png`), not an initial-on-gradient — owner ruling D-104, style and
+> source ruled in D-106. The ✘ backings in this section also change tier: `species`,
+> `card_species`, `species_names`, and the chip attributes become **scraper-owned tables**
+> populated in the Pokédex phase (D-106 reversed D-069.10), which CardStock reads. The `Year`
+> column's backing (`set_details`) arrives in the same phase with `pending` states for
+> non-English sets. Full contract: `docs/superpowers/specs/2026-08-14-pokedex-phase-design.md`.
+> This page's build pass (Catalog phase) refreshes the section in full.
+
 | Field | Rendered as | HTML | Backing |
 |---|---|---|---|
 | avatar initial | 64px circle, `linear-gradient(160deg, #2B2D42, #5C6B9E)`, Inter Tight 700 26px, `rgba(255,255,255,0.92)` | `:61` (literal `U`) | ✘ initial is derivable from the name; the **gradient pair is per-species identity colour** with no source (see §7) |
