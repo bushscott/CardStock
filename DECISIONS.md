@@ -378,9 +378,11 @@ rulings from the same exchange:
   rather than an up-front push. See also the D-107 v2 register: AI Japanese↔English matching is
   parked as the eventual backlog-collapser.
 - **Delivery:** per the D-079 precedent — written handoff brief, then implementation inside
-  `../PokemonInvestBatch`. *Amended same day:* the owner runs it in a **fresh session opened in
-  that repo** rather than a spawned subagent — same brief
-  (`docs/superpowers/plans/2026-08-14-pokedex-phase.md` + the design spec), different vehicle.
+  `../PokemonInvestBatch`. *Amended same day, twice:* the owner executes it from
+  **the CardStock window after clearing context** — deliberately, because GSD does not live
+  here — with the fresh context working cross-repo into `../PokemonInvestBatch` per the plan.
+  Same brief (`docs/superpowers/plans/2026-08-14-pokedex-phase.md` + the design spec),
+  different vehicle.
   Acceptance stays on this side: the spec's §7 receipts are re-run live from a CardStock session
   before the phase closes in this ledger.
 
