@@ -364,10 +364,19 @@ the sibling's `ops/README.md` §8 queries): both invariants 0; species 1,025; th
 every one a genuine ≥4-species item — were owner-reviewed and pinned Manual (§8 pattern) the
 same day; quarantine now reads 0. Execution rulings with product effect, beyond D-108:
 trainer-kit multi-target sets carry their **first** alias target's set code (deterministic,
-refinable via alias curation). Open curation, owner ruling pending: "Flaffy [Pikachu 37] #108"
-(upstream typo for Flaaffy) and glyph-less "Nidoran #29" (names neither gendered form; the card
-is the ♀) sit no-species — §8 pin statements cover both whenever ruled. The ~622 pending sets
-remain D-106's accepted backlog. Next per D-103: the Catalog phase.
+refinable via alias curation). Both open curation items were ruled and fixed 2026-08-15: "Flaffy [Pikachu 37] #108" pinned to
+Flaaffy (upstream title typo), and "Nidoran #29" turned out to be the visible edge of a
+**140-card glyph-less Nidoran family** (pricecharting drops the ♀/♂ glyph widely). 72 of them
+were pinned Manual on corpus-derived proof, not guesses: 54 in sixteen dex-numbered sets
+(numbering proven per set by ≥96% agreement between card number and species dex across 3,000+
+machine-tagged single-species cards — #29⇒♀, #32⇒♂), 16 with the gender spelled in the title
+("Nidoran F/M", "[F]"), and 2 by evolution pairing ("& Nidorina"⇒♀, "& Nidorino"⇒♂). The corpus
+now reads 74,258 tagged · 17,443 no-species · 0 quarantined. **67 glyph-less Nidorans remain
+honestly no-species** — their sets' gender assignments need per-set facts (evolution-block
+adjacency or published set lists); parked as curation backlog with the family re-runnable via
+`WHERE name LIKE 'Nidoran%' AND name !~ '[♀♂]'`; one Topps Movie Sticker ("Nidoran, Voltorb
+#17") stays partially tagged the same way. The ~622 pending sets remain D-106's accepted
+backlog. Next per D-103: the Catalog phase.
 
 ### D-108 — Denylist beats species matches: no-species, never quarantine (build-time ruling)
 Settled 2026-08-14 during Pokédex phase execution. The phase spec's §4 carried two contradictory
