@@ -19,6 +19,17 @@ Entries keep their ID forever and move between status sections as they settle. S
 
 ## Verified
 
+### D-101 — Card art displays at one fixed size for every card; source resolution never touches layout
+Owner rule, stated 2026-08-14 (anticipating later, higher-resolution images): *"when other cards
+load in, that might be a higher resolution, they load in to the exact same size that Charizard is
+currently using."* Already true by construction, verified live the same day: the displayed box is
+CSS-owned (`.art-col` fixed 217px; the img maps into it via `object-fit: cover`), so the incoming
+bitmap's dimensions cannot influence rendered size or layout. Receipt: Charizard 630417's source
+is 325×450 while Charmeleon 630437's is **321×450 (ratio 0.7133 vs 0.7222)** — both pages render
+the art at exactly **217×300.5** at 1500px with every header edge delta 0.0; a higher-resolution
+source will simply paint more detail into the same box (ratio slivers absorbed by cover, e.g.
+Charmeleon's ~1px/side). The click-to-enlarge lightbox is where full resolution shows.
+
 ### D-085 — 🚩 The chip inventory existed in no current document; the retirement over-claimed. Restored
 Found 2026-08-12 when the owner asked "did we define anywhere all the possible chips that could
 display?" The answer was yes — the retired `DISPLAY_VOCABULARY.md` §1 held the complete inventory:
@@ -1935,6 +1946,12 @@ scroll below it, arguably true to the persona), the art capping at its natural 3
 top-aligning once the column wraps, or a genuine narrow rework of the header's stacking. Until
 ruled, desktop widths (1280–1800 measured) are correct per D-099 and the wrap regime remains
 cosmetically broken — as it already was.
+
+2026-08-14, later the same day: the owner reviewed live renders of all candidates at 1000px
+(min-width scroll, capped art, grid recompose, and a band-tuned scaled-up card) and ruled none
+of them in — *"everything looks good as it is."* The page as deployed is affirmed; this entry
+stays open only for whenever narrow windows actually matter, and the renders' receipts live in
+this session's D-101 measurements. What IS settled from that review is the card-art rule → D-101.
 
 ### D-098 — The watchlist picker and the active watch/binder states await their phases
 Owner, 2026-08-14, closing the signals-panel session: *"on the mock watchlist has a drop down of
