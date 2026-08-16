@@ -370,12 +370,19 @@ Flaaffy (upstream title typo), and "Nidoran #29" turned out to be the visible ed
 were pinned Manual on corpus-derived proof, not guesses: 54 in sixteen dex-numbered sets
 (numbering proven per set by ≥96% agreement between card number and species dex across 3,000+
 machine-tagged single-species cards — #29⇒♀, #32⇒♂), 16 with the gender spelled in the title
-("Nidoran F/M", "[F]"), and 2 by evolution pairing ("& Nidorina"⇒♀, "& Nidorino"⇒♂). The corpus
-now reads 74,258 tagged · 17,443 no-species · 0 quarantined. **67 glyph-less Nidorans remain
-honestly no-species** — their sets' gender assignments need per-set facts (evolution-block
-adjacency or published set lists); parked as curation backlog with the family re-runnable via
-`WHERE name LIKE 'Nidoran%' AND name !~ '[♀♂]'`; one Topps Movie Sticker ("Nidoran, Voltorb
-#17") stays partially tagged the same way. The ~622 pending sets remain D-106's accepted
+("Nidoran F/M", "[F]"), and 2 by evolution pairing ("& Nidorina"⇒♀, "& Nidorino"⇒♂). The finishing pass ran the same day at the owner's
+direction (*"that's two different Pokémon"*): 57 more cards pinned on in-corpus proof —
+evolution-block adjacency (a glyph-less Nidoran at #N with Nidorina at #N+1 is the ♀; with
+Nidorino, the ♂) and line-presence (sets carrying only one sex's evolution line) — including both
+mojibake "Nidoran?" cards, and the DP-era Japanese sets that put ♂ at the LOWER number
+(Mysterious Mountains ♂6/♀7, Offense & Defense ♂53/♀58 — a blanket "♀-first" convention would
+have mis-sexed four cards); 10 more on published set-list receipts (Bulbapedia: Base Set 2 and
+Legendary Collection both ♀82/♂83; Skyridge #81 AND #82 are BOTH ♀ — the set has no ♂ at all,
+refuting the alphabetical-pair assumption); the Hanafuda "Nidorans (March)" names both Pokémon
+and links to both. **Family closed: 140 glyph-less cards → 139 pinned (68♀/72♂ links), one
+parked honestly** — Topps Movie Sticker "Nidoran, Voltorb #17" (no published checklist found;
+keeps its Voltorb tag, its Nidoran unlinked). Corpus final: 74,325 tagged · 17,376 no-species ·
+0 quarantined; both §7 invariants still 0. The ~622 pending sets remain D-106's accepted
 backlog. Next per D-103: the Catalog phase.
 
 ### D-108 — Denylist beats species matches: no-species, never quarantine (build-time ruling)
