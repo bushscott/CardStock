@@ -352,6 +352,40 @@ Read directly 2026-08-10, to be mirrored per D-018–D-021.
 
 ## Decided
 
+### D-110 — The Catalog phase is designed; D-102's vocabulary goes corpus-wide; the ninth era exists
+Approved section-by-section 2026-08-15, the day after D-109 closed. Full contract:
+`docs/superpowers/specs/2026-08-15-catalog-phase-design.md`. Shape: four WASM routes — `/browse`
+(mode in query), `/set/{id}` (set slugs verified URL-hostile), `/character/{slug}`, `/about-data`
+(tier addendum to D-063: neither app-auth nor `/product`; rides WASM until a static host exists) —
+built as vertical slices Set → Character → Browse → About-data, chrome arming last. **Scope
+rulings:** the global search box is OUT ("a separate long conversation"; its deferred tooltip gets
+a truthfulness edit only); the Browse filter popover is IN, all 8 attributes; the Card-page
+species subline stays deferred. **The load-bearing rendering ruling — D-102 extended to every
+page:** *"mock up all aspects of the UI … use dash where the number would go, but still write out
+the label … use that circle throughout the page"*, because *"I want the web page to be clear on
+things that we don't have enough data for or that we don't have a process for yet. That way I can
+keep an eye on them."* Every index-family stat (set/species Δs, sparkline, RS) renders label +
+GlyphDash + ◌-with-gate-tooltip; per-card maturity (Pop Δ, Year) stays a dashed cell with
+computed-date tooltips; controls stay D-087-disabled; no wire fields for gated stats. **Prototype
+deviations ruled** (spec §11): Character sort pills; Character Set-cell links; Sales/mo sortable
+both rosters; Browse ordering control [a–z | release date | era] with data-driven era shelves +
+"no era" (33 side-product sets) + "metadata pending" (622) tail shelves; mode-in-URL; pixel-icon
+species tiles (settles D-104's open half); full rosters, no "most-traded" cap; era chip in the
+Set header; uppercase-verbatim set codes (`SWSH7`, no invented padding); named-species footer
+reword. **Facts verified live 2026-08-15** (psql on the Pi): all 1,025 species have ≥1 tagged
+card; biggest rosters Pokemon Promo 2,531 cards / Pikachu 1,171 printings — full-roster-virtualized
+ruled; the corpus-wide latest-PSA10 aggregate costs **1,427 ms** (EXPLAIN ANALYZE) → Browse rides
+a short-TTL single-flight in-process cache, interim until the analytics worker (D-039). **The
+ninth era:** TCGdex serie "Mega Evolution" mapped to `ME` the same day — the sibling promoted
+`tcgdex-series-eras.json` from `.example` to tracked (catching that the publish recipe's
+`--delete` rsync would have silently deleted the Pi's copy and nulled every era on the next
+sweep), re-swept, and this side verified: `SELECT era, count(*) FROM set_details GROUP BY era` →
+BW 12 · DP 16 · EX 17 · **ME 7** · SM 16 · SV 18 · SWSH 17 · WOTC 16 · XY 15 (134 era-bearing of
+167 matched; 622 pending unchanged; the 7 ME sets named in the sibling's receipt). Era vocabulary
+is now 9 — the Screener's future "Era facet, 8 values" copy inherits the correction. Matched
+non-English sets: **0** — the era view's pending shelf is where all 534 non-English sets sit
+until curated, by design.
+
 ### D-109 — The Pokédex phase is closed on receipts
 Closed 2026-08-15 with the owner's sign-off, one day after the spec. Scraper-side per D-106:
 twelve plan tasks plus a final-review fix wave landed as 16 commits on the sibling's `main`

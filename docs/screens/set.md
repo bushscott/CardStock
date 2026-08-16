@@ -5,6 +5,26 @@
 > claims cite `../PokemonInvestBatch/DATA_MODEL.md`. Where a markdown doc disagrees with
 > the HTML, the HTML wins and the disagreement is recorded in §8 — never averaged.
 
+> **Amended 2026-08-15 (Catalog phase design, D-110 — build from
+> `docs/superpowers/specs/2026-08-15-catalog-phase-design.md`, which supersedes this spec where
+> they differ).** Owner rulings of that date: **(a)** §7.1 answered — the code chip renders
+> `set_details.code` **uppercase verbatim** (`swsh7` → `SWSH7`, no invented padding), and the
+> header **gains an era chip** beside it (superseding this spec's "no era anywhere on the Set
+> page"); a `Pending` set renders one **`◌ metadata pending`** chip in place of both.
+> **(b)** The index sparkline, 30D/90D deltas, and RS pct column render per the **D-102
+> vocabulary** — labels print, dashes in value runs, one ◌ per gated unit, RS pill disabled —
+> until the analytics worker (§7.2/§7.3 deferred to it; §7.6's negative rendering is defined
+> now, applied at arming). **(c)** §7.4 answered: **full roster, virtualized** — no
+> "most-traded" cap; the footer is rewritten to "Showing all {n} tracked cards · prices are
+> latest monthly PSA 10". **(d)** §7.5 answered: every count uses `delisted_at IS NULL AND
+> not_a_card_at IS NULL`. **(e)** §7.7 answered: **Sales/mo is sortable, with a fifth pill** —
+> the pill row covers every sortable key so binder density keeps the full sort set;
+> dead-looking unsortable headers (`Card`) lose the pointer/hover. **(f)** The pop banner's dates are
+> computed from the excluded cards' first observations (the `Jul 2026` literal does not
+> port), the all-pending state is guarded with proper copy — and it is the ship state until
+> ~late Sep 2026. **(g)** An empty-roster state is added. **(h)** Negative pop Δ renders a
+> real sign (the hard-coded `+` does not port).
+
 ---
 
 ## 1. Identity

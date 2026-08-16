@@ -2,6 +2,23 @@
 
 **Source of truth:** `CardStock Mockup/Cardstock Browse.dc.html` (318 lines), read in full 2026-08-10. Every line citation below is to that file unless another path is named. Where a markdown document disagreed with the prototype, the prototype was taken as correct and the disagreement is recorded in §8.
 
+> **Amended 2026-08-15 (Catalog phase design, D-110 — build from
+> `docs/superpowers/specs/2026-08-15-catalog-phase-design.md`, which supersedes this spec where
+> they differ).** Owner rulings of that date: **(a)** set mode gains an ordering control —
+> `a–z` (default) | `release date` | `era` — with **data-driven era shelves** (9 eras verified
+> live incl. the new `ME`) plus two labeled tail shelves, "no era" (33 matched side-products)
+> and "metadata pending" (622); §4.2's "shelves do not exist" now describes the default view
+> only, and §7.1–§7.3 are answered. **(b)** Species tiles render the **pixel species icon**
+> over the gradient (initial = fallback), settling D-104's open half; §2.3's avatar row is
+> superseded. **(c)** Mode goes in the URL (`?mode=pokemon`), superseding §2.1's "not in the
+> URL". **(d)** The species grid gets the explicit `ORDER BY` total value DESC that §6.3
+> requires. **(e)** The two tile Δs (`30d`, `90d`) render per the D-102 vocabulary — dash +
+> ◌-with-gate-tooltip — until the analytics worker; no interim change methods (§7.6 answered:
+> deferred). **(f)** Filter vocabularies come from the species tables (rule 7 confirmed);
+> habitat's editor carries a Gen 1–3-only explainer. **(g)** §4.6 stands: no species search;
+> the global search box is a separate future conversation. **(h)** §7.8 answered: the
+> per-species `sets` count stays off the tile. Full walls render (789/1,025) with lazy images.
+
 **Runtime:** Design Composer. `<x-dc>` host (`:9`), template directives `sc-if` / `sc-for` resolved by `support.js:555-556`; `hint-placeholder-count` / `hint-placeholder-val` are design-time-only hints consumed when the bound value is unavailable (`support.js:614`, `support.js:648`) and carry **no** runtime meaning. All view data comes from one `renderVals()` return object (`:219-314`, dispatched at `support.js:1085`). The component takes **no props** (`data-props=""`, `:159`).
 
 ---

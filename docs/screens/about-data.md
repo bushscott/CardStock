@@ -2,6 +2,21 @@
 
 **Source of truth:** `CardStock Mockup/Cardstock About Data.dc.html` (136 lines), read directly 2026-08-10. Every quote carries its line number in that file. Per `CLAUDE.md`, the prototype is Tier 1 and authoritative for **what the page says** — §§1–5 record that faithfully. Whether what it says is **true** is §6, and the answer is: largely not.
 
+> **Amended 2026-08-15 (Catalog phase design, D-110 — build from
+> `docs/superpowers/specs/2026-08-15-catalog-phase-design.md`).** The build target is this
+> spec's **"Corrected copy — build this"** section, transcribed with exactly three
+> adaptations: **(1)** the sufficiency section slims to what exists — the five states, the
+> 2026-09-01 floor and its reason, and the locked-controls-name-their-unlock rule; per-signal
+> unlock rows return when those signals ship. **(2)** No runtime-computed strings — the
+> corrected copy's dates are fixed historical anchors; the authored-countdown class (`≈ Jan
+> 2027`) is already gone from it. **(3)** The Card page's freshness footer gains the "About
+> our data" link, and the "opening a card page triggers a fresh visit" sentence is
+> receipt-verified against the shipped refresh behavior before it prints. Route `/about-data`
+> as a public WASM app route (§7.11 answered; tier addendum to D-063). The Apr-'25 pill and
+> section die with the rewrite; §7.1's chart-marker question stays open for the chart phases —
+> the copy simply stops promising the marking (§7.5 resolved: copy corrected, pipeline not
+> built).
+
 > **Read §6 before implementing this page.** It is the most factually wrong page in the prototype set. Its central organising concept — "The April 2025 seam" — describes a boundary that does not exist, on a date that predates the project's first commit by fifteen months. The page also claims a data field (sale counts) the database has never had and the source has never published, and it understates the depth of the one series that is genuinely deep by nearly three years. Shipping this copy unchanged would put false public statements on a site whose entire brand is not making false public statements.
 
 ---

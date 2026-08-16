@@ -6,6 +6,28 @@
 > Where a markdown doc disagrees with the HTML, the HTML wins and the disagreement is
 > recorded in §8 — never averaged.
 
+> **Amended 2026-08-15 (Catalog phase design, D-110 — build from
+> `docs/superpowers/specs/2026-08-15-catalog-phase-design.md`, which supersedes this spec where
+> they differ).** Owner rulings of that date, answering §7: **(1)** route is
+> `/character/{slug}` on the landed `species.slug` (§7.1). **(2)** The 90d tile renders per
+> the **D-102 vocabulary** — label + dash + ◌ — until the analytics worker; no interim species
+> index (§7.2, §7.13); no chart is added (§7.3). **(3)** Year and the tile's `set · year` line
+> get per-cell pending states with computed tooltips; the dangling `·` bug does not port
+> (§7.4, §4.4). **(4)** Chips: one per type, gen tooltip uses the stored region, stage via the
+> self-join, color, egg group(s), **habitat only when non-null** (Gen 4+ have none — omitted,
+> not pending); region/status keep no chip (§7.5); chips stay inert (§7.7). **(5)** §7.6
+> answered: **the Set cell links to `/set/{id}`**. **(6)** §7.8 answered: no co-star markers;
+> the footer states the rule — reworded to the named-species form ("a card *naming* multiple
+> Pokémon in its title appears under every species it names", per D-106). **(7)** §7.9
+> answered: **full roster, virtualized** — no cap. **(8)** §7.10 answered: **sort pills
+> arrive** (`value` / `year` / `ROC 3M` / `sales/mo` — every sortable key, so binder view has
+> the full sort set), resolving §4.3's default-view trap; the old manual-arrangement binder
+> idea is confirmed dropped; **Sales/mo is sortable**. **(9)** §7.11:
+> avatar renders the pixel species icon over the stored gradient pair (D-104); accent bar uses
+> the same pair. **(10)** §7.12 answered: header tiles abbreviate at ≥$10K; roster cells stay
+> full dollars. Total value's tooltip carries the D-061 denominator ("over {n} of {m}
+> printings with a PSA 10 price").
+
 ---
 
 ## 1. Identity
