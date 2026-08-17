@@ -1,0 +1,44 @@
+.char-header { display: flex; align-items: center; gap: 20px; background: var(--card);
+    border: 1px solid var(--line); border-radius: 10px; padding: 16px; }
+.char-avatar { position: relative; width: 64px; height: 64px; border-radius: 50%;
+    overflow: hidden; flex-shrink: 0; }
+.char-initial { position: absolute; inset: 0; display: grid; place-items: center;
+    font: 700 26px 'Inter Tight', sans-serif; color: rgba(255, 255, 255, 0.92); }
+.char-avatar img { position: relative; width: 100%; height: 100%; object-fit: contain;
+    image-rendering: pixelated; }
+.char-identity h1 { font: 700 26px 'Inter Tight', sans-serif; margin: 0 0 6px;
+    letter-spacing: -0.01em; }
+.char-chips { display: flex; flex-wrap: wrap; gap: 6px; }
+.dex-chip { font: 600 11.5px 'JetBrains Mono', monospace; background: var(--mutbg);
+    border: 1px solid var(--line); border-radius: 4px; padding: 2px 7px;
+    color: var(--mut); cursor: help; }
+.stat-tiles { display: flex; gap: 22px; }
+.stat-tile { display: flex; flex-direction: column; align-items: flex-end; gap: 2px; }
+.stat-label { font: 600 11px 'Inter Tight', sans-serif; letter-spacing: 0.06em;
+    color: var(--mut2); }
+.stat-value { font: 700 19px 'JetBrains Mono', monospace; }
+.deferred-value { color: var(--mut2); }
+.toolbar-sentence { font-size: 12.5px; color: var(--mut2); }
+
+/* Shared-with-SetPage chrome, copied verbatim from SetPage.razor.css: Blazor CSS
+   isolation is per-file (page-scoped), so these class names do not cross pages and must
+   be duplicated rather than referenced. */
+.accent-bar { height: 4px; border-radius: 2px;
+    background: linear-gradient(90deg, #2B2D42, #5C6B9E, #7E6BA8); }
+.breadcrumb { font-size: 13.5px; color: var(--mut2); margin: 8px 0; }
+.breadcrumb a { color: var(--link); text-decoration: none; }
+.set-toolbar { display: flex; align-items: center; gap: 14px; margin-top: 4px; }
+.shown-count { font-size: 12.5px; color: var(--mut2); }
+.empty-panel { background: var(--card); border: 1px solid var(--line); border-radius: 10px;
+    padding: 40px; text-align: center; font-size: 14px; color: var(--mut2); }
+.set-footer { font-size: 12.5px; color: var(--mut2); }
+.spacer { flex: 1; }
+.mono { font-family: 'JetBrains Mono', monospace; }
+.pos { color: var(--pos); }
+.neg { color: var(--neg2); }
+.row-link { color: inherit; text-decoration: none; }
+.row-link:hover { color: var(--acc); }
+.tile-name { font: 600 13.5px 'Inter Tight', sans-serif; white-space: nowrap;
+    overflow: hidden; text-overflow: ellipsis; }
+.tile-stats { display: flex; justify-content: space-between; margin-top: 4px; font-size: 12.5px; }
+.tile-setline { font-size: 11.5px; color: var(--mut2); margin-top: 2px; }

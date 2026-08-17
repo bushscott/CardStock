@@ -1,0 +1,179 @@
+@page "/character/{Slug}"
+@using CardStock.Application.Catalog
+@using CardStock.Domain.Signals
+@using CardStock.Web.Services
+@inject CatalogApiClient Api
+
+@if (_result is null)
+{
+    <p class="loading-strip" aria-busy="true">Loading…</p>
+}
+else if (_result.Failed)
+{
+    <div class="card-error">
+        <p>Couldn't reach the data service.</p>
+        <button type="button" @onclick="LoadAsync">Retry</button>
+    </div>
+}
+else if (_result.NotFound)
+{
+    <p class="card-not-found">No such species.</p>
+}
+else
+{
+    var character = _result.Value!;
+    <PageTitle>@character.Name</PageTitle>
+    <div class="accent-bar"
+         style="background: linear-gradient(90deg, @character.GradientStart, @character.GradientEnd)"></div>
+    <nav class="breadcrumb"><a href="browse">Browse</a> › @character.Name</nav>
+
+    <header class="char-header">
+        <div class="char-avatar"
+             style="background: linear-gradient(160deg, @character.GradientStart, @character.GradientEnd)">
+            <span class="char-initial">@character.Name[..1]</span>
+            <img src="@CatalogApiClient.SpeciesIconUrl(character.SpeciesId)" alt=""
+                 loading="lazy" onerror="this.style.display='none'" />
+        </div>
+        <div class="char-identity">
+            <h1>@character.Name</h1>
+            <div class="char-chips">
+                @foreach (var chip in character.Chips)
+                {
+                    <span class="dex-chip" tabindex="0" title="@chip.Tooltip">@chip.Label</span>
+                }
+            </div>
+        </div>
+        <div class="spacer"></div>
+        <div class="stat-tiles">
+            <div class="stat-tile"><span class="stat-label">PRINTINGS</span>
+                <span class="stat-value mono">@character.Printings</span></div>
+            <div class="stat-tile"><span class="stat-label">SETS</span>
+                <span class="stat-value mono">@character.SetsCount</span></div>
+            <div class="stat-tile"
+                 title="Sum of latest monthly PSA 10 — over @character.PricedPrintings of @character.Printings printings with a PSA 10 price">
+                <span class="stat-label">TOTAL VALUE</span>
+                <span class="stat-value mono">@Format.AbbrevMoney(character.TotalValueCents)</span></div>
+            <div class="stat-tile"><span class="stat-label">90D<PendingGlyph Note="@CatalogCopy.WorkerGate" /></span>
+                <span class="stat-value mono deferred-value">@ChipEngine.GlyphDash</span></div>
+        </div>
+    </header>
+
+    <div class="set-toolbar">
+        <DensityToggle LeftKey="binder" LeftLabel="binder"
+                       LeftTooltip="Binder density — fewer rows with card art"
+                       RightKey="terminal" RightLabel="terminal"
+                       RightTooltip="Terminal density — more rows, tighter type, every metric column"
+                       Value="@_view" ValueChanged="v => _view = v" />
+        <SortPills Pills="@Pills" Sort="@_sort" Changed="StateHasChanged" />
+        <span class="toolbar-sentence">every @character.Name printing we track, all eras</span>
+        <div class="spacer"></div>
+        <span class="shown-count mono">@character.Roster.Count of @character.Printings printings</span>
+    </div>
+
+    @if (character.Roster.Count == 0)
+    {
+        <div class="empty-panel">No tracked printings for this species.</div>
+    }
+    else if (_view == "terminal")
+    {
+        <RosterTable TRow="CharacterRosterRowDto" Columns="@Columns()" Rows="@Sorted()"
+                     Sort="@_sort" Changed="StateHasChanged" />
+    }
+    else
+    {
+        <BinderGrid TRow="CharacterRosterRowDto" Rows="@Sorted()"
+                    Href="@(r => $"card/{r.CardId}")"
+                    ArtUrl="@(r => r.HasImage ? CardApiClient.ImageUrl(r.CardId) : null)"
+                    GradientStart="@(_ => character.GradientStart)"
+                    GradientEnd="@(_ => character.GradientEnd)">
+            <TileBody Context="r">
+                <div class="tile-name">@r.Name</div>
+                <div class="tile-setline mono">@r.SetName@(r.Year is { } year ? $" · {year}" : "")</div>
+                <div class="tile-stats">
+                    <span class="mono">@(r.PriceCents is { } c ? Format.Money(c) : ChipEngine.GlyphDash)</span>
+                    <span class="mono @RocClass(r.Roc3M)">@(r.Roc3M is { } roc
+                        ? Format.ChangePercent(roc) : ChipEngine.GlyphDash)</span>
+                </div>
+            </TileBody>
+        </BinderGrid>
+    }
+
+    <p class="set-footer">Prices are latest monthly PSA 10 · a card naming multiple Pokémon in its title appears under every species it names</p>
+}
+
+@code {
+    [Parameter] public string Slug { get; set; } = "";
+
+    private CatalogResult<CharacterPageDto>? _result;
+    private string _view = "binder";
+    private readonly SortState _sort = new("value");
+
+    protected override Task OnParametersSetAsync() => LoadAsync();
+
+    private async Task LoadAsync()
+    {
+        _result = null;
+        _result = await Api.GetCharacterAsync(Slug);
+    }
+
+    private static readonly IReadOnlyList<SortPill> Pills =
+    [
+        new("value", "value", "Sort by value", false, null),
+        new("year", "year", "Sort by release year", false, null),
+        new("roc", "ROC 3M", "Sort by ROC 3M", false, null),
+        new("sales", "sales/mo", "Sort by observed sales", false, null),
+    ];
+
+    private IReadOnlyList<CharacterRosterRowDto> Sorted()
+    {
+        Comparison<CharacterRosterRowDto> by = _sort.Key switch
+        {
+            "year" => (a, b) => Nullable.Compare(a.Year, b.Year),
+            "roc" => (a, b) => Nullable.Compare(a.Roc3M, b.Roc3M),
+            "sales" => (a, b) => a.Sales30d.CompareTo(b.Sales30d),
+            _ => (a, b) => Nullable.Compare(a.PriceCents, b.PriceCents),
+        };
+
+        // Controller ruling (standing R15): a ranking must never imply a value a dash cell
+        // honestly refuses to state. Rows with no value for the active nullable key sort
+        // last, in incoming order, regardless of direction -- never floated to the top by
+        // an ascending flip. This screen has no exclusion concept (character.md §6, rule 4:
+        // "no filtering, no exclusion, ever"), so unlike SetPage there is no Included() step
+        // -- every row is a sort candidate, only the partition differs. Sales is non-nullable.
+        Func<CharacterRosterRowDto, bool> hasValue = _sort.Key switch
+        {
+            "value" => r => r.PriceCents is not null,
+            "year" => r => r.Year is not null,
+            "roc" => r => r.Roc3M is not null,
+            _ => _ => true,
+        };
+
+        var rows = _result!.Value!.Roster;
+        var valued = rows.Where(hasValue).ToList();
+        var unvalued = rows.Where(r => !hasValue(r)).ToList();
+        valued.Sort((a, b) => _sort.Descending ? by(b, a) : by(a, b));
+        return [.. valued, .. unvalued];
+    }
+
+    private static string RocClass(decimal? roc) =>
+        roc is null ? "" : roc >= 0 ? "pos" : "neg";
+
+    private IReadOnlyList<RosterColumn<CharacterRosterRowDto>> Columns() =>
+    [
+        new("name", "Card", 230, "Printing name", false, false, null,
+            r => @<a class="row-link" href="card/@r.CardId">@r.Name</a>),
+        new("set", "Set", 130, "Set this printing belongs to", false, false, null,
+            r => @<a class="row-link" href="set/@r.SetId">@r.SetName</a>),
+        new("year", "Year", 70, "Release year — click to sort", true, false, null,
+            r => r.Year is { } year
+                ? @<text>@year</text>
+                : @<span title="@CatalogCopy.YearPending">@ChipEngine.GlyphDash</span>),
+        new("value", "PSA 10", 100, "Latest monthly PSA 10 price — click to sort", true, false, null,
+            r => @<text>@(r.PriceCents is { } c ? Format.Money(c) : ChipEngine.GlyphDash)</text>),
+        new("roc", "ROC 3M", 92, "3-month rate of change — click to sort", true, false, null,
+            r => @<span class="@RocClass(r.Roc3M)">@(r.Roc3M is { } roc
+                ? Format.ChangePercent(roc) : ChipEngine.GlyphDash)</span>),
+        new("sales", "Sales / mo", 90, "Observed sales in the last 30 days, all grade labels — click to sort",
+            true, false, null, r => @<text>@r.Sales30d</text>),
+    ];
+}
