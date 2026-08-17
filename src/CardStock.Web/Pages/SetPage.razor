@@ -1,0 +1,216 @@
+@page "/set/{Id:long}"
+@using System.Globalization
+@using CardStock.Application.Catalog
+@using CardStock.Domain
+@using CardStock.Domain.Signals
+@using CardStock.Web.Services
+@inject CatalogApiClient Api
+
+@if (_result is null)
+{
+    <p class="loading-strip" aria-busy="true">Loading…</p>
+}
+else if (_result.Failed)
+{
+    <div class="card-error">
+        <p>Couldn't reach the data service.</p>
+        <button type="button" @onclick="LoadAsync">Retry</button>
+    </div>
+}
+else if (_result.NotFound)
+{
+    <p class="card-not-found">No such set.</p>
+}
+else
+{
+    var set = _result.Value!;
+    <PageTitle>@set.Name</PageTitle>
+    <div class="accent-bar"></div>
+    <nav class="breadcrumb"><a href="browse">Browse</a> › @set.Name</nav>
+
+    <header class="set-header">
+        <div class="set-identity">
+            <div class="set-title-row">
+                <h1>@set.Name</h1>
+                @if (set.MetadataStatus == "matched")
+                {
+                    @if (set.Code is { } setCode)
+                    {
+                        <span class="set-code">@setCode.ToUpperInvariant()</span>
+                    }
+                    @if (set.Era is { } era)
+                    {
+                        <span class="set-era">@era</span>
+                    }
+                }
+                else
+                {
+                    <span class="set-meta-pending" tabindex="0"
+                          title="@CatalogCopy.MetadataPending">◌ metadata pending</span>
+                }
+            </div>
+            @* Kept as plain, contiguous text (not split across a nested `.mono` span for just
+               the numeral/date): "N cards tracked" and "first sale observed MMM yyyy" are each
+               read as one phrase, not a number sitting inside separately-styled prose. *@
+            <p class="set-subline">@set.CardsTracked cards tracked
+                @if (set.FirstSaleMonth is { } month)
+                {
+                    <text> · first sale observed @Format.MonthYear(month)</text>
+                }
+            </p>
+        </div>
+        <div class="spacer"></div>
+        <DeferredIndexBlock Caption="set index · 12M" />
+    </header>
+
+    <div class="set-toolbar">
+        <DensityToggle LeftKey="terminal" LeftLabel="terminal"
+                       LeftTooltip="Terminal density — more rows, tighter type, every metric column"
+                       RightKey="binder" RightLabel="binder"
+                       RightTooltip="Binder density — fewer rows with card art"
+                       Value="@_view" ValueChanged="v => _view = v" />
+        <SortPills Pills="@Pills" Sort="@_sort" Changed="StateHasChanged" />
+        <div class="spacer"></div>
+        <span class="shown-count mono">@Sorted().Count of @set.CardsTracked cards</span>
+    </div>
+
+    @if (_sort.Key == "pop" && Excluded().Count > 0)
+    {
+        <div class="exclusion-banner">@BannerCopy()</div>
+    }
+
+    @if (set.Roster.Count == 0)
+    {
+        <div class="empty-panel">No tracked cards in this set.</div>
+    }
+    else if (_view == "terminal")
+    {
+        <RosterTable TRow="SetRosterRowDto" Columns="@Columns()" Rows="@Sorted()"
+                     Sort="@_sort" Changed="StateHasChanged" />
+    }
+    else
+    {
+        <BinderGrid TRow="SetRosterRowDto" Rows="@Sorted()"
+                    Href="@(r => $"card/{r.CardId}")"
+                    ArtUrl="@(r => r.HasImage ? CardApiClient.ImageUrl(r.CardId) : null)"
+                    GradientStart="@(_ => "#2B2D42")" GradientEnd="@(_ => "#5C6B9E")">
+            <TileBody Context="r">
+                <div class="tile-name">@r.Name</div>
+                <div class="tile-stats">
+                    <span class="mono">@(r.PriceCents is { } c ? Format.Money(c) : ChipEngine.GlyphDash)</span>
+                    <span class="mono @RocClass(r.Roc3M)">@(r.Roc3M is { } roc
+                        ? Format.ChangePercent(roc) : ChipEngine.GlyphDash)</span>
+                </div>
+            </TileBody>
+        </BinderGrid>
+    }
+
+    <p class="set-footer">Showing all @set.CardsTracked tracked cards · prices are latest monthly PSA 10</p>
+}
+
+@code {
+    [Parameter] public long Id { get; set; }
+
+    private CatalogResult<SetPageDto>? _result;
+    private string _view = "terminal";
+    private readonly SortState _sort = new("value");
+
+    protected override Task OnParametersSetAsync() => LoadAsync();
+
+    private async Task LoadAsync()
+    {
+        _result = null;
+        _result = await Api.GetSetAsync(Id);
+    }
+
+    private static readonly IReadOnlyList<SortPill> Pills =
+    [
+        new("value", "value", "Sort by value", false, null),
+        new("roc", "ROC 3M", "Sort by ROC 3M", false, null),
+        new("rs", "RS", "Sort by RS", true, CatalogCopy.WorkerGate),
+        new("pop", "pop Δ", "Sort by pop Δ", false, null),
+        new("sales", "sales/mo", "Sort by observed sales", false, null),
+    ];
+
+    private IReadOnlyList<SetRosterRowDto> Included() =>
+        _sort.Key == "pop"
+            ? _result!.Value!.Roster.Where(r => r.Pop.State == "available").ToList()
+            : _result!.Value!.Roster;
+
+    private IReadOnlyList<SetRosterRowDto> Excluded() =>
+        _result!.Value!.Roster.Where(r => r.Pop.State != "available").ToList();
+
+    private IReadOnlyList<SetRosterRowDto> Sorted()
+    {
+        var rows = Included();
+        Comparison<SetRosterRowDto> by = _sort.Key switch
+        {
+            "roc" => (a, b) => Nullable.Compare(a.Roc3M, b.Roc3M),
+            "pop" => (a, b) => Nullable.Compare(a.Pop.Fraction, b.Pop.Fraction),
+            "sales" => (a, b) => a.Sales30d.CompareTo(b.Sales30d),
+            _ => (a, b) => Nullable.Compare(a.PriceCents, b.PriceCents),
+        };
+        var sorted = rows.ToList();
+        sorted.Sort((a, b) => _sort.Descending ? by(b, a) : by(a, b));
+        return sorted;
+    }
+
+    /// <summary>D-070/R12: wire dates are machine values (yyyy-MM-dd), parsed independent of
+    /// the browser's locale -- WASM CurrentCulture is the browser locale, not invariant.</summary>
+    private string BannerCopy()
+    {
+        var excluded = Excluded();
+        var firsts = excluded
+            .Where(r => r.Pop.FirstObservedOn is not null)
+            .Select(r => DateOnly.Parse(r.Pop.FirstObservedOn!, CultureInfo.InvariantCulture))
+            .ToList();
+        var unlocks = excluded
+            .Where(r => r.Pop.DeltasBeginOn is not null)
+            .Select(r => DateOnly.Parse(r.Pop.DeltasBeginOn!, CultureInfo.InvariantCulture))
+            .ToList();
+        var range = firsts.Count > 0
+            ? $" First observations run {Dates.Full(firsts.Min())} to {Dates.Full(firsts.Max())};" +
+              (unlocks.Count > 0 ? $" deltas begin arriving {Dates.Full(unlocks.Min())}." : "")
+            : "";
+        return $"{excluded.Count} cards excluded from this sort — pop Δ 60d needs two census " +
+               $"observations 60 days apart.{range}";
+    }
+
+    private static string RocClass(decimal? roc) =>
+        roc is null ? "" : roc >= 0 ? "pos" : "neg";
+
+    private IReadOnlyList<RosterColumn<SetRosterRowDto>> Columns() =>
+    [
+        new("name", "Card", 230, "Card name", false, false, null,
+            r => @<a class="row-link" href="card/@r.CardId">@r.Name</a>),
+        new("value", "PSA 10", 100, "Latest monthly PSA 10 price — click to sort", true, false, null,
+            r => @<text>@(r.PriceCents is { } c ? Format.Money(c) : ChipEngine.GlyphDash)</text>),
+        new("roc", "ROC 3M", 92, "3-month rate of change — click to sort", true, false, null,
+            r => @<span class="@RocClass(r.Roc3M)">@(r.Roc3M is { } roc
+                ? Format.ChangePercent(roc) : ChipEngine.GlyphDash)</span>),
+        new("rs", "RS pct", 84, "Relative strength vs market index, percentile", false, true,
+            CatalogCopy.WorkerGate, _ => @<text>@ChipEngine.GlyphDash</text>),
+        new("pop", "Pop Δ 60d", 96, "PSA 10 census growth over 60 days — click to sort", true, false, null,
+            r => @<span title="@PopTip(r.Pop)" class="@PopClass(r.Pop)">@PopText(r.Pop)</span>),
+        new("sales", "Sales / mo", 90, "Observed sales in the last 30 days, all grade labels — click to sort",
+            true, false, null, r => @<text>@r.Sales30d</text>),
+    ];
+
+    private static string PopText(PopDto pop) =>
+        pop.State == "available" ? Format.ChangePercent(pop.Fraction!.Value) : ChipEngine.GlyphDash;
+
+    private static string PopClass(PopDto pop) =>
+        pop is { State: "available", Fraction: >= 0.05m } ? "pop-warn" : "";
+
+    private static string PopTip(PopDto pop) => pop.State switch
+    {
+        "available" => $"{Format.ChangePercent(pop.Fraction!.Value)} PSA 10 census growth over " +
+                       "60 days — rising supply reads as a warning",
+        "pending" => $"Census too young — first observation {FullDate(pop.FirstObservedOn)}, " +
+                     $"deltas begin {FullDate(pop.DeltasBeginOn)}",
+        _ => "No PSA 10 population observed",
+    };
+
+    private static string FullDate(string? iso) =>
+        iso is null ? "" : Dates.Full(DateOnly.Parse(iso, CultureInfo.InvariantCulture));
+}
