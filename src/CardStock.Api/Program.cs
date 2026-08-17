@@ -28,6 +28,15 @@ builder.Services.AddScoped<ICardSalesReader, CardSalesReader>();
 builder.Services.AddScoped<ISetPageReader, SetPageReader>();
 builder.Services.AddScoped<ICharacterPageReader, CharacterPageReader>();
 
+// Corpus-wide latest-PSA-10 measured 1,427 ms cold on the Pi (2026-08-15) --
+// far too slow per page load, so it computes once behind a short TTL and
+// serves from memory. Singleton: corpus state, not user session state.
+var aggregateTtl = TimeSpan.FromMinutes(
+    builder.Configuration.GetValue("Catalog:AggregateCacheMinutes", 5));
+builder.Services.AddSingleton<ICatalogAggregates>(sp => new CatalogAggregateCache(
+    sp.GetRequiredService<IDbContextFactory<CardStockDbContext>>(),
+    sp.GetRequiredService<TimeProvider>(), aggregateTtl));
+
 // Timeout outlives the worker's own 60s upstream cap, so the worker always
 // answers first (D-076) and we never guess at a status it hasn't yet given.
 builder.Services.AddHttpClient("worker-intake", client =>
