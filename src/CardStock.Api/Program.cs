@@ -26,6 +26,7 @@ builder.Services.AddScoped<ICardPriceReader, CardPriceReader>();
 builder.Services.AddScoped<ICardCensusReader, CardCensusReader>();
 builder.Services.AddScoped<ICardSalesReader, CardSalesReader>();
 builder.Services.AddScoped<ISetPageReader, SetPageReader>();
+builder.Services.AddScoped<ICharacterPageReader, CharacterPageReader>();
 
 // Timeout outlives the worker's own 60s upstream cap, so the worker always
 // answers first (D-076) and we never guess at a status it hasn't yet given.

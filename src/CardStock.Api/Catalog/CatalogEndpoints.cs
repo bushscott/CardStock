@@ -15,6 +15,31 @@ public static class CatalogEndpoints
             return snapshot is null ? NotFound() : Results.Ok(CatalogMappers.ToDto(snapshot));
         });
 
+        api.MapGet("/characters/{slug}", async (
+            string slug, ICharacterPageReader reader, CancellationToken ct) =>
+        {
+            var snapshot = await reader.GetAsync(slug, ct);
+            return snapshot is null ? NotFound() : Results.Ok(CatalogMappers.ToDto(snapshot));
+        });
+
+        // The card-image endpoint's shape (CardsEndpoints.cs): disk is the fact.
+        // The id is an int route constraint, so no traversal-shaped value can
+        // reach Path.Combine.
+        api.MapGet("/species/{id:int}/icon", (
+            int id, IConfiguration configuration, HttpContext httpContext) =>
+        {
+            var directory = configuration["SpeciesIcons:Directory"]
+                ?? throw new InvalidOperationException("SpeciesIcons:Directory is not configured.");
+            var path = Path.Combine(directory, $"{id}.png");
+            if (!File.Exists(path))
+            {
+                return Results.NotFound();
+            }
+
+            httpContext.Response.Headers.CacheControl = "public, max-age=31536000, immutable";
+            return Results.File(path, "image/png");
+        });
+
         return routes;
     }
 

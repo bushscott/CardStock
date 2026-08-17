@@ -30,15 +30,21 @@ public sealed class TestApp : WebApplicationFactory<Program>
 
     public SetPageSnapshot? SetSnapshot { get; set; }
 
+    public CharacterPageSnapshot? CharacterSnapshot { get; set; }
+
     /// <summary>A fresh temp directory per test instance, wired as ImageStore:Directory.</summary>
     public string ImageDirectory { get; } =
         Directory.CreateTempSubdirectory("cardstock-image-tests-").FullName;
+
+    public string SpeciesIconDirectory { get; } =
+        Directory.CreateTempSubdirectory("cardstock-icon-tests-").FullName;
 
     protected override void ConfigureWebHost(IWebHostBuilder builder)
     {
         builder.UseSetting("ConnectionStrings:CardStock",
             "Host=localhost;Database=never_used;Username=x;Password=x");
         builder.UseSetting("ImageStore:Directory", ImageDirectory);
+        builder.UseSetting("SpeciesIcons:Directory", SpeciesIconDirectory);
         builder.UseSetting("Worker:IntakeBaseUrl", "http://127.0.0.1:5155");
         if (ExpressPerHour is not null)
         {
@@ -52,6 +58,7 @@ public sealed class TestApp : WebApplicationFactory<Program>
             services.AddScoped<ICardCensusReader>(_ => new StubCensus(this));
             services.AddScoped<ICardSalesReader>(_ => new StubSales(this));
             services.AddScoped<ISetPageReader>(_ => new StubSetPage(this));
+            services.AddScoped<ICharacterPageReader>(_ => new StubCharacter(this));
             if (UtcNow is not null)
             {
                 services.AddSingleton<TimeProvider>(new FixedTimeProvider(UtcNow.Value));
@@ -74,6 +81,15 @@ public sealed class TestApp : WebApplicationFactory<Program>
             try
             {
                 Directory.Delete(ImageDirectory, recursive: true);
+            }
+            catch (IOException)
+            {
+                // Best effort; the OS reclaims the temp dir eventually regardless.
+            }
+
+            try
+            {
+                Directory.Delete(SpeciesIconDirectory, recursive: true);
             }
             catch (IOException)
             {
@@ -115,5 +131,11 @@ public sealed class TestApp : WebApplicationFactory<Program>
     private sealed class FixedTimeProvider(DateTimeOffset now) : TimeProvider
     {
         public override DateTimeOffset GetUtcNow() => now;
+    }
+
+    private sealed class StubCharacter(TestApp app) : ICharacterPageReader
+    {
+        public Task<CharacterPageSnapshot?> GetAsync(string slug, CancellationToken ct = default) =>
+            Task.FromResult(app.CharacterSnapshot?.Slug == slug ? app.CharacterSnapshot : null);
     }
 }
