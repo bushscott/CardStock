@@ -13,3 +13,14 @@ public sealed record SetRosterRowDto(
 /// tooltips verbatim.</summary>
 public sealed record PopDto(
     string State, decimal? Fraction, string? FirstObservedOn, string? DeltasBeginOn);
+
+public sealed record CharacterPageDto(
+    int SpeciesId, string Name, string GradientStart, string GradientEnd,
+    IReadOnlyList<ChipDto> Chips, int Printings, int SetsCount,
+    long TotalValueCents, int PricedPrintings, IReadOnlyList<CharacterRosterRowDto> Roster);
+
+public sealed record ChipDto(string Label, string Tooltip);
+
+public sealed record CharacterRosterRowDto(
+    long CardId, string Name, bool HasImage, long SetId, string SetName, short? Year,
+    int? PriceCents, decimal? Roc3M, int Sales30d);
