@@ -16,7 +16,7 @@ public interface ICardSalesReader
     /// lifetime — a bucket truncates only once its captured history exceeds the cap,
     /// so rare buckets show their complete lives while fast buckets stay bounded.
     /// One constant shared by the reader's query and the ledger's copy.</summary>
-    const int BucketCap = 300;
+    public const int BucketCap = 300;
 
-    Task<IReadOnlyList<LedgerSale>> GetAsync(long cardId, CancellationToken cancellationToken = default);
+    public Task<IReadOnlyList<LedgerSale>> GetAsync(long cardId, CancellationToken cancellationToken = default);
 }

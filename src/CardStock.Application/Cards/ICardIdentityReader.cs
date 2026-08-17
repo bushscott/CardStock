@@ -20,5 +20,5 @@ public sealed record CardIdentity(
 
 public interface ICardIdentityReader
 {
-    Task<CardIdentity?> GetAsync(long cardId, CancellationToken cancellationToken = default);
+    public Task<CardIdentity?> GetAsync(long cardId, CancellationToken cancellationToken = default);
 }

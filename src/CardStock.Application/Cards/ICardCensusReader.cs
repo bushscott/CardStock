@@ -9,5 +9,5 @@ namespace CardStock.Application.Cards;
 /// </summary>
 public interface ICardCensusReader
 {
-    Task<CardCensus> GetAsync(long cardId, CancellationToken cancellationToken = default);
+    public Task<CardCensus> GetAsync(long cardId, CancellationToken cancellationToken = default);
 }

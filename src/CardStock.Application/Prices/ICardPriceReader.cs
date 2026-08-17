@@ -10,5 +10,5 @@ namespace CardStock.Application.Prices;
 /// </summary>
 public interface ICardPriceReader
 {
-    Task<CardPriceSnapshot?> GetAsync(long cardId, CancellationToken cancellationToken = default);
+    public Task<CardPriceSnapshot?> GetAsync(long cardId, CancellationToken cancellationToken = default);
 }
