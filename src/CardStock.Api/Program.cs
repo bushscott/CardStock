@@ -1,9 +1,12 @@
 using System.Net;
 using System.Threading.RateLimiting;
 using CardStock.Api.Cards;
+using CardStock.Api.Catalog;
 using CardStock.Application.Cards;
+using CardStock.Application.Catalog;
 using CardStock.Application.Prices;
 using CardStock.Infrastructure.Cards;
+using CardStock.Infrastructure.Catalog;
 using CardStock.Infrastructure.Persistence;
 using CardStock.Infrastructure.Prices;
 using Microsoft.AspNetCore.RateLimiting;
@@ -22,6 +25,7 @@ builder.Services.AddScoped<ICardIdentityReader, CardIdentityReader>();
 builder.Services.AddScoped<ICardPriceReader, CardPriceReader>();
 builder.Services.AddScoped<ICardCensusReader, CardCensusReader>();
 builder.Services.AddScoped<ICardSalesReader, CardSalesReader>();
+builder.Services.AddScoped<ISetPageReader, SetPageReader>();
 
 // Timeout outlives the worker's own 60s upstream cap, so the worker always
 // answers first (D-076) and we never guess at a status it hasn't yet given.
@@ -75,6 +79,7 @@ app.MapGet("/healthz/data", async (CardStockDbContext db) => Results.Ok(new
 }));
 
 app.MapCardEndpoints();
+app.MapCatalogEndpoints();
 app.MapRefreshEndpoint();
 
 // The WASM app's own static assets and its host page fallback. Kept after the

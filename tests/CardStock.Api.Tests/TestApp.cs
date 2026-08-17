@@ -1,4 +1,5 @@
 using CardStock.Application.Cards;
+using CardStock.Application.Catalog;
 using CardStock.Application.Prices;
 using CardStock.Domain.Census;
 using CardStock.Domain.Prices;
@@ -27,6 +28,8 @@ public sealed class TestApp : WebApplicationFactory<Program>
     /// <summary>Overrides RateLimits:ExpressPerHour for a single test's host.</summary>
     public int? ExpressPerHour { get; set; }
 
+    public SetPageSnapshot? SetSnapshot { get; set; }
+
     /// <summary>A fresh temp directory per test instance, wired as ImageStore:Directory.</summary>
     public string ImageDirectory { get; } =
         Directory.CreateTempSubdirectory("cardstock-image-tests-").FullName;
@@ -48,6 +51,7 @@ public sealed class TestApp : WebApplicationFactory<Program>
             services.AddScoped<ICardPriceReader>(_ => new StubPrices(this));
             services.AddScoped<ICardCensusReader>(_ => new StubCensus(this));
             services.AddScoped<ICardSalesReader>(_ => new StubSales(this));
+            services.AddScoped<ISetPageReader>(_ => new StubSetPage(this));
             if (UtcNow is not null)
             {
                 services.AddSingleton<TimeProvider>(new FixedTimeProvider(UtcNow.Value));
@@ -100,6 +104,12 @@ public sealed class TestApp : WebApplicationFactory<Program>
     {
         public Task<IReadOnlyList<LedgerSale>> GetAsync(long id, CancellationToken ct = default) =>
             Task.FromResult(app.Sales);
+    }
+
+    private sealed class StubSetPage(TestApp app) : ISetPageReader
+    {
+        public Task<SetPageSnapshot?> GetAsync(long setId, CancellationToken ct = default) =>
+            Task.FromResult(app.SetSnapshot?.SetId == setId ? app.SetSnapshot : null);
     }
 
     private sealed class FixedTimeProvider(DateTimeOffset now) : TimeProvider
