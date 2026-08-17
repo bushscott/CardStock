@@ -32,6 +32,16 @@ public class CardStockDbContext(DbContextOptions<CardStockDbContext> options) : 
 
     public DbSet<ScraperSale> ScraperSales => Set<ScraperSale>();
 
+    public DbSet<ScraperSpecies> ScraperSpecies => Set<ScraperSpecies>();
+
+    public DbSet<ScraperSpeciesType> ScraperSpeciesTypes => Set<ScraperSpeciesType>();
+
+    public DbSet<ScraperSpeciesEggGroup> ScraperSpeciesEggGroups => Set<ScraperSpeciesEggGroup>();
+
+    public DbSet<ScraperCardSpecies> ScraperCardSpecies => Set<ScraperCardSpecies>();
+
+    public DbSet<ScraperSetDetail> ScraperSetDetails => Set<ScraperSetDetail>();
+
     protected override void OnModelCreating(ModelBuilder builder)
     {
         builder.HasDefaultSchema(Schema);

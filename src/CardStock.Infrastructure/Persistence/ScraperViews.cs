@@ -50,5 +50,39 @@ internal static class ScraperViews
             entity.HasKey(x => x.Id);
             entity.ToView("sales", CardStockDbContext.ScraperSchema);
         });
+
+        builder.Entity<ScraperSpecies>(entity =>
+        {
+            entity.HasKey(x => x.Id);
+            entity.ToView("species", CardStockDbContext.ScraperSchema);
+        });
+
+        builder.Entity<ScraperSpeciesType>(entity =>
+        {
+            entity.HasKey(x => new { x.SpeciesId, x.Slot });
+            entity.ToView("species_types", CardStockDbContext.ScraperSchema);
+        });
+
+        builder.Entity<ScraperSpeciesEggGroup>(entity =>
+        {
+            entity.HasKey(x => new { x.SpeciesId, x.EggGroup });
+            entity.ToView("species_egg_groups", CardStockDbContext.ScraperSchema);
+        });
+
+        builder.Entity<ScraperCardSpecies>(entity =>
+        {
+            entity.HasKey(x => new { x.CardId, x.SpeciesId });
+            entity.ToView("card_species", CardStockDbContext.ScraperSchema);
+        });
+
+        builder.Entity<ScraperSetDetail>(entity =>
+        {
+            entity.HasKey(x => x.SetId);
+            entity.ToView("set_details", CardStockDbContext.ScraperSchema);
+        });
+
+        // Deliberately not mapped: species_names (nothing reads it until a later
+        // phase) and card_tagging (lane bookkeeping). A mapping with no consumer
+        // is drift waiting to happen.
     }
 }

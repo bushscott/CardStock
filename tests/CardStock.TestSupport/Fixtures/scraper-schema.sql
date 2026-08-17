@@ -228,3 +228,85 @@ VALUES ('20260813234040_AddCardGoneAt', '10.0.10');
 
 COMMIT;
 
+START TRANSACTION;
+CREATE TABLE card_tagging (
+    card_id bigint NOT NULL,
+    status smallint NOT NULL,
+    method smallint NOT NULL,
+    tagged_name character varying(300) NOT NULL,
+    updated_at timestamp with time zone NOT NULL,
+    CONSTRAINT pk_card_tagging PRIMARY KEY (card_id),
+    CONSTRAINT fk_card_tagging_cards_card_id FOREIGN KEY (card_id) REFERENCES cards (id) ON DELETE RESTRICT
+);
+
+CREATE TABLE set_details (
+    set_id bigint NOT NULL,
+    match_status smallint NOT NULL,
+    code character varying(32),
+    released_on date,
+    series character varying(100),
+    era character varying(24),
+    CONSTRAINT pk_set_details PRIMARY KEY (set_id),
+    CONSTRAINT fk_set_details_sets_set_id FOREIGN KEY (set_id) REFERENCES sets (id) ON DELETE RESTRICT
+);
+
+CREATE TABLE species (
+    id integer NOT NULL,
+    name character varying(200) NOT NULL,
+    slug character varying(200) NOT NULL,
+    generation smallint NOT NULL,
+    region character varying(24) NOT NULL,
+    color character varying(24) NOT NULL,
+    habitat character varying(24),
+    status smallint NOT NULL,
+    stage smallint NOT NULL,
+    evolves_from_species_id integer,
+    gradient_start character varying(7) NOT NULL,
+    gradient_end character varying(7) NOT NULL,
+    CONSTRAINT pk_species PRIMARY KEY (id),
+    CONSTRAINT fk_species_species_evolves_from_species_id FOREIGN KEY (evolves_from_species_id) REFERENCES species (id) ON DELETE RESTRICT
+);
+
+CREATE TABLE card_species (
+    card_id bigint NOT NULL,
+    species_id integer NOT NULL,
+    method smallint NOT NULL,
+    CONSTRAINT pk_card_species PRIMARY KEY (card_id, species_id),
+    CONSTRAINT fk_card_species_cards_card_id FOREIGN KEY (card_id) REFERENCES cards (id) ON DELETE RESTRICT,
+    CONSTRAINT fk_card_species_species_species_id FOREIGN KEY (species_id) REFERENCES species (id) ON DELETE RESTRICT
+);
+
+CREATE TABLE species_egg_groups (
+    species_id integer NOT NULL,
+    egg_group character varying(24) NOT NULL,
+    CONSTRAINT pk_species_egg_groups PRIMARY KEY (species_id, egg_group),
+    CONSTRAINT fk_species_egg_groups_species_species_id FOREIGN KEY (species_id) REFERENCES species (id) ON DELETE RESTRICT
+);
+
+CREATE TABLE species_names (
+    species_id integer NOT NULL,
+    language character varying(12) NOT NULL,
+    name character varying(200) NOT NULL,
+    CONSTRAINT pk_species_names PRIMARY KEY (species_id, language),
+    CONSTRAINT fk_species_names_species_species_id FOREIGN KEY (species_id) REFERENCES species (id) ON DELETE RESTRICT
+);
+
+CREATE TABLE species_types (
+    species_id integer NOT NULL,
+    slot smallint NOT NULL,
+    type character varying(16) NOT NULL,
+    CONSTRAINT pk_species_types PRIMARY KEY (species_id, slot),
+    CONSTRAINT fk_species_types_species_species_id FOREIGN KEY (species_id) REFERENCES species (id) ON DELETE RESTRICT
+);
+
+CREATE INDEX ix_card_species_species_id_card_id ON card_species (species_id, card_id);
+
+CREATE INDEX ix_species_evolves_from_species_id ON species (evolves_from_species_id);
+
+CREATE UNIQUE INDEX ix_species_slug ON species (slug);
+
+INSERT INTO "__EFMigrationsHistory" (migration_id, product_version)
+VALUES ('20260815032212_AddPokedex', '10.0.10');
+
+COMMIT;
+

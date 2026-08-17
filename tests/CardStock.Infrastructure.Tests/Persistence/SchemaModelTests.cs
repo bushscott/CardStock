@@ -51,7 +51,7 @@ public class SchemaModelTests
             .Where(e => typeof(IScraperOwned).IsAssignableFrom(e.ClrType))
             .ToList();
 
-        Assert.Equal(5, scraperTypes.Count);
+        Assert.Equal(10, scraperTypes.Count);
 
         foreach (var entity in scraperTypes)
         {
