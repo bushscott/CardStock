@@ -37,6 +37,7 @@ public sealed class BrowseReader(
                 var top = members
                     .Where(c => latest.ContainsKey(c.Id))
                     .OrderByDescending(c => latest[c.Id])
+                    .ThenBy(c => c.Id)
                     .Select(c => (long?)c.Id)
                     .FirstOrDefault();
                 return new SetTile(
@@ -81,6 +82,7 @@ public sealed class BrowseReader(
                     s.Stage, s.Color, eggGroups[s.Id].ToList(), s.Habitat);
             })
             .OrderByDescending(s => s.TotalValueCents)
+            .ThenBy(s => s.SpeciesId)
             .ToList();
     }
 }
