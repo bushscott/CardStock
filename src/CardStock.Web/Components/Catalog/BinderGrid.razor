@@ -1,0 +1,31 @@
+@typeparam TRow
+
+@* Binder density (set.md §3.6, character.md §3.6): the whole tile links, art
+   sits over the accent gradient so an absent or still-loading image reads as
+   the gradient, never a broken slot. onerror hides a 404'd art request the
+   same way. *@
+<div class="binder-grid" style="grid-template-columns: repeat(auto-fill, minmax(@(MinTile)px, 1fr))">
+    @foreach (var row in Rows)
+    {
+        <a class="bg-tile" href="@Href(row)">
+            <div class="bg-art"
+                 style="background: linear-gradient(160deg, @GradientStart(row), @GradientEnd(row))">
+                @if (ArtUrl(row) is { } art)
+                {
+                    <img src="@art" alt="" loading="lazy" onerror="this.style.display='none'" />
+                }
+            </div>
+            <div class="bg-body">@TileBody(row)</div>
+        </a>
+    }
+</div>
+
+@code {
+    [Parameter, EditorRequired] public IReadOnlyList<TRow> Rows { get; set; } = default!;
+    [Parameter, EditorRequired] public Func<TRow, string> Href { get; set; } = default!;
+    [Parameter, EditorRequired] public Func<TRow, string?> ArtUrl { get; set; } = default!;
+    [Parameter, EditorRequired] public Func<TRow, string> GradientStart { get; set; } = default!;
+    [Parameter, EditorRequired] public Func<TRow, string> GradientEnd { get; set; } = default!;
+    [Parameter, EditorRequired] public RenderFragment<TRow> TileBody { get; set; } = default!;
+    [Parameter] public int MinTile { get; set; } = 180;
+}
