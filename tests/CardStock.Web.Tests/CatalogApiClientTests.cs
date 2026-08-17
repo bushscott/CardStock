@@ -41,6 +41,35 @@ public class CatalogApiClientTests
     }
 
     [Fact]
+    public async Task A_character_dto_round_trips()
+    {
+        var stub = new Stub(HttpStatusCode.OK,
+            """{"speciesId":32,"name":"Nidoran♀","gradientStart":"#2B2D42","gradientEnd":"#5C6B9E","chips":[],"printings":0,"setsCount":0,"totalValueCents":0,"pricedPrintings":0,"roster":[]}""");
+
+        var result = await Client(stub).GetCharacterAsync("nidoran-f");
+
+        Assert.Equal("/api/v1/characters/nidoran-f", stub.RequestedPath);
+        Assert.False(result.NotFound);
+        Assert.False(result.Failed);
+        Assert.Equal("Nidoran♀", result.Value!.Name);
+    }
+
+    [Fact]
+    public async Task A_slug_with_a_space_is_escaped_in_the_request_path()
+    {
+        // Synthetic input, not a real slug -- species slugs are purpose-built clean by
+        // construction (character.md §1: "umbreon", "nidoran-f"; the "♀"-style display
+        // name never reaches the URL). This pins Uri.EscapeDataString's behavior as
+        // defensive coverage, not a claim that escaping is load-bearing in practice.
+        var stub = new Stub(HttpStatusCode.OK,
+            """{"speciesId":1,"name":"Test","gradientStart":"#000000","gradientEnd":"#FFFFFF","chips":[],"printings":0,"setsCount":0,"totalValueCents":0,"pricedPrintings":0,"roster":[]}""");
+
+        await Client(stub).GetCharacterAsync("mr mime");
+
+        Assert.Equal("/api/v1/characters/mr%20mime", stub.RequestedPath);
+    }
+
+    [Fact]
     public async Task A_404_is_NotFound_not_a_failure()
     {
         var result = await Client(new Stub(HttpStatusCode.NotFound,
