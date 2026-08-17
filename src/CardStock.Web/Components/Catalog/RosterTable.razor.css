@@ -1,0 +1,26 @@
+.roster-table {
+    background: var(--card);
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    overflow-x: auto;
+}
+.rt-head, .rt-row { display: grid; align-items: center; padding: 6px 16px; }
+.rt-head {
+    border-bottom: 1px solid var(--line);
+    font: 600 12px 'JetBrains Mono', monospace;
+    color: var(--mut2);
+}
+.rt-head-cell { position: relative; text-align: center; user-select: none; }
+.rt-head-cell.sortable { cursor: pointer; }
+.rt-head-cell.sortable:hover { color: var(--ink); }
+.rt-grip {
+    position: absolute;
+    right: 0;
+    top: 0;
+    cursor: col-resize;
+    color: var(--line3);
+    touch-action: none;
+}
+.rt-row { border-bottom: 1px solid var(--line4); }
+.rt-cell { text-align: center; font: 500 12.5px 'JetBrains Mono', monospace; color: var(--mut); }
+.rt-cell-name { font: 500 14px 'Inter Tight', sans-serif; color: var(--ink); }

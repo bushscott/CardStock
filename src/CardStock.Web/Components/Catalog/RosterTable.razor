@@ -1,0 +1,133 @@
+@* task-9 brief: the virtualized terminal table both rosters share. Unsortable columns carry no
+   pointer affordance (no .sortable class, no tabindex); deferred columns carry the ◌ glyph in
+   the header and never sort (D-110 spec §5). Column-resize grips get pointer capture from a
+   single delegated JS listener installed once per table on first render -- not a JS call per
+   grip per drag -- so a drag that leaves the grip mid-move keeps receiving pointermove events. *@
+@typeparam TRow
+@implements IAsyncDisposable
+@inject IJSRuntime Js
+
+<div class="roster-table" role="table" @ref="_root">
+    <div class="rt-head" role="row" style="grid-template-columns: @GridCols()">
+        @foreach (var column in Columns)
+        {
+            <div role="columnheader" class="rt-head-cell @(column.Sortable ? "sortable" : null)"
+                 title="@column.Tooltip"
+                 tabindex="@(column.Sortable ? "0" : null)"
+                 @onclick="() => SortByAsync(column)"
+                 @onkeydown="e => HeaderKeyAsync(e, column)">
+                @column.Header@(Sort.Key == column.Key && column.Sortable
+                    ? Sort.Descending ? " ▾" : " ▴" : "")@if (column.Deferred)
+                {<PendingGlyph Note="@(column.DeferredTooltip ?? "")" />}
+                <span class="rt-grip" title="Drag to resize"
+                      @onpointerdown="e => GripDown(e, column.Key)"
+                      @onpointermove="e => GripMove(e, column.Key)"
+                      @onpointerup="() => _drag = null"
+                      @onclick:stopPropagation>│</span>
+            </div>
+        }
+    </div>
+    <div class="rt-body">
+        <Virtualize Items="RowsView" ItemSize="32" Context="row">
+            <div class="rt-row" role="row" style="grid-template-columns: @GridCols()">
+                @foreach (var column in Columns)
+                {
+                    <div role="cell" class="rt-cell rt-cell-@column.Key">@column.Cell(row)</div>
+                }
+            </div>
+        </Virtualize>
+    </div>
+</div>
+
+@code {
+    [Parameter, EditorRequired] public IReadOnlyList<RosterColumn<TRow>> Columns { get; set; } = default!;
+    [Parameter, EditorRequired] public IReadOnlyList<TRow> Rows { get; set; } = default!;
+    [Parameter, EditorRequired] public SortState Sort { get; set; } = default!;
+    [Parameter] public EventCallback Changed { get; set; }
+
+    private const int WidthFloor = 52;
+    private Dictionary<string, int> _widths = [];
+    private (string Key, double StartX, int StartWidth)? _drag;
+    private ElementReference _root;
+    private IJSObjectReference? _module;
+
+    protected override void OnParametersSet()
+    {
+        foreach (var column in Columns)
+        {
+            _widths.TryAdd(column.Key, column.DefaultWidth);
+        }
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (!firstRender)
+        {
+            return;
+        }
+
+        try
+        {
+            _module = await Js.InvokeAsync<IJSObjectReference>("import", "./js/catalog.js");
+            if (_module is not null)
+            {
+                await _module.InvokeVoidAsync("installGripCapture", _root);
+            }
+        }
+        catch (JSException)
+        {
+            // No delegated capture (e.g. under test, or a browser without module support):
+            // dragging inside the grip itself still works via the plain pointermove handler.
+        }
+    }
+
+    // Virtualize<TItem>.Items is typed ICollection<TItem>, which IReadOnlyList<TRow> does not
+    // implement (arrays and List<T> happen to satisfy both, but the Rows parameter's contract
+    // per the Interfaces block is IReadOnlyList<TRow> only -- ImmutableArray<T> and other
+    // read-only-only sequences do not). Materialize explicitly rather than an `as` cast, so a
+    // caller passing such a sequence renders every row instead of silently rendering none.
+    private List<TRow> RowsView => Rows.ToList();
+
+    private string GridCols() => string.Join(" ", Columns.Select((c, i) =>
+        i == 0 ? $"minmax({_widths[c.Key]}px, 1.4fr)" : $"{_widths[c.Key]}px"));
+
+    private Task SortByAsync(RosterColumn<TRow> column)
+    {
+        if (!column.Sortable)
+        {
+            return Task.CompletedTask;
+        }
+
+        Sort.Apply(column.Key);
+        return Changed.InvokeAsync();
+    }
+
+    private Task HeaderKeyAsync(KeyboardEventArgs e, RosterColumn<TRow> column) =>
+        e.Key is "Enter" or " " ? SortByAsync(column) : Task.CompletedTask;
+
+    private void GripDown(PointerEventArgs e, string key) =>
+        _drag = (key, e.ClientX, _widths[key]);
+
+    private void GripMove(PointerEventArgs e, string key)
+    {
+        if (_drag is { } drag && drag.Key == key)
+        {
+            _widths[key] = Math.Max(WidthFloor, drag.StartWidth + (int)(e.ClientX - drag.StartX));
+        }
+    }
+
+    public async ValueTask DisposeAsync()
+    {
+        try
+        {
+            if (_module is not null)
+            {
+                await _module.DisposeAsync();
+            }
+        }
+        catch (JSDisconnectedException)
+        {
+            // The circuit/module is already gone; nothing left to clean up.
+        }
+    }
+}
