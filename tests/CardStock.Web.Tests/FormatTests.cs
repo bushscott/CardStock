@@ -40,4 +40,17 @@ public class FormatTests
     {
         Assert.Equal("Aug ’26", Format.MonthLabel("2026-08"));
     }
+
+    [Theory]
+    [InlineData(999_900L, "$9,999")]        // below the 10K floor: full dollars
+    [InlineData(1_000_000L, "$10K")]        // exactly $10,000
+    [InlineData(9_640_000L, "$96.4K")]
+    [InlineData(120_000_000L, "$1.2M")]
+    [InlineData(100_000_000L, "$1M")]
+    public void AbbrevMoney_abbreviates_at_ten_thousand(long cents, string expected) =>
+        Assert.Equal(expected, Format.AbbrevMoney(cents));
+
+    [Fact]
+    public void MonthYear_prints_the_full_year() =>
+        Assert.Equal("Dec 2021", Format.MonthYear("2021-12"));
 }

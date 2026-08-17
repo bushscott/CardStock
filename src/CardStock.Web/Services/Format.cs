@@ -20,11 +20,34 @@ public static class Format
         return value < 0 ? $"−{Math.Abs(value):0.0}%" : $"+{value:0.0}%";
     }
 
-    /// <summary>"2026-08" or "2026-08-01" → "Aug '26" (U+2019), for month labels.</summary>
+    /// <summary>"2026-08" or "2026-08-01" → "Aug ’26" (U+2019), for month labels.</summary>
     public static string MonthLabel(string month)
     {
         var date = DateOnly.Parse(month.Length == 7 ? month + "-01" : month);
         var en = System.Globalization.CultureInfo.GetCultureInfo("en-US");
         return date.ToString("MMM", en) + " ’" + date.ToString("yy", en);
+    }
+
+    /// <summary>Header stat tiles abbreviate at ≥$10K (D-110 spec §4): one
+    /// decimal, trailing zero dropped. Roster cells always use Money.</summary>
+    public static string AbbrevMoney(long cents)
+    {
+        var dollars = cents / 100m;
+        return dollars switch
+        {
+            >= 1_000_000 => "$" + (dollars / 1_000_000).ToString("0.#",
+                System.Globalization.CultureInfo.GetCultureInfo("en-US")) + "M",
+            >= 10_000 => "$" + (dollars / 1_000).ToString("0.#",
+                System.Globalization.CultureInfo.GetCultureInfo("en-US")) + "K",
+            _ => Money((int)cents),
+        };
+    }
+
+    /// <summary>"2021-12" → "Dec 2021" — the Set header’s first-sale line.</summary>
+    public static string MonthYear(string month)
+    {
+        var date = DateOnly.Parse(month.Length == 7 ? month + "-01" : month,
+            System.Globalization.CultureInfo.InvariantCulture);
+        return date.ToString("MMM yyyy", System.Globalization.CultureInfo.GetCultureInfo("en-US"));
     }
 }
