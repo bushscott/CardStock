@@ -40,6 +40,12 @@ public static class CatalogEndpoints
             return Results.File(path, "image/png");
         });
 
+        api.MapGet("/browse/sets", async (IBrowseReader reader, CancellationToken ct) =>
+            Results.Ok(CatalogMappers.ToDto(await reader.GetSetsAsync(ct))));
+
+        api.MapGet("/browse/species", async (IBrowseReader reader, CancellationToken ct) =>
+            Results.Ok(CatalogMappers.ToDto(await reader.GetSpeciesAsync(ct))));
+
         return routes;
     }
 

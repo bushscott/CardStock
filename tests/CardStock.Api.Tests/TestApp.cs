@@ -32,6 +32,10 @@ public sealed class TestApp : WebApplicationFactory<Program>
 
     public CharacterPageSnapshot? CharacterSnapshot { get; set; }
 
+    public IReadOnlyList<SetTile> BrowseSets { get; set; } = [];
+
+    public IReadOnlyList<SpeciesTile> BrowseSpecies { get; set; } = [];
+
     /// <summary>A fresh temp directory per test instance, wired as ImageStore:Directory.</summary>
     public string ImageDirectory { get; } =
         Directory.CreateTempSubdirectory("cardstock-image-tests-").FullName;
@@ -59,6 +63,7 @@ public sealed class TestApp : WebApplicationFactory<Program>
             services.AddScoped<ICardSalesReader>(_ => new StubSales(this));
             services.AddScoped<ISetPageReader>(_ => new StubSetPage(this));
             services.AddScoped<ICharacterPageReader>(_ => new StubCharacter(this));
+            services.AddScoped<IBrowseReader>(_ => new StubBrowse(this));
             if (UtcNow is not null)
             {
                 services.AddSingleton<TimeProvider>(new FixedTimeProvider(UtcNow.Value));
@@ -137,5 +142,14 @@ public sealed class TestApp : WebApplicationFactory<Program>
     {
         public Task<CharacterPageSnapshot?> GetAsync(string slug, CancellationToken ct = default) =>
             Task.FromResult(app.CharacterSnapshot?.Slug == slug ? app.CharacterSnapshot : null);
+    }
+
+    private sealed class StubBrowse(TestApp app) : IBrowseReader
+    {
+        public Task<IReadOnlyList<SetTile>> GetSetsAsync(CancellationToken ct = default) =>
+            Task.FromResult(app.BrowseSets);
+
+        public Task<IReadOnlyList<SpeciesTile>> GetSpeciesAsync(CancellationToken ct = default) =>
+            Task.FromResult(app.BrowseSpecies);
     }
 }

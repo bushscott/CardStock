@@ -27,6 +27,7 @@ builder.Services.AddScoped<ICardCensusReader, CardCensusReader>();
 builder.Services.AddScoped<ICardSalesReader, CardSalesReader>();
 builder.Services.AddScoped<ISetPageReader, SetPageReader>();
 builder.Services.AddScoped<ICharacterPageReader, CharacterPageReader>();
+builder.Services.AddScoped<IBrowseReader, BrowseReader>();
 
 // Corpus-wide latest-PSA-10 measured 1,427 ms cold on the Pi (2026-08-15) --
 // far too slow per page load, so it computes once behind a short TTL and
