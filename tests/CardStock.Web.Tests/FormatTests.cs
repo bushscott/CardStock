@@ -1,3 +1,4 @@
+using System.Globalization;
 using CardStock.Web.Services;
 
 namespace CardStock.Web.Tests;
@@ -53,4 +54,23 @@ public class FormatTests
     [Fact]
     public void MonthYear_prints_the_full_year() =>
         Assert.Equal("Dec 2021", Format.MonthYear("2021-12"));
+
+    [Fact]
+    public void Month_formats_are_invariant_regardless_of_CurrentCulture()
+    {
+        var originalCulture = CultureInfo.CurrentCulture;
+        try
+        {
+            // Set CurrentCulture to Thai, whose date conventions differ significantly
+            CultureInfo.CurrentCulture = new CultureInfo("th-TH");
+
+            // Both methods should still produce en-US output with invariant parsing
+            Assert.Equal("Aug ’26", Format.MonthLabel("2026-08"));
+            Assert.Equal("Dec 2021", Format.MonthYear("2021-12"));
+        }
+        finally
+        {
+            CultureInfo.CurrentCulture = originalCulture;
+        }
+    }
 }

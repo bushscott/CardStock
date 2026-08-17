@@ -23,7 +23,8 @@ public static class Format
     /// <summary>"2026-08" or "2026-08-01" → "Aug ’26" (U+2019), for month labels.</summary>
     public static string MonthLabel(string month)
     {
-        var date = DateOnly.Parse(month.Length == 7 ? month + "-01" : month);
+        var date = DateOnly.Parse(month.Length == 7 ? month + "-01" : month,
+            System.Globalization.CultureInfo.InvariantCulture);
         var en = System.Globalization.CultureInfo.GetCultureInfo("en-US");
         return date.ToString("MMM", en) + " ’" + date.ToString("yy", en);
     }
