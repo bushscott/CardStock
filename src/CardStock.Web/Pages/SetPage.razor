@@ -49,13 +49,11 @@ else
                           title="@CatalogCopy.MetadataPending">◌ metadata pending</span>
                 }
             </div>
-            @* Kept as plain, contiguous text (not split across a nested `.mono` span for just
-               the numeral/date): "N cards tracked" and "first sale observed MMM yyyy" are each
-               read as one phrase, not a number sitting inside separately-styled prose. *@
-            <p class="set-subline">@set.CardsTracked cards tracked
+            @* set.md §3.1: the numeral/date each render mono inside the sub-line. *@
+            <p class="set-subline"><span class="mono">@set.CardsTracked</span> cards tracked
                 @if (set.FirstSaleMonth is { } month)
                 {
-                    <text> · first sale observed @Format.MonthYear(month)</text>
+                    <text> · first sale observed <span class="mono">@Format.MonthYear(month)</span></text>
                 }
             </p>
         </div>
@@ -150,9 +148,23 @@ else
             "sales" => (a, b) => a.Sales30d.CompareTo(b.Sales30d),
             _ => (a, b) => Nullable.Compare(a.PriceCents, b.PriceCents),
         };
-        var sorted = rows.ToList();
-        sorted.Sort((a, b) => _sort.Descending ? by(b, a) : by(a, b));
-        return sorted;
+
+        // Controller ruling: a ranking must never imply a value a dash cell honestly refuses
+        // to state. Rows with no value for the active nullable key sort last, in incoming
+        // order, regardless of direction -- never floated to the top by an ascending flip.
+        // Pop sort already excludes non-available rows (Included()), so its comparator never
+        // sees a null Fraction; sales is non-nullable. Only value/roc partition.
+        Func<SetRosterRowDto, bool> hasValue = _sort.Key switch
+        {
+            "value" => r => r.PriceCents is not null,
+            "roc" => r => r.Roc3M is not null,
+            _ => _ => true,
+        };
+
+        var valued = rows.Where(hasValue).ToList();
+        var unvalued = rows.Where(r => !hasValue(r)).ToList();
+        valued.Sort((a, b) => _sort.Descending ? by(b, a) : by(a, b));
+        return [.. valued, .. unvalued];
     }
 
     /// <summary>D-070/R12: wire dates are machine values (yyyy-MM-dd), parsed independent of
@@ -168,10 +180,14 @@ else
             .Where(r => r.Pop.DeltasBeginOn is not null)
             .Select(r => DateOnly.Parse(r.Pop.DeltasBeginOn!, CultureInfo.InvariantCulture))
             .ToList();
-        var range = firsts.Count > 0
-            ? $" First observations run {Dates.Full(firsts.Min())} to {Dates.Full(firsts.Max())};" +
-              (unlocks.Count > 0 ? $" deltas begin arriving {Dates.Full(unlocks.Min())}." : "")
-            : "";
+        var range = "";
+        if (firsts.Count > 0)
+        {
+            var observed = $" First observations run {Dates.Full(firsts.Min())} to {Dates.Full(firsts.Max())}";
+            range = unlocks.Count > 0
+                ? $"{observed}; deltas begin arriving {Dates.Full(unlocks.Min())}."
+                : $"{observed}.";
+        }
         return $"{excluded.Count} cards excluded from this sort — pop Δ 60d needs two census " +
                $"observations 60 days apart.{range}";
     }

@@ -38,8 +38,11 @@ public class SetPageTests : BunitContext
         var cut = RenderSetPage(Dto(Row()));
         Assert.Equal("SWSH7", cut.Find(".set-code").TextContent);
         Assert.Equal("SWSH", cut.Find(".set-era").TextContent);
-        Assert.Contains("3 cards tracked", cut.Markup);
-        Assert.Contains("first sale observed Dec 2021", cut.Markup);
+        // TextContent (not Markup) so the `.mono` spans around the numeral/date
+        // (set.md §3.1) don't break the phrase's contiguity.
+        var subline = cut.Find(".set-subline").TextContent;
+        Assert.Contains("3 cards tracked", subline);
+        Assert.Contains("first sale observed Dec 2021", subline);
     }
 
     [Fact]
@@ -102,6 +105,40 @@ public class SetPageTests : BunitContext
         var falling = Row(popState: "available", popFraction: -0.25m);
         var cut = RenderSetPage(Dto(falling));
         Assert.Contains("−25.0%", cut.Find(".rt-cell-pop").TextContent);
+    }
+
+    [Fact]
+    public void The_exclusion_banner_terminates_cleanly_with_only_first_observations_known()
+    {
+        // The zero-base None shape (PopulationDelta.cs: `then == 0`) carries a
+        // FirstObservedOn with a null DeltasBeginOn -- no "deltas begin arriving" clause
+        // exists to append, so the first-observations clause must end its own sentence.
+        var zeroBase = Row(id: 2, name: "Duraludon VMAX", popState: "none", popFraction: null,
+            firstObserved: "2026-07-30");
+        var cut = RenderSetPage(Dto(Row(), zeroBase));
+
+        cut.FindAll(".sort-pills .pill").Single(p => p.TextContent == "pop Δ").Click();
+
+        var banner = cut.Find(".exclusion-banner").TextContent;
+        Assert.EndsWith("First observations run 07-30-2026 to 07-30-2026.", banner);
+        Assert.DoesNotContain("; ", banner);
+    }
+
+    [Fact]
+    public void Ascending_value_sort_still_pushes_the_null_priced_row_last()
+    {
+        var high = Row(id: 1, name: "High", price: 100);
+        var unpriced = Row(id: 2, name: "Unpriced", price: null);
+        var low = Row(id: 3, name: "Low", price: 50);
+        var cut = RenderSetPage(Dto(high, unpriced, low));
+
+        // "value" is already the default active key at descending (SortState's ctor
+        // default); one click on it flips to ascending -- a second click would flip
+        // straight back to descending, so this deliberately clicks only once.
+        cut.FindAll(".sort-pills .pill").Single(p => p.TextContent == "value").Click();
+
+        var names = cut.FindAll(".row-link").Select(a => a.TextContent).ToList();
+        Assert.Equal("Unpriced", names[^1]);
     }
 
     [Fact]
