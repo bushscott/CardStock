@@ -1,3 +1,4 @@
+using System.Globalization;
 using CardStock.Domain.Census;
 
 namespace CardStock.Application.Catalog;
@@ -6,7 +7,7 @@ public static class CatalogMappers
 {
     public static SetPageDto ToDto(SetPageSnapshot snapshot) => new(
         snapshot.SetId, snapshot.Name, snapshot.MetadataStatus, snapshot.Code, snapshot.Era,
-        snapshot.CardsTracked, snapshot.FirstSale?.ToString("yyyy-MM"),
+        snapshot.CardsTracked, snapshot.FirstSale?.ToString("yyyy-MM", CultureInfo.InvariantCulture),
         snapshot.Roster.Select(ToDto).ToArray());
 
     private static SetRosterRowDto ToDto(RosterCard card) => new(
@@ -21,6 +22,6 @@ public static class CatalogMappers
             _ => "none",
         },
         pop.Fraction,
-        pop.FirstObservedOn?.ToString("yyyy-MM-dd"),
-        pop.DeltasBeginOn?.ToString("yyyy-MM-dd"));
+        pop.FirstObservedOn?.ToString("yyyy-MM-dd", CultureInfo.InvariantCulture),
+        pop.DeltasBeginOn?.ToString("yyyy-MM-dd", CultureInfo.InvariantCulture));
 }

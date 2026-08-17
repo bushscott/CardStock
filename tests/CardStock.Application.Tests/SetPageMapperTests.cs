@@ -53,4 +53,28 @@ public class SetPageMapperTests
         Assert.Equal("available", dto.Pop.State);
         Assert.Equal(0.10m, dto.Pop.Fraction);
     }
+
+    [Fact]
+    public void None_state_maps_and_passes_dates_through()
+    {
+        // Empty-history None: all three fields null
+        var emptyNone = new PopulationDelta.Result(
+            PopulationDeltaState.None, null, null, null);
+        var emptyDto = CatalogMappers.ToDto(
+            Snapshot([new RosterCard(1, "a", false, null, null, emptyNone, 0)])).Roster[0];
+        Assert.Equal("none", emptyDto.Pop.State);
+        Assert.Null(emptyDto.Pop.Fraction);
+        Assert.Null(emptyDto.Pop.FirstObservedOn);
+        Assert.Null(emptyDto.Pop.DeltasBeginOn);
+
+        // Zero-base None: FirstObservedOn set, DeltasBeginOn null
+        var zeroBaseNone = new PopulationDelta.Result(
+            PopulationDeltaState.None, null, new DateOnly(2026, 8, 1), null);
+        var zeroDto = CatalogMappers.ToDto(
+            Snapshot([new RosterCard(1, "b", false, null, null, zeroBaseNone, 0)])).Roster[0];
+        Assert.Equal("none", zeroDto.Pop.State);
+        Assert.Null(zeroDto.Pop.Fraction);
+        Assert.Equal("2026-08-01", zeroDto.Pop.FirstObservedOn);
+        Assert.Null(zeroDto.Pop.DeltasBeginOn);
+    }
 }
