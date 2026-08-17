@@ -25,25 +25,32 @@ public sealed class CatalogAggregateCache(
         }
 
         await _gate.WaitAsync(ct);
+        Task<IReadOnlyDictionary<long, int>> chosen;
         try
         {
             now = time.GetUtcNow();
-            if (_current is { IsFaulted: false } && now - _computedAt < ttl)
+            if (_current is not { IsFaulted: false } || now - _computedAt >= ttl)
             {
-                return await _current.WaitAsync(ct);
+                // Not the caller's token: one caller's cancellation must not poison
+                // the shared computation every other request is waiting on.
+                _current = ComputeAsync(CancellationToken.None);
+                _computedAt = now;
             }
 
-            // Not the caller's token: one caller's cancellation must not poison
-            // the shared computation every other request is waiting on.
-            _current = ComputeAsync(CancellationToken.None);
-            _computedAt = now;
+            chosen = _current;
         }
         finally
         {
             _gate.Release();
         }
 
-        return await _current.WaitAsync(ct);
+        // Awaited after the gate releases: holding the semaphore across the
+        // ~1.4s cold computation would serialize every queued caller through
+        // one at a time, defeating single-flight in the exact thundering-herd
+        // case this cache exists for. The local capture -- not a re-read of
+        // _current -- pins the task this caller was promised, so a later
+        // refresh racing in after release cannot swap it out from under us.
+        return await chosen.WaitAsync(ct);
     }
 
     private async Task<IReadOnlyDictionary<long, int>> ComputeAsync(CancellationToken ct)
