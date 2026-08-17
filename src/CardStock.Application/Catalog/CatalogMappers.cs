@@ -56,4 +56,16 @@ public static class CatalogMappers
 
         return chips;
     }
+
+    public static BrowseSetsDto ToDto(IReadOnlyList<SetTile> sets) => new(
+        sets.Select(s => new SetTileDto(
+            s.SetId, s.Name, s.Cards, s.TopCardId, s.MetadataStatus, s.Era, s.ReleasedOn))
+        .ToArray());
+
+    public static BrowseSpeciesDto ToDto(IReadOnlyList<SpeciesTile> species) => new(
+        species.Select(s => new SpeciesTileDto(
+            s.SpeciesId, s.Name, s.Slug, s.GradientStart, s.GradientEnd, s.Printings,
+            s.TotalValueCents, s.Types, s.Generation, s.Region, s.Status, s.Stage,
+            s.Color, s.EggGroups, s.Habitat))
+        .ToArray());
 }

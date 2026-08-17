@@ -24,3 +24,17 @@ public sealed record ChipDto(string Label, string Tooltip);
 public sealed record CharacterRosterRowDto(
     long CardId, string Name, bool HasImage, long SetId, string SetName, short? Year,
     int? PriceCents, decimal? Roc3M, int Sales30d);
+
+public sealed record BrowseSetsDto(IReadOnlyList<SetTileDto> Sets);
+
+public sealed record SetTileDto(
+    long SetId, string Name, int Cards, long? TopCardId,
+    string MetadataStatus, string? Era, DateOnly? ReleasedOn);
+
+public sealed record BrowseSpeciesDto(IReadOnlyList<SpeciesTileDto> Species);
+
+public sealed record SpeciesTileDto(
+    int SpeciesId, string Name, string Slug, string GradientStart, string GradientEnd,
+    int Printings, long TotalValueCents, IReadOnlyList<string> Types, short Generation,
+    string Region, string Status, short Stage, string Color,
+    IReadOnlyList<string> EggGroups, string? Habitat);
