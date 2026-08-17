@@ -11,4 +11,4 @@
     cursor: pointer;
 }
 .pill.active { background: var(--acc); border-color: var(--acc); color: var(--card); }
-.pill.deferred { color: var(--mut3); cursor: not-allowed; }
+.pill.deferred { color: var(--mut2); cursor: not-allowed; }

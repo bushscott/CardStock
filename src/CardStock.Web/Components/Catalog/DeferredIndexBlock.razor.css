@@ -12,4 +12,4 @@
 }
 .dib-deltas { display: flex; flex-direction: column; align-items: flex-end; gap: 2px; margin-top: 6px; }
 .dib-delta-label { font: 500 11px 'JetBrains Mono', monospace; color: var(--mut2); margin-right: 6px; }
-.dib-delta-value { font: 700 15px 'JetBrains Mono', monospace; color: var(--mut3); }
+.dib-delta-value { font: 700 15px 'JetBrains Mono', monospace; color: var(--mut2); }
