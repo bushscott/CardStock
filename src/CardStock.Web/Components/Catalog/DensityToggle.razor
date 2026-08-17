@@ -1,0 +1,19 @@
+<div class="density-toggle" role="group" aria-label="Density">
+    <button type="button" title="@LeftTooltip" aria-pressed="@((Value == LeftKey).ToString().ToLowerInvariant())"
+            class="@(Value == LeftKey ? "active" : null)"
+            @onclick="() => ValueChanged.InvokeAsync(LeftKey)">@LeftLabel</button>
+    <button type="button" title="@RightTooltip" aria-pressed="@((Value == RightKey).ToString().ToLowerInvariant())"
+            class="@(Value == RightKey ? "active" : null)"
+            @onclick="() => ValueChanged.InvokeAsync(RightKey)">@RightLabel</button>
+</div>
+
+@code {
+    [Parameter, EditorRequired] public string LeftKey { get; set; } = default!;
+    [Parameter, EditorRequired] public string LeftLabel { get; set; } = default!;
+    [Parameter, EditorRequired] public string LeftTooltip { get; set; } = default!;
+    [Parameter, EditorRequired] public string RightKey { get; set; } = default!;
+    [Parameter, EditorRequired] public string RightLabel { get; set; } = default!;
+    [Parameter, EditorRequired] public string RightTooltip { get; set; } = default!;
+    [Parameter] public string Value { get; set; } = "";
+    [Parameter] public EventCallback<string> ValueChanged { get; set; }
+}

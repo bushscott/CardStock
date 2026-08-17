@@ -1,0 +1,10 @@
+.gate-glyph {
+    color: var(--mut2);
+    font-size: 12px;
+    margin-left: 4px;
+    cursor: help;
+}
+.gate-glyph:focus-visible {
+    outline: 2px solid var(--acc);
+    outline-offset: 1px;
+}

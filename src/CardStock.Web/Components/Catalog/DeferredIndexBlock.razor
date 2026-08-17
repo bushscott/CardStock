@@ -1,0 +1,21 @@
+@using CardStock.Domain.Signals
+@using CardStock.Web.Services
+
+@* The Set header's index block, fully mocked (D-110 spec §2): frame and caption
+   print, one ◌ covers the block (one gate, one glyph), value runs hold the dash.
+   No fake polyline — an empty chart area is the honest rendering. *@
+<div class="dib">
+    <div class="dib-chart" aria-hidden="true"></div>
+    <div class="dib-caption">@Caption<PendingGlyph Note="@CatalogCopy.WorkerGate" /></div>
+    <div class="dib-deltas">
+        <span class="dib-delta"><span class="dib-delta-label">30D</span>
+            <span class="dib-delta-value">@ChipEngine.GlyphDash</span></span>
+        <span class="dib-delta"><span class="dib-delta-label">90D</span>
+            <span class="dib-delta-value">@ChipEngine.GlyphDash</span></span>
+    </div>
+</div>
+
+@code {
+    [Parameter, EditorRequired]
+    public string Caption { get; set; } = default!;
+}

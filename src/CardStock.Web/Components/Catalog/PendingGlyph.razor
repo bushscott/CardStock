@@ -1,0 +1,9 @@
+@* The ◌ pending glyph (D-102, brand.md §4): sits beside a gated statistic's
+   label, tooltip names the gate, keyboard reachable. Same shape as
+   CensusSentence's cs-gate span. *@
+<span class="gate-glyph" tabindex="0" title="@Note" aria-label="@Note">◌</span>
+
+@code {
+    [Parameter, EditorRequired]
+    public string Note { get; set; } = default!;
+}

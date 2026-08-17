@@ -1,0 +1,32 @@
+@using CardStock.Web.Services
+
+<div class="sort-pills">
+    <span class="sort-label">sort</span>
+    @foreach (var pill in Pills)
+    {
+        var active = !pill.Deferred && Sort.Key == pill.Key;
+        if (pill.Deferred)
+        {
+            <button type="button" class="pill deferred" disabled aria-disabled="true"
+                    title="@pill.DeferredTooltip">@pill.Label</button>
+        }
+        else
+        {
+            <button type="button" class="pill @(active ? "active" : null)"
+                    title="@(active ? pill.Tooltip + " — click again to reverse the order" : pill.Tooltip)"
+                    @onclick="() => PickAsync(pill.Key)">@pill.Label</button>
+        }
+    }
+</div>
+
+@code {
+    [Parameter, EditorRequired] public IReadOnlyList<SortPill> Pills { get; set; } = default!;
+    [Parameter, EditorRequired] public SortState Sort { get; set; } = default!;
+    [Parameter] public EventCallback Changed { get; set; }
+
+    private Task PickAsync(string key)
+    {
+        Sort.Apply(key);
+        return Changed.InvokeAsync();
+    }
+}
