@@ -1,0 +1,97 @@
+@using CardStock.Application.Catalog
+@using CardStock.Web.Services
+
+@* browse.md §4.3 as amended: role=dialog, Esc closes, initial focus, overlay
+   catches outside clicks (no document listeners needed). Menu → editor; the
+   editor pre-checks the attribute's committed values so re-opening is edit-in-
+   place; Add replaces that attribute's chip wholesale. *@
+<div class="pf-overlay" @onclick="() => Closed.InvokeAsync()"></div>
+<div class="pf-pop" role="dialog" aria-modal="true" aria-label="Species filters"
+     tabindex="-1" @ref="_root" @onkeydown="KeyDown"
+     @onmouseleave="MouseLeft" @onclick:stopPropagation>
+    @if (_editing is null)
+    {
+        <div class="pf-section">Pokédex</div>
+        @foreach (var attr in SpeciesFilters.Attributes)
+        {
+            <button type="button" class="pf-attr"
+                    title="Filter species by @attr.DisplayName.ToLowerInvariant() — fixed Pokédex data"
+                    @onclick="() => OpenEditor(attr.Key)">@attr.DisplayName<span>›</span></button>
+        }
+    }
+    else
+    {
+        var attr = SpeciesFilters.Attributes.Single(a => a.Key == _editing);
+        <div class="pf-editor-head">
+            <button type="button" class="pf-back" @onclick="() => _editing = null">‹</button>
+            <span>@attr.DisplayName</span>
+        </div>
+        @if (_editing == "habitat")
+        {
+            <p class="pf-note">Habitat exists for Gen 1–3 species only</p>
+        }
+        <div class="pf-options">
+            @foreach (var (value, label) in SpeciesFilters.Options(_editing, AllSpecies))
+            {
+                var on = _selection.Contains(value);
+                <button type="button" class="pf-option @(on ? "on" : null)" role="checkbox"
+                        aria-checked="@on.ToString().ToLowerInvariant()"
+                        title="@(on ? $"Stop including {label}" : $"Include {label} in the results")"
+                        @onclick="() => Toggle(value)">
+                    <span class="pf-box">@(on ? "✓" : "")</span>@label
+                </button>
+            }
+        </div>
+        <div class="pf-footer">
+            <span class="pf-preview mono">@Preview()</span>
+            <button type="button" class="pf-add" disabled="@(_selection.Count == 0)"
+                    @onclick="CommitAsync">Add</button>
+        </div>
+    }
+</div>
+
+@code {
+    [Parameter, EditorRequired] public IReadOnlyList<SpeciesTileDto> AllSpecies { get; set; } = default!;
+    [Parameter, EditorRequired] public IReadOnlyDictionary<string, IReadOnlySet<string>> Active { get; set; } = default!;
+    [Parameter] public EventCallback<(string Key, IReadOnlySet<string> Values)> Committed { get; set; }
+    [Parameter] public EventCallback Closed { get; set; }
+
+    private ElementReference _root;
+    private string? _editing;
+    private HashSet<string> _selection = [];
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            await _root.FocusAsync();
+        }
+    }
+
+    private void OpenEditor(string key)
+    {
+        _editing = key;
+        _selection = Active.TryGetValue(key, out var current) ? [.. current] : [];
+    }
+
+    private void Toggle(string value)
+    {
+        if (!_selection.Remove(value))
+        {
+            _selection.Add(value);
+        }
+    }
+
+    private string Preview() => _selection.Count == 0
+        ? "pick at least one"
+        : $"{_editing} {(_selection.Count > 1 ? "∈" : "=")} " +
+          string.Join(", ", _selection.Order().Select(v => SpeciesFilters.Label(_editing!, v)));
+
+    private Task CommitAsync() =>
+        Committed.InvokeAsync((_editing!, (IReadOnlySet<string>)_selection));
+
+    private Task KeyDown(KeyboardEventArgs e) =>
+        e.Key == "Escape" ? Closed.InvokeAsync() : Task.CompletedTask;
+
+    private Task MouseLeft() => _editing is null ? Closed.InvokeAsync() : Task.CompletedTask;
+}

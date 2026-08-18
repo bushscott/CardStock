@@ -84,7 +84,70 @@
         }
     }
 }
-@* POKEMON MODE — Task 21 *@
+@if (IsPokemon)
+{
+    @if (_species is null)
+    {
+        <p class="loading-strip" aria-busy="true">Loading…</p>
+    }
+    else if (_species.Failed)
+    {
+        <div class="card-error"><p>Couldn't reach the data service.</p>
+            <button type="button" @onclick="LoadAsync">Retry</button></div>
+    }
+    else
+    {
+        var all = _species.Value!.Species;
+        var matched = all.Where(s => SpeciesFilters.Matches(s, _filters)).ToList();
+
+        <div class="filter-bar">
+            <div class="filter-anchor">
+                <button type="button" class="add-filter" @onclick="() => _popoverOpen = !_popoverOpen">+ filter</button>
+                @if (_popoverOpen)
+                {
+                    <BrowseFilterPopover AllSpecies="all" Active="_filters"
+                                         Committed="OnFilterCommitted"
+                                         Closed="() => _popoverOpen = false" />
+                }
+            </div>
+            @foreach (var filter in _filters)
+            {
+                var key = filter.Key;
+                <span class="filter-chip mono">@ChipLabel(key, filter.Value)
+                    <button type="button" class="chip-remove" aria-label="Remove @key filter"
+                            @onclick="() => RemoveFilter(key)">✕</button></span>
+            }
+            <div class="spacer"></div>
+            <span class="shown-count mono">@matched.Count of @all.Count species</span>
+        </div>
+
+        <p class="species-caption">Ordered by total market value across all printings</p>
+        <div class="species-grid">
+            @foreach (var species in matched)
+            {
+                <a class="species-tile" href="character/@species.Slug"
+                   title="Character page for @species.Name">
+                    <div class="sp-avatar"
+                         style="background: linear-gradient(160deg, @species.GradientStart, @species.GradientEnd)">
+                        <span class="sp-initial">@species.Name[..1]</span>
+                        <img src="@CatalogApiClient.SpeciesIconUrl(species.SpeciesId)" alt=""
+                             loading="lazy" onerror="this.style.display='none'" />
+                    </div>
+                    <div class="sp-name">@species.Name</div>
+                    <div class="sp-printings mono">@species.Printings printings</div>
+                    <div class="sp-footer">
+                        <span class="sp-value mono">@Format.AbbrevMoney(species.TotalValueCents)</span>
+                        <span class="sp-delta mono">@ChipEngine.GlyphDash 90d<PendingGlyph Note="@CatalogCopy.WorkerGate" /></span>
+                    </div>
+                </a>
+            }
+        </div>
+        @if (matched.Count == 0)
+        {
+            <div class="empty-panel">No species match these filters — remove one to widen the net.</div>
+        }
+    }
+}
 
 @code {
     [SupplyParameterFromQuery(Name = "mode")]
@@ -95,6 +158,8 @@
     private CatalogResult<BrowseSetsDto>? _sets;
     private CatalogResult<BrowseSpeciesDto>? _species;
     private string _setOrder = "az";
+    private bool _popoverOpen;
+    private readonly Dictionary<string, IReadOnlySet<string>> _filters = [];
 
     private static readonly (string Key, string Label)[] OrderOptions =
         [("az", "a–z"), ("date", "release date"), ("era", "era")];
@@ -130,6 +195,18 @@
 
     private void SetMode(string mode) =>
         Nav.NavigateTo(Nav.GetUriWithQueryParameter("mode", mode == "sets" ? null : mode));
+
+    private void OnFilterCommitted((string Key, IReadOnlySet<string> Values) filter)
+    {
+        _filters[filter.Key] = filter.Values;
+        _popoverOpen = false;
+    }
+
+    private void RemoveFilter(string key) => _filters.Remove(key);
+
+    private static string ChipLabel(string key, IReadOnlySet<string> values) =>
+        $"{key} {(values.Count > 1 ? "∈" : "=")} " +
+        string.Join(", ", values.Order().Select(v => SpeciesFilters.Label(key, v)));
 
     private IReadOnlyList<(string? Title, IReadOnlyList<SetTileDto> Sets)> Shelves()
     {

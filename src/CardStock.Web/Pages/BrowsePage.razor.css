@@ -59,3 +59,37 @@
     background: var(--acc);
     color: var(--card);
 }
+
+.filter-bar { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; margin-top: 10px; }
+.filter-anchor { position: relative; }
+.add-filter { border: 1px dashed var(--line3); border-radius: 6px; background: none;
+    padding: 4px 10px; font-size: 12.5px; color: var(--mut); cursor: pointer; }
+.filter-chip { display: inline-flex; align-items: center; gap: 6px; font-size: 12px;
+    background: color-mix(in srgb, var(--acc) 10%, transparent);
+    border: 1px solid var(--acc); border-radius: 99px; padding: 3px 10px; }
+.chip-remove { border: 0; background: none; cursor: pointer; color: var(--mut); }
+.species-caption { font-size: 12.5px; color: var(--mut2); margin: 6px 0 0; }
+.species-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(190px, 1fr));
+    gap: 12px; margin-top: 10px; }
+.species-tile { display: block; background: var(--card); border: 1px solid var(--line);
+    border-radius: 10px; padding: 13px; text-decoration: none; color: inherit;
+    transition: box-shadow 0.15s; }
+.species-tile:hover { box-shadow: 0 6px 20px rgba(20, 19, 26, 0.10); }
+.sp-avatar { position: relative; width: 44px; height: 44px; border-radius: 50%;
+    overflow: hidden; }
+.sp-initial { position: absolute; inset: 0; display: grid; place-items: center;
+    font: 700 17px 'Inter Tight', sans-serif; color: rgba(255, 255, 255, 0.92); }
+.sp-avatar img { position: relative; width: 100%; height: 100%; object-fit: contain;
+    image-rendering: pixelated; }
+.sp-name { font: 600 15.5px 'Inter Tight', sans-serif; white-space: nowrap;
+    overflow: hidden; text-overflow: ellipsis; margin-top: 8px; }
+.sp-printings { font-size: 11.5px; color: var(--mut2); }
+.sp-footer { display: flex; justify-content: space-between; align-items: baseline;
+    margin-top: 8px; }
+.sp-value { font: 700 14.5px 'JetBrains Mono', monospace; }
+.sp-delta { font-size: 12px; color: var(--mut2); }
+.shown-count { font-size: 12.5px; color: var(--mut2); }
+.spacer { flex: 1; }
+.empty-panel { background: var(--card); border: 1px solid var(--line);
+    border-radius: 10px; padding: 40px; text-align: center; font-size: 14px;
+    color: var(--mut2); margin-top: 10px; }
