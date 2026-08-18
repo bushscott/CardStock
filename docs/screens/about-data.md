@@ -19,6 +19,8 @@
 
 > **Read §6 before implementing this page.** It is the most factually wrong page in the prototype set. Its central organising concept — "The April 2025 seam" — describes a boundary that does not exist, on a date that predates the project's first commit by fifteen months. The page also claims a data field (sale counts) the database has never had and the source has never published, and it understates the depth of the one series that is genuinely deep by nearly three years. Shipping this copy unchanged would put false public statements on a site whose entire brand is not making false public statements.
 
+> **2026-08-18 (build):** The freshness section's "Closed months never change" sentence does not ship — D-078 proved its receipt (DATA_MODEL.md closed-month immutability) false. The built page states the verified behavior: a closed month can restate; we keep both figures and display the newest.
+
 ---
 
 ## 1. Identity

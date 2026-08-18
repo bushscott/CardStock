@@ -1,0 +1,138 @@
+@page "/about-data"
+
+<PageTitle>About our data</PageTitle>
+
+<div class="about-container">
+    <h1>About our data</h1>
+    <p class="subtitle">Where every number comes from, how fresh it is, and what cannot be known.</p>
+
+    <div class="pill-row">
+        <a href="about-data#sources">Sources</a>
+        <a href="about-data#holdings">What we hold</a>
+        <a href="about-data#cannot-know">What we cannot know</a>
+        <a href="about-data#pooled-grades">Pooled grades</a>
+        <a href="about-data#freshness">Freshness</a>
+        <a href="about-data#floor">The floor</a>
+        <a href="about-data#honesty">Honesty policy</a>
+        <a href="about-data#disclaimers">Disclaimers</a>
+    </div>
+
+    <section id="sources">
+        <h2>Where the numbers come from</h2>
+        <p>Every price, sale, and population figure on Cardstock comes from
+            <strong>pricecharting.com</strong>. We do not collect from marketplaces ourselves.</p>
+        <p>Two things follow from that, and they matter when you read a chart:</p>
+        <p>The <strong>individual sales</strong> we list are real completed transactions,
+            recorded as PriceCharting reported them — date, venue, grade, and price.</p>
+        <p>The <strong>monthly price line is not built from those sales.</strong> It is
+            PriceCharting's own monthly average, which we store and chart unaltered. We do not
+            recompute it, and its method is theirs, not ours.</p>
+    </section>
+
+    <section id="holdings">
+        <h2>What we hold, and from when</h2>
+        <div class="holdings-table">
+            <div class="ht-head">Series</div><div class="ht-head">Covers</div><div class="ht-head">Begins</div>
+            <div>Monthly average prices</div><div>6 grade tiers</div>
+            <div><strong>~December 2020</strong>, complete for every card</div>
+            <div>Individual sales</div><div>19 grade labels</div>
+            <div>The first time we visited that card</div>
+            <div>Population census</div><div>PSA and CGC only</div>
+            <div>The first time we visited that card</div>
+        </div>
+        <p><strong>Our sales and census history does not start on a single date.</strong> It
+            starts the first time we visited each card. We began collecting on 28 July 2026, and
+            each card entered the record when its turn came — so the boundary sits in a different
+            place for every card, and we draw it where it actually falls rather than pretending
+            it is one line.</p>
+        <p>Monthly prices are the exception. The first visit to a card retrieves its entire
+            price chart at once, so that history is complete back to about December 2020
+            regardless of when we first saw it.</p>
+    </section>
+
+    <section id="cannot-know">
+        <h2>What we cannot know</h2>
+        <p>Some things are not missing from Cardstock — they do not exist anywhere, and no
+            amount of collecting will produce them.</p>
+        <p><strong>How many sales happened before we started watching.</strong> PriceCharting
+            publishes no historical volume series. Nobody has this.</p>
+        <p><strong>Sales older than roughly the last 30 in each grade bucket.</strong>
+            PriceCharting keeps a rolling window and discards what falls off it. Once a sale
+            scrolls out, it is gone for everyone.</p>
+        <p><strong>Census history before our first visit.</strong> PriceCharting publishes a
+            current snapshot with no history attached.</p>
+        <p><strong>Which company graded a card below grade 10.</strong> PriceCharting pools
+            every grading company into a single figure for grades 1 through 9.5, and splits by
+            company only at 10.</p>
+    </section>
+
+    <section id="pooled-grades">
+        <h2>On pooled grades</h2>
+        <p>Below grade 10, a price covers every grading company at once — a "Grade 8" figure
+            includes PSA, CGC, BGS and others together.</p>
+        <p>About <strong>91%</strong> of the identifiable volume in those buckets is PSA, so
+            the pooled figure tracks PSA closely. A CGC card of the same grade typically trades
+            below it, by roughly a third at grade 8.</p>
+        <p>We show the pooled number and label it as pooled. <strong>We do not apply a
+            multiplier to estimate a company-specific price</strong> — that would present a
+            guess with the same confidence as an observation.</p>
+    </section>
+
+    <section id="freshness">
+        <h2>How fresh it is</h2>
+        <p>Cards are visited continuously, one at a time, in priority order — not on a fixed
+            schedule. A card that is selling quickly is visited sooner. A quiet card may go a
+            month or more between visits.</p>
+        <p><strong>Opening a card page triggers a fresh visit</strong>, so a card page shows
+            sales up to that moment.</p>
+        <p>The <strong>current month's price revises.</strong> PriceCharting recalculates it as
+            sales land, and we pick up the new figure on our next visit. It renders as a hollow,
+            dashed point for exactly that reason. <strong>A closed month can restate too</strong>
+            — we have observed the source revise a month after it ended. When that happens we
+            keep both figures and display the newest.</p>
+    </section>
+
+    <section id="floor">
+        <h2>The floor</h2>
+        <p><strong>No metric on Cardstock counts an observation recorded before
+            1 September 2026.</strong></p>
+        <p>This is a deliberate cutoff, not the date our data begins. We were still stabilising
+            the collector through August 2026, so we discard our own earliest observations
+            rather than trust them. September 1st is the first date we are willing to stand
+            behind.</p>
+        <p>Every unlock countdown on this site is measured from that floor.</p>
+        <p>An indicator without enough history renders a <em>state</em>, not a number:
+            <span class="mono">OK</span> · <span class="mono">LOW DATA</span> ·
+            <span class="mono">LOCKED</span> · <span class="mono">UNDEFINED window</span> ·
+            <span class="mono">UNSTABLE FIT</span>. Every locked control names the rule it is
+            waiting on and its unlock condition.</p>
+    </section>
+
+    <section id="honesty">
+        <h2>Honesty policy</h2>
+        <ul>
+            <li><strong>No projected or extrapolated points.</strong> A partial month renders
+                as partial, never as a forecast.</li>
+            <li><strong>A metric below its sufficiency floor renders a state, not a
+                number.</strong> It will tell you which rule it failed and when it will
+                pass.</li>
+            <li><strong>When a grader restates a past census, we keep what we already
+                recorded.</strong> Restatements happen — PSA restated in June 2026 and one
+                card's grade cell moved from 397 to 99,246. We write the new figures alongside
+                the old ones. We never rewrite history.</li>
+            <li><strong>Backtests start at the first date every filter in them could actually
+                be computed</strong>, not at the start of our records.</li>
+        </ul>
+    </section>
+
+    <section id="disclaimers">
+        <h2>Disclaimers</h2>
+        <p>Cardstock is a fan-made analytics project. It is not affiliated with, endorsed by,
+            or sponsored by Nintendo, The Pokémon Company, Creatures Inc., or any grading
+            company or marketplace. Pokémon names and card references are used for
+            identification only; all trademarks belong to their owners.</p>
+        <p>Nothing here is financial advice. Collectible prices are volatile and thinly traded;
+            signals describe the past, not the future. Do your own research before spending
+            money on cardboard.</p>
+    </section>
+</div>

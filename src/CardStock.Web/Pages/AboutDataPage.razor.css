@@ -1,0 +1,20 @@
+.about-container { max-width: 820px; margin: 0 auto; padding: 32px 24px 80px; }
+.about-container h1 { font: 700 27px 'Inter Tight', sans-serif; margin: 0 0 4px; }
+.subtitle { color: var(--mut); margin: 0 0 16px; }
+.pill-row { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 28px; }
+.pill-row a { font: 600 13px 'Inter Tight', sans-serif; border: 1px solid var(--line);
+    border-radius: 99px; padding: 4px 12px; color: var(--mut); text-decoration: none; }
+.pill-row a:hover { color: var(--acc); border-color: var(--acc); }
+section { background: var(--card); border: 1px solid var(--line); border-radius: 8px;
+    padding: 20px 22px; margin-bottom: 14px; scroll-margin-top: 62px; }
+section h2 { font: 700 18.5px 'Inter Tight', sans-serif; margin: 0 0 10px; }
+section p, section li { font-size: 14.5px; line-height: 1.6; color: var(--mut); }
+section ul { display: flex; flex-direction: column; gap: 6px; padding-left: 20px; margin: 0; }
+.holdings-table { display: grid; grid-template-columns: 1.2fr 1fr 1.6fr; gap: 0;
+    border: 1px solid var(--line); border-radius: 6px; overflow: hidden;
+    font-size: 13.5px; margin-bottom: 12px; }
+.holdings-table > div { padding: 8px 12px; border-top: 1px solid var(--line4); }
+.holdings-table > .ht-head { background: var(--mutbg); border-top: 0;
+    font: 600 12px 'Inter Tight', sans-serif; letter-spacing: 0.06em;
+    text-transform: uppercase; color: var(--mut2); }
+.mono { font-family: 'JetBrains Mono', monospace; }
