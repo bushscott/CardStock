@@ -26,3 +26,36 @@ export function installHeaderKeyGuard(tableElement) {
         }
     });
 }
+
+// Focus trap for BrowseFilterPopover (D-110 spec §5: role=dialog + Esc + focus trap). Tab and
+// Shift+Tab must never carry focus out of the open popover onto the page behind it. Blazor's
+// @onkeydown:preventDefault directive is static per element (always on or always off) and
+// can't be scoped to just Tab -- Esc and every other key inside the popover still need to
+// reach BrowseFilterPopover.razor's KeyDown handler unmodified -- so only plain JS can single
+// out Tab here. preventDefault() cancels just the browser's default focus move; it does not
+// stop propagation, so Blazor's own delegated listener still sees the keydown afterward.
+// Installed once per popover instance on first render, same shape as
+// installGripCapture/installHeaderKeyGuard above. When focus sits on the dialog root itself
+// (FocusAsync's initial target) Tab enters the content at the first focusable element and
+// Shift+Tab wraps to the last, matching common focus-trap convention.
+export function installFocusTrap(dialogElement) {
+    dialogElement.addEventListener('keydown', e => {
+        if (e.key !== 'Tab') { return; }
+
+        const focusable = Array.from(dialogElement.querySelectorAll(
+            'button:not([disabled]), [tabindex]:not([tabindex="-1"])'));
+        if (focusable.length === 0) { return; }
+
+        const first = focusable[0];
+        const last = focusable[focusable.length - 1];
+        const current = document.activeElement;
+
+        if (e.shiftKey && (current === first || current === dialogElement)) {
+            e.preventDefault();
+            last.focus();
+        } else if (!e.shiftKey && (current === last || current === dialogElement)) {
+            e.preventDefault();
+            first.focus();
+        }
+    });
+}

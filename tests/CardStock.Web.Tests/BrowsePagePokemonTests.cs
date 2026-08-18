@@ -109,6 +109,25 @@ public class BrowsePagePokemonTests : BunitContext
         Assert.Contains("Habitat exists for Gen 1–3 species only", cut.Markup);
     }
 
+    // D-110 spec §5 (focus trap fix): bUnit's JSInterop runs loose, and there is no real
+    // browser tab order to assert Tab-wrapping against here -- the real behavior lands in
+    // Task 24's browser pass. What this test guards cheaply: the structural contract
+    // installFocusTrap's JS depends on (role="dialog" + tabindex="-1" on the exact element
+    // passed as _root), and that OnAfterRenderAsync's module-import/installFocusTrap call
+    // doesn't throw when the interop is stubbed (loose mode returns null for the unconfigured
+    // "import" call, so the guarded `if (_module is not null)` skips the install -- same shape
+    // RosterTable's installGripCapture/installHeaderKeyGuard already rely on).
+    [Fact]
+    public void The_popover_root_is_a_focus_trappable_dialog()
+    {
+        var cut = RenderBrowse(species: All, mode: "pokemon");
+        cut.Find(".add-filter").Click();
+
+        var pop = cut.Find(".pf-pop");
+        Assert.Equal("dialog", pop.GetAttribute("role"));
+        Assert.Equal("-1", pop.GetAttribute("tabindex"));
+    }
+
     // Mirrors BrowsePageSetsTests' RenderBrowse (one CatalogApiClient stub per test-class
     // instance, mutable fixture read through closure via RegisterClient/RespondingWith) but
     // cannot reuse that private helper -- it lives on a different test class -- and cannot

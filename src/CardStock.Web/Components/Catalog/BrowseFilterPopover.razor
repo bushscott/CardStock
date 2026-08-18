@@ -1,10 +1,13 @@
 @using CardStock.Application.Catalog
 @using CardStock.Web.Services
+@implements IAsyncDisposable
+@inject IJSRuntime Js
 
-@* browse.md §4.3 as amended: role=dialog, Esc closes, initial focus, overlay
-   catches outside clicks (no document listeners needed). Menu → editor; the
-   editor pre-checks the attribute's committed values so re-opening is edit-in-
-   place; Add replaces that attribute's chip wholesale. *@
+@* browse.md §4.3 as amended, D-110 spec §5: role=dialog, Esc closes, initial focus, a
+   JS-installed Tab focus trap (catalog.js's installFocusTrap -- Blazor's preventDefault
+   directive can't be scoped to just Tab), overlay catches outside clicks (no document
+   listeners needed). Menu → editor; the editor pre-checks the attribute's committed values
+   so re-opening is edit-in-place; Add replaces that attribute's chip wholesale. *@
 <div class="pf-overlay" @onclick="() => Closed.InvokeAsync()"></div>
 <div class="pf-pop" role="dialog" aria-modal="true" aria-label="Species filters"
      tabindex="-1" @ref="_root" @onkeydown="KeyDown"
@@ -59,12 +62,29 @@
     private ElementReference _root;
     private string? _editing;
     private HashSet<string> _selection = [];
+    private IJSObjectReference? _module;
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
         if (firstRender)
         {
             await _root.FocusAsync();
+
+            try
+            {
+                _module = await Js.InvokeAsync<IJSObjectReference>("import", "./js/catalog.js");
+                if (_module is not null)
+                {
+                    await _module.InvokeVoidAsync("installFocusTrap", _root);
+                }
+            }
+            catch (JSException)
+            {
+                // D-110 spec §5's focus trap doesn't install (e.g. under test, or a browser
+                // without ES module support): Esc still closes the popover via KeyDown below,
+                // and FocusAsync above still lands initial focus on the dialog root -- only
+                // Tab can walk out of the popover into the page behind it until this recovers.
+            }
         }
     }
 
@@ -94,4 +114,19 @@
         e.Key == "Escape" ? Closed.InvokeAsync() : Task.CompletedTask;
 
     private Task MouseLeft() => _editing is null ? Closed.InvokeAsync() : Task.CompletedTask;
+
+    public async ValueTask DisposeAsync()
+    {
+        try
+        {
+            if (_module is not null)
+            {
+                await _module.DisposeAsync();
+            }
+        }
+        catch (JSDisconnectedException)
+        {
+            // The circuit/module is already gone; nothing left to clean up.
+        }
+    }
 }
