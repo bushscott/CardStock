@@ -2,10 +2,22 @@
     background: var(--card);
     border: 1px solid var(--line);
     border-radius: 10px;
-    overflow-x: auto;
+    /* clip, not auto: any scroll-container overflow value would make this box the
+       sticky containment for .rt-head, and the §4.7 sticky header would never pin to
+       the page. clip keeps the rounded-corner clipping with no scroll container; on a
+       viewport narrower than the columns the table clips instead of scrolling — the
+       mockup had no horizontal scroll either. */
+    overflow: clip;
 }
 .rt-head, .rt-row { display: grid; align-items: center; padding: 6px 16px; }
+/* shared-components.md §4.7's ruled stack: the table header pins below the 48px nav
+   (z-index 10 under the nav's 20) so the sort/resize controls never scroll away. The
+   solid background masks rows passing beneath. */
 .rt-head {
+    position: sticky;
+    top: 48px;
+    z-index: 10;
+    background: var(--card);
     border-bottom: 1px solid var(--line);
     font: 600 12px 'JetBrains Mono', monospace;
     color: var(--mut2);

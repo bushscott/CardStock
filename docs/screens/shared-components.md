@@ -279,6 +279,20 @@ Screener's version takes a second `bucket` argument (`startResize(key, bucket)`,
 
 Default widths, Home (`Home:331`): `{ card: 220, tier: 52, price: 76, chg: 52, spark: 68 }`.
 
+> **Amended 2026-08-18 (owner UAT, D-117/D-118).** The built `RosterTable` departs from the
+> mockup mechanics in three ruled ways. **(a)** The first column is a flexible
+> `minmax(min, 1.4fr)` track (the build's fill-the-page choice), which made its own grip
+> inert — so that grip now **redistributes**: dragging left grows the fixed columns by the
+> dragged amount split proportional to their drag-start widths (and vice versa), while the
+> fr share visibly shrinks; other grips stay single-column. **(b)** The clamp divergence
+> above is resolved: floor 52 (the build's), ceiling 420, all columns. **(c)** Virtualized
+> rows materialize once per `Rows` instance — a fresh list every render resets Virtualize's
+> anchoring (the snap-to-top D-118 records) — and `ItemSize` is a contract with the real
+> 30px row height. The §4.7 sticky header also now ships: `.rt-head` pins at `top: 48px`,
+> `z-index: 10`, which required the wrapper to clip (`overflow: clip`) rather than be a
+> scroll container — on a viewport narrower than the columns the table clips, as the
+> mockup's did.
+
 ### 4.2 Row-actions overflow menu
 
 **Trigger** (`Home:122`): `<button aria-label="Row actions" title="More actions for this card" onClick="{{ row.toggleMenu }}">⋯</button>` — the literal `⋯` (U+22EF), `background: none; border: none; color: var(--mut2); font-size: 16px; padding: 2px`. The button sits in a `position: relative` wrapper.

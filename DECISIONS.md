@@ -352,6 +352,41 @@ Read directly 2026-08-10, to be mirrored per D-018–D-021.
 
 ## Decided
 
+### D-118 — Roster scrolling: identity-stable rows, honest ItemSize, and the §4.7 sticky header ships
+Owner UAT, 2026-08-18, two reports on `/set/90`: reaching the table's foot snapped the page
+back to the top ("that should never happen, on any table"), and scrolling loses the header
+controls ("I think we also decided… the table's head would always be displayed" — correct:
+shared-components.md §4.7 rules `sticky, top: 48px, z-index: 10`; the build had omitted it).
+Root causes, measured: `RowsView => Rows.ToList()` fed Virtualize a **new list instance every
+render** (identity churn resets its internal anchoring), and `ItemSize="32"` against a real
+row height of **30px** (measured live) left ~2px/row of phantom scroll space whose correction
+yanks the page. Fixes, all in the one shared `RosterTable` (site-wide by construction — the
+only `Virtualize` in the app): rows materialize once per `Rows` instance (guarded by an
+enumeration-counting test); `ItemSize` 30 with a comment binding it to the row height; and
+`.rt-head` pins per §4.7 — which required `.roster-table` to swap `overflow-x: auto` for
+`overflow: clip`, because any scroll-container overflow value makes the wrapper the sticky
+containment and the header could never pin to the page. Accepted consequence: on a viewport
+narrower than the columns the table clips instead of h-scrolling — the mockup had no
+horizontal scroll either. Receipts, live post-deploy: header top = 48 at scrollY 3000;
+bottom settles with no reversal headless (momentum-scroll confirmation is the owner's, in
+their browser). Suite: 463 passed, 0 failed, 35 DB-gated skips.
+
+### D-117 — The name column's grip redistributes; the resize clamp is 52/420 everywhere
+Owner UAT, 2026-08-18, on `/set/90`: *"when i try to drag the resizing bar right of the card
+name leftwards nothing happens and i expected the name to shrink and other column/s to
+grow."* Root cause, reproduced live before the fix (80px drag, zero movement on all six
+columns): the first column is the build's flexible `minmax(min, 1.4fr)` track — its grip
+adjusted only the minmax minimum, which the fr fill absorbs invisibly. Ruled behavior,
+implementing the owner's stated expectation verbatim: **the first grip redistributes** —
+dragging left grows the fixed columns by the dragged amount, split proportional to their
+drag-start widths, and the flexible share shrinks by exactly that much (dragging right
+mirrors; the stored minimum tracks the drag so compression continues below the old minimum).
+Other grips stay single-column, and the spec's clamp divergence (§4.1's "36 vs 40 — pick
+one") is settled as floor 52 (already built) / ceiling 420 for every column. Site-wide by
+construction: one shared `RosterTable` serves the Set and Character rosters and every future
+table. Receipt, live post-deploy: the same 80px drag now moves the name −81px and the other
+five columns +81px in total, proportionally (100→117 · 92→108 · 84→99 · 96→113 · 90→106).
+
 ### D-115 — The order pills toggle direction; ▴/▾ is the one direction vocabulary
 Owner, 2026-08-18, during Catalog UAT: *"The order by pills should be ascending and
 descending options. If you click it again, it should do the opposite. And what the current

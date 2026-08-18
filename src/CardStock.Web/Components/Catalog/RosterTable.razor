@@ -31,7 +31,9 @@
         }
     </div>
     <div class="rt-body">
-        <Virtualize Items="RowsView" ItemSize="32" Context="row">
+        @* ItemSize is a contract with .rt-row's real height — 30px, measured live (D-118).
+           An over-estimate leaves phantom scroll space whose correction snaps the page. *@
+        <Virtualize Items="RowsView" ItemSize="30" Context="row">
             <div class="rt-row" role="row" style="grid-template-columns: @GridCols()">
                 @foreach (var column in Columns)
                 {
@@ -49,8 +51,9 @@
     [Parameter] public EventCallback Changed { get; set; }
 
     private const int WidthFloor = 52;
+    private const int WidthCeiling = 420;   // shared-components.md §4.1's clamp
     private Dictionary<string, int> _widths = [];
-    private (string Key, double StartX, int StartWidth)? _drag;
+    private (string Key, double StartX, Dictionary<string, int> Start)? _drag;
     private ElementReference _root;
     private IJSObjectReference? _module;
 
@@ -59,6 +62,12 @@
         foreach (var column in Columns)
         {
             _widths.TryAdd(column.Key, column.DefaultWidth);
+        }
+
+        if (!ReferenceEquals(_rowsSource, Rows))
+        {
+            _rowsSource = Rows;
+            _rowsView = Rows.ToList();
         }
     }
 
@@ -91,7 +100,11 @@
     // per the Interfaces block is IReadOnlyList<TRow> only -- ImmutableArray<T> and other
     // read-only-only sequences do not). Materialize explicitly rather than an `as` cast, so a
     // caller passing such a sequence renders every row instead of silently rendering none.
-    private List<TRow> RowsView => Rows.ToList();
+    // Materialized ONCE per Rows instance (D-118): Virtualize keys its internal anchoring on
+    // Items identity, and a fresh list every render resets it — the scroll snap at the foot.
+    private IReadOnlyList<TRow>? _rowsSource;
+    private List<TRow> _rowsView = [];
+    private List<TRow> RowsView => _rowsView;
 
     private string GridCols() => string.Join(" ", Columns.Select((c, i) =>
         i == 0 ? $"minmax({_widths[c.Key]}px, 1.4fr)" : $"{_widths[c.Key]}px"));
@@ -111,14 +124,34 @@
         e.Key is "Enter" or " " ? SortByAsync(column) : Task.CompletedTask;
 
     private void GripDown(PointerEventArgs e, string key) =>
-        _drag = (key, e.ClientX, _widths[key]);
+        _drag = (key, e.ClientX, new Dictionary<string, int>(_widths));
 
     private void GripMove(PointerEventArgs e, string key)
     {
-        if (_drag is { } drag && drag.Key == key)
+        if (_drag is not { } drag || drag.Key != key)
         {
-            _widths[key] = Math.Max(WidthFloor, drag.StartWidth + (int)(e.ClientX - drag.StartX));
+            return;
         }
+
+        var delta = (int)(e.ClientX - drag.StartX);
+        if (Columns.Count > 1 && key == Columns[0].Key)
+        {
+            // D-117: the first track is flexible (minmax min, 1.4fr), so moving only its
+            // own minimum is invisible while the fr share fills the container — this grip
+            // redistributes instead. Dragging left grows the fixed columns by |delta|,
+            // split proportional to their drag-start widths, and the fr share shrinks by
+            // the same amount; dragging right mirrors. The stored minimum tracks the drag
+            // so compression can continue below the old minimum.
+            var others = Columns.Skip(1).Select(c => c.Key).ToList();
+            var startSum = others.Sum(k => drag.Start[k]);
+            foreach (var k in others)
+            {
+                var share = (int)Math.Round((double)drag.Start[k] / startSum * -delta);
+                _widths[k] = Math.Clamp(drag.Start[k] + share, WidthFloor, WidthCeiling);
+            }
+        }
+
+        _widths[key] = Math.Clamp(drag.Start[key] + delta, WidthFloor, WidthCeiling);
     }
 
     public async ValueTask DisposeAsync()
