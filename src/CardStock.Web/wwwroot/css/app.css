@@ -250,6 +250,15 @@ button:disabled,
   border-radius: 2px;
 }
 
+/* App.razor's FocusOnNavigate lands programmatic focus on each page's h1 (so
+   keyboard/screen-reader position follows navigation), and programmatic focus
+   matches :focus-visible on a fresh load. A heading is not interactive and takes
+   no ring; the stock Blazor template carries this same reset for this reason.
+   Interactive elements keep §4.10's ring untouched. */
+h1:focus {
+  outline: none;
+}
+
 /* ---------------------------------------------------------------------
    Blazor framework hooks — retained from the template, re-themed.
    --------------------------------------------------------------------- */
