@@ -74,7 +74,7 @@ public sealed class BrowseReader(
             {
                 var cards = bySpecies[s.Id].ToList();
                 return new SpeciesTile(
-                    s.Id, s.Name, s.Slug, s.GradientStart, s.GradientEnd,
+                    s.Id, s.Name, s.Slug,
                     cards.Count,
                     cards.Sum(id => (long)latest.GetValueOrDefault(id)),
                     types[s.Id].ToList(), s.Generation, s.Region,

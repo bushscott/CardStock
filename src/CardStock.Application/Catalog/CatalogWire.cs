@@ -34,7 +34,7 @@ public sealed record SetTileDto(
 public sealed record BrowseSpeciesDto(IReadOnlyList<SpeciesTileDto> Species);
 
 public sealed record SpeciesTileDto(
-    int SpeciesId, string Name, string Slug, string GradientStart, string GradientEnd,
+    int SpeciesId, string Name, string Slug,
     int Printings, long TotalValueCents, IReadOnlyList<string> Types, short Generation,
     string Region, string Status, short Stage, string Color,
     IReadOnlyList<string> EggGroups, string? Habitat);

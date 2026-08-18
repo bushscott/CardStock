@@ -12,7 +12,7 @@ public class BrowseEndpointTests
         {
             BrowseSets = [new SetTile(7, "Evolving Skies", 237, 1, "matched", "SWSH",
                 new DateOnly(2021, 8, 27))],
-            BrowseSpecies = [new SpeciesTile(197, "Umbreon", "umbreon", "#2B2D42", "#5C6B9E",
+            BrowseSpecies = [new SpeciesTile(197, "Umbreon", "umbreon",
                 34, 9_640_000, ["Dark"], 2, "Johto", "Ordinary", 1, "Black", ["Field"], "Urban")],
         };
         using var client = app.CreateClient();

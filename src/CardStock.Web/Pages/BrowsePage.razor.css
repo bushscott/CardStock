@@ -75,17 +75,17 @@
     border-radius: 10px; padding: 13px; text-decoration: none; color: inherit;
     transition: box-shadow 0.15s; }
 .species-tile:hover { box-shadow: 0 6px 20px rgba(20, 19, 26, 0.10); }
-.sp-avatar { position: relative; width: 44px; height: 44px; border-radius: 50%;
-    overflow: hidden; }
-.sp-initial { position: absolute; inset: 0; display: grid; place-items: center;
-    font: 700 17px 'Inter Tight', sans-serif; color: rgba(255, 255, 255, 0.92); }
-.sp-avatar img { position: relative; width: 100%; height: 100%; object-fit: contain;
-    image-rendering: pixelated; }
+.sp-head { display: flex; align-items: center; gap: 10px; }
+.sp-id { flex: 1; min-width: 0; }
+/* The corpus's sprite canvas is a uniform 68×56; rendering at native size is the only
+   integer scale that fits the tile, and integer scale is what keeps pixel art crisp. */
+.sp-sprite { width: 68px; height: 56px; object-fit: contain; image-rendering: pixelated;
+    flex-shrink: 0; }
 .sp-name { font: 600 15.5px 'Inter Tight', sans-serif; white-space: nowrap;
-    overflow: hidden; text-overflow: ellipsis; margin-top: 8px; }
+    overflow: hidden; text-overflow: ellipsis; }
 .sp-printings { font-size: 11.5px; color: var(--mut2); }
 .sp-footer { display: flex; justify-content: space-between; align-items: baseline;
-    margin-top: 8px; }
+    margin-top: 10px; }
 .sp-value { font: 700 14.5px 'JetBrains Mono', monospace; }
 .sp-delta { font-size: 12px; color: var(--mut2); }
 .shown-count { font-size: 12.5px; color: var(--mut2); }

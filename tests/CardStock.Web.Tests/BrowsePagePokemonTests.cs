@@ -20,7 +20,7 @@ public class BrowsePagePokemonTests : BunitContext
 
     private static SpeciesTileDto Species(int id, string name, long value, string[] types,
         short gen, string? habitat = "Urban") => new(
-        id, name, name.ToLowerInvariant(), "#2B2D42", "#5C6B9E", 10, value, types, gen,
+        id, name, name.ToLowerInvariant(), 10, value, types, gen,
         "Johto", "Ordinary", 1, "Black", ["Field"], habitat);
 
     private static readonly SpeciesTileDto[] All =
@@ -39,8 +39,17 @@ public class BrowsePagePokemonTests : BunitContext
         Assert.Equal(["Charizard", "Umbreon", "Glaceon"], names);   // wire order preserved
         Assert.Contains("Ordered by total market value across all printings", cut.Markup);
 
+        // Owner ruling 2026-08-18 (UAT): header is a flex row — name + printings left,
+        // sprite trailing right at its native 68×56 — and the gradient circle + initial
+        // are gone outright (icon coverage is 1,025/1,025; onerror collapse suffices).
         var tile = cut.FindAll(".species-tile")[0];
-        Assert.Contains("api/v1/species/6/icon", tile.QuerySelector(".sp-avatar img")!.GetAttribute("src"));
+        var head = tile.QuerySelector(".sp-head")!;
+        Assert.Equal(2, head.Children.Length);
+        Assert.Contains("sp-id", head.Children[0].ClassName);
+        Assert.Equal("IMG", head.Children[1].TagName);
+        Assert.Contains("api/v1/species/6/icon", head.QuerySelector("img.sp-sprite")!.GetAttribute("src"));
+        Assert.Empty(cut.FindAll(".sp-avatar"));
+        Assert.Empty(cut.FindAll(".sp-initial"));
         Assert.Contains("$284K", tile.TextContent);
         Assert.Contains("10 printings", tile.TextContent);
         Assert.Single(tile.QuerySelectorAll("span.gate-glyph"));

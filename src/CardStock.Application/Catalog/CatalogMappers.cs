@@ -64,7 +64,7 @@ public static class CatalogMappers
 
     public static BrowseSpeciesDto ToDto(IReadOnlyList<SpeciesTile> species) => new(
         species.Select(s => new SpeciesTileDto(
-            s.SpeciesId, s.Name, s.Slug, s.GradientStart, s.GradientEnd, s.Printings,
+            s.SpeciesId, s.Name, s.Slug, s.Printings,
             s.TotalValueCents, s.Types, s.Generation, s.Region, s.Status, s.Stage,
             s.Color, s.EggGroups, s.Habitat))
         .ToArray());

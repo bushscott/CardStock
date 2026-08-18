@@ -9,7 +9,7 @@ public class SpeciesFiltersTests
     private static SpeciesTileDto Species(int id, string name, string[] types, short gen,
         string region, string status = "Ordinary", short stage = 1, string color = "Black",
         string[]? eggs = null, string? habitat = "Urban") => new(
-        id, name, name.ToLowerInvariant(), "#000", "#FFF", 10, 1000, types, gen, region,
+        id, name, name.ToLowerInvariant(), 10, 1000, types, gen, region,
         status, stage, color, eggs ?? ["Field"], habitat);
 
     private static readonly SpeciesTileDto[] All =

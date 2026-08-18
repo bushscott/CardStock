@@ -352,6 +352,30 @@ Read directly 2026-08-10, to be mirrored per D-018–D-021.
 
 ## Decided
 
+### D-112 — The species tile drops the monogram circle; the sprite trails the name at native size
+Owner, 2026-08-18, during Catalog UAT, after a three-way real-pixel comparison (current /
+mockup order / mirrored): *"a looks way cooler, and this is the route we need to go."* The
+browse species tile's header becomes a flex row — name + printings left, **pixel sprite
+trailing right at its native 68×56 canvas** — and the 44×44 gradient circle with centred
+initial is deleted outright, superseding both the mockup's leading-circle arrangement
+(`Cardstock Browse.dc.html:137-138`) and D-110 (b)'s icon-over-gradient with initial-as-fallback.
+Grounds: icon coverage is total — 1,025 files for 1,025 species
+(`ssh scott@192.168.0.56 'ls /opt/pokemon-invest-batch/species-icons | wc -l'`) — so the
+initial only ever covered a fetch failure (`onerror` now collapses to text-only), and the 44px
+circle forced a non-integer downscale of the 68×56 art, which is what made the sprites blurry.
+Corrected in the same pass: the build had **stacked** the header regions the mockup lays out as
+a row (`:137` `display:flex`; browse.md §2.3's extraction listed the regions but lost the
+arrangement — the whitespace the owner flagged in UAT *was* that deviation), and the footer's
+top margin is the mockup's 10px (`:144`), not the build's 8. Wire consequence:
+`SpeciesTile`/`SpeciesTileDto` lose `GradientStart`/`GradientEnd` — the circle was browse's
+only consumer; character/set/binder gradients ride their own contracts, and `ScraperSpecies`
+keeps its fields for them. Receipts, live post-deploy: 1,025 tiles, 0 `.sp-avatar`/`.sp-initial`,
+1,025 `.sp-head img.sp-sprite` at 68×56, head child order `DIV.sp-id | IMG.sp-sprite`, tile
+height 145→114px; `/api/v1/browse/species` carries no gradient keys. **Open follow-on:** the
+art inside the uniform canvas varies wildly (Pikachu 21×20 vs Charizard 44×39, alpha-bbox
+measured), so small species read tiny at native scale — sprite-size normalization is the
+owner's announced next conversation.
+
 ### D-110 — The Catalog phase is designed; D-102's vocabulary goes corpus-wide; the ninth era exists
 Approved section-by-section 2026-08-15, the day after D-109 closed. Full contract:
 `docs/superpowers/specs/2026-08-15-catalog-phase-design.md`. Shape: four WASM routes — `/browse`

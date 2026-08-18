@@ -28,7 +28,6 @@ public class BrowseMapperTests
     {
         var tile = new SpeciesTile(
             SpeciesId: 197, Name: "Umbreon", Slug: "umbreon",
-            GradientStart: "#2B2D42", GradientEnd: "#5C6B9E",
             Printings: 34, TotalValueCents: 9_640_000, Types: ["Dark"],
             Generation: 2, Region: "Johto", Status: "Ordinary", Stage: 1,
             Color: "Black", EggGroups: ["Field"], Habitat: "Urban");
@@ -38,8 +37,6 @@ public class BrowseMapperTests
         Assert.Equal(197, dto.SpeciesId);
         Assert.Equal("Umbreon", dto.Name);
         Assert.Equal("umbreon", dto.Slug);
-        Assert.Equal("#2B2D42", dto.GradientStart);
-        Assert.Equal("#5C6B9E", dto.GradientEnd);
         Assert.Equal(34, dto.Printings);
         Assert.Equal(9_640_000, dto.TotalValueCents);
         Assert.Equal(["Dark"], dto.Types);

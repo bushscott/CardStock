@@ -125,16 +125,21 @@
         <div class="species-grid">
             @foreach (var species in matched)
             {
+                @* Owner ruling 2026-08-18 (UAT), amending D-110 (b) and the mockup's :137
+                   row order: header is name + printings left, sprite trailing right at its
+                   native canvas size. The gradient circle + initial are deleted outright —
+                   icon coverage is 1,025/1,025, so the letter was only ever a fetch-failure
+                   fallback; onerror now collapses to text-only instead. *@
                 <a class="species-tile" href="character/@species.Slug"
                    title="Character page for @species.Name">
-                    <div class="sp-avatar"
-                         style="background: linear-gradient(160deg, @species.GradientStart, @species.GradientEnd)">
-                        <span class="sp-initial">@species.Name[..1]</span>
-                        <img src="@CatalogApiClient.SpeciesIconUrl(species.SpeciesId)" alt=""
-                             loading="lazy" onerror="this.style.display='none'" />
+                    <div class="sp-head">
+                        <div class="sp-id">
+                            <div class="sp-name">@species.Name</div>
+                            <div class="sp-printings mono">@species.Printings printings</div>
+                        </div>
+                        <img class="sp-sprite" src="@CatalogApiClient.SpeciesIconUrl(species.SpeciesId)"
+                             alt="" loading="lazy" onerror="this.style.display='none'" />
                     </div>
-                    <div class="sp-name">@species.Name</div>
-                    <div class="sp-printings mono">@species.Printings printings</div>
                     <div class="sp-footer">
                         <span class="sp-value mono">@Format.AbbrevMoney(species.TotalValueCents)</span>
                         <span class="sp-delta mono">@ChipEngine.GlyphDash 90d<PendingGlyph Note="@CatalogCopy.WorkerGate" /></span>
