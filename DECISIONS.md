@@ -371,10 +371,16 @@ top margin is the mockup's 10px (`:144`), not the build's 8. Wire consequence:
 only consumer; character/set/binder gradients ride their own contracts, and `ScraperSpecies`
 keeps its fields for them. Receipts, live post-deploy: 1,025 tiles, 0 `.sp-avatar`/`.sp-initial`,
 1,025 `.sp-head img.sp-sprite` at 68×56, head child order `DIV.sp-id | IMG.sp-sprite`, tile
-height 145→114px; `/api/v1/browse/species` carries no gradient keys. **Open follow-on:** the
-art inside the uniform canvas varies wildly (Pikachu 21×20 vs Charizard 44×39, alpha-bbox
-measured), so small species read tiny at native scale — sprite-size normalization is the
-owner's announced next conversation.
+height 145→114px; `/api/v1/browse/species` carries no gradient keys. **Corrected same day:**
+this entry's first write called the canvas "uniform 68×56" from a two-sprite sample — the
+full-corpus alpha-bbox measurement (all 1,025 fetched and measured in one harness) found
+**two canvas populations**: 898 at 68×56 (render 1:1, crisp) and 127 at 96×96 (120 Gen 9,
+dex ≥ 906, plus 7 late-Gen-8 forms), which the 68×56 display box currently shrinks
+non-integer — 71 of those have art alone exceeding 68×56. **Open follow-on (the owner's
+announced next conversation):** art-in-canvas varies wildly — height min 10 / median 24 /
+p75 33 / max 96; Pikachu 21×20 vs Charizard 44×39; 609 of 1,025 would fit the box at a clean
+2× — so small species read tiny at 1× and the Gen 9 subset blurs. Sprite-size normalization
+should be designed from this measurement, not by eye.
 
 ### D-110 — The Catalog phase is designed; D-102's vocabulary goes corpus-wide; the ninth era exists
 Approved section-by-section 2026-08-15, the day after D-109 closed. Full contract:

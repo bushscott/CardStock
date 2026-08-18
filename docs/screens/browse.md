@@ -24,8 +24,10 @@
 > by dex number — the same data always renders the same wall.
 
 > **Amended 2026-08-18 (owner UAT, D-112).** The species tile's header is a **flex row** with
-> the name + printings block left and the **pixel sprite trailing right at its native 68×56
-> canvas** — the 44×44 gradient circle + centred initial (`:138`) is deleted outright,
+> the name + printings block left and the **pixel sprite trailing right in a 68×56 box**
+> (native canvas for 898/1,025 sprites — 1:1 and crisp; the 127 Gen-9-era 96×96 sprites
+> downscale non-integer for now, D-112's open follow-on) — the 44×44 gradient circle +
+> centred initial (`:138`) is deleted outright,
 > superseding D-110 (b)'s icon-over-gradient (initial = fallback). Grounds: icon coverage is
 > 1,025/1,025, so the initial only ever covered a fetch failure (`onerror` now collapses to
 > text-only), and the 44px circle forced a blurring non-integer downscale of the 68×56 art.
@@ -95,7 +97,7 @@ Two sibling `sc-if isPoke` blocks (`:65-107` filter bar, `:132-154` grid), so in
 
 | Region | Spec |
 |---|---|
-| Header row | Flex row, `align-items:center`, gap 10 (`:137`): name + printings block left (`min-width:0`), pixel sprite trailing **right** at its native 68×56 canvas, `image-rendering: pixelated`, `onerror` collapses to text-only. ~~Avatar: 44×44 gradient circle + centred initial (`:138`)~~ — deleted by D-112 (2026-08-18 banner above); the mockup's leading-circle order is superseded by the owner's trailing-sprite ruling |
+| Header row | Flex row, `align-items:center`, gap 10 (`:137`): name + printings block left (`min-width:0`), pixel sprite trailing **right** in a 68×56 box (native for 898/1,025; the 127 Gen-9-era 96×96 canvases downscale for now), `image-rendering: pixelated`, `onerror` collapses to text-only. ~~Avatar: 44×44 gradient circle + centred initial (`:138`)~~ — deleted by D-112 (2026-08-18 banner above); the mockup's leading-circle order is superseded by the owner's trailing-sprite ruling |
 | Name | Inter Tight 600 / 15.5px, single line, ellipsis on overflow (`:140`) |
 | Sub-line | JetBrains Mono 11.5px `--mut2`: `"{printings} printings"` (`:141`) |
 | Footer row | `space-between`, baseline-aligned: value in Mono 14.5px/700 (`:145`), then `"{chg} 90d"` in Mono 12px, sign-coloured (`:146`); margin-top 10 (`:144`) |

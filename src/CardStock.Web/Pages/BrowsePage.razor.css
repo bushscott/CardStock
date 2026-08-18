@@ -77,8 +77,10 @@
 .species-tile:hover { box-shadow: 0 6px 20px rgba(20, 19, 26, 0.10); }
 .sp-head { display: flex; align-items: center; gap: 10px; }
 .sp-id { flex: 1; min-width: 0; }
-/* The corpus's sprite canvas is a uniform 68×56; rendering at native size is the only
-   integer scale that fits the tile, and integer scale is what keeps pixel art crisp. */
+/* Display box 68×56 — the native canvas of 898 of the 1,025 sprites, which therefore
+   render 1:1 and crisp. The other 127 (Gen 9 + late-Gen-8 forms) are 96×96 natively and
+   object-fit shrinks them non-integer for now — measured corpus-wide 2026-08-18; sizing
+   normalization is D-112's open follow-on, not this rule's job. */
 .sp-sprite { width: 68px; height: 56px; object-fit: contain; image-rendering: pixelated;
     flex-shrink: 0; }
 .sp-name { font: 600 15.5px 'Inter Tight', sans-serif; white-space: nowrap;
