@@ -48,6 +48,10 @@
 > 1×-canvas draw. The owner approved the max-fit flavor as sampled, aware that a 2× mid-size
 > sprite can outsize a 1× large one.
 
+> **Amended 2026-08-18 (owner UAT, D-114).** The bare `loading-strip` is replaced by the shared
+> `LoadingRing` — one 48px ring at `inset: 20vh` that the boot indicator fills (real download
+> progress) and this page's data fetch then spins in place. Contract: shared-components.md §4.8.
+
 **Runtime:** Design Composer. `<x-dc>` host (`:9`), template directives `sc-if` / `sc-for` resolved by `support.js:555-556`; `hint-placeholder-count` / `hint-placeholder-val` are design-time-only hints consumed when the bound value is unavailable (`support.js:614`, `support.js:648`) and carry **no** runtime meaning. All view data comes from one `renderVals()` return object (`:219-314`, dispatched at `support.js:1085`). The component takes **no props** (`data-props=""`, `:159`).
 
 ---

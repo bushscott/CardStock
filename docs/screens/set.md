@@ -36,6 +36,10 @@
 > the About-data promise — first armings ~2026-10-31, not the design spec §2's
 > first-observation-based "~late Sep 2026" estimate, which embedded the omission.
 
+> **Amended 2026-08-18 (owner UAT, D-114).** The bare `loading-strip` is replaced by the shared
+> `LoadingRing` — one 48px ring at `inset: 20vh` that the boot indicator fills (real download
+> progress) and this page's data fetch then spins in place. Contract: shared-components.md §4.8.
+
 ---
 
 ## 1. Identity

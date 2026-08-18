@@ -36,7 +36,7 @@
 {
     @if (_sets is null)
     {
-        <p class="loading-strip" aria-busy="true">Loading…</p>
+        <LoadingRing />
     }
     else if (_sets.Failed)
     {
@@ -88,7 +88,7 @@
 {
     @if (_species is null)
     {
-        <p class="loading-strip" aria-busy="true">Loading…</p>
+        <LoadingRing />
     }
     else if (_species.Failed)
     {

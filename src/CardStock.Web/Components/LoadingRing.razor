@@ -1,0 +1,10 @@
+@* One loading vocabulary (D-114): geometry-identical to index.html's boot indicator —
+   same 48px ring, same stroke, same 20vh anchor — so a refresh reads as one ring that
+   fills (real download progress) during runtime boot, then spins here, in place, while
+   the page's data loads. The fetch has no progress signal (one atomic response), so this
+   half is indeterminate by design; a determinate 25→100 walk was considered and rejected
+   as a fabricated number. *@
+<div class="loading-ring" aria-busy="true">
+    <svg><circle class="track" r="40%" cx="50%" cy="50%" /><circle class="arc" r="40%" cx="50%" cy="50%" /></svg>
+    <span class="cap">Loading…</span>
+</div>

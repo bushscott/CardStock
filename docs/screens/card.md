@@ -13,6 +13,10 @@
 > (amended), §2.3 (amended), §2.3.2 (new), §3.3 (amended), §8 C-25. Everything else on this page
 > keeps `Cardstock Card.dc.html` + this spec as authority.
 
+> **Amended 2026-08-18 (owner UAT, D-114).** The bare `loading-strip` is replaced by the shared
+> `LoadingRing` — one 48px ring at `inset: 20vh` that the boot indicator fills (real download
+> progress) and this page's data fetch then spins in place. Contract: shared-components.md §4.8.
+
 ---
 
 ## 1. Identity

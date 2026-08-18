@@ -296,11 +296,15 @@ h1:focus {
   content: "An error has occurred.";
 }
 
+/* D-114 — one loading vocabulary. This boot ring and the pages' LoadingRing component
+   share size, stroke, colors, and the 20vh anchor, so a refresh reads as one ring that
+   fills here (real runtime-download progress via --blazor-load-percentage) and then
+   spins in place while the page data loads. Keep the two in step. */
 .loading-progress {
   position: absolute;
   display: block;
-  width: 8rem;
-  height: 8rem;
+  width: 48px;
+  height: 48px;
   inset: 20vh 0 auto 0;
   margin: 0 auto 0 auto;
 }
@@ -308,13 +312,14 @@ h1:focus {
 .loading-progress circle {
   fill: none;
   stroke: var(--line);
-  stroke-width: 0.6rem;
+  stroke-width: 4px;
   transform-origin: 50% 50%;
   transform: rotate(-90deg);
 }
 
 .loading-progress circle:last-child {
   stroke: var(--acc);
+  stroke-linecap: round;
   stroke-dasharray: calc(3.141 * var(--blazor-load-percentage, 0%) * 0.8), 500%;
   transition: stroke-dasharray 0.05s ease-in-out;
 }
@@ -322,8 +327,10 @@ h1:focus {
 .loading-progress-text {
   position: absolute;
   text-align: center;
-  font-weight: bold;
-  inset: calc(20vh + 3.25rem) 0 auto 0.2rem;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11.5px;
+  color: var(--mut2);
+  inset: calc(20vh + 58px) 0 auto 0;
 }
 
 .loading-progress-text:after {

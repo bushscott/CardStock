@@ -352,6 +352,27 @@ Read directly 2026-08-10, to be mirrored per D-018–D-021.
 
 ## Decided
 
+### D-114 — One loading ring: boot fills it with real progress, the fetch spins it in place
+Owner, 2026-08-18, during Catalog UAT — prompted by their own report of "loading screen to
+loading screen" on refresh: the boot indicator (big template ring + percent at viewport
+centre) and the pages' bare `loading-strip` text were two unrelated loading languages in two
+places. Chosen from a three-variant real-pixel mock (fill-then-spin / quarter-plus-comet /
+fake 25→100 walk): *"lets just go with A"* — **fill then spin**. One 48px ring anchored at
+`inset: 20vh`: during runtime boot it fills with **real** download progress (the template's
+`--blazor-load-percentage` mechanics, kept — restyled to tokens, stroke 4, round cap, mono
+caption); the pages' fetch then renders the geometry-identical shared `LoadingRing`
+component spinning in place (28% arc, 0.9s/rev, static under `prefers-reduced-motion`,
+`aria-busy`, `Loading…`). Replaces `loading-strip` on Browse (both modes), Set, Character,
+and Card. The seamless 25/75 determinate ring the owner first floated was **rejected on
+honesty grounds the owner themselves articulated** — *"we don't get partial data, so it
+would just jump from twenty five percent to one hundred percent"* — a mid-fetch percentage
+would be a fabricated number (the fetch is one atomic response; its wait is server compute,
+so even byte-progress would sit at zero until the end). Receipts, live post-deploy: served
+`app.css` carries the D-114 block; mid-fetch on cold `/character/tynamo` the ring measures
+top 20.0vh, svg 48×48, caption `Loading…`, spin animation running, resolving to the Tynamo
+page when data lands. Spec: shared-components.md §4.8 (new), banners on browse/set/character/
+card. Suite: 456 passed, 0 failed, 35 DB-gated skips.
+
 ### D-113 — Sprites normalize to clean factors; the art boxes ship as a static asset
 Owner, 2026-08-18, after a real-pixel sample of the wall's top row plus the two edges
 (Pikachu 2×, Charizard 1×, Tynamo 3×, Koraidon ½×): *"It looks okay better than before. So

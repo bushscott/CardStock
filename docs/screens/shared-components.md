@@ -384,6 +384,26 @@ The universal success affordance: **the control itself becomes its own confirmat
 
 Observed stack, so a Blazor rebuild does not re-derive it: nav `z-index: 20` (`Home:39`, `position: sticky; top: 0`) → table header `z-index: 10` at `position: sticky; top: 48px` (`Home:93`, offset by the nav height) → row menu `40` (`Home:124`) → search menu `80` (`cardstock-search.js:28`) → Charts views menu `60` (`Charts:50`) → Screener rail menu `60` (`Screener:63`) → add pickers `50` (`Screener:101`, `Browse:70`) → hover preview `100` (`Home:316`) → Profile modal `100` (`Profile:188`) → Card lightbox `200` (`Card:102`). The peek's `50`/`10` duplicate is the one incoherent entry.
 
+### 4.8 Loading vocabulary — one ring, two phases (D-114, owner UAT 2026-08-18)
+
+Not in the prototypes (they had no loading states); ruled during Catalog UAT after a
+three-variant real-pixel mock. A refresh shows **one 48px ring anchored at `inset: 20vh`,
+centred**, in two consecutive phases that never move it:
+
+1. **Runtime boot** — `index.html`'s `.loading-progress` (template mechanics kept): the arc
+   **fills with real download progress** via `--blazor-load-percentage`, caption via
+   `--blazor-load-percentage-text`. Track `--line`, arc `--acc`, stroke 4, round cap,
+   caption JetBrains Mono 11.5 `--mut2` at `20vh + 58px`.
+2. **Page data fetch** — the shared `LoadingRing` component (`Components/LoadingRing.razor`),
+   geometry-identical, **indeterminate**: a 28% arc spinning at 0.9s/rev (static under
+   `prefers-reduced-motion: reduce`), caption `Loading…`, `aria-busy`. Replaces the bare
+   `loading-strip` on Browse (both modes), Set, Character, and Card.
+
+A determinate 25→100 walk during the fetch was **rejected**: the response is atomic (no
+partial data — the owner's own formulation), so any mid-fetch percentage would be a
+fabricated number. The two definitions must stay in step — a change to either updates
+`app.css` §loading-progress *and* `LoadingRing.razor.css` together.
+
 ---
 
 ## 5. Theming hooks

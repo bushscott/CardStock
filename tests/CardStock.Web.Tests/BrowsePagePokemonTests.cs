@@ -169,6 +169,34 @@ public class BrowsePagePokemonTests : BunitContext
         Assert.Equal("-1", pop.GetAttribute("tabindex"));
     }
 
+    // D-114: while the fetch is in flight, the page shows the shared LoadingRing — the same
+    // ring index.html's boot indicator draws, so the handoff reads as one animation. The
+    // gated handler holds the species response open long enough to observe the state.
+    [Fact]
+    public void The_fetch_in_flight_renders_the_shared_loading_ring()
+    {
+        var gate = new TaskCompletionSource<HttpResponseMessage>();
+        RegisterClient(new HttpClient(new GatedHandler(gate)) { BaseAddress = new Uri("http://localhost/") });
+        Services.GetRequiredService<NavigationManager>().NavigateTo("browse?mode=pokemon");
+
+        var cut = Render<BrowsePage>();
+        Assert.NotNull(cut.Find(".loading-ring"));
+        Assert.Empty(cut.FindAll(".loading-strip"));
+
+        gate.SetResult(new HttpResponseMessage(HttpStatusCode.OK)
+        { Content = JsonContent.Create(new BrowseSpeciesDto([])) });
+        cut.WaitForAssertion(() => Assert.NotEmpty(cut.FindAll(".species-grid")));
+    }
+
+    private sealed class GatedHandler(TaskCompletionSource<HttpResponseMessage> gate) : HttpMessageHandler
+    {
+        protected override Task<HttpResponseMessage> SendAsync(
+            HttpRequestMessage request, CancellationToken cancellationToken) =>
+            request.RequestUri!.AbsolutePath.EndsWith("sprite-art.json")
+                ? Task.FromResult(new HttpResponseMessage(HttpStatusCode.NotFound))
+                : gate.Task;
+    }
+
     // Mirrors BrowsePageSetsTests' RenderBrowse (one CatalogApiClient stub per test-class
     // instance, mutable fixture read through closure via RegisterClient/RespondingWith) but
     // cannot reuse that private helper -- it lives on a different test class -- and cannot
