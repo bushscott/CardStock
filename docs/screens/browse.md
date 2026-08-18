@@ -52,6 +52,12 @@
 > `LoadingRing` — one 48px ring at `inset: 20vh` that the boot indicator fills (real download
 > progress) and this page's data fetch then spins in place. Contract: shared-components.md §4.8.
 
+> **Amended 2026-08-18 (owner UAT, D-115).** The order pills toggle: re-clicking the active
+> pill reverses its order (switching pills resets to ascending), the active pill carries the
+> roster's ▴/▾ glyph plus `aria-pressed`, and the alphabetical label flips a–z ↔ z–a so it
+> never contradicts its own arrow. Reversal mirrors date/name-ordered content only — the tail
+> shelves, all-unknown-date eras, and undated sets stay pinned last in both directions.
+
 **Runtime:** Design Composer. `<x-dc>` host (`:9`), template directives `sc-if` / `sc-for` resolved by `support.js:555-556`; `hint-placeholder-count` / `hint-placeholder-val` are design-time-only hints consumed when the bound value is unavailable (`support.js:614`, `support.js:648`) and carry **no** runtime meaning. All view data comes from one `renderVals()` return object (`:219-314`, dispatched at `support.js:1085`). The component takes **no props** (`data-props=""`, `:159`).
 
 ---

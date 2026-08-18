@@ -23,10 +23,16 @@
     {
         <div class="order-pills sort-pills">
             <span class="sort-label">order</span>
+            @* D-115: pills toggle direction — re-clicking the active pill reverses it; the
+               roster's ▴/▾ glyphs mark the live direction; the alphabetical label flips
+               (a–z ↔ z–a) so it never contradicts its own arrow. *@
             @foreach (var (key, label) in OrderOptions)
             {
-                <button type="button" class="pill @(_setOrder == key ? "active" : null)"
-                        title="@OrderTooltip(key)" @onclick="() => _setOrder = key">@label</button>
+                var active = _setOrder == key;
+                <button type="button" class="pill @(active ? "active" : null)"
+                        aria-pressed="@(active ? "true" : "false")"
+                        title="@OrderTooltip(key) — click again to reverse"
+                        @onclick="() => ToggleOrder(key)">@PillLabel(key, label)@(active ? _setDesc ? " ▾" : " ▴" : null)</button>
             }
         </div>
     }
@@ -181,6 +187,7 @@
     private CatalogResult<BrowseSpeciesDto>? _species;
     private IReadOnlyDictionary<int, int[]>? _spriteArt;
     private string _setOrder = "az";
+    private bool _setDesc;
     private bool _popoverOpen;
     private readonly Dictionary<string, IReadOnlySet<string>> _filters = [];
 
@@ -188,6 +195,22 @@
         [("az", "a–z"), ("date", "release date"), ("era", "era")];
 
     private static string Px(double v) => FormattableString.Invariant($"{v}px");
+
+    private void ToggleOrder(string key)
+    {
+        if (_setOrder == key)
+        {
+            _setDesc = !_setDesc;
+        }
+        else
+        {
+            _setOrder = key;
+            _setDesc = false;
+        }
+    }
+
+    private string PillLabel(string key, string label) =>
+        key == "az" && _setOrder == "az" && _setDesc ? "z–a" : label;
 
     private static string OrderTooltip(string key) => key switch
     {
@@ -240,9 +263,9 @@
         var sets = _sets!.Value!.Sets;
         return _setOrder switch
         {
-            "date" => SetShelves.ByReleaseDate(sets).Select(s => ((string?)s.Title, s.Sets)).ToList(),
-            "era" => SetShelves.ByEra(sets).Select(s => ((string?)s.Title, s.Sets)).ToList(),
-            _ => [(null, SetShelves.Alphabetical(sets))],
+            "date" => SetShelves.ByReleaseDate(sets, _setDesc).Select(s => ((string?)s.Title, s.Sets)).ToList(),
+            "era" => SetShelves.ByEra(sets, _setDesc).Select(s => ((string?)s.Title, s.Sets)).ToList(),
+            _ => [(null, SetShelves.Alphabetical(sets, _setDesc))],
         };
     }
 }

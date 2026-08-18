@@ -76,6 +76,45 @@ public class BrowsePageSetsTests : BunitContext
         Assert.Equal("Set metadata pending curation", chip.GetAttribute("title"));
     }
 
+    // D-115: the order pills toggle direction — re-clicking the active pill reverses its
+    // order, the roster's ▴/▾ glyph vocabulary marks the live direction, switching pills
+    // resets to ascending, and the alphabetical label flips (a–z ↔ z–a) so it never lies.
+    [Fact]
+    public void The_active_pill_reclicked_reverses_and_the_glyph_tracks_direction()
+    {
+        var cut = RenderBrowse(sets:
+        [
+            Tile(1, "Base Set", era: "WOTC", released: "1999-01-09"),
+            Tile(2, "Evolving Skies", released: "2021-08-27"),
+        ]);
+
+        var az = cut.FindAll(".order-pills .pill").Single(p => p.TextContent.Contains("a–z"));
+        Assert.Contains("▴", az.TextContent);
+        Assert.Equal("true", az.GetAttribute("aria-pressed"));
+
+        az.Click();
+        var za = cut.FindAll(".order-pills .pill").Single(p => p.TextContent.Contains("z–a"));
+        Assert.Contains("▾", za.TextContent);
+        Assert.Equal(["Evolving Skies", "Base Set"],
+            cut.FindAll(".fan-tile .fan-name").Select(n => n.TextContent).ToList());
+
+        cut.FindAll(".order-pills .pill").Single(p => p.TextContent == "release date").Click();
+        var date = cut.FindAll(".order-pills .pill").Single(p => p.TextContent.Contains("release date"));
+        Assert.Contains("▴", date.TextContent);
+        Assert.Equal("false", cut.FindAll(".order-pills .pill")
+            .Single(p => p.TextContent.Contains("a–z")).GetAttribute("aria-pressed"));
+
+        date.Click();
+        Assert.Contains("▾", cut.FindAll(".order-pills .pill")
+            .Single(p => p.TextContent.Contains("release date")).TextContent);
+        Assert.Equal(["Evolving Skies", "Base Set"],
+            cut.FindAll(".fan-tile .fan-name").Select(n => n.TextContent).ToList());
+
+        cut.FindAll(".order-pills .pill").Single(p => p.TextContent == "era").Click();
+        Assert.Contains("▴", cut.FindAll(".order-pills .pill")
+            .Single(p => p.TextContent.Contains("era")).TextContent);
+    }
+
     // Controller-ruled regression test: CatalogApiClient.GetAsync<T> returns a non-null
     // CatalogResult even on failure (Failed: true), so a naive `_sets ??= await ...` in
     // LoadAsync would never re-fetch once a failed result was stored -- Retry would no-op

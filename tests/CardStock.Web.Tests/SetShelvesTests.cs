@@ -56,4 +56,56 @@ public class SetShelvesTests
         Assert.Equal(6, ordered.Count);
         Assert.Equal("Aquapolis", ordered[0].Name);
     }
+
+    // D-115 direction rule: date/name-ordered content mirrors when descending; the
+    // unknowable tail shelves stay pinned last and keep their stated internal order.
+    [Fact]
+    public void Descending_alphabetical_is_z_first()
+    {
+        var ordered = SetShelves.Alphabetical(Sets, descending: true);
+        Assert.Equal("POP Series 5", ordered[0].Name);
+        Assert.Equal("Aquapolis", ordered[^1].Name);
+    }
+
+    [Fact]
+    public void Descending_release_order_is_newest_first_with_the_pending_block_still_last()
+    {
+        var shelves = SetShelves.ByReleaseDate(Sets, descending: true);
+        Assert.Equal([3L, 2L, 4L, 1L], shelves[0].Sets.Select(t => t.SetId).ToArray());
+        Assert.Equal("2 sets awaiting metadata — alphabetical", shelves[1].Title);
+        Assert.Equal(["Aquapolis", "Pokemon Japanese Promo"],
+            shelves[1].Sets.Select(t => t.Name).ToArray());
+    }
+
+    [Fact]
+    public void Descending_era_mirrors_shelves_and_contents_but_the_tails_stay_pinned()
+    {
+        var shelves = SetShelves.ByEra(Sets, descending: true);
+        Assert.Equal(["SWSH", "WOTC", "no era", "metadata pending"],
+            shelves.Select(s => s.Title).ToArray());
+        Assert.Equal([3L, 2L], shelves[0].Sets.Select(t => t.SetId).ToArray()); // newest first
+        Assert.Equal(["Aquapolis", "Pokemon Japanese Promo"],
+            shelves[3].Sets.Select(t => t.Name).ToArray());                    // still alphabetical
+    }
+
+    // Reversing must not promote the unknowns: an era whose dates are all unknown, and an
+    // undated set inside a dated era, both stay last in BOTH directions.
+    [Fact]
+    public void Unknown_dates_stay_last_in_both_directions()
+    {
+        SetTileDto[] withUnknowns =
+        [
+            .. Sets,
+            Tile(7, "Mystery Era Set", era: "XY", released: null),
+            Tile(8, "Undated Swsh", era: "SWSH", released: null),
+        ];
+
+        foreach (var descending in new[] { false, true })
+        {
+            var shelves = SetShelves.ByEra(withUnknowns, descending);
+            Assert.Equal("XY", shelves[2].Title);                       // all-unknown era: after dated eras
+            var swsh = shelves.Single(s => s.Title == "SWSH");
+            Assert.Equal(8L, swsh.Sets[^1].SetId);                      // undated set: last in its shelf
+        }
+    }
 }

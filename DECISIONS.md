@@ -352,6 +352,23 @@ Read directly 2026-08-10, to be mirrored per D-018–D-021.
 
 ## Decided
 
+### D-115 — The order pills toggle direction; ▴/▾ is the one direction vocabulary
+Owner, 2026-08-18, during Catalog UAT: *"The order by pills should be ascending and
+descending options. If you click it again, it should do the opposite. And what the current
+sort by is needs to be visible via some visual indicator."* Re-clicking the active pill
+reverses its order; switching pills resets to ascending; the active pill carries the same
+` ▴`/` ▾` glyphs RosterTable's sorted headers already append — one direction vocabulary, not
+a second arrow dialect — plus `aria-pressed` (the pills previously lacked it) and a "click
+again to reverse" tooltip suffix. The alphabetical label flips **a–z ↔ z–a** so the label
+never contradicts its own arrow. Direction rule, extending set.md's nulls-last sorting
+banner: **date/name-ordered content mirrors; unknowable buckets never promote** — the
+metadata-pending and no-era tail shelves stay pinned last in both directions, an era whose
+dates are all unknown stays behind the dated eras, and undated sets stay last within their
+shelf (alphabetical either way). Receipts, live post-deploy: a–z ▴ first tile Chinese CSV10C
+→ z–a ▾ first tile x Oreo; release date ▴ Pokemon Base Set → ▾ Pokemon Pitch Black; era ▴
+first shelf WOTC → ▾ first shelf ME; switching pills lands on ▴; `aria-pressed` tracks the
+active pill. Suite: 461 passed, 0 failed, 35 DB-gated skips.
+
 ### D-114 — One loading ring: boot fills it with real progress, the fetch spins it in place
 Owner, 2026-08-18, during Catalog UAT — prompted by their own report of "loading screen to
 loading screen" on refresh: the boot indicator (big template ring + percent at viewport
