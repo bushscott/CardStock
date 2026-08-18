@@ -24,3 +24,38 @@
 .fan-pending { font: 600 11.5px 'JetBrains Mono', monospace; color: var(--mut2);
     text-align: center; margin-top: 6px; }
 .mono { font-family: 'JetBrains Mono', monospace; }
+
+/* Copied from SortPills.razor.css / DensityToggle.razor.css: Blazor CSS isolation is per-file, so those components' own rules never reach this page's raw markup (the mode switch and order pills reuse the class names, not the components). */
+.sort-pills { display: inline-flex; align-items: center; gap: 6px; }
+.sort-label { font: 500 12.5px 'JetBrains Mono', monospace; color: var(--mut2); }
+.pill {
+    height: 24px;
+    padding: 0 10px;
+    border: 1px solid var(--line);
+    border-radius: 99px;
+    background: var(--card);
+    color: var(--mut);
+    font: 600 12px 'JetBrains Mono', monospace;
+    cursor: pointer;
+}
+.pill.active { background: var(--acc); border-color: var(--acc); color: var(--card); }
+.density-toggle {
+    display: inline-flex;
+    border: 1px solid var(--line);
+    border-radius: 6px;
+    overflow: hidden;
+}
+.density-toggle button {
+    height: 28px;
+    padding: 0 12px;
+    border: 0;
+    background: var(--card);
+    color: var(--mut);
+    font: 600 13px 'JetBrains Mono', monospace;
+    text-transform: lowercase;
+    cursor: pointer;
+}
+.density-toggle button.active {
+    background: var(--acc);
+    color: var(--card);
+}
