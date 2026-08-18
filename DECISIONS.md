@@ -2226,6 +2226,23 @@ The line reads: *"Seams: liquidity seam Apr '25 (churn/vol panes), resolution se
 
 ## Open
 
+### D-116 — The ja-locale set enrichment is briefed; awaiting owner commissioning in the sibling repo
+Owner ask 2026-08-18, during Catalog UAT, on seeing the 622-set pending shelf: manual
+entry or cross-reference? Answer: cross-reference — the existing TCGdex join (their
+ADR-0009) extended to the `ja` locale. Brief drafted the same day:
+`docs/superpowers/plans/2026-08-18-tcgdex-ja-set-enrichment-brief.md`, delivery per the
+D-079/D-106 precedent (fresh context window, implemented in `../PokemonInvestBatch`,
+acceptance re-run from this side). Facts established while drafting, all measured
+2026-08-18: the 622 pending = **395 Japanese + 139 Chinese/Korean + 88 other**; the mirror
+fetches `/v2/en` only (`TcgdexMirror.cs:155`); TCGdex `ja` holds **177 sets** (live probe,
+Japanese-script names, per-set docs carry `releaseDate`/`serie`/counts — SV2a receipt in
+the brief), so **≤177 of the 395 can ever match** and the join must be a hand-curated
+alias map — the sibling's `SetMapping.cs` deliberately bars non-English sets from name
+matching, and the brief keeps that rule. A set match fills `set_details.Code/ReleasedOn/
+Series/Era` only (verified `PokedexEntities.cs:107-124` — no count columns); per-card
+`tcgdex_enrichments` for ja sets is the brief's separate stage 2. Closes into Decided when
+the sibling implements and the brief's acceptance receipts re-run green.
+
 ### D-107 — The v2 register: ideas deliberately parked until v1 is complete
 Created 2026-08-14 at the owner's request for a place *"where I don't forget about them."* Nothing
 here is designed, scheduled, or committed — revisit when v1 wraps. **Append future v2 ideas to
