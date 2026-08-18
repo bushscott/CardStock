@@ -79,3 +79,42 @@ and is **stage 2 below, a separate decision**.
 Chinese/Korean locales (TCGdex coverage unmeasured — separate probe), the ~88 side
 products (no TCGdex counterpart exists; they stay honestly pending or become a manual
 decision later), AI alias generation (v2 register).
+
+## Launcher prompt
+
+Owner-requested (2026-08-18): the paste-ready prompt that primes a metadata-gap session
+on this brief. Works from either window; the D-106 precedent prefers launching from the
+CardStock window after `/clear` so GSD does not attach.
+
+```
+Before responding, read this brief in full:
+- from the CardStock window: docs/superpowers/plans/2026-08-18-tcgdex-ja-set-enrichment-brief.md
+- from the PokemonInvestBatch window: ../CardStock/docs/superpowers/plans/2026-08-18-tcgdex-ja-set-enrichment-brief.md
+
+I'm the owner. CardStock's Browse wall shows 622 sets awaiting metadata, and that brief
+scopes the fix: extending this repo's TCGdex join (ADR-0009) to the ja locale. This
+conversation is about filling metadata gaps under that brief.
+
+Ground rules, non-negotiable:
+1. Verify before asserting. Every claim about this codebase or the data carries a
+   file:line or a query I can re-run. If you haven't checked it this session, check it.
+2. Do not use GSD or .planning/ for this work; follow the brief and plain conversation.
+3. SetMapping.cs's exclusion of non-English sets from name matching is deliberate design,
+   not a gap. Never propose EN↔JA fuzzy name matching. The ja join is a hand-curated
+   alias map, bounded by TCGdex's 177 ja sets.
+4. Honesty over coverage: no set gains a date, era, code, or series TCGdex does not
+   state. Unmapped sets keep their honest Unmapped verdict. If a number is unknown,
+   say unknown — never estimate it into a column.
+5. Stage 0 before anything: probe the ja list into the mirror, hand-map what's
+   recognizable, measure the real overlap, report the numbers, then STOP for my
+   decision before Stage 1 plumbing. Stage 2 (per-card enrichment) is a separate
+   conversation entirely.
+6. House conventions bind: warnings-as-errors, tests mirroring existing patterns,
+   change-only storage semantics untouched, new ADR if this extends ADR-0009's posture.
+
+If I raise a metadata gap outside the brief (Chinese/Korean locales, the ~88 side
+products, per-card numbers), apply the same rules: measure what the gap actually is
+first, report with receipts, and wait for my call before designing anything.
+
+Start now with Stage 0.
+```
