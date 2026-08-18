@@ -12,6 +12,9 @@
    href) is actually inert; a real anchor keeps the browser's own pointer/focus behaviour. */
 .crumb-link {
     color: var(--mut);
+    /* app.css has no global `a` reset (the AppChrome tab documents the same),
+       so the live Browse anchor needs this or it renders UA-underlined. */
+    text-decoration: none;
 }
 
 .crumb-link:not([href]) {
