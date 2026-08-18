@@ -50,4 +50,14 @@ public class FreshnessFooterTests : BunitContext
         Assert.Equal("https://www.tradingview.com/", link.GetAttribute("href"));
         Assert.Equal("TradingView", link.TextContent);
     }
+
+    [Fact]
+    public void The_footer_links_about_our_data()
+    {
+        var cut = Render<FreshnessFooter>(p => p
+            .Add(x => x.LastVisitedAt, (DateTimeOffset?)null)
+            .Add(x => x.CensusObservedAt, (DateTimeOffset?)null));
+        var link = cut.FindAll("a").Single(a => a.TextContent == "About our data");
+        Assert.Equal("about-data", link.GetAttribute("href"));
+    }
 }

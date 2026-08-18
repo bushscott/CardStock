@@ -15,7 +15,11 @@
    card.md's own stamps are hard-coded prototype seeds ("just now", "2026-07-30") -- the
    prototype never has a null or stale visit. Real data can have either, so the null
    branches below mirror CensusBars' "never observed" convention (task 19 brief) rather
-   than inventing a relative-time phrase card.md never specifies. *@
+   than inventing a relative-time phrase card.md never specifies.
+
+   Task 23 (chrome arming, D-110's Catalog phase): the "About our data" link to /about-data
+   (Task 22) sits between the flex spacer and the TradingView attribution, so it rides the
+   same right alignment (task 19 binding). *@
 @using CardStock.Application.Cards
 
 <div class="freshness-footer">
@@ -25,6 +29,8 @@
     <span class="freshness-stamp"
           title="Census updates when the graders publish; we capture it on the same visits as prices.">@CensusPrefix()<span class="freshness-mono">@CensusValue()</span></span>
     <span class="freshness-flex-spacer"></span>
+    <a class="freshness-about" href="about-data">About our data</a>
+    <span class="freshness-sep">·</span>
     <span class="freshness-attribution">Charts by <a href="https://www.tradingview.com/">TradingView</a></span>
 </div>
 

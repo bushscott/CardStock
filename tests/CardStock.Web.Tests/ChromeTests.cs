@@ -2,6 +2,8 @@ using Bunit;
 using CardStock.Web.Components;
 using CardStock.Web.Components.Card;
 using CardStock.Web.Layout;
+using Microsoft.AspNetCore.Components;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace CardStock.Web.Tests;
 
@@ -14,8 +16,7 @@ public class ChromeTests : BunitContext
             new object[] { "Screener", "The Screener arrives in a later phase" },
             new object[] { "Charts", "Charts arrives in a later phase" },
             new object[] { "Binder", "The Binder arrives in a later phase (Phase 4)" },
-            new object[] { "Browse", "Browse arrives in a later phase" },
-            new object[] { "Search", "Search arrives with the Browse phase" },
+            new object[] { "Search", "Search arrives in a later phase" },
             new object[] { "Avatar", "Accounts arrive with the Binder phase" },
             new object[] { "Open in Charts →", "Charts arrives in a later phase" },
             new object[] { "+ Watchlist ▾", "Watchlists arrive with accounts, in a later phase" },
@@ -38,12 +39,12 @@ public class ChromeTests : BunitContext
     }
 
     [Fact]
-    public void AppChrome_renders_exactly_five_tabs_and_no_anchors()
+    public void AppChrome_renders_four_deferred_tabs_and_the_live_browse_anchor()
     {
         var cut = Render<AppChrome>();
 
-        Assert.Equal(5, cut.FindAll("button.tab").Count);
-        Assert.Empty(cut.FindAll("a"));
+        Assert.Equal(4, cut.FindAll("button.tab").Count);
+        Assert.Single(cut.FindAll("a.tab"));
     }
 
     [Fact]
@@ -57,7 +58,31 @@ public class ChromeTests : BunitContext
 
         var search = cut.Find("input.search-input");
         Assert.True(search.HasAttribute("disabled"));
-        Assert.Equal("Search arrives with the Browse phase", search.GetAttribute("title"));
+        Assert.Equal("Search arrives in a later phase", search.GetAttribute("title"));
+    }
+
+    [Fact]
+    public void The_browse_tab_is_a_live_link_active_across_catalog_routes()
+    {
+        var cut = Render<AppChrome>();
+        var browse = cut.FindAll(".tabs a").Single(a => a.TextContent == "Browse");
+        Assert.Equal("browse", browse.GetAttribute("href"));
+
+        foreach (var route in new[] { "browse", "set/7", "character/umbreon" })
+        {
+            Services.GetRequiredService<NavigationManager>().NavigateTo(route);
+            cut.Render();
+            Assert.Contains("active",
+                cut.FindAll(".tabs a").Single(a => a.TextContent == "Browse").ClassList);
+        }
+    }
+
+    [Fact]
+    public void The_search_tooltip_no_longer_promises_the_browse_phase()
+    {
+        var cut = Render<AppChrome>();
+        Assert.Equal("Search arrives in a later phase",
+            cut.Find("input[type=search]").GetAttribute("title"));
     }
 
     [Fact]

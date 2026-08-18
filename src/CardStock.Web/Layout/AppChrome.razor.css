@@ -36,14 +36,24 @@
     height: 100%;
 }
 
-/* No tab is ever marked active on the Card screen — card.md "Outbound navigation":
-   all five carry border-bottom: 2px solid transparent. Color comes from the shared
-   .deferred utility (muted fg) in app.css. */
+/* Base tab treatment, shared by the four still-deferred buttons and the live Browse
+   anchor: border-bottom: 2px solid transparent until .active overrides it below. The
+   deferred four take their color from the shared .deferred utility (muted fg) in
+   app.css; the Card screen never lights Browse active either (card.md:41 -- a leaf,
+   not a tab). */
 .tabs ::deep .tab {
     height: 100%;
     padding: 0 2px;
     font-size: 15px;
     border-bottom: 2px solid transparent;
+}
+
+/* home.md:23 / set.md:37 / character.md:40 / shared-components.md:66-68 — Browse lights
+   active on /browse and on its descendant catalog routes /set/* and /character/*. */
+.tabs ::deep .tab.active {
+    font-weight: 600;
+    color: var(--ink);
+    border-bottom: 2px solid var(--acc);
 }
 
 .spacer {

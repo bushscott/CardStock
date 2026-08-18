@@ -29,6 +29,11 @@
     flex: 1;
 }
 
+.freshness-about {
+    color: var(--link);
+    text-decoration: none;
+}
+
 .freshness-attribution {
     color: var(--mut2);
 }
