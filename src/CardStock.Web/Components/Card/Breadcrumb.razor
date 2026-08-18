@@ -1,9 +1,11 @@
 @* Card page breadcrumb — card.md Layout block #0, Interactions §5.1: "Browse / {SetName} / {CardTitle}".
-   Browse and the set crumb are inert "future link" spans — Browse and Set pages are both
-   deferred in Phase 2 (owner ruling: present-but-disabled with honest tooltips, never a dead
-   link). The leaf crumb is plain --ink text, not a link (card.md §5.1 item 5). *@
+   Browse is live (/browse) and the crumb links straight there. The set crumb stays an inert
+   "future link" span -- not because Set pages are deferred (they're live at /set/{id} too),
+   but because CardIdentity doesn't carry the set id this crumb would need to link to it
+   (owner ruling: present-but-disabled with an honest tooltip, never a dead link). The leaf
+   crumb is plain --ink text, not a link (card.md §5.1 item 5). *@
 <div class="breadcrumb">
-    <span class="crumb-link" title="@BrowseTooltip">Browse</span>
+    <a class="crumb-link" href="browse">Browse</a>
     <span class="crumb-sep">›</span>
     <span class="crumb-link" title="@SetTooltip">@SetName</span>
     <span class="crumb-sep">›</span>
@@ -11,11 +13,10 @@
 </div>
 
 @code {
-    // Reusable single source of truth for these two tooltip strings — Task 16 renders the
+    // Reusable single source of truth for this tooltip string — Task 16 renders the
     // identity-header subline's deferred set segment and must show byte-identical copy
     // rather than a re-typed duplicate literal.
-    public const string BrowseTooltip = "Browse arrives in a later phase";
-    public const string SetTooltip = "Set pages arrive in a later phase";
+    public const string SetTooltip = "Set link arrives in a later phase";
 
     [Parameter]
     public string SetName { get; set; } = "";

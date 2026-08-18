@@ -7,10 +7,14 @@
     gap: 6px;
 }
 
-/* Future links, inert — no href, not focusable. The mockup's breadcrumb links
-   are muted (Card.dc.html:56: color var(--mut)), not accent. */
+/* The mockup's breadcrumb links are muted (Card.dc.html:56: color var(--mut)), not accent --
+   true for both the live Browse anchor and the still-deferred Set span. Only the span (no
+   href) is actually inert; a real anchor keeps the browser's own pointer/focus behaviour. */
 .crumb-link {
     color: var(--mut);
+}
+
+.crumb-link:not([href]) {
     cursor: not-allowed;
 }
 

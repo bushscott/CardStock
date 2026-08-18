@@ -68,6 +68,12 @@ public class BrowsePageSetsTests : BunitContext
         var cut = RenderBrowse(sets: [Tile(5, "Japanese Promo", status: "pending", era: null, released: null)]);
         cut.FindAll(".order-pills .pill").Single(p => p.TextContent == "era").Click();
         Assert.Contains("◌ metadata pending", cut.Find(".shelf-title + .set-grid .fan-tile").TextContent);
+
+        // Mirrors the Set page's identical chip (SetPage.razor's .set-meta-pending): keyboard
+        // reachable and carries the same CatalogCopy.MetadataPending explainer.
+        var chip = cut.Find(".fan-pending");
+        Assert.Equal("0", chip.GetAttribute("tabindex"));
+        Assert.Equal("Set metadata pending curation", chip.GetAttribute("title"));
     }
 
     // Controller-ruled regression test: CatalogApiClient.GetAsync<T> returns a non-null

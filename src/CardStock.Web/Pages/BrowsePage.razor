@@ -76,7 +76,7 @@
                         </div>
                         @if (_setOrder == "era" && set.MetadataStatus != "matched")
                         {
-                            <div class="fan-pending">◌ metadata pending</div>
+                            <div class="fan-pending" tabindex="0" title="@CatalogCopy.MetadataPending">◌ metadata pending</div>
                         }
                     </a>
                 }

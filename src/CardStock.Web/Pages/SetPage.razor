@@ -188,8 +188,8 @@ else
                 ? $"{observed}; deltas begin arriving {Dates.Full(unlocks.Min())}."
                 : $"{observed}.";
         }
-        return $"{excluded.Count} cards excluded from this sort — pop Δ 60d needs two census " +
-               $"observations 60 days apart.{range}";
+        return $"{excluded.Count} cards excluded from this sort — pop Δ 60d needs a census " +
+               $"observation at least 60 days old.{range}";
     }
 
     private static string RocClass(decimal? roc) =>
@@ -224,6 +224,9 @@ else
                        "60 days — rising supply reads as a warning",
         "pending" => $"Census too young — first observation {FullDate(pop.FirstObservedOn)}, " +
                      $"deltas begin {FullDate(pop.DeltasBeginOn)}",
+        _ when pop.FirstObservedOn is not null =>
+            "No pop Δ — the PSA 10 census was zero at the window's base " +
+            $"(first observation {FullDate(pop.FirstObservedOn)})",
         _ => "No PSA 10 population observed",
     };
 

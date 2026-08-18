@@ -107,10 +107,15 @@ public class ChromeTests : BunitContext
 
         var crumbs = cut.FindAll(".crumb-link");
         Assert.Equal(2, crumbs.Count);
-        Assert.Equal("Browse", crumbs[0].TextContent);
-        Assert.Equal(Breadcrumb.BrowseTooltip, crumbs[0].GetAttribute("title"));
-        Assert.Equal("Evolving Skies", crumbs[1].TextContent);
-        Assert.Equal(Breadcrumb.SetTooltip, crumbs[1].GetAttribute("title"));
+
+        var browseCrumb = cut.Find("a.crumb-link");
+        Assert.Equal("Browse", browseCrumb.TextContent);
+        Assert.Equal("browse", browseCrumb.GetAttribute("href"));
+        Assert.False(browseCrumb.HasAttribute("title"));
+
+        var setCrumb = cut.Find("span.crumb-link");
+        Assert.Equal("Evolving Skies", setCrumb.TextContent);
+        Assert.Equal(Breadcrumb.SetTooltip, setCrumb.GetAttribute("title"));
 
         var leaf = cut.Find(".crumb-leaf");
         Assert.Equal("Umbreon VMAX (Alt Art)", leaf.TextContent);

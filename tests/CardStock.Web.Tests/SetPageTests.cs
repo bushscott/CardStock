@@ -73,7 +73,9 @@ public class SetPageTests : BunitContext
             firstObserved: "2026-07-30", deltasBegin: "2026-09-28");
         var none = Row(id: 3, name: "Leafeon V", price: null, roc: null,
             popState: "none", popFraction: null, firstObserved: null, sales: 0);
-        var cut = RenderSetPage(Dto(Row(), pending, none));
+        var zeroBase = Row(id: 4, name: "Duraludon VMAX", price: null, roc: null,
+            popState: "none", popFraction: null, firstObserved: "2026-07-30", sales: 0);
+        var cut = RenderSetPage(Dto(Row(), pending, none, zeroBase));
 
         var pendingCell = cut.FindAll(".rt-cell-pop")[1];
         Assert.Equal("–", pendingCell.TextContent.Trim());
@@ -81,6 +83,14 @@ public class SetPageTests : BunitContext
         var noneCell = cut.FindAll(".rt-cell-pop")[2];
         Assert.Contains("No PSA 10 population observed",
             noneCell.QuerySelector("[title]")!.GetAttribute("title"));
+
+        // Zero-base None is a distinct shape from never-observed None (PopulationDelta.cs:
+        // `then == 0`) -- it carries a FirstObservedOn, so its tooltip must not claim no
+        // population was ever observed.
+        var zeroBaseCell = cut.FindAll(".rt-cell-pop")[3];
+        Assert.Contains(
+            "No pop Δ — the PSA 10 census was zero at the window's base (first observation 07-30-2026)",
+            zeroBaseCell.QuerySelector("[title]")!.GetAttribute("title"));
     }
 
     [Fact]
@@ -95,6 +105,9 @@ public class SetPageTests : BunitContext
         Assert.Single(cut.FindAll(".rt-row"));
         var banner = cut.Find(".exclusion-banner");
         Assert.Contains("1 cards excluded", banner.TextContent);
+        // The gate is one observation 60+ days old (flat-fill qualifies), not two observations
+        // spaced 60 days apart -- the banner must not overstate what pop Δ 60d requires.
+        Assert.Contains("pop Δ 60d needs a census observation at least 60 days old", banner.TextContent);
         Assert.Contains("deltas begin arriving", banner.TextContent);
         Assert.Contains("1 of 3 cards", cut.Markup);
     }
