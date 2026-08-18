@@ -31,6 +31,11 @@
 > banner terminates with a period when no unlock dates exist among the excluded rows
 > (zero-base cards carry a first observation but no unlock date).
 
+> **Amended 2026-08-18 (build, controller ruling R23).** Pop Δ 60d counts only observations
+> on/after the D-033 floor (2026-09-01), mirroring the Card page's census mechanic (D-093) and
+> the About-data promise — first armings ~2026-10-31, not the design spec §2's
+> first-observation-based "~late Sep 2026" estimate, which embedded the omission.
+
 ---
 
 ## 1. Identity

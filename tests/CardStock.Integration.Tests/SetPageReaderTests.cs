@@ -14,8 +14,9 @@ namespace CardStock.Integration.Tests;
 /// </summary>
 public class SetPageReaderTests : CardStockDatabaseTest
 {
-    // Fixed clock: current month = Aug 2026, so ROC anchors are Jul (m−1) and Apr (m−4).
-    private static readonly DateTimeOffset Now = new(2026, 8, 17, 12, 0, 0, TimeSpan.Zero);
+    // Fixed clock: current month = Nov 2026, so ROC anchors are Oct (m−1) and Jul (m−4).
+    // Post D-033-floor (2026-09-01) so census rows can actually qualify for Pop Δ 60d.
+    private static readonly DateTimeOffset Now = new(2026, 11, 15, 12, 0, 0, TimeSpan.Zero);
 
     private SetPageReader Reader() =>
         new(NewContextFactory(), new FixedClock(Now));
@@ -41,30 +42,30 @@ public class SetPageReaderTests : CardStockDatabaseTest
               (id, set_id, name, url, first_seen_at, last_seen_at, any_bucket_at_cap, delisted_at)
             VALUES (4, 7, 'Ghost Card', 'https://x/4', now(), now(), false, now());
 
-            -- Card 1: Jul revised (12000 then 12500 — newer observed_at must win),
-            -- Apr anchor present, plus a current-month row that must not matter.
+            -- Card 1: Oct revised (12000 then 12500 — newer observed_at must win),
+            -- Jul anchor present, plus a current-month (Nov) row that must not matter for ROC.
             INSERT INTO public.price_months (card_id, tier, month, price_cents, observed_at) VALUES
-              (1, 5, '2026-07-01', 12000, '2026-08-01T00:00:00Z'),
-              (1, 5, '2026-07-01', 12500, '2026-08-10T00:00:00Z'),
-              (1, 5, '2026-04-01', 10000, '2026-05-02T00:00:00Z'),
-              (1, 5, '2026-08-01', 13000, '2026-08-16T00:00:00Z'),
-              (2, 5, '2026-07-01',  5000, '2026-08-01T00:00:00Z'),
-              (2, 5, '2026-03-01',  4000, '2026-04-02T00:00:00Z');
+              (1, 5, '2026-10-01', 12000, '2026-11-01T00:00:00Z'),
+              (1, 5, '2026-10-01', 12500, '2026-11-10T00:00:00Z'),
+              (1, 5, '2026-07-01', 10000, '2026-08-02T00:00:00Z'),
+              (1, 5, '2026-11-01', 13000, '2026-11-14T00:00:00Z'),
+              (2, 5, '2026-10-01',  5000, '2026-11-02T00:00:00Z'),
+              (2, 5, '2026-06-01',  4000, '2026-07-02T00:00:00Z');
             -- Card 3 has no PSA 10 rows at all.
 
-            -- Census: card 1 mature (first obs 1 Jun, grew 100 → 110);
-            -- card 2 young (first obs 30 Jul).
+            -- Census: card 1 mature (first obs 5 Sep, post D-033-floor, grew 100 → 110 by Nov);
+            -- card 2 young (first obs 1 Nov, post-floor).
             INSERT INTO public.populations (card_id, grader, grade, population, observed_at) VALUES
-              (1, 'psa', 10, 100, '2026-06-01T00:00:00Z'),
-              (1, 'psa', 10, 110, '2026-08-10T00:00:00Z'),
-              (1, 'psa',  9,  40, '2026-06-01T00:00:00Z'),
-              (2, 'psa', 10,  20, '2026-07-30T00:00:00Z');
+              (1, 'psa', 10, 100, '2026-09-05T00:00:00Z'),
+              (1, 'psa', 10, 110, '2026-11-01T00:00:00Z'),
+              (1, 'psa',  9,  40, '2026-09-05T00:00:00Z'),
+              (2, 'psa', 10,  20, '2026-11-01T00:00:00Z');
 
             INSERT INTO public.sales
               (card_id, source, source_id, grade_tier, title, sold_on, price_cents, captured_at) VALUES
-              (1, 'ebay', 'a1', 'PSA 10', 'Umbreon VMAX', '2026-08-05', 45000, now()),
-              (1, 'ebay', 'a2', 'Ungraded', 'Umbreon VMAX', '2026-07-25', 9000, now()),
-              (1, 'ebay', 'a3', 'PSA 10', 'Umbreon VMAX', '2026-06-01', 44000, now()),
+              (1, 'ebay', 'a1', 'PSA 10', 'Umbreon VMAX', '2026-11-05', 45000, now()),
+              (1, 'ebay', 'a2', 'Ungraded', 'Umbreon VMAX', '2026-10-25', 9000, now()),
+              (1, 'ebay', 'a3', 'PSA 10', 'Umbreon VMAX', '2026-09-01', 44000, now()),
               (2, 'ebay', 'b1', 'PSA 10', 'Glaceon V', '2021-12-15', 8000, now());
             """);
     }
@@ -98,10 +99,10 @@ public class SetPageReaderTests : CardStockDatabaseTest
         var umbreon = roster.Single(r => r.CardId == 1);
 
         Assert.Equal(13000, umbreon.PriceCents);           // current month IS the latest cell
-        Assert.Equal(0.25m, umbreon.Roc3M);                // 12500 (revised Jul) vs 10000 (Apr)
+        Assert.Equal(0.25m, umbreon.Roc3M);                // 12500 (revised Oct) vs 10000 (Jul)
         Assert.Equal(PopulationDeltaState.Available, umbreon.Pop.State);
         Assert.Equal(0.10m, umbreon.Pop.Fraction);
-        Assert.Equal(2, umbreon.Sales30d);                 // Aug 5 + Jul 25, all grade labels
+        Assert.Equal(2, umbreon.Sales30d);                 // Nov 5 + Oct 25, all grade labels
     }
 
     [SkippableFact]
@@ -115,9 +116,9 @@ public class SetPageReaderTests : CardStockDatabaseTest
         var leafeon = roster.Single(r => r.CardId == 3);
 
         Assert.Equal(5000, glaceon.PriceCents);
-        Assert.Null(glaceon.Roc3M);                        // Apr cell absent — a real gap
+        Assert.Null(glaceon.Roc3M);                        // Jul cell absent — a real gap
         Assert.Equal(PopulationDeltaState.Pending, glaceon.Pop.State);
-        Assert.Equal(new DateOnly(2026, 7, 30), glaceon.Pop.FirstObservedOn);
+        Assert.Equal(new DateOnly(2026, 11, 1), glaceon.Pop.FirstObservedOn);
 
         Assert.Null(leafeon.PriceCents);                   // no PSA 10 series at all
         Assert.Null(leafeon.Roc3M);
