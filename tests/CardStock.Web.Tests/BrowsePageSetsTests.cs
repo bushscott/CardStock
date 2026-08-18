@@ -70,6 +70,34 @@ public class BrowsePageSetsTests : BunitContext
         Assert.Contains("◌ metadata pending", cut.Find(".shelf-title + .set-grid .fan-tile").TextContent);
     }
 
+    // Controller-ruled regression test: CatalogApiClient.GetAsync<T> returns a non-null
+    // CatalogResult even on failure (Failed: true), so a naive `_sets ??= await ...` in
+    // LoadAsync would never re-fetch once a failed result was stored -- Retry would no-op
+    // forever. Bypasses RenderBrowse (whose closure always succeeds) and registers its own
+    // stub directly through the same RegisterClient/RespondingWith building blocks, mirroring
+    // the mutable-field-captured-by-closure shape RenderBrowse and the landed SetPageTests/
+    // CharacterPageTests both use -- here the mutated variable is a bool the closure reads to
+    // decide whether to throw (first load) or succeed (after Retry), rather than a dto.
+    [Fact]
+    public void Retry_refetches_after_a_failure_instead_of_replaying_it()
+    {
+        var fail = true;
+        var sets = new List<SetTileDto> { Tile(1, "Base Set") };
+        RegisterClient(RespondingWith(_ => fail
+            ? throw new HttpRequestException("down")
+            : new HttpResponseMessage(HttpStatusCode.OK) { Content = JsonContent.Create(new BrowseSetsDto(sets)) }));
+
+        var cut = Render<BrowsePage>();
+        cut.WaitForAssertion(() => Assert.NotEmpty(cut.FindAll(".card-error")));
+        Assert.Empty(cut.FindAll(".set-grid"));
+
+        fail = false;
+        cut.Find(".card-error button").Click();
+
+        cut.WaitForAssertion(() => Assert.NotEmpty(cut.FindAll(".set-grid")));
+        Assert.Equal("Base Set", cut.Find(".fan-name").TextContent);
+    }
+
     // Registration idiom mirrors SetPageTests/CharacterPageTests: one CatalogApiClient stub
     // per test-class instance, registered once (bUnit 2.9's BunitServiceProvider throws if a
     // service is (re-)registered after the first render already resolved one), reading the

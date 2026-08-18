@@ -112,11 +112,19 @@
     {
         if (IsPokemon)
         {
-            _species ??= await Api.GetBrowseSpeciesAsync();
+            if (_species is null or { Failed: true })
+            {
+                _species = null;
+                _species = await Api.GetBrowseSpeciesAsync();
+            }
         }
         else
         {
-            _sets ??= await Api.GetBrowseSetsAsync();
+            if (_sets is null or { Failed: true })
+            {
+                _sets = null;
+                _sets = await Api.GetBrowseSetsAsync();
+            }
         }
     }
 
