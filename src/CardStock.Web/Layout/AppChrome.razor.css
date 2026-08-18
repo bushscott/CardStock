@@ -37,14 +37,21 @@
 }
 
 /* Base tab treatment, shared by the four still-deferred buttons and the live Browse
-   anchor: border-bottom: 2px solid transparent until .active overrides it below. The
-   deferred four take their color from the shared .deferred utility (muted fg) in
-   app.css; the Card screen never lights Browse active either (card.md:41 -- a leaf,
-   not a tab). */
+   anchor: border-bottom: 2px solid transparent until .active overrides it below. Resting
+   color is --mut, the same muted-control convention DensityToggle's resting buttons use
+   (DensityToggle.razor.css:12); text-decoration: none strips the browser-default anchor
+   underline (buttons never had one, so that line is inert for the deferred four). app.css
+   has no global `a` reset, so without this the live Browse anchor would render
+   browser-default blue-and-underlined whenever it isn't active. The deferred four also
+   carry app.css's .deferred utility, which sets the identical color: var(--mut) -- same
+   value however the cascade orders the two rules, so no specificity fix was needed. The
+   Card screen never lights Browse active either (card.md:41 -- a leaf, not a tab). */
 .tabs ::deep .tab {
     height: 100%;
     padding: 0 2px;
     font-size: 15px;
+    color: var(--mut);
+    text-decoration: none;
     border-bottom: 2px solid transparent;
 }
 

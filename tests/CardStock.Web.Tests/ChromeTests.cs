@@ -68,13 +68,22 @@ public class ChromeTests : BunitContext
         var browse = cut.FindAll(".tabs a").Single(a => a.TextContent == "Browse");
         Assert.Equal("browse", browse.GetAttribute("href"));
 
+        // No forced cut.Render() here -- WaitForAssertion polls until the assertion holds,
+        // so only AppChrome's own LocationChanged subscription (not a test-driven re-render)
+        // can make these pass. Delete the subscription and this test times out and fails.
+        var nav = Services.GetRequiredService<NavigationManager>();
         foreach (var route in new[] { "browse", "set/7", "character/umbreon" })
         {
-            Services.GetRequiredService<NavigationManager>().NavigateTo(route);
-            cut.Render();
-            Assert.Contains("active",
-                cut.FindAll(".tabs a").Single(a => a.TextContent == "Browse").ClassList);
+            nav.NavigateTo(route);
+            cut.WaitForAssertion(() => Assert.Contains("active",
+                cut.FindAll(".tabs a").Single(a => a.TextContent == "Browse").ClassList));
         }
+
+        // The negative transition: leaving the catalog un-lights the tab, proving
+        // IsCatalogRoute() is re-evaluated on every redraw rather than latched true.
+        nav.NavigateTo("card/1");
+        cut.WaitForAssertion(() => Assert.DoesNotContain("active",
+            cut.FindAll(".tabs a").Single(a => a.TextContent == "Browse").ClassList));
     }
 
     [Fact]
