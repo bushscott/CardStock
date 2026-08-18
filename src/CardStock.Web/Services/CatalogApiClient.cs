@@ -15,6 +15,12 @@ public sealed class CatalogApiClient(HttpClient http)
     public Task<CatalogResult<CharacterPageDto>> GetCharacterAsync(string slug, CancellationToken ct = default) =>
         GetAsync<CharacterPageDto>($"api/v1/characters/{Uri.EscapeDataString(slug)}", ct);
 
+    public Task<CatalogResult<BrowseSetsDto>> GetBrowseSetsAsync(CancellationToken ct = default) =>
+        GetAsync<BrowseSetsDto>("api/v1/browse/sets", ct);
+
+    public Task<CatalogResult<BrowseSpeciesDto>> GetBrowseSpeciesAsync(CancellationToken ct = default) =>
+        GetAsync<BrowseSpeciesDto>("api/v1/browse/species", ct);
+
     public static string SpeciesIconUrl(int id) => $"api/v1/species/{id}/icon";
 
     private async Task<CatalogResult<T>> GetAsync<T>(string path, CancellationToken ct)

@@ -1,0 +1,136 @@
+@page "/browse"
+@using CardStock.Application.Catalog
+@using CardStock.Domain.Signals
+@using CardStock.Web.Services
+@inject CatalogApiClient Api
+@inject NavigationManager Nav
+
+<PageTitle>Browse</PageTitle>
+
+<div class="browse-head">
+    <h1>Browse</h1>
+    <div class="mode-switch density-toggle" role="group" aria-label="Browse mode">
+        <button type="button" aria-pressed="@((!IsPokemon).ToString().ToLowerInvariant())"
+                class="@(!IsPokemon ? "active" : null)"
+                title="Browse by set — every release, its size, and its market value"
+                @onclick='() => SetMode("sets")'>by set</button>
+        <button type="button" aria-pressed="@(IsPokemon.ToString().ToLowerInvariant())"
+                class="@(IsPokemon ? "active" : null)"
+                title="Browse by Pokémon — every species and all of its printings"
+                @onclick='() => SetMode("pokemon")'>by pokémon</button>
+    </div>
+    @if (!IsPokemon)
+    {
+        <div class="order-pills sort-pills">
+            <span class="sort-label">order</span>
+            @foreach (var (key, label) in OrderOptions)
+            {
+                <button type="button" class="pill @(_setOrder == key ? "active" : null)"
+                        title="@OrderTooltip(key)" @onclick="() => _setOrder = key">@label</button>
+            }
+        </div>
+    }
+</div>
+
+@if (!IsPokemon)
+{
+    @if (_sets is null)
+    {
+        <p class="loading-strip" aria-busy="true">Loading…</p>
+    }
+    else if (_sets.Failed)
+    {
+        <div class="card-error"><p>Couldn't reach the data service.</p>
+            <button type="button" @onclick="LoadAsync">Retry</button></div>
+    }
+    else
+    {
+        @foreach (var shelf in Shelves())
+        {
+            @if (shelf.Title is not null)
+            {
+                <h2 class="shelf-title">@shelf.Title</h2>
+            }
+            <div class="set-grid">
+                @foreach (var set in shelf.Sets)
+                {
+                    <a class="browse-set-link fan-tile" href="set/@set.SetId" title="@set.Name">
+                        <div class="fan">
+                            <div class="fan-card fan-back-left"
+                                 style="background: linear-gradient(160deg, @SetGradients.For(set.SetId + 1).Start, @SetGradients.For(set.SetId + 1).End)"></div>
+                            <div class="fan-card fan-back-right"
+                                 style="background: linear-gradient(160deg, @SetGradients.For(set.SetId + 2).Start, @SetGradients.For(set.SetId + 2).End)"></div>
+                            <div class="fan-card fan-front"
+                                 style="background: linear-gradient(160deg, @SetGradients.For(set.SetId).Start, @SetGradients.For(set.SetId).End)">
+                                @if (set.TopCardId is { } topCard)
+                                {
+                                    <img src="@CardApiClient.ImageUrl(topCard)" alt="" loading="lazy"
+                                         onerror="this.style.display='none'" />
+                                }
+                            </div>
+                        </div>
+                        <div class="fan-name">@set.Name</div>
+                        <div class="fan-stats mono">
+                            <span class="fan-count">@set.Cards cards</span>
+                            <span class="fan-delta">@ChipEngine.GlyphDash 30d<PendingGlyph Note="@CatalogCopy.WorkerGate" /></span>
+                        </div>
+                        @if (_setOrder == "era" && set.MetadataStatus != "matched")
+                        {
+                            <div class="fan-pending">◌ metadata pending</div>
+                        }
+                    </a>
+                }
+            </div>
+        }
+    }
+}
+@* POKEMON MODE — Task 21 *@
+
+@code {
+    [SupplyParameterFromQuery(Name = "mode")]
+    public string? Mode { get; set; }
+
+    private bool IsPokemon => Mode == "pokemon";
+
+    private CatalogResult<BrowseSetsDto>? _sets;
+    private CatalogResult<BrowseSpeciesDto>? _species;
+    private string _setOrder = "az";
+
+    private static readonly (string Key, string Label)[] OrderOptions =
+        [("az", "a–z"), ("date", "release date"), ("era", "era")];
+
+    private static string OrderTooltip(string key) => key switch
+    {
+        "date" => "Dated sets chronologically; sets awaiting metadata follow alphabetically",
+        "era" => "Era shelves in chronological order, with the no-era and metadata-pending shelves last",
+        _ => "Every set, alphabetically",
+    };
+
+    protected override Task OnParametersSetAsync() => LoadAsync();
+
+    private async Task LoadAsync()
+    {
+        if (IsPokemon)
+        {
+            _species ??= await Api.GetBrowseSpeciesAsync();
+        }
+        else
+        {
+            _sets ??= await Api.GetBrowseSetsAsync();
+        }
+    }
+
+    private void SetMode(string mode) =>
+        Nav.NavigateTo(Nav.GetUriWithQueryParameter("mode", mode == "sets" ? null : mode));
+
+    private IReadOnlyList<(string? Title, IReadOnlyList<SetTileDto> Sets)> Shelves()
+    {
+        var sets = _sets!.Value!.Sets;
+        return _setOrder switch
+        {
+            "date" => SetShelves.ByReleaseDate(sets).Select(s => ((string?)s.Title, s.Sets)).ToList(),
+            "era" => SetShelves.ByEra(sets).Select(s => ((string?)s.Title, s.Sets)).ToList(),
+            _ => [(null, SetShelves.Alphabetical(sets))],
+        };
+    }
+}

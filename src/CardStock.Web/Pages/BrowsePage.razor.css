@@ -1,0 +1,26 @@
+.browse-head { display: flex; align-items: center; gap: 14px; }
+.browse-head h1 { font: 700 26px 'Inter Tight', sans-serif; margin: 0; }
+.set-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(230px, 1fr));
+    gap: 12px; margin-top: 12px; }
+.shelf-title { font: 600 13px 'JetBrains Mono', monospace; color: var(--mut2);
+    text-transform: uppercase; letter-spacing: 0.06em; margin: 18px 0 0; }
+.fan-tile { display: block; background: var(--card); border: 1px solid var(--line);
+    border-radius: 10px; padding: 14px; text-decoration: none; color: inherit;
+    transition: box-shadow 0.15s; }
+.fan-tile:hover { box-shadow: 0 6px 20px rgba(20, 19, 26, 0.10); }
+.fan { position: relative; height: 118px; margin-bottom: 11px; }
+.fan-card { position: absolute; left: 50%; border-radius: 5px; overflow: hidden; }
+.fan-back-left { width: 74px; height: 102px; top: 4px;
+    transform: translateX(-88%) rotate(-8deg); box-shadow: 0 3px 10px rgba(0,0,0,0.2); }
+.fan-back-right { width: 74px; height: 102px; top: 4px;
+    transform: translateX(-12%) rotate(8deg); box-shadow: 0 3px 10px rgba(0,0,0,0.2); }
+.fan-front { width: 78px; height: 108px; top: 0; transform: translateX(-50%);
+    box-shadow: 0 5px 14px rgba(0,0,0,0.25); }
+.fan-front img { width: 100%; height: 100%; object-fit: cover; }
+.fan-name { font: 600 15.5px 'Inter Tight', sans-serif; text-align: center; }
+.fan-stats { display: flex; justify-content: center; gap: 8px; font-size: 12px; margin-top: 4px; }
+.fan-count { color: var(--mut2); }
+.fan-delta { color: var(--mut2); }
+.fan-pending { font: 600 11.5px 'JetBrains Mono', monospace; color: var(--mut2);
+    text-align: center; margin-top: 6px; }
+.mono { font-family: 'JetBrains Mono', monospace; }
