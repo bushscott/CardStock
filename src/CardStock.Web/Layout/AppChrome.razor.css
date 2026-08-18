@@ -47,6 +47,12 @@
    value however the cascade orders the two rules, so no specificity fix was needed. The
    Card screen never lights Browse active either (card.md:41 -- a leaf, not a tab). */
 .tabs ::deep .tab {
+    /* height:100% centers nothing by itself: a <button> vertically centers its label
+       via UA button layout, but the live <a> top-aligns its line box inside the
+       stretched box (label rode ~11px high). inline-flex centers both element types
+       by one mechanism. */
+    display: inline-flex;
+    align-items: center;
     height: 100%;
     padding: 0 2px;
     font-size: 15px;
