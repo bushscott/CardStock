@@ -59,4 +59,12 @@ public class AboutDataPageTests : BunitContext
         Assert.Contains("We never rewrite history", markup);
         Assert.DoesNotContain("mark the affected window on charts", markup);
     }
+
+    [Fact]
+    public void The_freshness_section_states_the_verified_restatement_behavior()
+    {
+        var markup = Render<AboutDataPage>().Markup;
+        Assert.Contains("A closed month can restate too", markup);
+        Assert.DoesNotContain("Closed months never change", markup);
+    }
 }
