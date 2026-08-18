@@ -39,6 +39,15 @@
 > was browse's only consumer). Sprite-size normalization (art-in-canvas varies 21×20 to 44×39)
 > is an open follow-on.
 
+> **Amended 2026-08-18 (owner UAT, D-113).** The follow-on closes: every sprite draws
+> **cropped to its measured art box at the largest clean factor — ½, 1, 2, or 3 — that fits
+> the 68×56 slot** (`SpriteScale.Factor`; ½ is the uniform half-sample for the 96×96
+> overflow canvases, and the cap at 3 keeps the tiniest arts from comic chunkiness). The
+> boxes ship as `wwwroot/sprite-art.json` — all 1,025 measured by alpha-bbox, provenance
+> recorded in the file — and a species missing from the index falls back to the plain
+> 1×-canvas draw. The owner approved the max-fit flavor as sampled, aware that a 2× mid-size
+> sprite can outsize a 1× large one.
+
 **Runtime:** Design Composer. `<x-dc>` host (`:9`), template directives `sc-if` / `sc-for` resolved by `support.js:555-556`; `hint-placeholder-count` / `hint-placeholder-val` are design-time-only hints consumed when the bound value is unavailable (`support.js:614`, `support.js:648`) and carry **no** runtime meaning. All view data comes from one `renderVals()` return object (`:219-314`, dispatched at `support.js:1085`). The component takes **no props** (`data-props=""`, `:159`).
 
 ---
@@ -97,7 +106,7 @@ Two sibling `sc-if isPoke` blocks (`:65-107` filter bar, `:132-154` grid), so in
 
 | Region | Spec |
 |---|---|
-| Header row | Flex row, `align-items:center`, gap 10 (`:137`): name + printings block left (`min-width:0`), pixel sprite trailing **right** in a 68×56 box (native for 898/1,025; the 127 Gen-9-era 96×96 canvases downscale for now), `image-rendering: pixelated`, `onerror` collapses to text-only. ~~Avatar: 44×44 gradient circle + centred initial (`:138`)~~ — deleted by D-112 (2026-08-18 banner above); the mockup's leading-circle order is superseded by the owner's trailing-sprite ruling |
+| Header row | Flex row, `align-items:center`, gap 10 (`:137`): name + printings block left (`min-width:0`), pixel sprite trailing **right** in a 68×56 slot, drawn per D-113 — cropped to its measured art box at the largest clean factor (½/1/2/3) that fits, `image-rendering: pixelated`, `onerror` collapses to text-only, index-miss falls back to the 1×-canvas draw. ~~Avatar: 44×44 gradient circle + centred initial (`:138`)~~ — deleted by D-112 (2026-08-18 banner above); the mockup's leading-circle order is superseded by the owner's trailing-sprite ruling |
 | Name | Inter Tight 600 / 15.5px, single line, ellipsis on overflow (`:140`) |
 | Sub-line | JetBrains Mono 11.5px `--mut2`: `"{printings} printings"` (`:141`) |
 | Footer row | `space-between`, baseline-aligned: value in Mono 14.5px/700 (`:145`), then `"{chg} 90d"` in Mono 12px, sign-coloured (`:146`); margin-top 10 (`:144`) |

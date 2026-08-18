@@ -352,6 +352,25 @@ Read directly 2026-08-10, to be mirrored per D-018–D-021.
 
 ## Decided
 
+### D-113 — Sprites normalize to clean factors; the art boxes ship as a static asset
+Owner, 2026-08-18, after a real-pixel sample of the wall's top row plus the two edges
+(Pikachu 2×, Charizard 1×, Tynamo 3×, Koraidon ½×): *"It looks okay better than before. So
+let's go ahead and do it."* Closes D-112's open follow-on. Rule as sampled and shipped: crop
+each sprite to its measured alpha-bbox and draw it at the **largest clean factor ∈ {½, 1, 2, 3}
+that fits the 68×56 slot** — ½ reserved for art exceeding the slot (the Gen 9-era 96×96
+canvases; a uniform half-sample instead of object-fit's fractional squeeze), the cap at 3
+keeping the tiniest arts from comic chunkiness. The owner approved the max-fit flavor knowing
+a closest-to-target variant existed (a 2× mid-size sprite can outsize a 1× large one — seen
+and accepted). Implementation: `wwwroot/sprite-art.json` carries all 1,025 boxes as
+`[x, y, w, h, canvasW, canvasH]` with generation provenance in the file (regenerate only if
+the icon corpus changes, by the method the file names); `SpriteScale.Factor` owns the math;
+the tile draws a windowed lazy `<img>` (a background-image would forfeit `loading="lazy"`
+across a 1,025-tile wall); a species missing from the index — or the asset failing entirely —
+degrades to the pre-D-113 1×-canvas draw, never an error. Receipts, live post-deploy:
+1,025 `.sp-art-window`, 0 fallbacks; windows measured Pikachu 42×40 · Charizard 44×39 ·
+Rayquaza 62×54 · Tynamo 42×33 · Koraidon 44×47, each equal to the prediction computed from
+its measured box before the page was read. Suite: 454 passed, 0 failed, 35 DB-gated skips.
+
 ### D-112 — The species tile drops the monogram circle; the sprite trails the name at native size
 Owner, 2026-08-18, during Catalog UAT, after a three-way real-pixel comparison (current /
 mockup order / mirrored): *"a looks way cooler, and this is the route we need to go."* The

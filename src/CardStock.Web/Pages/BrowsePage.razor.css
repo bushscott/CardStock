@@ -77,10 +77,16 @@
 .species-tile:hover { box-shadow: 0 6px 20px rgba(20, 19, 26, 0.10); }
 .sp-head { display: flex; align-items: center; gap: 10px; }
 .sp-id { flex: 1; min-width: 0; }
-/* Display box 68×56 — the native canvas of 898 of the 1,025 sprites, which therefore
-   render 1:1 and crisp. The other 127 (Gen 9 + late-Gen-8 forms) are 96×96 natively and
-   object-fit shrinks them non-integer for now — measured corpus-wide 2026-08-18; sizing
-   normalization is D-112's open follow-on, not this rule's job. */
+/* D-113 normalization: the slot stays 68×56 so tile geometry never varies; inside it the
+   art window is the measured art box × its clean factor (SpriteScale.Factor), and the
+   full canvas <img> is scaled by that factor and shifted so only the art shows. */
+.sp-sprite-slot { width: 68px; height: 56px; flex-shrink: 0; display: flex;
+    align-items: center; justify-content: center; }
+.sp-art-window { overflow: hidden; }
+.sp-art-window img { display: block; image-rendering: pixelated; }
+/* Fallback when a species is missing from sprite-art.json (or the asset fails to load):
+   the pre-D-113 1×-canvas draw — 1:1 for the 898 native 68×56 sprites, a fractional
+   squeeze for the 127 Gen-9-era 96×96 ones. */
 .sp-sprite { width: 68px; height: 56px; object-fit: contain; image-rendering: pixelated;
     flex-shrink: 0; }
 .sp-name { font: 600 15.5px 'Inter Tight', sans-serif; white-space: nowrap;

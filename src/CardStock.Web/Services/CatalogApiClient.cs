@@ -7,6 +7,13 @@ namespace CardStock.Web.Services;
 /// <summary>What any catalog fetch can come back as — the pages' three top states.</summary>
 public sealed record CatalogResult<T>(T? Value, bool NotFound, bool Failed) where T : class;
 
+/// <summary>
+/// The measured sprite art boxes behind D-113's normalization — a static wwwroot asset,
+/// not an API route, regenerated only when the icon corpus changes. Values are
+/// [x, y, w, h, canvasW, canvasH] per species id.
+/// </summary>
+public sealed record SpriteArtDoc(string GeneratedOn, string Method, Dictionary<int, int[]> Sprites);
+
 public sealed class CatalogApiClient(HttpClient http)
 {
     public Task<CatalogResult<SetPageDto>> GetSetAsync(long id, CancellationToken ct = default) =>
@@ -22,6 +29,13 @@ public sealed class CatalogApiClient(HttpClient http)
         GetAsync<BrowseSpeciesDto>("api/v1/browse/species", ct);
 
     public static string SpeciesIconUrl(int id) => $"api/v1/species/{id}/icon";
+
+    /// <summary>Null degrades the wall to the plain 1×-canvas draw — never an error state.</summary>
+    public async Task<IReadOnlyDictionary<int, int[]>?> GetSpriteArtAsync(CancellationToken ct = default)
+    {
+        var result = await GetAsync<SpriteArtDoc>("sprite-art.json", ct);
+        return result.Value?.Sprites;
+    }
 
     private async Task<CatalogResult<T>> GetAsync<T>(string path, CancellationToken ct)
         where T : class

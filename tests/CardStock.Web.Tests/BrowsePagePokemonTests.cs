@@ -57,6 +57,38 @@ public class BrowsePagePokemonTests : BunitContext
         Assert.Contains("3 of 3 species", cut.Markup);
     }
 
+    // D-113: with the art index present, each sprite draws cropped to its measured art box
+    // at the largest clean factor that fits the 68×56 slot; species missing from the index
+    // keep the plain 1×-canvas draw.
+    [Fact]
+    public void Sprites_draw_cropped_at_their_clean_factor_when_the_art_index_is_present()
+    {
+        _spriteArtJson = """
+            {"generatedOn":"test","method":"test",
+             "sprites":{"6":[10,15,44,39,68,56],"197":[22,27,26,27,68,56]}}
+            """;
+        var cut = RenderBrowse(species: All, mode: "pokemon");
+        var tiles = cut.FindAll(".species-tile");
+
+        // Charizard 44×39 → 1×: window is the art box, canvas shifted by the art origin.
+        var charWin = tiles[0].QuerySelector(".sp-art-window")!;
+        Assert.Contains("width:44px;height:39px", charWin.GetAttribute("style"));
+        var charImg = charWin.QuerySelector("img")!;
+        Assert.Contains("width:68px;height:56px", charImg.GetAttribute("style"));
+        Assert.Contains("margin:-15px 0 0 -10px", charImg.GetAttribute("style"));
+
+        // Umbreon 26×27 → 2×: window, canvas, and origin all double.
+        var umbWin = tiles[1].QuerySelector(".sp-art-window")!;
+        Assert.Contains("width:52px;height:54px", umbWin.GetAttribute("style"));
+        var umbImg = umbWin.QuerySelector("img")!;
+        Assert.Contains("width:136px;height:112px", umbImg.GetAttribute("style"));
+        Assert.Contains("margin:-54px 0 0 -44px", umbImg.GetAttribute("style"));
+
+        // Glaceon has no index entry → the plain fallback, no crop window.
+        Assert.NotNull(tiles[2].QuerySelector("img.sp-sprite"));
+        Assert.Null(tiles[2].QuerySelector(".sp-art-window"));
+    }
+
     [Fact]
     public void Committing_a_filter_narrows_the_grid_chips_it_and_the_counter_follows()
     {
@@ -146,6 +178,7 @@ public class BrowsePagePokemonTests : BunitContext
     // and waits on ".species-grid" instead, which renders once loaded regardless of match
     // count (the empty-panel test needs it present even at 0 matches).
     private IReadOnlyList<SpeciesTileDto> _species = [];
+    private string? _spriteArtJson;   // null → the static asset 404s → the 1×-canvas fallback
     private bool _registered;
 
     private IRenderedComponent<BrowsePage> RenderBrowse(
@@ -155,8 +188,14 @@ public class BrowsePagePokemonTests : BunitContext
         if (!_registered)
         {
             _registered = true;
-            RegisterClient(RespondingWith(_ => new HttpResponseMessage(HttpStatusCode.OK)
-            { Content = JsonContent.Create(new BrowseSpeciesDto(_species)) }));
+            RegisterClient(RespondingWith(req =>
+                req.RequestUri!.AbsolutePath.EndsWith("sprite-art.json")
+                    ? _spriteArtJson is null
+                        ? new HttpResponseMessage(HttpStatusCode.NotFound)
+                        : new HttpResponseMessage(HttpStatusCode.OK)
+                        { Content = new StringContent(_spriteArtJson, System.Text.Encoding.UTF8, "application/json") }
+                    : new HttpResponseMessage(HttpStatusCode.OK)
+                    { Content = JsonContent.Create(new BrowseSpeciesDto(_species)) }));
         }
 
         Services.GetRequiredService<NavigationManager>().NavigateTo($"browse?mode={mode}");

@@ -137,8 +137,25 @@
                             <div class="sp-name">@species.Name</div>
                             <div class="sp-printings mono">@species.Printings printings</div>
                         </div>
-                        <img class="sp-sprite" src="@CatalogApiClient.SpeciesIconUrl(species.SpeciesId)"
-                             alt="" loading="lazy" onerror="this.style.display='none'" />
+                        @if (_spriteArt is not null && _spriteArt.TryGetValue(species.SpeciesId, out var art))
+                        {
+                            @* D-113 normalization: crop to the measured art box [x,y,w,h,cw,ch],
+                               draw at the largest clean factor that fits the slot. A windowed
+                               <img> rather than a background keeps loading="lazy" and onerror. *@
+                            var k = SpriteScale.Factor(art[2], art[3]);
+                            <div class="sp-sprite-slot">
+                                <div class="sp-art-window" style="width:@Px(art[2] * k);height:@Px(art[3] * k)">
+                                    <img src="@CatalogApiClient.SpeciesIconUrl(species.SpeciesId)" alt=""
+                                         loading="lazy" onerror="this.style.display='none'"
+                                         style="width:@Px(art[4] * k);height:@Px(art[5] * k);margin:@Px(-art[1] * k) 0 0 @Px(-art[0] * k)" />
+                                </div>
+                            </div>
+                        }
+                        else
+                        {
+                            <img class="sp-sprite" src="@CatalogApiClient.SpeciesIconUrl(species.SpeciesId)"
+                                 alt="" loading="lazy" onerror="this.style.display='none'" />
+                        }
                     </div>
                     <div class="sp-footer">
                         <span class="sp-value mono">@Format.AbbrevMoney(species.TotalValueCents)</span>
@@ -162,12 +179,15 @@
 
     private CatalogResult<BrowseSetsDto>? _sets;
     private CatalogResult<BrowseSpeciesDto>? _species;
+    private IReadOnlyDictionary<int, int[]>? _spriteArt;
     private string _setOrder = "az";
     private bool _popoverOpen;
     private readonly Dictionary<string, IReadOnlySet<string>> _filters = [];
 
     private static readonly (string Key, string Label)[] OrderOptions =
         [("az", "a–z"), ("date", "release date"), ("era", "era")];
+
+    private static string Px(double v) => FormattableString.Invariant($"{v}px");
 
     private static string OrderTooltip(string key) => key switch
     {
@@ -185,7 +205,9 @@
             if (_species is null or { Failed: true })
             {
                 _species = null;
-                _species = await Api.GetBrowseSpeciesAsync();
+                var speciesTask = Api.GetBrowseSpeciesAsync();
+                _spriteArt ??= await Api.GetSpriteArtAsync();
+                _species = await speciesTask;
             }
         }
         else
