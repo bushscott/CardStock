@@ -28,6 +28,9 @@
 > full dollars. Total value's tooltip carries the D-061 denominator ("over {n} of {m}
 > printings with a PSA 10 price").
 
+> **Amended 2026-08-18 (build).** Sorting on nullable keys (`value`, `year`, `ROC 3M`) places
+> rows without a value **last in both directions** — a dashed cell never implies a rank.
+
 ---
 
 ## 1. Identity

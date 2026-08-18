@@ -19,6 +19,10 @@
 > the global search box is a separate future conversation. **(h)** §7.8 answered: the
 > per-species `sets` count stays off the tile. Full walls render (789/1,025) with lazy images.
 
+> **Amended 2026-08-18 (build).** Ties resolve deterministically: a set's top-value card breaks
+> equal latest-PSA-10 values by lowest card id, and the species wall breaks equal total values
+> by dex number — the same data always renders the same wall.
+
 **Runtime:** Design Composer. `<x-dc>` host (`:9`), template directives `sc-if` / `sc-for` resolved by `support.js:555-556`; `hint-placeholder-count` / `hint-placeholder-val` are design-time-only hints consumed when the bound value is unavailable (`support.js:614`, `support.js:648`) and carry **no** runtime meaning. All view data comes from one `renderVals()` return object (`:219-314`, dispatched at `support.js:1085`). The component takes **no props** (`data-props=""`, `:159`).
 
 ---

@@ -25,6 +25,12 @@
 > ~late Sep 2026. **(g)** An empty-roster state is added. **(h)** Negative pop Δ renders a
 > real sign (the hard-coded `+` does not port).
 
+> **Amended 2026-08-18 (build).** Sorting on nullable keys (`value`, `ROC 3M`) places rows
+> without a value **last in both directions** — a dashed cell never implies a rank (an
+> ascending sort must not present a priceless card as "cheapest"). The pop-sort exclusion
+> banner terminates with a period when no unlock dates exist among the excluded rows
+> (zero-base cards carry a first observation but no unlock date).
+
 ---
 
 ## 1. Identity
