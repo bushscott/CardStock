@@ -284,7 +284,11 @@ Default widths, Home (`Home:331`): `{ card: 220, tier: 52, price: 76, chg: 52, s
 > `minmax(min, 1.4fr)` track (the build's fill-the-page choice), which made its own grip
 > inert — so that grip now **redistributes**: dragging left grows the fixed columns by the
 > dragged amount split proportional to their drag-start widths (and vice versa), while the
-> fr share visibly shrinks; other grips stay single-column. **(b)** The clamp divergence
+> fr share visibly shrinks; other grips stay single-column. *Superseded next day by D-119:*
+> **every** grip is the seam between the column on its left and everything to its right —
+> the dragged column takes the delta, the columns right of it absorb the opposite
+> (proportional split), columns left of it never move, and the boundary follows the
+> cursor. The last grip has no right side, so the flexible first track absorbs via fr. **(b)** The clamp divergence
 > above is resolved: floor 52 (the build's), ceiling 420, all columns. **(c)** Virtualized
 > rows materialize once per `Rows` instance — a fresh list every render resets Virtualize's
 > anchoring (the snap-to-top D-118 records) — and `ItemSize` is a contract with the real

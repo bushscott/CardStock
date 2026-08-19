@@ -88,28 +88,48 @@ public class RosterTableTests : BunitContext
         Assert.Contains("A", cut.Markup);
     }
 
-    // D-117 (owner UAT): the first column is the flexible track, so its own grip was dead —
-    // shrinking a minmax minimum changes nothing while the fr share fills the container.
-    // Ruled behavior: the name grip redistributes. Dragging left grows the fixed columns
-    // by the dragged amount, split proportional to their drag-start widths, and the
-    // stored minimum tracks the drag; the fr share visibly shrinks by the same amount.
-    // Other grips stay single-column, now under the spec's 420 ceiling (§4.1).
+    // D-119 (owner UAT, amending D-117): every grip is the SEAM between the column on its
+    // left and everything to its right — the boundary follows the cursor. The dragged
+    // column takes the delta; the columns right of it absorb the opposite, split
+    // proportional to their drag-start widths; columns left of it never move. The last
+    // grip has nothing to its right, so the flexible name track absorbs via its fr share.
     [Fact]
-    public void The_name_grip_redistributes_and_other_grips_stay_single_column()
+    public void Every_grip_moves_its_seam_and_the_right_side_absorbs()
     {
         var cut = Render(new SortState("value"));
 
+        // Name grip (unchanged from D-117): 92px left → both right columns grow.
         // re-find per event: every dispatch re-renders and stales the previous reference
         cut.FindAll(".rt-grip")[0].PointerDown(new PointerEventArgs { ClientX = 500 });
-        cut.FindAll(".rt-grip")[0].PointerMove(new PointerEventArgs { ClientX = 408 });   // 92px left
+        cut.FindAll(".rt-grip")[0].PointerMove(new PointerEventArgs { ClientX = 408 });
         cut.FindAll(".rt-grip")[0].PointerUp(new PointerEventArgs());
-        // others started 100 + 84 = 184 → +50 and +42; the name minimum 230 → 138.
+        // right of name started 100 + 84 = 184 → +50 and +42; the name minimum 230 → 138.
         Assert.Contains("minmax(138px, 1.4fr) 150px 126px",
             cut.Find(".rt-head").GetAttribute("style"));
 
+        // Middle grip: +20 grows the dragged column; only the column right of it shrinks.
         cut.FindAll(".rt-grip")[1].PointerDown(new PointerEventArgs { ClientX = 500 });
-        cut.FindAll(".rt-grip")[1].PointerMove(new PointerEventArgs { ClientX = 1100 });  // +600 → ceiling
-        Assert.Contains("420px", cut.Find(".rt-head").GetAttribute("style"));
+        cut.FindAll(".rt-grip")[1].PointerMove(new PointerEventArgs { ClientX = 520 });
+        cut.FindAll(".rt-grip")[1].PointerUp(new PointerEventArgs());
+        Assert.Contains("minmax(138px, 1.4fr) 170px 106px",
+            cut.Find(".rt-head").GetAttribute("style"));
+
+        // Last grip: nothing to its right — its own width changes, the fr absorbs.
+        cut.FindAll(".rt-grip")[2].PointerDown(new PointerEventArgs { ClientX = 500 });
+        cut.FindAll(".rt-grip")[2].PointerMove(new PointerEventArgs { ClientX = 530 });
+        cut.FindAll(".rt-grip")[2].PointerUp(new PointerEventArgs());
+        Assert.Contains("minmax(138px, 1.4fr) 170px 136px",
+            cut.Find(".rt-head").GetAttribute("style"));
+    }
+
+    [Fact]
+    public void The_clamp_holds_at_both_ends_of_a_violent_drag()
+    {
+        var cut = Render(new SortState("value"));
+        cut.FindAll(".rt-grip")[1].PointerDown(new PointerEventArgs { ClientX = 500 });
+        cut.FindAll(".rt-grip")[1].PointerMove(new PointerEventArgs { ClientX = 1100 });  // +600
+        // dragged column ceilings at 420; the absorber floors at 52.
+        Assert.Contains("420px 52px", cut.Find(".rt-head").GetAttribute("style"));
     }
 
     private sealed class CountingRows(IReadOnlyList<Row> inner) : IReadOnlyList<Row>

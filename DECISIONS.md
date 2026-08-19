@@ -352,6 +352,22 @@ Read directly 2026-08-10, to be mirrored per D-018–D-021.
 
 ## Decided
 
+### D-119 — Every roster grip is a seam: the boundary follows the cursor
+Owner UAT, 2026-08-19, refining D-117 after feeling it live: *"the right resize bar of a
+column resizes its column to the left and the ones to the right i think that feels
+natural."* Under D-117, a middle grip grew its column leftward (the distant flexible track
+absorbed), so the edge under the cursor never moved. Ruled model, generalizing D-117's
+name-grip rule to **every** grip: a grip is the seam between the column on its left and
+everything to its right — the dragged column takes the delta, the columns right of it
+absorb the opposite split proportional to their drag-start widths, columns left of it never
+move, and the seam tracks the cursor. The last grip has no right side, so the flexible
+first track absorbs through its fr share. The D-117 special case collapsed into this one
+rule (the name grip is simply seam 0); clamps stay 52/420. Receipt, live post-deploy on
+`/set/90`: a 60px rightward drag on the second grip → dragged column 100→160, the four
+right columns 92/84/96/90 → 77/70/80/75 (−60 exactly), name untouched, and the dragged
+column's left edge moved **0px** while its right edge moved **+60px**. Suite: 464 passed,
+0 failed, 35 DB-gated skips.
+
 ### D-118 — Roster scrolling: identity-stable rows, honest ItemSize, and the §4.7 sticky header ships
 Owner UAT, 2026-08-18, two reports on `/set/90`: reaching the table's foot snapped the page
 back to the top ("that should never happen, on any table"), and scrolling loses the header

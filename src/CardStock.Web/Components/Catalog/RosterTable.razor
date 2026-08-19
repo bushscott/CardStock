@@ -133,22 +133,21 @@
             return;
         }
 
+        // D-119 seam semantics (amending D-117): a grip is the boundary between the
+        // column on its left and everything to its right, and the boundary follows the
+        // cursor — the dragged column takes the delta, the columns right of it absorb
+        // the opposite (split proportional to their drag-start widths), and columns
+        // left of it never move. The last grip has no right side, so the flexible first
+        // track absorbs through its fr share; the first grip's "column" is that track's
+        // stored minimum, which must track the drag for compression to continue.
         var delta = (int)(e.ClientX - drag.StartX);
-        if (Columns.Count > 1 && key == Columns[0].Key)
+        var index = Columns.ToList().FindIndex(c => c.Key == key);
+        var right = Columns.Skip(index + 1).Select(c => c.Key).ToList();
+        var startSum = right.Sum(k => drag.Start[k]);
+        foreach (var k in right)
         {
-            // D-117: the first track is flexible (minmax min, 1.4fr), so moving only its
-            // own minimum is invisible while the fr share fills the container — this grip
-            // redistributes instead. Dragging left grows the fixed columns by |delta|,
-            // split proportional to their drag-start widths, and the fr share shrinks by
-            // the same amount; dragging right mirrors. The stored minimum tracks the drag
-            // so compression can continue below the old minimum.
-            var others = Columns.Skip(1).Select(c => c.Key).ToList();
-            var startSum = others.Sum(k => drag.Start[k]);
-            foreach (var k in others)
-            {
-                var share = (int)Math.Round((double)drag.Start[k] / startSum * -delta);
-                _widths[k] = Math.Clamp(drag.Start[k] + share, WidthFloor, WidthCeiling);
-            }
+            var share = (int)Math.Round((double)drag.Start[k] / startSum * -delta);
+            _widths[k] = Math.Clamp(drag.Start[k] + share, WidthFloor, WidthCeiling);
         }
 
         _widths[key] = Math.Clamp(drag.Start[key] + delta, WidthFloor, WidthCeiling);
