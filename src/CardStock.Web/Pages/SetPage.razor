@@ -67,7 +67,12 @@ else
                        RightKey="binder" RightLabel="binder"
                        RightTooltip="Binder density — fewer rows with card art"
                        Value="@_view" ValueChanged="v => _view = v" />
-        <SortPills Pills="@Pills" Sort="@_sort" Changed="StateHasChanged" />
+        @* D-127: pills only where no header exists — the binder grid. Terminal sorts
+           by clicking headers. *@
+        @if (_view == "binder")
+        {
+            <SortPills Pills="@Pills" Sort="@_sort" Changed="StateHasChanged" />
+        }
         <div class="spacer"></div>
         <span class="shown-count mono">@Sorted().Count of @set.CardsTracked cards</span>
     </div>
@@ -143,6 +148,7 @@ else
         var rows = Included();
         Comparison<SetRosterRowDto> by = _sort.Key switch
         {
+            "name" => (a, b) => string.Compare(a.Name, b.Name, StringComparison.OrdinalIgnoreCase),
             "roc" => (a, b) => Nullable.Compare(a.Roc3M, b.Roc3M),
             "pop" => (a, b) => Nullable.Compare(a.Pop.Fraction, b.Pop.Fraction),
             "sales" => (a, b) => a.Sales30d.CompareTo(b.Sales30d),
@@ -197,7 +203,7 @@ else
 
     private IReadOnlyList<RosterColumn<SetRosterRowDto>> Columns() =>
     [
-        new("name", "Card", 230, "Card name", false, false, null,
+        new("name", "Card", 230, "Card name — click to sort", true, false, null,
             r => @<a class="row-link" href="card/@r.CardId">@r.Name</a>),
         new("value", "PSA 10", 100, "Latest monthly PSA 10 price — click to sort", true, false, null,
             r => @<text>@(r.PriceCents is { } c ? Format.Money(c) : ChipEngine.GlyphDash)</text>),

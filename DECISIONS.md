@@ -368,6 +368,22 @@ Read directly 2026-08-10, to be mirrored per D-018–D-021.
 
 ## Decided
 
+### D-127 — Terminal rosters sort by header only; pills survive solely in binder density
+Owner UAT, 2026-08-19, after clicking the Card header and getting nothing: *"I think we
+need to get rid of all the pills. and just have the header of the table be clickable for
+how you want to sort."* The pills duplicated the sortable headers in terminal view — same
+`SortState`, same keys. Ruled and shipped: terminal view drops the pills; every honest
+data column sorts by header click (**Card joins on both rosters, plus Set on the character
+roster** — name-alphabetical, new-key-starts-descending uniform with every column, ▴/▾
+glyphs); deferred ◌ columns still refuse. **One scope judgment made in the build:** binder
+density has no table header, so the pills remain there as its only sort control — the
+shared `SortState` keeps the two densities agreeing (set.md §6.1's one-sort rule). If the
+owner wants pills dead in binder too, that is a one-line follow-up. The pop-sort exclusion
+machinery (banner, Included()) rides the header unchanged. Receipts, live post-deploy on
+`/set/92`: terminal renders zero `.sort-pills`; Card header click → Zorua [Reverse Holo]
+#170 first, second click → Absol #164 with `Card ▴`; binder view renders the five pills.
+Suite: 474 passed, 0 failed, 35 DB-gated skips.
+
 ### D-126 — The sales regime displaces the monthly regime window-by-window, gated by sufficiency, app-wide
 Owner, 2026-08-19, generalizing D-125 into product policy: *"the further out we get from
 the seam, the more we need to look back and see if we can replace the historical monthly

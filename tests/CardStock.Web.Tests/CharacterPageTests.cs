@@ -116,7 +116,7 @@ public class CharacterPageTests : BunitContext
         // "value" is already the default active key at descending (SortState's ctor
         // default); one click on it flips to ascending -- a second click would flip
         // straight back to descending, so this deliberately clicks only once.
-        cut.FindAll(".sort-pills .pill").Single(p => p.TextContent == "value").Click();
+        cut.FindAll(".rt-head-cell").Single(h => h.TextContent.Contains("PSA 10")).Click();
 
         var names = cut.FindAll(".rt-cell-name").Select(c => c.TextContent).ToList();
         Assert.Equal("Unpriced", names[^1]);

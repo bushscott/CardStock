@@ -64,7 +64,12 @@ else
                        RightKey="terminal" RightLabel="terminal"
                        RightTooltip="Terminal density — more rows, tighter type, every metric column"
                        Value="@_view" ValueChanged="v => _view = v" />
-        <SortPills Pills="@Pills" Sort="@_sort" Changed="StateHasChanged" />
+        @* D-127: pills only where no header exists — the binder grid. Terminal sorts
+           by clicking headers. *@
+        @if (_view == "binder")
+        {
+            <SortPills Pills="@Pills" Sort="@_sort" Changed="StateHasChanged" />
+        }
         <span class="toolbar-sentence">every @character.Name printing we track, all eras</span>
         <div class="spacer"></div>
         <span class="shown-count mono">@character.Roster.Count of @character.Printings printings</span>
@@ -128,6 +133,8 @@ else
     {
         Comparison<CharacterRosterRowDto> by = _sort.Key switch
         {
+            "name" => (a, b) => string.Compare(a.Name, b.Name, StringComparison.OrdinalIgnoreCase),
+            "set" => (a, b) => string.Compare(a.SetName, b.SetName, StringComparison.OrdinalIgnoreCase),
             "year" => (a, b) => Nullable.Compare(a.Year, b.Year),
             "roc" => (a, b) => Nullable.Compare(a.Roc3M, b.Roc3M),
             "sales" => (a, b) => a.Sales30d.CompareTo(b.Sales30d),
@@ -160,9 +167,9 @@ else
 
     private IReadOnlyList<RosterColumn<CharacterRosterRowDto>> Columns() =>
     [
-        new("name", "Card", 230, "Printing name", false, false, null,
+        new("name", "Card", 230, "Printing name — click to sort", true, false, null,
             r => @<a class="row-link" href="card/@r.CardId">@r.Name</a>),
-        new("set", "Set", 130, "Set this printing belongs to", false, false, null,
+        new("set", "Set", 130, "Set this printing belongs to — click to sort", true, false, null,
             r => @<a class="row-link" href="set/@r.SetId">@r.SetName</a>),
         new("year", "Year", 70, "Release year — click to sort", true, false, null,
             r => r.Year is { } year

@@ -100,7 +100,7 @@ public class SetPageTests : BunitContext
             firstObserved: "2026-07-30", deltasBegin: "2026-09-28");
         var cut = RenderSetPage(Dto(Row(), pending));
 
-        cut.FindAll(".sort-pills .pill").Single(p => p.TextContent == "pop Δ").Click();
+        cut.FindAll(".rt-head-cell").Single(h => h.TextContent.Contains("Pop Δ 60d")).Click();
 
         Assert.Single(cut.FindAll(".rt-row"));
         var banner = cut.Find(".exclusion-banner");
@@ -110,6 +110,23 @@ public class SetPageTests : BunitContext
         Assert.Contains("pop Δ 60d needs a census observation at least 60 days old", banner.TextContent);
         Assert.Contains("deltas begin arriving", banner.TextContent);
         Assert.Contains("1 of 3 cards", cut.Markup);
+    }
+
+    // D-127: terminal view carries no pills — headers are the one sort control — and the
+    // Card column sorts like any other (new key starts descending, so Z-first, then A-first).
+    [Fact]
+    public void Terminal_has_no_pills_and_the_card_header_sorts_by_name()
+    {
+        var cut = RenderSetPage(Dto(Row(id: 1, name: "Alpha"), Row(id: 2, name: "Zebra")));
+        Assert.Empty(cut.FindAll(".sort-pills"));
+
+        cut.FindAll(".rt-head-cell").Single(h => h.TextContent.Contains("Card")).Click();
+        Assert.Equal(["Zebra", "Alpha"],
+            cut.FindAll(".row-link").Select(a => a.TextContent).ToList());
+
+        cut.FindAll(".rt-head-cell").Single(h => h.TextContent.Contains("Card")).Click();
+        Assert.Equal(["Alpha", "Zebra"],
+            cut.FindAll(".row-link").Select(a => a.TextContent).ToList());
     }
 
     [Fact]
@@ -130,7 +147,7 @@ public class SetPageTests : BunitContext
             firstObserved: "2026-07-30");
         var cut = RenderSetPage(Dto(Row(), zeroBase));
 
-        cut.FindAll(".sort-pills .pill").Single(p => p.TextContent == "pop Δ").Click();
+        cut.FindAll(".rt-head-cell").Single(h => h.TextContent.Contains("Pop Δ 60d")).Click();
 
         var banner = cut.Find(".exclusion-banner").TextContent;
         Assert.EndsWith("First observations run 07-30-2026 to 07-30-2026.", banner);
@@ -148,7 +165,7 @@ public class SetPageTests : BunitContext
         // "value" is already the default active key at descending (SortState's ctor
         // default); one click on it flips to ascending -- a second click would flip
         // straight back to descending, so this deliberately clicks only once.
-        cut.FindAll(".sort-pills .pill").Single(p => p.TextContent == "value").Click();
+        cut.FindAll(".rt-head-cell").Single(h => h.TextContent.Contains("PSA 10")).Click();
 
         var names = cut.FindAll(".row-link").Select(a => a.TextContent).ToList();
         Assert.Equal("Unpriced", names[^1]);

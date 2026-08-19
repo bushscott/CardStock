@@ -104,6 +104,12 @@ exists (needs a non-scraped table, `DECISIONS.md:199`, or the external Pokédex 
 > `LoadingRing` — one 48px ring at `inset: 20vh` that the boot indicator fills (real download
 > progress) and this page's data fetch then spins in place. Contract: shared-components.md §4.8.
 
+> **Amended 2026-08-19 (owner UAT, D-127).** The roster's sort pills leave the terminal
+> view: **table headers are the one sort control there**, and the Card and Set column joins
+> the sortable set (name-alphabetical, new-key-starts-descending like every column, ▴/▾
+> glyphs). The pills render **only in binder density**, where no header exists — the shared
+> `SortState` keeps the two views agreeing. Deferred ◌ columns still never sort.
+
 | Field | Rendered as | HTML | Backing |
 |---|---|---|---|
 | avatar initial | 64px circle, `linear-gradient(160deg, #2B2D42, #5C6B9E)`, Inter Tight 700 26px, `rgba(255,255,255,0.92)` | `:61` (literal `U`) | ✘ initial is derivable from the name; the **gradient pair is per-species identity colour** with no source (see §7) |

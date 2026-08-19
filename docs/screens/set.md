@@ -40,6 +40,12 @@
 > `LoadingRing` — one 48px ring at `inset: 20vh` that the boot indicator fills (real download
 > progress) and this page's data fetch then spins in place. Contract: shared-components.md §4.8.
 
+> **Amended 2026-08-19 (owner UAT, D-127).** The roster's sort pills leave the terminal
+> view: **table headers are the one sort control there**, and the Card column joins
+> the sortable set (name-alphabetical, new-key-starts-descending like every column, ▴/▾
+> glyphs). The pills render **only in binder density**, where no header exists — the shared
+> `SortState` keeps the two views agreeing. Deferred ◌ columns still never sort.
+
 > **Amended 2026-08-19 (owner ruling, D-125).** The `set index · 12M` slot keeps its
 > worker-phase arming, and its data contract when it arms is two-source: the monthly price
 > history draws the **full 12-month width on day one** (backfilled years deep), a
