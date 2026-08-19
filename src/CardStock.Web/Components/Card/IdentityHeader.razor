@@ -34,16 +34,28 @@
         <div class="row-a">
             <div class="title-block">
                 <h1>@Identity.Title</h1>
+                @* D-122: the set segment and the tagged species are live links — their target
+                   pages exist. A card with no tagged species (Trainers/Energy, D-108) omits
+                   the character segment and its dot rather than showing a placeholder. *@
                 <p class="subline">
-                    <DeferredControl Label="@Identity.SetName" Tooltip="@Breadcrumb.SetTooltip" CssClass="subline-set" />
+                    <a class="subline-set" href="set/@Identity.SetId">@Identity.SetName</a>
                     @if (NumberSegment() is { } number)
                     {
                         <span class="subline-number">@number</span>
                     }
-                    <span class="subline-dot" aria-hidden="true">·</span>
-                    <DeferredControl Label="Pokémon name"
-                                     Tooltip="The Pokémon's name arrives with the Pokédex phase"
-                                     CssClass="subline-character" />
+                    @if (Identity.Species.Count > 0)
+                    {
+                        <span class="subline-dot" aria-hidden="true">·</span>
+                        @for (var i = 0; i < Identity.Species.Count; i++)
+                        {
+                            @if (i > 0)
+                            {
+                                <span class="subline-species-sep" aria-hidden="true">/</span>
+                            }
+                            var species = Identity.Species[i];
+                            <a class="subline-character" href="character/@species.Slug">@species.Name</a>
+                        }
+                    }
                 </p>
                 <DelistedChip DelistedAt="@Identity.DelistedAt" />
             </div>

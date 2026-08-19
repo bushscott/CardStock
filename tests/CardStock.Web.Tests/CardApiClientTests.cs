@@ -74,10 +74,12 @@ internal static class Fixtures
         string setName = "Evolving Skies",
         string? collectorNumber = "215",
         int? setSize = null,
+        IReadOnlyList<SpeciesRefDto>? species = null,
         DateTimeOffset? lastVisitedAt = null) =>
         new(
             cardId,
-            new IdentityDto(title, collectorNumber, setSize, setName, HasImage: true, DelistedAt: null),
+            new IdentityDto(title, collectorNumber, setSize, SetId: 7, setName,
+                species ?? [new SpeciesRefDto("Umbreon", "umbreon")], HasImage: true, DelistedAt: null),
             new PricesDto("2026-08", []),
             new CensusDto(
                 [], PsaTotal: 0, CgcTotal: 0, ObservedAt: null, QualifyingObservations: 0,

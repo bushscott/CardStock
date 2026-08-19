@@ -1,22 +1,18 @@
 @* Card page breadcrumb — card.md Layout block #0, Interactions §5.1: "Browse / {SetName} / {CardTitle}".
-   Browse is live (/browse) and the crumb links straight there. The set crumb stays an inert
-   "future link" span -- not because Set pages are deferred (they're live at /set/{id} too),
-   but because CardIdentity doesn't carry the set id this crumb would need to link to it
-   (owner ruling: present-but-disabled with an honest tooltip, never a dead link). The leaf
-   crumb is plain --ink text, not a link (card.md §5.1 item 5). *@
+   Both ancestor crumbs are live links (D-122): Browse at /browse, the set at /set/{id} — the
+   set crumb's inert-span era ended when the identity wire gained SetId. The leaf crumb is
+   plain --ink text, not a link (card.md §5.1 item 5). *@
 <div class="breadcrumb">
     <a class="crumb-link" href="browse">Browse</a>
     <span class="crumb-sep">›</span>
-    <span class="crumb-link" title="@SetTooltip">@SetName</span>
+    <a class="crumb-link" href="set/@SetId">@SetName</a>
     <span class="crumb-sep">›</span>
     <span class="crumb-leaf">@CardTitle</span>
 </div>
 
 @code {
-    // Reusable single source of truth for this tooltip string — Task 16 renders the
-    // identity-header subline's deferred set segment and must show byte-identical copy
-    // rather than a re-typed duplicate literal.
-    public const string SetTooltip = "Set link arrives in a later phase";
+    [Parameter]
+    public long SetId { get; set; }
 
     [Parameter]
     public string SetName { get; set; } = "";

@@ -17,6 +17,16 @@
 > `LoadingRing` — one 48px ring at `inset: 20vh` that the boot indicator fills (real download
 > progress) and this page's data fetch then spins in place. Contract: shared-components.md §4.8.
 
+> **Amended 2026-08-19 (owner UAT link-arming, D-122).** The Catalog phase's arrival ends
+> three D-087 placeholder eras on this page: the breadcrumb's set crumb and the subline's
+> set segment are **live links to `/set/{id}`** (the identity wire gained `SetId`), and the
+> subline's character segment renders **one live link per tagged species to
+> `/character/{slug}`** (dex order — a tag team gets two links with a `/` separator). A card
+> with no tagged species (Trainers/Energy, D-108's honest verdicts) omits the segment and
+> its separator dot entirely — an absent segment is honest; a placeholder for data that can
+> never arrive is not. Charts/watchlist/binder controls stay deferred: their targets still
+> don't exist.
+
 ---
 
 ## 1. Identity

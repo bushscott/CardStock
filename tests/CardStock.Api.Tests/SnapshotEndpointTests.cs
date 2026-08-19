@@ -16,7 +16,9 @@ public class SnapshotEndpointTests
         Title: "Charizard #4/102",
         CollectorNumber: "4",
         SetSize: null,
+        SetId: 7,
         SetName: "Base Set",
+        Species: [],
         ImageHash: null,
         DelistedAt: null,
         NotACardAt: notACardAt);

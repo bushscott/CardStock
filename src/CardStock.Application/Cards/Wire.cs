@@ -11,8 +11,10 @@ public sealed record CardPageSnapshotDto(
     FreshnessDto Freshness);
 
 public sealed record IdentityDto(
-    string Title, string? CollectorNumber, int? SetSize, string SetName,
-    bool HasImage, DateTimeOffset? DelistedAt);
+    string Title, string? CollectorNumber, int? SetSize, long SetId, string SetName,
+    IReadOnlyList<SpeciesRefDto> Species, bool HasImage, DateTimeOffset? DelistedAt);
+
+public sealed record SpeciesRefDto(string Name, string Slug);
 
 public sealed record PricesDto(string CurrentMonth, IReadOnlyList<TierDto> Tiers);
 

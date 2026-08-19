@@ -108,18 +108,25 @@
     gap: 4px;
 }
 
-.subline ::deep .subline-set,
-.subline ::deep .subline-character {
+/* D-122: real anchors now (their target pages exist), rendered by this component —
+   accent, quiet until hover, underline on hover like every live crumb. app.css has no
+   global `a` reset, so text-decoration must be stripped here. */
+.subline-set,
+.subline-character {
     font: inherit;
     color: var(--acc);
     padding: 0;
     border: none;
     background: none;
+    text-decoration: none;
 }
 
-/* D-087: a placeholder label, not data — it wears the pending tone rather than
-   the accent, so it can never be read as a real character name. */
-.subline ::deep .subline-character {
+.subline-set:hover,
+.subline-character:hover {
+    text-decoration: underline;
+}
+
+.subline-species-sep {
     color: var(--mut2);
 }
 

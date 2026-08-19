@@ -94,10 +94,13 @@ public class ChromeTests : BunitContext
             cut.Find("input[type=search]").GetAttribute("title"));
     }
 
+    // D-122 (owner UAT link-arming): the set crumb links to its live /set/{id} page — the
+    // inert span existed only because the wire lacked SetId, not because the target did.
     [Fact]
-    public void Breadcrumb_renders_browse_set_and_leaf_with_the_reusable_tooltips()
+    public void Breadcrumb_renders_browse_and_set_as_links_with_a_plain_leaf()
     {
         var cut = Render<Breadcrumb>(p => p
+            .Add(x => x.SetId, 7L)
             .Add(x => x.SetName, "Evolving Skies")
             .Add(x => x.CardTitle, "Umbreon VMAX (Alt Art)"));
 
@@ -105,17 +108,13 @@ public class ChromeTests : BunitContext
         Assert.All(cut.FindAll(".crumb-sep"), sep => Assert.Equal("›", sep.TextContent));
         Assert.Equal(2, cut.FindAll(".crumb-sep").Count);
 
-        var crumbs = cut.FindAll(".crumb-link");
+        var crumbs = cut.FindAll("a.crumb-link");
         Assert.Equal(2, crumbs.Count);
-
-        var browseCrumb = cut.Find("a.crumb-link");
-        Assert.Equal("Browse", browseCrumb.TextContent);
-        Assert.Equal("browse", browseCrumb.GetAttribute("href"));
-        Assert.False(browseCrumb.HasAttribute("title"));
-
-        var setCrumb = cut.Find("span.crumb-link");
-        Assert.Equal("Evolving Skies", setCrumb.TextContent);
-        Assert.Equal(Breadcrumb.SetTooltip, setCrumb.GetAttribute("title"));
+        Assert.Equal("Browse", crumbs[0].TextContent);
+        Assert.Equal("browse", crumbs[0].GetAttribute("href"));
+        Assert.Equal("Evolving Skies", crumbs[1].TextContent);
+        Assert.Equal("set/7", crumbs[1].GetAttribute("href"));
+        Assert.False(crumbs[1].HasAttribute("title"));
 
         var leaf = cut.Find(".crumb-leaf");
         Assert.Equal("Umbreon VMAX (Alt Art)", leaf.TextContent);

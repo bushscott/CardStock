@@ -17,7 +17,9 @@ public class CardPageMapperTests
         Title: "Charizard #4/102",
         CollectorNumber: "4",
         SetSize: setSize,
+        SetId: 7,
         SetName: "Base Set",
+        Species: [new CardSpeciesRef("Charizard", "charizard")],
         ImageHash: imageHash,
         DelistedAt: null,
         NotACardAt: null);

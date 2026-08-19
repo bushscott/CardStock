@@ -45,7 +45,9 @@ public static class CardPageMapper
             identity.Title,
             identity.CollectorNumber,
             identity.SetSize,
+            identity.SetId,
             identity.SetName,
+            [.. identity.Species.Select(s => new SpeciesRefDto(s.Name, s.Slug))],
             identity.ImageHash is not null,
             identity.DelistedAt);
 

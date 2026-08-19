@@ -352,6 +352,27 @@ Read directly 2026-08-10, to be mirrored per D-018–D-021.
 
 ## Decided
 
+### D-122 — The Card page's dead links arm: set crumb, set segment, and species links go live
+Owner UAT, 2026-08-19: *"go through all the pages that exist today and look at links that
+are specifically broken but shouldn't be broken anymore and make those links."* Audit
+finding: the catalog-built pages were already fully armed (set/character breadcrumbs,
+roster rows → `/card/{id}`, the character roster's set column → `/set/{id}`, the freshness
+footer → `/about-data`), and the chrome's deferred tabs remain correctly deferred — **the
+whole gap was the Card page**, built in Phase 2 before its targets existed. Armed: the
+breadcrumb set crumb and subline set segment link to `/set/{id}` (the identity wire gained
+`SetId` — `CardIdentity`/`IdentityDto`), and the subline character segment renders one link
+per tagged species to `/character/{slug}` (`CardIdentity.Species` from
+`card_species`+`species`, dex order; `Breadcrumb.SetTooltip` and both DeferredControl
+placeholders deleted). A no-species card (Trainers/Energy, D-108) omits the segment and its
+dot — closing D-087's placeholder posture for this slot now that the data shipped rather
+than keeping a label for data that will never come. Charts, watchlist, and Binder controls
+stay deferred; their targets still don't exist. Receipts, live post-deploy, each predicted
+from SQL first: 630417 Charizard → `set/5` + `character/charizard`; 844767 Mewtwo & Mew GX
+→ `set/1` + `character/mewtwo`,`character/mew` with one `/` separator (dex order); 25437
+Professor Kukui → `set/279`, zero character links, zero dots; clicking the Mewtwo link
+lands on the rendered Mewtwo character page. Suite: 468 passed, 0 failed, 35 DB-gated
+skips.
+
 ### D-121 — The set wall opens on release date, newest first
 Owner UAT, 2026-08-19: *"the browse page should default to sorting by set and sorting by
 release date descending."* Set mode was already the default; the order default flips from

@@ -196,7 +196,8 @@ public class RefreshFlowTests : BunitContext
     public void Badge_slot_is_a_full_width_row_beneath_row_a_and_above_the_tier_strip()
     {
         var identity = new IdentityDto(
-            "Umbreon VMAX (Alt Art)", "215", null, "Evolving Skies", HasImage: true, DelistedAt: null);
+            "Umbreon VMAX (Alt Art)", "215", null, SetId: 7, "Evolving Skies",
+            [new SpeciesRefDto("Umbreon", "umbreon")], HasImage: true, DelistedAt: null);
         var prices = new PricesDto("2026-08", []);
 
         var cut = Render<IdentityHeader>(p => p

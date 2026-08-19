@@ -19,8 +19,10 @@ public class IdentityHeaderTests : BunitContext
     }
 
     private static IdentityDto Identity(
-        string? collectorNumber = "215", int? setSize = null, DateTimeOffset? delistedAt = null) =>
-        new("Umbreon VMAX (Alt Art)", collectorNumber, setSize, "Evolving Skies", HasImage: true, delistedAt);
+        string? collectorNumber = "215", int? setSize = null, DateTimeOffset? delistedAt = null,
+        IReadOnlyList<SpeciesRefDto>? species = null) =>
+        new("Umbreon VMAX (Alt Art)", collectorNumber, setSize, SetId: 7, "Evolving Skies",
+            species ?? [new SpeciesRefDto("Umbreon", "umbreon")], HasImage: true, delistedAt);
 
     private IRenderedComponent<IdentityHeader> RenderHeader(IdentityDto identity) =>
         Render<IdentityHeader>(p => p
@@ -29,17 +31,17 @@ public class IdentityHeaderTests : BunitContext
             .Add(x => x.Prices, EmptyPrices)
             .Add(x => x.Signals, new SignalsDto(0, 0, [])));
 
+    // D-122: the set segment is a live link now that /set/{id} exists — the deferred
+    // button era ended with the wire gaining SetId.
     [Fact]
-    public void Subline_set_segment_is_deferred_disabled_not_plain_text()
+    public void Subline_set_segment_links_to_the_set_page()
     {
         var cut = RenderHeader(Identity());
 
-        var setControl = cut.Find(".subline button");
-
-        Assert.True(setControl.HasAttribute("disabled"));
-        Assert.Equal("true", setControl.GetAttribute("aria-disabled"));
-        Assert.Equal("Evolving Skies", setControl.TextContent);
-        Assert.Equal(Breadcrumb.SetTooltip, setControl.GetAttribute("title"));
+        var setLink = cut.Find("a.subline-set");
+        Assert.Equal("Evolving Skies", setLink.TextContent);
+        Assert.Equal("set/7", setLink.GetAttribute("href"));
+        Assert.Empty(cut.FindAll(".subline button"));
     }
 
     [Fact]
@@ -60,26 +62,34 @@ public class IdentityHeaderTests : BunitContext
         Assert.Contains("215/203", cut.Find(".subline").TextContent);
     }
 
+    // D-122 closes the D-087 placeholder era: the Pokédex tag table shipped, so the
+    // character segment renders real species links — and a card with no tagged species
+    // (Trainers/Energy, D-108) omits the segment honestly instead of showing a label.
     [Fact]
-    public void Subline_species_placeholder_is_deferred_with_its_phase_tooltip()
+    public void Subline_species_render_as_character_links()
     {
-        // D-087: the slot ships before the data. An honest placeholder label holds the
-        // character segment until the Pokédex phase's tag table supplies real names —
-        // never an omitted segment, and never a name guessed from the title string.
         var cut = RenderHeader(Identity());
-        var species = cut.Find(".subline .subline-character");
+        var species = cut.Find("a.subline-character");
 
-        Assert.True(species.HasAttribute("disabled"));
-        Assert.Equal("Pokémon name", species.TextContent);
-        Assert.Equal("The Pokémon's name arrives with the Pokédex phase", species.GetAttribute("title"));
+        Assert.Equal("Umbreon", species.TextContent);
+        Assert.Equal("character/umbreon", species.GetAttribute("href"));
     }
 
     [Fact]
-    public void Subline_species_placeholder_renders_even_without_a_collector_number()
+    public void Subline_species_links_render_even_without_a_collector_number()
     {
         var cut = RenderHeader(Identity(collectorNumber: null));
 
-        Assert.Single(cut.FindAll(".subline .subline-character"));
+        Assert.Single(cut.FindAll("a.subline-character"));
+    }
+
+    [Fact]
+    public void A_card_without_species_omits_the_character_segment_and_dot()
+    {
+        var cut = RenderHeader(Identity(species: []));
+
+        Assert.Empty(cut.FindAll(".subline-character"));
+        Assert.Empty(cut.FindAll(".subline-dot"));
     }
 
     [Fact]

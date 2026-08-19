@@ -24,7 +24,8 @@ else if (_result.Snapshot is null)
 else
 {
     <PageTitle>@_result.Snapshot.Identity.Title</PageTitle>
-    <Breadcrumb SetName="@_result.Snapshot.Identity.SetName" CardTitle="@_result.Snapshot.Identity.Title" />
+    <Breadcrumb SetId="@_result.Snapshot.Identity.SetId" SetName="@_result.Snapshot.Identity.SetName"
+                CardTitle="@_result.Snapshot.Identity.Title" />
     <IdentityHeader Identity="@_result.Snapshot.Identity" CardId="@_result.Snapshot.CardId"
                     Prices="@_result.Snapshot.Prices" Signals="@_result.Snapshot.Signals">
         <BadgeSlot>

@@ -13,10 +13,16 @@ public sealed record CardIdentity(
     string Title,
     string? CollectorNumber,
     int? SetSize,
+    long SetId,
     string SetName,
+    IReadOnlyList<CardSpeciesRef> Species,
     string? ImageHash,
     DateTimeOffset? DelistedAt,
     DateTimeOffset? NotACardAt);
+
+/// <summary>A species tagged on the card (D-122) — dex order, zero for Trainers/Energy
+/// per D-108's honest no-species verdicts.</summary>
+public sealed record CardSpeciesRef(string Name, string Slug);
 
 public interface ICardIdentityReader
 {

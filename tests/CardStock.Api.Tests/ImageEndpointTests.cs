@@ -11,7 +11,9 @@ public class ImageEndpointTests
         Title: "Charizard #4/102",
         CollectorNumber: "4",
         SetSize: null,
+        SetId: 7,
         SetName: "Base Set",
+        Species: [],
         ImageHash: imageHash,
         DelistedAt: null,
         NotACardAt: notACardAt);
