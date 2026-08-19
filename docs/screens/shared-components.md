@@ -288,7 +288,13 @@ Default widths, Home (`Home:331`): `{ card: 220, tier: 52, price: 76, chg: 52, s
 > **every** grip is the seam between the column on its left and everything to its right —
 > the dragged column takes the delta, the columns right of it absorb the opposite
 > (proportional split), columns left of it never move, and the boundary follows the
-> cursor. The last grip has no right side, so the flexible first track absorbs via fr. **(b)** The clamp divergence
+> cursor. The last grip has no right side, so the flexible first track absorbs via fr.
+> *And D-120 (same day):* pristine, **every** column flexes over its default minimum —
+> `minmax(min, 2.5fr)` for the name against `minmax(min, 1fr)` each for the data columns —
+> so the name's default share is a weighted portion of the spare width, not all of it. The
+> first grip touch freezes the rendered widths (JS measure) into the fixed model so the
+> seam math stays pixel-exact; a reload restores the fluid pristine state (widths remain
+> in-memory only, as ruled). **(b)** The clamp divergence
 > above is resolved: floor 52 (the build's), ceiling 420, all columns. **(c)** Virtualized
 > rows materialize once per `Rows` instance — a fresh list every render resets Virtualize's
 > anchoring (the snap-to-top D-118 records) — and `ItemSize` is a contract with the real

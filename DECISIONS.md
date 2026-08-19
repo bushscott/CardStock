@@ -352,6 +352,23 @@ Read directly 2026-08-10, to be mirrored per D-018–D-021.
 
 ## Decided
 
+### D-120 — The roster is fluid until touched: weighted flex pristine, frozen widths on first grip
+Owner UAT, 2026-08-19: *"i would like card title to default to a bit smaller space."* The
+name column was the grid's only flexible track, so it swallowed all spare width by
+construction (944px at 1500px viewport — its 230 "default" is only a minmax minimum).
+Ruled design: **pristine, every column flexes over its default minimum** — the name at
+2.5fr against 1fr per data column — so spare width distributes by weight instead of
+pooling in the name; **the first grip touch freezes the rendered widths** (measured via
+`catalog.js measureColumns`, fallback to defaults if measurement is unavailable) into the
+fixed model, so D-119's seam-follows-cursor math stays pixel-exact from the first drag.
+The first column's stored value is a minmax minimum, not a width, so it clamps to the
+floor only — a frozen 469px name must not snap to the 420 ceiling on first touch. Reload
+restores pristine fluid (§4.1's widths-in-memory-only ruling unchanged). Receipts, live
+post-deploy on `/set/90` at 1500px: pristine name **469px** (was 944) with data columns
+187 each; after freeze, a +60px seam drag moved the dragged column exactly +60 and the
+right side exactly −60, name within rounding (±2px). Suite: 465 passed, 0 failed, 35
+DB-gated skips.
+
 ### D-119 — Every roster grip is a seam: the boundary follows the cursor
 Owner UAT, 2026-08-19, refining D-117 after feeling it live: *"the right resize bar of a
 column resizes its column to the left and the ones to the right i think that feels

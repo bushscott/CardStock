@@ -59,3 +59,11 @@ export function installFocusTrap(dialogElement) {
         }
     });
 }
+
+// D-120: the pristine roster is fluid (name 2.5fr, data columns 1fr over their minimums)
+// so the name's default share is modest; the first grip touch freezes the layout so the
+// D-119 seam math stays pixel-exact. This reads the rendered track widths at that moment.
+export function measureColumns(tableElement) {
+    return [...tableElement.querySelectorAll('.rt-head-cell')]
+        .map(c => c.getBoundingClientRect().width);
+}

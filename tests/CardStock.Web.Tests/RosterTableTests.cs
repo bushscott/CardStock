@@ -72,12 +72,16 @@ public class RosterTableTests : BunitContext
         Assert.Equal("value", sort.Key);
     }
 
+    // D-120: pristine, every column flexes over its default minimum — the name weighted
+    // 2.5fr against 1fr each — so the name no longer swallows all spare width by default.
+    // The first grip touch freezes the layout (the seam tests below exercise that path).
     [Fact]
-    public void The_grid_template_follows_the_column_widths_with_the_name_track_elastic()
+    public void The_pristine_grid_is_fluid_with_the_name_track_weighted()
     {
         var cut = Render(new SortState("value"));
         var head = cut.Find(".rt-head");
-        Assert.Contains("minmax(230px, 1.4fr) 100px 84px", head.GetAttribute("style"));
+        Assert.Contains("minmax(230px, 2.5fr) minmax(100px, 1fr) minmax(84px, 1fr)",
+            head.GetAttribute("style"));
     }
 
     [Fact]
