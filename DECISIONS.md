@@ -19,6 +19,22 @@ Entries keep their ID forever and move between status sections as they settle. S
 
 ## Verified
 
+### D-124 — A chained on-demand set index costs ~46ms; the hard part is confirmed to be methodology, not compute
+Owner's for-fun probe during UAT, 2026-08-19 ("how complex would the query be to run this on
+demand?"), run read-only against the Pi. A ~30-line SQL sketch — DISTINCT ON latest per
+(card, month) cell (D-078 restatements respected), month-over-month log-ratios over cards
+present in **both** months (composition-bias guard), chained median — drew a plausible
+13-month PSA-10 index for Fusion Strike (set 92, baskets 473–502 of 546):
+100 → −9.6% step in Nov 2025 → drifting ~90.8 by Aug 2026. **Execution 46.4ms, planning
+1.3ms** (EXPLAIN ANALYZE). Consequence for the D-039/D-103 worker design: index compute is
+trivial even per-request; the real work is methodology — the sketch silently chose tier,
+median, basket rule, and window, each changing the line, and the Nov step plus the dead-flat
+stretches (sparse-publication tangle) are unexplained. Per the signal-referee rule nothing
+ships without fixtures + external cross-validation; this entry is design evidence, not a
+shipped number. Query preserved in the entry's receipt:
+latest-per-cell → pairs `ln(a/b)` on consecutive months → `percentile_cont(0.5)` per month
+→ `exp(sum(...) over (order by month))`, tier=5, window 14 months, set_id=92.
+
 ### D-105 — Card names are anglicized corpus-wide; the multi-language problem lives in set names, not card titles
 Live query, 2026-08-14, during the Pokédex-phase brainstorm, prompted by the owner's "we need to
 figure out how to do that for other languages also." Only **51 of 91,646** active cards carry any
