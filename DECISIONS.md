@@ -383,6 +383,10 @@ machinery (banner, Included()) rides the header unchanged. Receipts, live post-d
 `/set/92`: terminal renders zero `.sort-pills`; Card header click → Zorua [Reverse Holo]
 #170 first, second click → Absol #164 with `Card ▴`; binder view renders the five pills.
 Suite: 474 passed, 0 failed, 35 DB-gated skips.
+**Extended same day (owner):** binder gains a **name** pill on both rosters — the sort
+terminal's Card header offers must be reachable in the headerless density too. Receipt:
+binder pills on `/set/92` render `name · value · ROC 3M · RS · pop Δ · sales/mo`; the
+name pill's first click sorts Z-first (uniform new-key-descending), tiles follow.
 
 ### D-126 — The sales regime displaces the monthly regime window-by-window, gated by sufficiency, app-wide
 Owner, 2026-08-19, generalizing D-125 into product policy: *"the further out we get from

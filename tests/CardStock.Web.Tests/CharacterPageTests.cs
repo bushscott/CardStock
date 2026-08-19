@@ -57,13 +57,14 @@ public class CharacterPageTests : BunitContext
     }
 
     [Fact]
-    public void Binder_is_the_default_with_four_pills_reachable()
+    public void Binder_is_the_default_with_five_pills_reachable()
     {
         var cut = RenderCharacterPage(Dto(Row()));
         Assert.NotEmpty(cut.FindAll(".binder-grid"));
         Assert.Empty(cut.FindAll(".roster-table"));
         var labels = cut.FindAll(".sort-pills .pill").Select(p => p.TextContent).ToList();
-        Assert.Equal(["value", "year", "ROC 3M", "sales/mo"], labels);
+        // D-127 extension: binder gains the name pill terminal's Card header already has.
+        Assert.Equal(["name", "value", "year", "ROC 3M", "sales/mo"], labels);
     }
 
     [Fact]
