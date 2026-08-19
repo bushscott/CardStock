@@ -299,9 +299,10 @@ Default widths, Home (`Home:331`): `{ card: 220, tier: 52, price: 76, chg: 52, s
 > rows materialize once per `Rows` instance — a fresh list every render resets Virtualize's
 > anchoring (the snap-to-top D-118 records) — and `ItemSize` is a contract with the real
 > 30px row height. The §4.7 sticky header also now ships: `.rt-head` pins at `top: 48px`,
-> `z-index: 10`, which required the wrapper to clip (`overflow: clip`) rather than be a
-> scroll container — on a viewport narrower than the columns the table clips, as the
-> mockup's did.
+> `z-index: 10`, which required the wrapper to clip rather than be a scroll container —
+> **X axis only** (`overflow-x: clip`; corrected 2026-08-19 after two-axis clip made
+> Virtualize adopt the wrapper as its scroll root and wedge rosters at ~106 rendered
+> rows). On a viewport narrower than the columns the table clips, as the mockup's did.
 
 ### 4.2 Row-actions overflow menu
 

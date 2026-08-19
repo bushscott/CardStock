@@ -2,12 +2,14 @@
     background: var(--card);
     border: 1px solid var(--line);
     border-radius: 10px;
-    /* clip, not auto: any scroll-container overflow value would make this box the
-       sticky containment for .rt-head, and the §4.7 sticky header would never pin to
-       the page. clip keeps the rounded-corner clipping with no scroll container; on a
-       viewport narrower than the columns the table clips instead of scrolling — the
-       mockup had no horizontal scroll either. */
-    overflow: clip;
+    /* Clip the X axis ONLY. Any scroll-container overflow value would break the §4.7
+       sticky header, and two-axis `overflow: clip` broke Blazor's Virtualize — it took
+       this box for the scroll container and stopped hearing page scroll, wedging the
+       roster at ~106 rendered rows (owner UAT find, 2026-08-19; D-118 correction).
+       The Y axis must stay visible: the page is the one true scroller. On a viewport
+       narrower than the columns the table clips instead of scrolling — the mockup had
+       no horizontal scroll either. */
+    overflow-x: clip;
 }
 .rt-head, .rt-row { display: grid; align-items: center; padding: 6px 16px; }
 /* shared-components.md §4.7's ruled stack: the table header pins below the 48px nav

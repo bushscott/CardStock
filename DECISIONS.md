@@ -510,6 +510,14 @@ narrower than the columns the table clips instead of h-scrolling — the mockup 
 horizontal scroll either. Receipts, live post-deploy: header top = 48 at scrollY 3000;
 bottom settles with no reversal headless (momentum-scroll confirmation is the owner's, in
 their browser). Suite: 463 passed, 0 failed, 35 DB-gated skips.
+**Corrected 2026-08-19 (owner UAT find):** the two-axis `overflow: clip` broke Virtualize —
+it took the wrapper for its scroll container and stopped hearing page scroll, wedging
+rosters at ~106 rendered rows with a 13,200px blank spacer below (measured on set 92: 546
+rows, 106 rendered at max scroll). This entry's receipts checked scroll stability and the
+pinned header but never content completeness — the wedge shipped verified-looking. Fix:
+clip the X axis only (`overflow-x: clip`; Y stays visible — the page is the one true
+scroller). Re-receipt: set 92 scrolls to its true last row, 0px slack after it, sticky
+still at 48.
 
 ### D-117 — The name column's grip redistributes; the resize clamp is 52/420 everywhere
 Owner UAT, 2026-08-18, on `/set/90`: *"when i try to drag the resizing bar right of the card
