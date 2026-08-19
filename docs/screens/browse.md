@@ -63,6 +63,16 @@
 > default (a–z remains one click away). The newest sets are the ones worth walking in the
 > door for.
 
+> **Amended 2026-08-19 (owner UAT, D-123).** Shelf headers grow up: the 13px mono label is
+> replaced by the shared **`ShelfHeader`** component — an 18px Inter Tight title, the
+> metadata segments the grouping can **honestly state** (a year span only when the shelf
+> has known dates; the set count always; "alphabetical" when that is the shelf's ordering
+> story), and a hairline rule to the right edge that does the separating. The date-mode
+> tail retitles from "{n} sets awaiting metadata — alphabetical" to title "awaiting
+> metadata" with the count and ordering as metadata segments. The pending tails never show
+> a year span — their dates are unknown. Future grouped surfaces reuse this component
+> rather than inventing a header.
+
 **Runtime:** Design Composer. `<x-dc>` host (`:9`), template directives `sc-if` / `sc-for` resolved by `support.js:555-556`; `hint-placeholder-count` / `hint-placeholder-val` are design-time-only hints consumed when the bound value is unavailable (`support.js:614`, `support.js:648`) and carry **no** runtime meaning. All view data comes from one `renderVals()` return object (`:219-314`, dispatched at `support.js:1085`). The component takes **no props** (`data-props=""`, `:159`).
 
 ---

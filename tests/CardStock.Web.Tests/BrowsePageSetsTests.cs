@@ -73,7 +73,7 @@ public class BrowsePageSetsTests : BunitContext
     {
         var cut = RenderBrowse(sets: [Tile(5, "Japanese Promo", status: "pending", era: null, released: null)]);
         cut.FindAll(".order-pills .pill").Single(p => p.TextContent == "era").Click();
-        Assert.Contains("◌ metadata pending", cut.Find(".shelf-title + .set-grid .fan-tile").TextContent);
+        Assert.Contains("◌ metadata pending", cut.Find(".shelf-header + .set-grid .fan-tile").TextContent);
 
         // Mirrors the Set page's identical chip (SetPage.razor's .set-meta-pending): keyboard
         // reachable and carries the same CatalogCopy.MetadataPending explainer.
@@ -123,6 +123,33 @@ public class BrowsePageSetsTests : BunitContext
         cut.FindAll(".order-pills .pill").Single(p => p.TextContent == "era").Click();
         Assert.Contains("▴", cut.FindAll(".order-pills .pill")
             .Single(p => p.TextContent.Contains("era")).TextContent);
+    }
+
+    // D-123: each shelf header states only what its grouping can honestly claim — a year
+    // span when the shelf has known dates, the count always, "alphabetical" when that is
+    // the shelf's ordering story. The pending tail never invents a span.
+    [Fact]
+    public void Shelf_headers_state_years_counts_and_ordering_honestly()
+    {
+        var cut = RenderBrowse(sets:
+        [
+            Tile(1, "Base Set", era: "WOTC", released: "1999-01-09"),
+            Tile(2, "Evolving Skies", released: "2021-08-27"),
+            Tile(5, "Japanese Promo", status: "pending", era: null, released: null),
+        ]);
+
+        var headers = cut.FindAll(".shelf-header");
+        Assert.Equal(2, headers.Count);
+
+        Assert.Equal("By release date", headers[0].QuerySelector(".shelf-title")!.TextContent);
+        Assert.Contains("1999–2021", headers[0].TextContent);
+        Assert.Contains("2 sets", headers[0].TextContent);
+        Assert.Equal(2, headers[0].QuerySelectorAll(".shelf-meta").Length);   // years + count
+
+        Assert.Equal("awaiting metadata", headers[1].QuerySelector(".shelf-title")!.TextContent);
+        Assert.Contains("1 set", headers[1].TextContent);
+        Assert.Contains("alphabetical", headers[1].TextContent);
+        Assert.Equal(2, headers[1].QuerySelectorAll(".shelf-meta").Length);   // count + alphabetical, no years
     }
 
     // Controller-ruled regression test: CatalogApiClient.GetAsync<T> returns a non-null

@@ -1,0 +1,7 @@
+.shelf-header { display: flex; align-items: baseline; gap: 10px; margin: 28px 0 0; }
+.shelf-title { font: 600 18px 'Inter Tight', sans-serif; color: var(--ink); margin: 0; }
+.shelf-meta { font: 400 12px 'JetBrains Mono', monospace; color: var(--mut2);
+    white-space: nowrap; }
+.shelf-meta + .shelf-meta::before { content: "· "; }
+/* The rule is what separates the shelves; baseline-aligned flex needs it re-centred. */
+.shelf-rule { flex: 1; height: 1px; background: var(--line); align-self: center; }

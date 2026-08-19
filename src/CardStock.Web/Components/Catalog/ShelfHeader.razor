@@ -1,0 +1,32 @@
+@* D-123: the shared shelf/group header — an 18px title, the metadata segments the
+   grouping can honestly state (a year span only when the shelf has known dates, the
+   count always, "alphabetical" when that is the shelf's ordering story), and a hairline
+   rule to the right edge that does the actual separating. Future grouped surfaces
+   (screener buckets, binder groupings) reuse this rather than inventing a header. *@
+<div class="shelf-header">
+    <h2 class="shelf-title">@Title</h2>
+    @if (Years is not null)
+    {
+        <span class="shelf-meta">@Years</span>
+    }
+    <span class="shelf-meta">@(Count == 1 ? "1 set" : $"{Count} sets")</span>
+    @if (Alphabetical)
+    {
+        <span class="shelf-meta">alphabetical</span>
+    }
+    <span class="shelf-rule" aria-hidden="true"></span>
+</div>
+
+@code {
+    [Parameter, EditorRequired]
+    public string Title { get; set; } = "";
+
+    [Parameter]
+    public string? Years { get; set; }
+
+    [Parameter]
+    public int Count { get; set; }
+
+    [Parameter]
+    public bool Alphabetical { get; set; }
+}

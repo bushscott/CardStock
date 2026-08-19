@@ -2,8 +2,6 @@
 .browse-head h1 { font: 700 26px 'Inter Tight', sans-serif; margin: 0; }
 .set-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(230px, 1fr));
     gap: 12px; margin-top: 12px; }
-.shelf-title { font: 600 13px 'JetBrains Mono', monospace; color: var(--mut2);
-    text-transform: uppercase; letter-spacing: 0.06em; margin: 18px 0 0; }
 .fan-tile { display: block; background: var(--card); border: 1px solid var(--line);
     border-radius: 10px; padding: 14px; text-decoration: none; color: inherit;
     transition: box-shadow 0.15s; }

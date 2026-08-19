@@ -46,7 +46,7 @@ public class SetShelvesTests
     {
         var shelves = SetShelves.ByReleaseDate(Sets);
         Assert.Equal([1L, 4L, 2L, 3L], shelves[0].Sets.Select(t => t.SetId).ToArray());
-        Assert.Equal("2 sets awaiting metadata — alphabetical", shelves[1].Title);
+        Assert.Equal("awaiting metadata", shelves[1].Title);
     }
 
     [Fact]
@@ -59,6 +59,32 @@ public class SetShelvesTests
 
     // D-115 direction rule: date/name-ordered content mirrors when descending; the
     // unknowable tail shelves stay pinned last and keep their stated internal order.
+    // D-123: shelf headers carry the metadata each grouping can honestly state. YearSpan
+    // reads the known dates only — null when a shelf has none (the pending tails), a single
+    // year when min == max — and the pending tails are flagged alphabetical so the header
+    // can say so instead of inventing a span.
+    [Fact]
+    public void Year_span_reads_known_dates_only()
+    {
+        Assert.Equal("1999–2022", SetShelves.YearSpan(Sets));
+        Assert.Equal("2021–2022", SetShelves.YearSpan(SetShelves.ByEra(Sets)[1].Sets));
+        Assert.Null(SetShelves.YearSpan(SetShelves.ByEra(Sets)[3].Sets));          // pending tail
+        Assert.Equal("1999", SetShelves.YearSpan([Tile(1, "Base Set", era: "WOTC", released: "1999-01-09")]));
+    }
+
+    [Fact]
+    public void The_pending_tails_are_flagged_alphabetical_and_the_date_tail_is_retitled()
+    {
+        var era = SetShelves.ByEra(Sets);
+        Assert.False(era[0].Alphabetical);
+        Assert.True(era[3].Alphabetical);
+
+        var date = SetShelves.ByReleaseDate(Sets);
+        Assert.Equal("awaiting metadata", date[1].Title);
+        Assert.True(date[1].Alphabetical);
+        Assert.False(date[0].Alphabetical);
+    }
+
     [Fact]
     public void Descending_alphabetical_is_z_first()
     {
@@ -72,7 +98,7 @@ public class SetShelvesTests
     {
         var shelves = SetShelves.ByReleaseDate(Sets, descending: true);
         Assert.Equal([3L, 2L, 4L, 1L], shelves[0].Sets.Select(t => t.SetId).ToArray());
-        Assert.Equal("2 sets awaiting metadata — alphabetical", shelves[1].Title);
+        Assert.Equal("awaiting metadata", shelves[1].Title);
         Assert.Equal(["Aquapolis", "Pokemon Japanese Promo"],
             shelves[1].Sets.Select(t => t.Name).ToArray());
     }

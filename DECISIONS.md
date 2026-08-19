@@ -352,6 +352,25 @@ Read directly 2026-08-10, to be mirrored per D-018–D-021.
 
 ## Decided
 
+### D-123 — Shelf headers say what they can prove: title, honest metadata, and the rule that separates
+Owner UAT, 2026-08-19, on the era wall: *"the titles on this page of the groupings are way
+to small and not doing a good job at separating the content"* — the 13px mono era codes
+vanished between tile rows. Chosen from a four-treatment real-pixel mock (current / bigger
+/ +rule+count / +years+count+rule): the fullest one, then generalized at the owner's
+direction — *"the other groupings will need the same treatment. So their extra information
+… might be a little different."* Ruled design, the shared `ShelfHeader` component: an 18px
+Inter Tight ink title, metadata segments limited to what the grouping can **honestly
+state** — `SetShelves.YearSpan` reads known dates only (null when a shelf has none, a
+single year when the span collapses), the count always, "alphabetical" when that is the
+shelf's ordering story — and a hairline rule to the right edge that does the actual
+separating. The pending tails never show a span (their dates are unknown); the date-mode
+tail retitles to "awaiting metadata" with count/ordering moved into segments. Future
+grouped surfaces (screener buckets, binder groupings) reuse the component. Receipts, live
+post-deploy, spans matching the SQL prediction per era: date mode "By release date ·
+1999–2026 · 167 sets" + "awaiting metadata · 622 sets · alphabetical"; era mode "WOTC ·
+1999–2003 · 16 sets" through "ME", "no era · 2002–2024 · 33 sets", pending tail without a
+span. Suite: 473 passed, 0 failed, 35 DB-gated skips.
+
 ### D-122 — The Card page's dead links arm: set crumb, set segment, and species links go live
 Owner UAT, 2026-08-19: *"go through all the pages that exist today and look at links that
 are specifically broken but shouldn't be broken anymore and make those links."* Audit

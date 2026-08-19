@@ -55,7 +55,9 @@
         {
             @if (shelf.Title is not null)
             {
-                <h2 class="shelf-title">@shelf.Title</h2>
+                @* D-123: the shared header — title + honest metadata + the separating rule. *@
+                <ShelfHeader Title="@shelf.Title" Years="@SetShelves.YearSpan(shelf.Sets)"
+                             Count="@shelf.Sets.Count" Alphabetical="@shelf.Alphabetical" />
             }
             <div class="set-grid">
                 @foreach (var set in shelf.Sets)
@@ -260,14 +262,16 @@
         $"{key} {(values.Count > 1 ? "∈" : "=")} " +
         string.Join(", ", values.Order().Select(v => SpeciesFilters.Label(key, v)));
 
-    private IReadOnlyList<(string? Title, IReadOnlyList<SetTileDto> Sets)> Shelves()
+    private IReadOnlyList<(string? Title, IReadOnlyList<SetTileDto> Sets, bool Alphabetical)> Shelves()
     {
         var sets = _sets!.Value!.Sets;
         return _setOrder switch
         {
-            "date" => SetShelves.ByReleaseDate(sets, _setDesc).Select(s => ((string?)s.Title, s.Sets)).ToList(),
-            "era" => SetShelves.ByEra(sets, _setDesc).Select(s => ((string?)s.Title, s.Sets)).ToList(),
-            _ => [(null, SetShelves.Alphabetical(sets, _setDesc))],
+            "date" => SetShelves.ByReleaseDate(sets, _setDesc)
+                .Select(s => ((string?)s.Title, s.Sets, s.Alphabetical)).ToList(),
+            "era" => SetShelves.ByEra(sets, _setDesc)
+                .Select(s => ((string?)s.Title, s.Sets, s.Alphabetical)).ToList(),
+            _ => [(null, SetShelves.Alphabetical(sets, _setDesc), false)],
         };
     }
 }

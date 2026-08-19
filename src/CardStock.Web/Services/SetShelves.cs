@@ -9,7 +9,23 @@ namespace CardStock.Web.Services;
 /// must not promote the "we don't know" buckets to the top.</summary>
 public static class SetShelves
 {
-    public sealed record Shelf(string Title, IReadOnlyList<SetTileDto> Sets);
+    public sealed record Shelf(string Title, IReadOnlyList<SetTileDto> Sets, bool Alphabetical = false);
+
+    /// <summary>The years a shelf can honestly claim (D-123): known dates only — null when
+    /// a shelf has none (the pending tails), a single year when the span collapses.</summary>
+    public static string? YearSpan(IReadOnlyList<SetTileDto> sets)
+    {
+        var years = sets.Where(s => s.ReleasedOn is not null)
+            .Select(s => s.ReleasedOn!.Value.Year).ToList();
+        if (years.Count == 0)
+        {
+            return null;
+        }
+
+        var min = years.Min();
+        var max = years.Max();
+        return min == max ? $"{min}" : $"{min}–{max}";
+    }
 
     public static IReadOnlyList<SetTileDto> Alphabetical(
         IReadOnlyList<SetTileDto> sets, bool descending = false) =>
@@ -33,7 +49,7 @@ public static class SetShelves
         var shelves = new List<Shelf> { new("By release date", ordered) };
         if (undated.Count > 0)
         {
-            shelves.Add(new($"{undated.Count} sets awaiting metadata — alphabetical", undated));
+            shelves.Add(new("awaiting metadata", undated, Alphabetical: true));
         }
 
         return shelves;
@@ -72,7 +88,7 @@ public static class SetShelves
             .ToList();
         if (pending.Count > 0)
         {
-            shelves.Add(new("metadata pending", pending));
+            shelves.Add(new("metadata pending", pending, Alphabetical: true));
         }
 
         return shelves;
