@@ -368,6 +368,24 @@ Read directly 2026-08-10, to be mirrored per D-018–D-021.
 
 ## Decided
 
+### D-126 — The sales regime displaces the monthly regime window-by-window, gated by sufficiency, app-wide
+Owner, 2026-08-19, generalizing D-125 into product policy: *"the further out we get from
+the seam, the more we need to look back and see if we can replace the historical monthly
+data throughout the application with our granular sales data."* Ruled: **every windowed
+consumer (chart, metric, index) prefers sales-derived series for any window the sales
+history fully and adequately covers; the monthly source serves only the stretch sales
+cannot, with the seam drawn where it falls (rule #1) — and when sales cover the whole
+window, the monthly source drops out of that view entirely and no seam renders.** The
+switchover per window is **a sufficiency test, not a calendar event** — the owner's "if we
+can" is load-bearing: granular is not automatically adequate (sparse-sale cards have
+zero-transaction months where the monthly source at least carries a value), so each
+consumer's existing floor/state machinery gates its own takeover, per card or per basket.
+Consequences: the seam migrates out of short windows first (90D turns sales-pure within
+months of the D-033 floor), 12M windows about a year after, and it survives longest in
+deep-history look-backs — the monthly source's one enduring job. Binds the worker design
+phase (D-039/D-103 phase 6); D-125's set chart is the first instance of this rule, not a
+special case.
+
 ### D-125 — The set index chart: monthly backbone full-width, sales segment growing from the floor, seam visible
 Owner, 2026-08-19, closing the conversation D-124's probe opened: *"Let's go with that as
 our final implementation. and we can still leave it to the worker to fill in."* The set
