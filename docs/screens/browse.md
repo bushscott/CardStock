@@ -58,6 +58,11 @@
 > never contradicts its own arrow. Reversal mirrors date/name-ordered content only — the tail
 > shelves, all-unknown-date eras, and undated sets stay pinned last in both directions.
 
+> **Amended 2026-08-19 (owner UAT, D-121).** The set wall opens on **release date,
+> descending** — the "release date ▾" pill active on load — superseding D-110 (a)'s a–z
+> default (a–z remains one click away). The newest sets are the ones worth walking in the
+> door for.
+
 **Runtime:** Design Composer. `<x-dc>` host (`:9`), template directives `sc-if` / `sc-for` resolved by `support.js:555-556`; `hint-placeholder-count` / `hint-placeholder-val` are design-time-only hints consumed when the bound value is unavailable (`support.js:614`, `support.js:648`) and carry **no** runtime meaning. All view data comes from one `renderVals()` return object (`:219-314`, dispatched at `support.js:1085`). The component takes **no props** (`data-props=""`, `:159`).
 
 ---

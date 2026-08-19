@@ -18,12 +18,18 @@ public class BrowsePageSetsTests : BunitContext
         id, name, cards, top, status, era,
         released is null ? null : DateOnly.Parse(released, CultureInfo.InvariantCulture));
 
+    // D-121: the wall opens on release date, newest first (superseding D-110 (a)'s
+    // a–z default).
     [Fact]
-    public void Sets_mode_is_the_default_with_the_alphabetical_wall()
+    public void Sets_mode_is_the_default_and_opens_on_release_date_newest_first()
     {
-        var cut = RenderBrowse(sets: [Tile(2, "Evolving Skies"), Tile(1, "Base Set", era: "WOTC")]);
+        var cut = RenderBrowse(sets:
+            [Tile(1, "Base Set", era: "WOTC", released: "1999-01-09"), Tile(2, "Evolving Skies")]);
         var names = cut.FindAll(".fan-tile .fan-name").Select(n => n.TextContent).ToList();
-        Assert.Equal(["Base Set", "Evolving Skies"], names);
+        Assert.Equal(["Evolving Skies", "Base Set"], names);
+        var active = cut.FindAll(".order-pills .pill").Single(p => p.GetAttribute("aria-pressed") == "true");
+        Assert.Contains("release date", active.TextContent);
+        Assert.Contains("▾", active.TextContent);
     }
 
     [Fact]
@@ -88,25 +94,29 @@ public class BrowsePageSetsTests : BunitContext
             Tile(2, "Evolving Skies", released: "2021-08-27"),
         ]);
 
+        // Default (D-121): release date, descending, marked.
+        var date = cut.FindAll(".order-pills .pill").Single(p => p.TextContent.Contains("release date"));
+        Assert.Contains("▾", date.TextContent);
+        Assert.Equal("true", date.GetAttribute("aria-pressed"));
+
+        // Re-clicking the active pill reverses it: oldest first.
+        date.Click();
+        Assert.Contains("▴", cut.FindAll(".order-pills .pill")
+            .Single(p => p.TextContent.Contains("release date")).TextContent);
+        Assert.Equal(["Base Set", "Evolving Skies"],
+            cut.FindAll(".fan-tile .fan-name").Select(n => n.TextContent).ToList());
+
+        // Switching pills resets to ascending.
+        cut.FindAll(".order-pills .pill").Single(p => p.TextContent == "a–z").Click();
         var az = cut.FindAll(".order-pills .pill").Single(p => p.TextContent.Contains("a–z"));
         Assert.Contains("▴", az.TextContent);
-        Assert.Equal("true", az.GetAttribute("aria-pressed"));
+        Assert.Equal("false", cut.FindAll(".order-pills .pill")
+            .Single(p => p.TextContent.Contains("release date")).GetAttribute("aria-pressed"));
 
+        // Re-clicking flips the label so it never lies about its own arrow.
         az.Click();
         var za = cut.FindAll(".order-pills .pill").Single(p => p.TextContent.Contains("z–a"));
         Assert.Contains("▾", za.TextContent);
-        Assert.Equal(["Evolving Skies", "Base Set"],
-            cut.FindAll(".fan-tile .fan-name").Select(n => n.TextContent).ToList());
-
-        cut.FindAll(".order-pills .pill").Single(p => p.TextContent == "release date").Click();
-        var date = cut.FindAll(".order-pills .pill").Single(p => p.TextContent.Contains("release date"));
-        Assert.Contains("▴", date.TextContent);
-        Assert.Equal("false", cut.FindAll(".order-pills .pill")
-            .Single(p => p.TextContent.Contains("a–z")).GetAttribute("aria-pressed"));
-
-        date.Click();
-        Assert.Contains("▾", cut.FindAll(".order-pills .pill")
-            .Single(p => p.TextContent.Contains("release date")).TextContent);
         Assert.Equal(["Evolving Skies", "Base Set"],
             cut.FindAll(".fan-tile .fan-name").Select(n => n.TextContent).ToList());
 

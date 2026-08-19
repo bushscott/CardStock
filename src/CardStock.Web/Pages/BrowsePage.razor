@@ -186,8 +186,10 @@
     private CatalogResult<BrowseSetsDto>? _sets;
     private CatalogResult<BrowseSpeciesDto>? _species;
     private IReadOnlyDictionary<int, int[]>? _spriteArt;
-    private string _setOrder = "az";
-    private bool _setDesc;
+    // D-121: the wall opens on release date, newest first (superseding D-110 (a)'s a–z
+    // default) — the newest sets are the ones worth walking in the door for.
+    private string _setOrder = "date";
+    private bool _setDesc = true;
     private bool _popoverOpen;
     private readonly Dictionary<string, IReadOnlySet<string>> _filters = [];
 

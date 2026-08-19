@@ -352,6 +352,15 @@ Read directly 2026-08-10, to be mirrored per D-018–D-021.
 
 ## Decided
 
+### D-121 — The set wall opens on release date, newest first
+Owner UAT, 2026-08-19: *"the browse page should default to sorting by set and sorting by
+release date descending."* Set mode was already the default; the order default flips from
+D-110 (a)'s a–z to **release date, descending** — the "release date ▾" pill active on
+load, a–z one click away, all D-115 toggle/reset semantics unchanged. Receipts, live
+post-deploy: fresh `/browse` shows the "release date ▾" pill `aria-pressed=true`, first
+shelf "By release date", first tile Pokemon Pitch Black (the corpus's newest dated set —
+same tile the D-115 date-▾ receipt found). Suite: 465 passed, 0 failed, 35 DB-gated skips.
+
 ### D-120 — The roster is fluid until touched: weighted flex pristine, frozen widths on first grip
 Owner UAT, 2026-08-19: *"i would like card title to default to a bit smaller space."* The
 name column was the grid's only flexible track, so it swallowed all spare width by
