@@ -40,6 +40,14 @@
 > `LoadingRing` — one 48px ring at `inset: 20vh` that the boot indicator fills (real download
 > progress) and this page's data fetch then spins in place. Contract: shared-components.md §4.8.
 
+> **Amended 2026-08-19 (owner ruling, D-125).** The `set index · 12M` slot keeps its
+> worker-phase arming, and its data contract when it arms is two-source: the monthly price
+> history draws the **full 12-month width on day one** (backfilled years deep), a
+> **sales-based segment grows month-by-month from the D-033 floor** (2026-09-01), and the
+> boundary between them **draws where it falls, never blended** — rule #1 at set grain.
+> Page-load computation was probed and rejected (D-124: 46ms, but methodology and
+> cross-page consistency are the block).
+
 ---
 
 ## 1. Identity

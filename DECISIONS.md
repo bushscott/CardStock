@@ -368,6 +368,30 @@ Read directly 2026-08-10, to be mirrored per D-018–D-021.
 
 ## Decided
 
+### D-125 — The set index chart: monthly backbone full-width, sales segment growing from the floor, seam visible
+Owner, 2026-08-19, closing the conversation D-124's probe opened: *"Let's go with that as
+our final implementation. and we can still leave it to the worker to fill in."* The set
+page's `set index · 12M` slot **still arms with the analytics worker** (D-103 phase 6
+unchanged; no on-demand interim), and when it arms, its data contract is **two-source**:
+
+1. The **monthly price history draws the full 12-month width on day one** — it is
+   backfilled years deep (D-124's Fusion Strike receipts: 2021-11 → 2026-08, 543/546
+   cards), so the chart is never empty and never waits on wall-clock time.
+2. A **sales-ledger-based segment begins at the D-033 floor (2026-09-01) and extends one
+   month at a time** as real transactions bank — the owner's fill-as-time-progresses
+   instinct, riding on the always-full backbone.
+3. **The boundary between the two draws where it falls and is never blended** — rule #1
+   applied at set grain.
+
+Rejected on the way: page-load computation (D-124 — the block is methodology and
+consistency, not the 46ms cost), sales-only (an empty chart until mid-2027), monthly-only
+(inherits the source's illiquid-card smoothing with no honest fine-grained regime).
+Methodology inside each regime — weighting, basket screens, the step-change explanation,
+referee fixtures per the signal rule — remains the worker design phase's job, constrained
+by this contract and D-124's exhibits. Whether the same two-source shape extends to the
+product-wide index family (D-004: Home ticker, Binder benchmark) is that phase's question;
+this ruling covers the set chart.
+
 ### D-123 — Shelf headers say what they can prove: title, honest metadata, and the rule that separates
 Owner UAT, 2026-08-19, on the era wall: *"the titles on this page of the groupings are way
 to small and not doing a good job at separating the content"* — the 13px mono era codes
