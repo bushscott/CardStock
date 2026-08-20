@@ -20,7 +20,7 @@ ProtectHome=true
 PrivateTmp=true
 MemoryMax=2G
 # 443 is a privileged port; this grants exactly the low-port bind and nothing
-# else, and composes with NoNewPrivileges (D-132 §4).
+# else, and composes with NoNewPrivileges (D-132 checklist B).
 AmbientCapabilities=CAP_NET_BIND_SERVICE
 
 [Install]

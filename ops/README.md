@@ -210,5 +210,7 @@ Let's Encrypt via certbot DNS-01 against Cloudflare (token in
 /etc/letsencrypt/renewal-hooks/deploy/cardstock.sh (source:
 ops/certbot-deploy-hook.sh) which copies PEMs to /etc/cardstock/tls
 (root:cardstock 640) and restarts the unit. LAN access without Cloudflare:
-add "192.168.30.56 cardstock.pro" to /etc/hosts on the dev machine — the
-cert genuinely matches, so no warnings. HSTS ramps per D-132 §G only.
+add "cardstock.pro" to /etc/hosts on the dev machine pointing at the Pi
+(192.168.0.56 until the Pi's DMZ move, 192.168.30.56 after — flip it
+alongside deploy.sh's IPs) — the cert genuinely matches, so no warnings.
+HSTS ramps per D-132 §G only.
