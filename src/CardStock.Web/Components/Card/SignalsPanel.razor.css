@@ -109,3 +109,8 @@
     border: none;
     background: none;
 }
+
+/* D-128 firing breakdown tones — the glyph carries the meaning, hue is redundant. */
+.sig-bd-pos { color: var(--pos); }
+.sig-bd-neg { color: var(--neg); }
+.sig-bd-warn { color: var(--warn); }

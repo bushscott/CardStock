@@ -130,9 +130,13 @@ public static class CardPageMapper
             SignalState.Locked, ChipTone.Neutral));
         rows.Add(ChurnRow(today));
 
+        var firing = rows.Where(r => r.State == SignalState.Firing).ToList();
         return new SignalsDto(
             rows.Count,
-            rows.Count(r => r.State == SignalState.Firing),
+            firing.Count,
+            firing.Count(r => r.Tone == ChipTone.Pos),
+            firing.Count(r => r.Tone == ChipTone.Neg),
+            firing.Count(r => r.Tone == ChipTone.Caution),
             [.. rows.Select(ToRowDto)]);
     }
 

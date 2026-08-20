@@ -58,8 +58,12 @@ public sealed record CensusDeltaBarDto(
 
 /// <summary>The signals panel (card.md §2.3.2). Evaluated counts every row — locked
 /// included: they were evaluated and found locked. Firing counts rows in the firing
-/// state. Both are computed, never authored.</summary>
-public sealed record SignalsDto(int Evaluated, int Firing, IReadOnlyList<SignalRowDto> Rows);
+/// state; the three breakdown counts split it by tone (D-128) and are computed in the
+/// same pass, so the header can never disagree with itself. All computed, never
+/// authored.</summary>
+public sealed record SignalsDto(
+    int Evaluated, int Firing, int FiringBullish, int FiringBearish, int FiringCaution,
+    IReadOnlyList<SignalRowDto> Rows);
 
 /// <summary>One signals-panel row. State: "firing" | "quiet" | "belowfloor" |
 /// "neutral" | "locked". Tone: "pos" | "neg" | "caution" | "neutral".</summary>

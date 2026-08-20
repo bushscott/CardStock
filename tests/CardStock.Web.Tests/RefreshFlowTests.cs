@@ -204,7 +204,7 @@ public class RefreshFlowTests : BunitContext
             .Add(x => x.Identity, identity)
             .Add(x => x.CardId, CardId)
             .Add(x => x.Prices, prices)
-            .Add(x => x.Signals, new SignalsDto(0, 0, []))
+            .Add(x => x.Signals, new SignalsDto(0, 0, 0, 0, 0, []))
             .Add(x => x.BadgeSlot, "<span class=\"probe\">badge</span>"));
 
         // D-097: the reservation lives under the action buttons inside row-a --

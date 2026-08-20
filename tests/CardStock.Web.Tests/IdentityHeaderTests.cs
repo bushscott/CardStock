@@ -29,7 +29,7 @@ public class IdentityHeaderTests : BunitContext
             .Add(x => x.Identity, identity)
             .Add(x => x.CardId, 630417L)
             .Add(x => x.Prices, EmptyPrices)
-            .Add(x => x.Signals, new SignalsDto(0, 0, [])));
+            .Add(x => x.Signals, new SignalsDto(0, 0, 0, 0, 0, [])));
 
     // D-122: the set segment is a live link now that /set/{id} exists — the deferred
     // button era ended with the wire gaining SetId.

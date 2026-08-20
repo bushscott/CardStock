@@ -96,7 +96,7 @@
     public PricesDto Prices { get; set; } = default!;
 
     [Parameter]
-    public SignalsDto Signals { get; set; } = new(0, 0, []);
+    public SignalsDto Signals { get; set; } = new(0, 0, 0, 0, 0, []);
 
     /// <summary>The reserved 28px slot's content -- CardPage supplies a RefreshBadge
     /// here (task 20). Empty renders as a blank row; the reservation is CSS

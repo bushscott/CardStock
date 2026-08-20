@@ -368,6 +368,20 @@ Read directly 2026-08-10, to be mirrored per D-018–D-021.
 
 ## Decided
 
+### D-128 — The signals count line carries a tone breakdown; signal hues keep the measurement grammar
+Owner UAT, 2026-08-19, asking whether colors mean one thing across the signals panel and
+floating green-buy/red-sell recoloring. Verified: the grammar is uniform (brand.md §4.2 —
+▲ bullish hit, ▼ bearish hit, – amber caution band closed at three signals, grey quiet,
+● descriptive, ◌ pending; color never alone). Buy/sell recoloring was argued down — the
+same reading is a buy in one strategy and a sell in another, and verdict-coloring bakes one
+playbook into the product; the designed home for "green means buy" is the ◆ composite,
+colored by the **user's own** screen thesis (Screener phase). Shipped instead, owner-picked:
+the count line gains a firing breakdown by tone — `12 evaluated · 5 firing — 3▲ · 1▼ · 1–` —
+computed on the wire beside the existing counts (never in the component, D-061 discipline),
+zero segments omitted, absent when nothing fires, tooltip leading with the words. Receipt,
+live 630417: `12 evaluated · 4 firing — 2▲ · 1▼ · 1–` with firing rows exactly ▲MACD,
+▲Trend R², ▼Tier spread, –RSI. Suite: 476 passed, 0 failed, 35 DB-gated skips.
+
 ### D-127 — Terminal rosters sort by header only; pills survive solely in binder density
 Owner UAT, 2026-08-19, after clicking the Card header and getting nothing: *"I think we
 need to get rid of all the pills. and just have the header of the table be clickable for

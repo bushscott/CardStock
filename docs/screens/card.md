@@ -27,6 +27,14 @@
 > never arrive is not. Charts/watchlist/binder controls stay deferred: their targets still
 > don't exist.
 
+> **Amended 2026-08-19 (owner UAT, D-128).** The signals count line breaks the firing total
+> down by tone — `12 evaluated · 5 firing — 3▲ · 1▼ · 1–` — computed on the wire in the same
+> pass as the counts (`SignalsDto` gains `FiringBullish/FiringBearish/FiringCaution`), so the
+> header can never disagree with itself. Zero segments are omitted; nothing renders when
+> nothing fires; the tooltip/aria-label leads with the breakdown in words. Per-signal colors
+> keep brand.md §4.2's measurement grammar — the owner's buy/sell coloring instinct is served
+> later by the ◆ composite (user-authored screens), not by re-meaning signal hues.
+
 ---
 
 ## 1. Identity

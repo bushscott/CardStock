@@ -14,7 +14,12 @@
     <div class="sig-header">
         <span class="sig-title">Signals</span>
         <span class="sig-spacer"></span>
-        <span class="sig-count" tabindex="0" title="@CountTooltip" aria-label="@CountTooltip">@Signals.Evaluated evaluated · @Signals.Firing firing</span>
+        <span class="sig-count" tabindex="0" title="@CountTooltip" aria-label="@CountTooltip">@Signals.Evaluated evaluated · @Signals.Firing <text>firing</text>@if (Breakdown().Count > 0)
+            {<text> — </text>@for (var i = 0; i < Breakdown().Count; i++)
+             {
+                 var seg = Breakdown()[i];
+                 @if (i > 0){<text> · </text>}<span class="@seg.Cls">@seg.Text</span>
+             }}</span>
     </div>
     <div class="sig-rows">
         @foreach (var row in Signals.Rows)
@@ -34,10 +39,24 @@
 </div>
 
 @code {
-    private const string CountTooltip =
+    // D-128: the firing breakdown by tone — computed on the wire like the counts above,
+    // zero segments omitted (a "0▼" is noise, not honesty). Glyphs carry the meaning;
+    // the tone hue is redundant with them, per brand.md §4's colour-never-alone rule.
+    private IReadOnlyList<(string Text, string Cls)> Breakdown()
+    {
+        var segments = new List<(string, string)>();
+        if (Signals.FiringBullish > 0) { segments.Add(($"{Signals.FiringBullish}▲", "sig-bd-pos")); }
+        if (Signals.FiringBearish > 0) { segments.Add(($"{Signals.FiringBearish}▼", "sig-bd-neg")); }
+        if (Signals.FiringCaution > 0) { segments.Add(($"{Signals.FiringCaution}–", "sig-bd-warn")); }
+        return segments;
+    }
+
+    private string CountTooltip => (Signals.Firing > 0
+        ? $"Firing now: {Signals.FiringBullish} bullish, {Signals.FiringBearish} bearish, {Signals.FiringCaution} caution. "
+        : "") +
         "Every chip-eligible signal is evaluated on this card automatically — nothing here is opted into. " +
         "Bollinger, beta, discount-to-list, and seasonality are excluded: visualization-grade, descriptive, or below coverage.";
 
     [Parameter, EditorRequired]
-    public SignalsDto Signals { get; set; } = new(0, 0, []);
+    public SignalsDto Signals { get; set; } = new(0, 0, 0, 0, 0, []);
 }

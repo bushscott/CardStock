@@ -86,6 +86,6 @@ internal static class Fixtures
                 GemRate: new CensusMetricDto("lowdata", [], GateNote: null),
                 Pace: new CensusMetricDto("lowdata", [], GateNote: null),
                 DeltaBars: []),
-            new SignalsDto(0, 0, []),
+            new SignalsDto(0, 0, 0, 0, 0, []),
             new FreshnessDto(lastVisitedAt));
 }

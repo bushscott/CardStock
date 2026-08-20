@@ -13,7 +13,7 @@ public class SignalsPanelTests : BunitContext
 
     /// <summary>Twelve rows — more than the mockup's eight, because the eight are a
     /// sample, not a cap (owner ruling 1, D-092).</summary>
-    private static SignalsDto TwelveRows() => new(12, 2,
+    private static SignalsDto TwelveRows() => new(12, 2, 2, 0, 0,
     [
         Row("ROC 3M", state: "firing", tone: "pos", glyph: "▲", value: "+18%"),
         Row("Trend R²", state: "firing", tone: "pos", glyph: "▲", value: ".99"),
@@ -30,6 +30,32 @@ public class SignalsPanelTests : BunitContext
         Row("Churn 30d", state: "locked", glyph: "◌", value: "unlocks 10-31-2026",
             tooltip: "Needs 60+ post-seam days · 0 recorded"),
     ]);
+
+    // D-128: the count line breaks the firing total down by tone — glyphs carry the
+    // meaning, zero segments are omitted, and no breakdown renders when nothing fires.
+    [Fact]
+    public void The_count_line_breaks_firing_down_by_tone_and_omits_zeros()
+    {
+        var mixed = new SignalsDto(12, 5, 3, 1, 1,
+            [Row("ROC 3M", state: "firing", tone: "pos", glyph: "▲")]);
+        var cut = Render<SignalsPanel>(p => p.Add(x => x.Signals, mixed));
+        var count = cut.Find(".sig-count");
+        Assert.Contains("3▲", count.QuerySelector(".sig-bd-pos")!.TextContent);
+        Assert.Contains("1▼", count.QuerySelector(".sig-bd-neg")!.TextContent);
+        Assert.Contains("1–", count.QuerySelector(".sig-bd-warn")!.TextContent);
+        Assert.Contains("3 bullish, 1 bearish, 1 caution", count.GetAttribute("title"));
+
+        var bullOnly = new SignalsDto(12, 2, 2, 0, 0, []);
+        var cut2 = Render<SignalsPanel>(p => p.Add(x => x.Signals, bullOnly));
+        Assert.NotNull(cut2.Find(".sig-count .sig-bd-pos"));
+        Assert.Empty(cut2.FindAll(".sig-bd-neg"));
+        Assert.Empty(cut2.FindAll(".sig-bd-warn"));
+
+        var none = new SignalsDto(12, 0, 0, 0, 0, []);
+        var cut3 = Render<SignalsPanel>(p => p.Add(x => x.Signals, none));
+        Assert.Empty(cut3.FindAll(".sig-bd-pos"));
+        Assert.DoesNotContain("—", cut3.Find(".sig-count").TextContent);
+    }
 
     [Fact]
     public void Every_row_renders_unbounded_no_fold_no_cap()
@@ -48,8 +74,10 @@ public class SignalsPanelTests : BunitContext
         var cut = Render<SignalsPanel>(p => p.Add(x => x.Signals, TwelveRows()));
 
         var count = cut.Find(".sig-count");
-        Assert.Equal("12 evaluated · 2 firing", count.TextContent);
-        Assert.StartsWith("Every chip-eligible signal is evaluated", count.GetAttribute("title"));
+        Assert.Equal("12 evaluated · 2 firing — 2▲", count.TextContent);
+        // D-128: the tooltip leads with the breakdown in words, then the authored copy.
+        Assert.StartsWith("Firing now: 2 bullish, 0 bearish, 0 caution. Every chip-eligible signal is evaluated",
+            count.GetAttribute("title"));
         Assert.Equal(count.GetAttribute("title"), count.GetAttribute("aria-label"));
         Assert.Equal("0", count.GetAttribute("tabindex"));
     }
