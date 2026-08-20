@@ -19,6 +19,31 @@ Entries keep their ID forever and move between status sections as they settle. S
 
 ## Verified
 
+### D-131 — 🚩 Postgres is LAN-exposed, not loopback-bound; D-036's claim went stale the day D-073 landed. Owner ruled it back to loopback
+Found 2026-08-20 during the Public exposure brainstorm, verifying the handoff's "Postgres and the
+intake API are loopback-bound" before building ACLs on it. **Half true.** Receipt, run over ssh:
+
+```
+ss -tlnp                                  → 0.0.0.0:5432 and [::]:5432  (Postgres, ALL interfaces)
+                                            0.0.0.0:5180                (the app, expected)
+                                            127.0.0.1:5155              (intake API — loopback ✅)
+SHOW listen_addresses;                    → *
+pg_hba.conf (non-comment tail)            → host all all 192.168.0.0/24 scram-sha-256
+```
+
+D-036 promised *"Postgres never has to listen on a network interface… unreachable from outside
+**by construction**."* True when written; **D-073 (test databases on the Pi, 2026-08-11) opened
+`listen_addresses = *` plus a whole-LAN pg_hba grant**, and no entry recorded the change. Until
+this phase executes, any device on the home LAN can attempt password auth against 5432.
+
+**Owner ruling, 2026-08-20: lock it down** — `listen_addresses = 'localhost'`, the LAN pg_hba
+line deleted — **while keeping both access paths**: ad-hoc queries via ssh + local-socket psql
+(unchanged), and the test suite via an SSH `LocalForward` (`pi-db` host entry, local 5433 →
+loopback 5432; `POKEMON_TEST_DB` repoints). Postgres ends with zero network listeners; the only
+network path to it is sshd, so reaching the socket takes the owner's key and auth still takes the
+role password. Steps and receipt live on the D-132 checklist; design in
+`docs/superpowers/specs/2026-08-20-public-exposure-design.md` §6.
+
 ### D-124 — A chained on-demand set index costs ~46ms; the hard part is confirmed to be methodology, not compute
 Owner's for-fun probe during UAT, 2026-08-19 ("how complex would the query be to run this on
 demand?"), run read-only against the Pi. A ~30-line SQL sketch — DISTINCT ON latest per
@@ -367,6 +392,82 @@ Read directly 2026-08-10, to be mirrored per D-018–D-021.
 ---
 
 ## Decided
+
+### D-132 — The Public exposure design is settled; this entry carries the go-public checklist (the phase's definition of done)
+Owner-approved section by section, 2026-08-20. Full design:
+`docs/superpowers/specs/2026-08-20-public-exposure-design.md`. The rulings, for the record:
+(1) **Route: Cloudflare Tunnel, free tier only** — over direct-443, decisively because the site's
+DNS never publishes the home IP (the crawler's egress; D-062's asymmetric harm) and volumetric
+DDoS dies at the edge instead of saturating the uplink; the Omada DMZ is still built underneath
+(D-036's blast radius is about the box, not the transport). Direct-443 stays the recorded
+fallback. (2) **The static-IP phone call is not made** — the tunnel is outbound-only; recorded as
+needed only if direct-443 is ever adopted. (3) **Kestrel moves to 443, amending D-129's "5180"**
+— every file naming the port is rewritten this phase anyway; the owner's direct/VPN URL becomes
+plainly `https://cardstock.pro` via hosts entry; cost is one `AmbientCapabilities` line. The
+banked accounts spec's prerequisite line is corrected in the same commit. (4) **Postgres returns
+to loopback** (D-131, owner ruling; ssh-tunnel test access). (5) **Remote management enters
+scope: WireGuard on the ER605 v2** (firmware-verified), VPN clients ACL'd to exactly the dev
+machine's grants — 22 and 443 to the Pi; endpoint via a DDNS hostname deliberately uncorrelated
+with "cardstock". (6) **Email provider settled early at the owner's offer: Resend, free tier**
+(3,000/mo, 100/day — production-usable where Postmark's 100/mo hard stop is not), settling
+D-130 #5's open item; this phase publishes the verified sending domain (DKIM live, apex SPF
+`-all`, DMARC `p=reject`, null MX) so the accounts phase writes only code. (7) **Domain:**
+`cardstock.pro`, owned, at Namecheap on parking defaults (verified by dig) — registration stays
+at Namecheap; only nameservers move to Cloudflare. Schema changes: **none.**
+
+**The go-public checklist** — ticked as executed; ordering is load-bearing (HSTS strictly last):
+
+**A. Cloudflare zone** — propagation runs while B–C proceed
+- [ ] Free account · add zone `cardstock.pro` · Namecheap nameservers → Cloudflare pair · delete parking records. Receipt: `dig NS cardstock.pro` shows Cloudflare
+- [ ] Scoped API token (Zone→DNS→Edit, this zone only) → root-only file on the Pi
+- [ ] Standing rule on record: no record in this zone ever points at the home IP
+
+**B. Pi prep** — all LAN-side; site not public yet
+- [ ] `certbot` + `python3-certbot-dns-cloudflare` via apt · issue cert for apex+www (DNS-01). Receipt: `/etc/letsencrypt/live/cardstock.pro/`
+- [ ] Deploy-hook → `/etc/cardstock/tls/` + web-unit restart · `certbot renew --dry-run` passes
+- [ ] App deploy: HTTPS-only Kestrel on 443 (PEM config) · forwarded headers (CF-Connecting-IP, loopback-only proxy) · security headers + CSP · `AllowedHosts` · per-IP cap reviewed/tightened (value set at plan time per D-062's principle)
+- [ ] systemd hardening (D-037 list + `CAP_NET_BIND_SERVICE`). Receipt: `systemd-analyze security` before/after
+- [ ] LAN verify via hosts entry: `https://cardstock.pro` direct — cert-valid, headers present (`curl -sI`)
+- [ ] Postgres lockdown per D-131 · restart between crawler visits. Receipt: `ss -tlnp` → 5432 loopback-only; test suite passes through the `pi-db` forward
+
+**C. Omada topology**
+- [ ] Pre-move sweep: `ss -tnp` on the Pi for established LAN-bound flows (record findings)
+- [ ] DHCP reservations: Pi `192.168.30.56` (DMZ), dev machine (LAN)
+- [ ] DMZ network VLAN 30 (`192.168.30.0/24`) created
+- [ ] Gateway ACLs 1–6 in spec §5's order (verify stateful states + VPN-as-source on this controller version; fallback recorded in spec)
+- [ ] Pi's switch port → untagged VLAN 30; Pi up at `.30.56` · update every old-IP reference: `~/.ssh/config` (+`pi-db`), `known_hosts`, deploy scripts, hosts entry, assistant memory
+- [ ] Survival check: ssh · deploy · test-suite tunnel · LAN browse 443 · Pi outbound (crawl journal advancing, NTP, apt)
+- [ ] WireGuard: interface `10.9.0.1/24` · per-device `/32` peers · No-IP DDNS (uncorrelated name) on the gateway. Receipt: from phone hotspot — VPN up, ssh + `https://cardstock.pro` reach the Pi, nothing else does
+
+**D. Tunnel — the site goes public**
+- [ ] `cloudflared` via Cloudflare arm64 apt repo · remotely-managed tunnel · hostname `cardstock.pro → https://127.0.0.1:443`, `originServerName` set · unit enabled
+- [ ] `www` → apex 301 Redirect Rule · Always Use HTTPS · SSL/TLS **Full (strict)**
+- [ ] Receipt: site loads on a phone off wifi
+
+**E. Edge posture + email DNS**
+- [ ] Free Managed Ruleset on · Bot Fight Mode on (watched toggle)
+- [ ] The one free rate-limiting rule on the express-refresh path (IP-keyed)
+- [ ] CAA `0 issue "letsencrypt.org"` · paired same-day check: edge cert still valid (Cloudflare auto-CAA)
+- [ ] Resend: account · add domain · publish issued DKIM/SPF records · apex SPF `v=spf1 -all` stays · DMARC `p=reject` · null MX · test send to gmail passes DKIM+DMARC (receipt: message headers)
+
+**F. Outside-in verification** — from networks that aren't ours
+- [ ] SSL Labs: **A** (pre-HSTS)
+- [ ] securityheaders.com: **A**
+- [ ] External port sweep of home IP: silent (WireGuard unresponsive by design)
+- [ ] `curl --resolve cardstock.pro:443:<home-ip>` from outside: unreachable — origin exists only behind the tunnel
+- [ ] Scripted refresh-endpoint burst from outside: cap trips at the configured threshold; normal browsing untouched
+- [ ] Full journey on the phone: browse, chart, ledger, refresh
+- [ ] Trackers check: read the legal prototype's actual claim; confirm no third-party client calls (CSP enforces) and none server-side (D-037's New Relic note)
+
+**G. HSTS ramp — strictly last (the recorded trap: HSTS before trusted cert = lockout)**
+- [ ] Preconditions ticked: cert live · tunnel serving · SSL Labs pass
+- [ ] `UseHsts` max-age **86400** · verify
+- [ ] After ≥7 quiet days: **31536000 + includeSubDomains**, no preload · SSL Labs **A+**
+
+**H. Closeout**
+- [ ] D-037 marked largely closed; what remains, named (the `sales.title` XSS test rides its screen's phase)
+- [ ] D-129 amendments recorded as executed (443; static-IP unnecessary-unless-direct-443)
+- [ ] Recorded risk, not a re-raise: the public box holds `sales`/`populations` with no backup, by owner ruling D-069 — on the record the day the door opens
 
 ### D-130 — The Accounts + watchlists design is settled; the rulings live in the spec
 Owner-approved section by section, 2026-08-20. Full design:

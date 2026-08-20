@@ -1,7 +1,7 @@
 # Accounts + watchlists — design
 
 **Date:** 2026-08-20 · **Status:** owner-approved section by section (brainstorm session, 2026-08-20); banked
-**Prerequisite:** the **Public exposure** phase (D-129) ships first. This design inherits from it and does not re-specify: HTTPS-only Kestrel on 5180 with a browser-trusted certificate (DNS-01), HSTS, response security headers (CSP with Blazor-WASM allowances, `X-Content-Type-Options`, `Referrer-Policy`, `X-Frame-Options`), the hardened systemd unit, and the domain — which is also the email sending domain, with SPF/DKIM/DMARC pre-staged.
+**Prerequisite:** the **Public exposure** phase (D-129) ships first. This design inherits from it and does not re-specify: HTTPS-only Kestrel on 443 (D-132 amended D-129's "5180") with a browser-trusted certificate (DNS-01), HSTS, response security headers (CSP with Blazor-WASM allowances, `X-Content-Type-Options`, `Referrer-Policy`, `X-Frame-Options`), the hardened systemd unit, and the domain — which is also the email sending domain, with SPF/DKIM/DMARC pre-staged.
 **Build references:** `docs/screens/account.md` · `docs/screens/profile.md` · `docs/screens/card.md` §3.4–3.5 · ADR-0001 · ADR-0002 · D-098 · D-103 #3.
 
 ---
