@@ -14,12 +14,8 @@
     <div class="sig-header">
         <span class="sig-title">Signals</span>
         <span class="sig-spacer"></span>
-        <span class="sig-count" tabindex="0" title="@CountTooltip" aria-label="@CountTooltip">@Signals.Evaluated evaluated · @Signals.Firing <text>firing</text>@if (Breakdown().Count > 0)
-            {<text> — </text>@for (var i = 0; i < Breakdown().Count; i++)
-             {
-                 var seg = Breakdown()[i];
-                 @if (i > 0){<text> · </text>}<span class="@seg.Cls">@seg.Text</span>
-             }}</span>
+        <span class="sig-count" tabindex="0" title="@CountTooltip" aria-label="@CountTooltip">@Signals.Evaluated evaluated · @Signals.Firing <text>firing</text>@foreach (var seg in Breakdown())
+            {@(" ")<span class="sig-bd-chip sig-bd-chip-@seg.Tone"><span class="sig-bd-@seg.Tone">@seg.Glyph</span>@seg.Count</span>}</span>
     </div>
     <div class="sig-rows">
         @foreach (var row in Signals.Rows)
@@ -40,14 +36,15 @@
 
 @code {
     // D-128: the firing breakdown by tone — computed on the wire like the counts above,
-    // zero segments omitted (a "0▼" is noise, not honesty). Glyphs carry the meaning;
-    // the tone hue is redundant with them, per brand.md §4's colour-never-alone rule.
-    private IReadOnlyList<(string Text, string Cls)> Breakdown()
+    // zero segments omitted (a "0▼" is noise, not honesty). Rendered as tone chips
+    // (owner pick, D-128): glyph toned, count in ink, tinted shell — glyph carries the
+    // meaning per brand.md §4's colour-never-alone rule.
+    private IReadOnlyList<(string Glyph, int Count, string Tone)> Breakdown()
     {
-        var segments = new List<(string, string)>();
-        if (Signals.FiringBullish > 0) { segments.Add(($"{Signals.FiringBullish}▲", "sig-bd-pos")); }
-        if (Signals.FiringBearish > 0) { segments.Add(($"{Signals.FiringBearish}▼", "sig-bd-neg")); }
-        if (Signals.FiringCaution > 0) { segments.Add(($"{Signals.FiringCaution}–", "sig-bd-warn")); }
+        var segments = new List<(string, int, string)>();
+        if (Signals.FiringBullish > 0) { segments.Add(("▲", Signals.FiringBullish, "pos")); }
+        if (Signals.FiringBearish > 0) { segments.Add(("▼", Signals.FiringBearish, "neg")); }
+        if (Signals.FiringCaution > 0) { segments.Add(("–", Signals.FiringCaution, "warn")); }
         return segments;
     }
 

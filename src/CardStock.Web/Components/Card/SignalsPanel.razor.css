@@ -110,7 +110,16 @@
     background: none;
 }
 
-/* D-128 firing breakdown tones — the glyph carries the meaning, hue is redundant. */
+/* D-128 firing breakdown — tone chips (owner pick): tinted shell, toned glyph, count
+   in ink. The glyph carries the meaning; the tint is redundant with it. */
+.sig-bd-chip { display: inline-flex; align-items: center; gap: 3px; padding: 0 7px;
+    border-radius: 99px; font-size: 12px; border: 1px solid; color: var(--ink); }
+.sig-bd-chip-pos { background: color-mix(in srgb, var(--pos) 8%, transparent);
+    border-color: color-mix(in srgb, var(--pos) 35%, transparent); }
+.sig-bd-chip-neg { background: color-mix(in srgb, var(--neg) 8%, transparent);
+    border-color: color-mix(in srgb, var(--neg) 35%, transparent); }
+.sig-bd-chip-warn { background: color-mix(in srgb, var(--warn) 8%, transparent);
+    border-color: color-mix(in srgb, var(--warn) 35%, transparent); }
 .sig-bd-pos { color: var(--pos); }
 .sig-bd-neg { color: var(--neg); }
 .sig-bd-warn { color: var(--warn); }

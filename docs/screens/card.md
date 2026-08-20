@@ -28,7 +28,9 @@
 > don't exist.
 
 > **Amended 2026-08-19 (owner UAT, D-128).** The signals count line breaks the firing total
-> down by tone — `12 evaluated · 5 firing — 3▲ · 1▼ · 1–` — computed on the wire in the same
+> down by tone — **tone chips** `▲3 ▼1 –1` (tinted pill per tone, toned glyph, ink count;
+> owner-picked from a four-way comparison after the first inline-text form read badly) —
+> computed on the wire in the same
 > pass as the counts (`SignalsDto` gains `FiringBullish/FiringBearish/FiringCaution`), so the
 > header can never disagree with itself. Zero segments are omitted; nothing renders when
 > nothing fires; the tooltip/aria-label leads with the breakdown in words. Per-signal colors

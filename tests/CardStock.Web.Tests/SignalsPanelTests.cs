@@ -40,21 +40,20 @@ public class SignalsPanelTests : BunitContext
             [Row("ROC 3M", state: "firing", tone: "pos", glyph: "▲")]);
         var cut = Render<SignalsPanel>(p => p.Add(x => x.Signals, mixed));
         var count = cut.Find(".sig-count");
-        Assert.Contains("3▲", count.QuerySelector(".sig-bd-pos")!.TextContent);
-        Assert.Contains("1▼", count.QuerySelector(".sig-bd-neg")!.TextContent);
-        Assert.Contains("1–", count.QuerySelector(".sig-bd-warn")!.TextContent);
+        Assert.Equal("▲3", count.QuerySelector(".sig-bd-chip-pos")!.TextContent);
+        Assert.Equal("▼1", count.QuerySelector(".sig-bd-chip-neg")!.TextContent);
+        Assert.Equal("–1", count.QuerySelector(".sig-bd-chip-warn")!.TextContent);
         Assert.Contains("3 bullish, 1 bearish, 1 caution", count.GetAttribute("title"));
 
         var bullOnly = new SignalsDto(12, 2, 2, 0, 0, []);
         var cut2 = Render<SignalsPanel>(p => p.Add(x => x.Signals, bullOnly));
-        Assert.NotNull(cut2.Find(".sig-count .sig-bd-pos"));
-        Assert.Empty(cut2.FindAll(".sig-bd-neg"));
-        Assert.Empty(cut2.FindAll(".sig-bd-warn"));
+        Assert.NotNull(cut2.Find(".sig-count .sig-bd-chip-pos"));
+        Assert.Empty(cut2.FindAll(".sig-bd-chip-neg"));
+        Assert.Empty(cut2.FindAll(".sig-bd-chip-warn"));
 
         var none = new SignalsDto(12, 0, 0, 0, 0, []);
         var cut3 = Render<SignalsPanel>(p => p.Add(x => x.Signals, none));
-        Assert.Empty(cut3.FindAll(".sig-bd-pos"));
-        Assert.DoesNotContain("—", cut3.Find(".sig-count").TextContent);
+        Assert.Empty(cut3.FindAll(".sig-bd-chip"));
     }
 
     [Fact]
@@ -74,7 +73,7 @@ public class SignalsPanelTests : BunitContext
         var cut = Render<SignalsPanel>(p => p.Add(x => x.Signals, TwelveRows()));
 
         var count = cut.Find(".sig-count");
-        Assert.Equal("12 evaluated · 2 firing — 2▲", count.TextContent);
+        Assert.Equal("12 evaluated · 2 firing ▲2", count.TextContent);
         // D-128: the tooltip leads with the breakdown in words, then the authored copy.
         Assert.StartsWith("Firing now: 2 bullish, 0 bearish, 0 caution. Every chip-eligible signal is evaluated",
             count.GetAttribute("title"));

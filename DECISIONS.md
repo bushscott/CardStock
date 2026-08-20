@@ -381,6 +381,11 @@ computed on the wire beside the existing counts (never in the component, D-061 d
 zero segments omitted, absent when nothing fires, tooltip leading with the words. Receipt,
 live 630417: `12 evaluated · 4 firing — 2▲ · 1▼ · 1–` with firing rows exactly ▲MACD,
 ▲Trend R², ▼Tier spread, –RSI. Suite: 476 passed, 0 failed, 35 DB-gated skips.
+**Amended same day:** the inline run read badly in situ ("1–" scans as a minus/range), so
+the owner chose **tone chips** from a four-way real-pixel comparison (inline run / glyph
+fingerprint / tone chips / segmented chip): tinted pill per tone, toned glyph + ink count
+(`▲2 ▼1 –1`), zero segments omitted, none when nothing fires. Live receipt: 630417 renders
+the three chips after the counts.
 
 ### D-127 — Terminal rosters sort by header only; pills survive solely in binder density
 Owner UAT, 2026-08-19, after clicking the Card header and getting nothing: *"I think we
