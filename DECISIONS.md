@@ -368,6 +368,58 @@ Read directly 2026-08-10, to be mirrored per D-018–D-021.
 
 ## Decided
 
+### D-130 — The Accounts + watchlists design is settled; the rulings live in the spec
+Owner-approved section by section, 2026-08-20. Full design:
+`docs/superpowers/specs/2026-08-20-accounts-watchlists-design.md`. The rulings, for the record:
+(1) **Watchlist rows are card + tier** — Home's Tier-1 row identity wins (home.md §3.4, "part of
+the row's identity") and the Card-page picker gains a tier control defaulting to PSA 10, recorded
+as a card.md spec extension. Closes card.md OQ-11/C-14 — a Tier-1-vs-Tier-1 conflict of the D-043
+class, owner-resolved. (2) **`user_id` on every user-facing table, literally** — child tables
+included: `watchlist_rows` carries `user_id` with a composite FK `(user_id, watchlist_id) →
+watchlists(user_id, id)`, making a cross-owner row structurally impossible. D-034 applied as
+written; the pattern binds `transactions` and `saved_screens` in their phases. (3) **The auth
+wall**: signed-out visitors see the auth shell, with `/about-data` the single public exception
+until marketing lands; app pages AND their JSON API require a session behind a default-deny
+fallback policy. The prototypes agree — the designed no-account path was always the demo
+(account.md rule 11), never public app pages; the demo button renders deferred and OQ-8 stays
+open for the marketing phase. (4) **Verify before first sign-in**; the verification link lands on
+sign-in with the flash pattern (resolves account.md OQ-9). (5) **Email via a transactional API
+provider** behind a typed `IEmailSender` plus a file/log sink; provider + sending domain confirmed
+at build (domain arrives with D-129). (6) **Standard ASP.NET Core auth à la carte, not full
+Identity** — cookie auth + `ITicketStore` + `PasswordHasher` per ADR-0002; the why-not-Identity
+rationale the ADR's alternatives omitted is recorded in the spec §2. (7) **D-043's deletion half
+needs no new ruling** — D-069 already settled it (immediate + permanent while backups stay
+deferred); legal.md's "30 days" copy corrects during the phase. Schema delta: three `users`
+columns (`display_name`, `timezone`, `password_changed_at`), three new tables (`email_tokens`,
+`watchlists`, `watchlist_rows`), one new grant (`REFERENCES ON public.cards TO cardstock_owner`).
+
+### D-129 — The build order gains "Public exposure" ahead of Accounts + watchlists
+Owner, 2026-08-20, during the accounts brainstorm, generalizing from the HSTS example — a security
+setting that structurally could not land pre-exposure — to the worry that deferred security stays
+deferred: *"split this into two phases. First phase, securely bringing this product to the
+public."* **Amends D-103's order: Public exposure inserts ahead of Accounts + watchlists** (now
+second; everything after unchanged — the named-phase list absorbs the insert without renumbering).
+
+Phase scope, owner's words first: firewall rules; VLANs — a DMZ isolating the Pi from the home
+network, since a publicly reachable device is otherwise *on* that network; the static IP; and
+evaluating what Cloudflare adds. Plus the items the accounts brainstorm surfaced that need only a
+domain, not exposure: browser-trusted cert via DNS-01 (public CAs won't issue for private IPs; no
+inbound ports needed), HTTPS-only Kestrel on 5180 (no plain-HTTP listener — owner's call), HSTS
+(**the trap, recorded**: HSTS + self-signed = a hard browser lockout; never enable before the
+trusted cert), CAA, pre-staged SPF/DKIM/DMARC for the email phase, response security headers (CSP
+with Blazor-WASM allowances, X-Content-Type-Options, Referrer-Policy, X-Frame-Options), the
+systemd hardening pass (D-037's list — no exposure dependency, so it stops waiting), and
+outside-in verification (SSL Labs, securityheaders.com, phone-off-wifi) — chosen precisely
+because scanners catch omissions mechanically instead of trusting anyone's memory.
+
+**Definition of done: a written go-public checklist in this ledger, ticked item by item** —
+D-037 becomes this phase's backbone and largely closes with it. **Interim posture, accepted with
+eyes open:** between this phase shipping and the accounts wall landing, the public app is the
+anonymous read-only product; express-refresh rides its per-IP cap (D-084.1), so this phase must
+include bot rules and/or a tighter interim cap per D-062 — the harm from enumeration falls on
+PriceCharting, and CardStock is the only guardrail. Forwarded-headers middleware lands here if
+the Cloudflare route wins, or per-IP limits go blind behind the proxy.
+
 ### D-128 — The signals count line carries a tone breakdown; signal hues keep the measurement grammar
 Owner UAT, 2026-08-19, asking whether colors mean one thing across the signals panel and
 floating green-buy/red-sell recoloring. Verified: the grammar is uniform (brand.md §4.2 —
