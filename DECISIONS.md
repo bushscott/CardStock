@@ -433,17 +433,17 @@ the current record.
 - [x] Postgres lockdown per D-131 · restart between crawler visits. Receipt: `ss -tlnp` → 5432 loopback-only ✓; gated suite 37/37, 0 skipped, through the `pi-db` forward (2026-08-20); crawler wrote through the whole change (sales count advanced mid-receipts)
 
 **C. Omada topology**
-- [ ] Pre-move sweep: `ss -tnp` on the Pi for established LAN-bound flows (record findings)
-- [ ] DHCP reservations: Pi `192.168.30.56` (DMZ), dev machine (LAN)
-- [ ] DMZ network VLAN 30 (`192.168.30.0/24`) created
-- [ ] Gateway ACLs 1–6 in spec §5's order (verify stateful states + VPN-as-source on this controller version; fallback recorded in spec)
-- [ ] Pi's switch port → untagged VLAN 30; Pi up at `.30.56` · update every old-IP reference: `~/.ssh/config` (+`pi-db`), `known_hosts`, deploy scripts, hosts entry, assistant memory
-- [ ] Survival check: ssh · deploy · test-suite tunnel · LAN browse 443 · Pi outbound (crawl journal advancing, NTP, apt)
+- [x] Pre-move sweep: `ss -tnp` on the Pi for established LAN-bound flows ✓ 2026-08-20 — zero Pi→LAN flows; dev machine identified at `192.168.0.200`; discovery: `rpi-connectd` runs (outbound remote-access relay) — owner decide-point after WireGuard works: keep or `rpi-connect off`
+- [x] DHCP reservations ✓ Mac `0E-42-3B-03-CE-59`→`192.168.0.200` (Default); Pi `2C-CF-67-E4-11-FE`→`192.168.30.56` (DMZ, pre-staged so the flip landed directly on the reservation)
+- [x] DMZ network VLAN 30 (`192.168.30.0/24`) created ✓ (controller is v6.2.14.11 — all menu paths re-derived; see SDD ledger)
+- [x] Gateway ACLs 1–6 ✓ created in order, screenshot-verified; rule 1 Manual states Established+Related (verified mid-form); spec §5's VPN-as-source uncertainty RESOLVED — v6 accepts a raw-range IP Group (`WG-VPN-Range` 10.9.0.0/24) as source, no VPN-network selector needed
+- [x] Pi's switch port (8) → native/untagged VLAN 30 ✓ via the Edit-LAN port-selection step (the port-edit panel's Allow-All auto-tagging fought manual config; the wizard route was clean — closes the owner's open-item note); stale lease resolved by owner's switch restart (chosen over power-pull to protect disk writes); references updated: `~/.ssh/config` `pi-db`, `known_hosts` (accept-new), `ops/deploy.sh` committed; hosts entry deliberately declined by owner (public path preferred; raw-IP access 400s by design)
+- [x] Survival check ✓ ssh (= rules 1+3 live proof) · app over 443 with live counts · tunnel re-established + gated suite 37/37 at the new address · Pi outbound: pricecharting 200, apt 0, NTP synced · the wall from inside: Pi→LAN ping and TCP both denied · crawler wrote through the entire move (sales 4,651,785 → 4,653,324) · rule 5 (LAN browse) is unverifiable without a hosts entry — future-proofing by design, exercised never in practice (public path via tunnel instead)
 - [ ] WireGuard: interface `10.9.0.1/24` · per-device `/32` peers · No-IP DDNS (uncorrelated name) on the gateway. Receipt: from phone hotspot — VPN up, ssh + `https://cardstock.pro` reach the Pi, nothing else does
 
 **D. Tunnel — the site goes public**
-- [ ] `cloudflared` via Cloudflare arm64 apt repo · remotely-managed tunnel · hostname `cardstock.pro → https://127.0.0.1:443`, `originServerName` set · unit enabled
-- [ ] `www` → apex 301 Redirect Rule · Always Use HTTPS · SSL/TLS **Full (strict)**
+- [x] `cloudflared` via Cloudflare arm64 apt repo (2026.8.2) · remotely-managed tunnel `cardstock-pi` · hostname `cardstock.pro → https://127.0.0.1:443`, Origin Server Name set, No-TLS-Verify off · unit enabled ✓ 2026-08-20, three QUIC connections registered (ord07/15/16)
+- [x] `www` → apex 301 Redirect Rule (wildcard `https://www.*` → `https://${1}`, template) · Always Use HTTPS · SSL/TLS **Full (strict)** (caught at plain "Full" first — strict selected via Configure) ✓ probes: `http://` → 301 https · `https://www` → 301 apex · apex 200, TLS verify 0, ~145 ms · DNS answers only Cloudflare edge IPs
 - [ ] Receipt: site loads on a phone off wifi
 
 **E. Edge posture + email DNS**
