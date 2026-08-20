@@ -17,3 +17,4 @@ screen's spec under `../screens/`.
 |---|---|---|
 | [0001](0001-schema-separation-and-migration-ownership.md) | CardStock's tables live in their own schema, and each repo migrates its own | 2026-08-11 |
 | [0002](0002-identity-is-a-cookie-backed-by-a-session-row.md) | Identity is email and password, carried in an HttpOnly cookie backed by a session row | 2026-08-11 |
+| [0003](0003-public-exposure-through-a-cloudflare-tunnel.md) | The app goes public through a Cloudflare Tunnel, with the Pi in a DMZ | 2026-08-20 |

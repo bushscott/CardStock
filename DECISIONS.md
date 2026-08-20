@@ -413,7 +413,9 @@ with "cardstock". (6) **Email provider settled early at the owner's offer: Resen
 D-130 #5's open item; this phase publishes the verified sending domain (DKIM live, apex SPF
 `-all`, DMARC `p=reject`, null MX) so the accounts phase writes only code. (7) **Domain:**
 `cardstock.pro`, owned, at Namecheap on parking defaults (verified by dig) — registration stays
-at Namecheap; only nameservers move to Cloudflare. Schema changes: **none.**
+at Namecheap; only nameservers move to Cloudflare. Schema changes: **none.** The architecture is
+recorded as **ADR-0003** (2026-08-20), frozen per the ADR convention; this entry and the spec stay
+the current record.
 
 **The go-public checklist** — ticked as executed; ordering is load-bearing (HSTS strictly last):
 
@@ -468,6 +470,7 @@ at Namecheap; only nameservers move to Cloudflare. Schema changes: **none.**
 - [ ] D-037 marked largely closed; what remains, named (the `sales.title` XSS test rides its screen's phase)
 - [ ] D-129 amendments recorded as executed (443; static-IP unnecessary-unless-direct-443)
 - [ ] Recorded risk, not a re-raise: the public box holds `sales`/`populations` with no backup, by owner ruling D-069 — on the record the day the door opens
+- [ ] `README.md` (root, derived) gains the live `https://cardstock.pro` URL — the front door names the door; every claim in it stays sourced from the spec/ledger per its derived status
 
 ### D-130 — The Accounts + watchlists design is settled; the rulings live in the spec
 Owner-approved section by section, 2026-08-20. Full design:
