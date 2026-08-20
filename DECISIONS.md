@@ -427,10 +427,10 @@ the current record.
 **B. Pi prep** — all LAN-side; site not public yet
 - [x] `certbot` + `python3-certbot-dns-cloudflare` via apt · issue cert for apex+www (DNS-01). Receipt: `/etc/letsencrypt/live/cardstock.pro/` ✓ 2026-08-20, certbot 2.1.0; issuance needed `--dns-cloudflare-propagation-seconds 60` (10s raced the fresh zone; recorded in the renewal conf)
 - [x] Deploy-hook → `/etc/cardstock/tls/` + web-unit restart · `certbot renew --dry-run` passes ✓ hook at `renewal-hooks/deploy/cardstock.sh`, PEMs root:cardstock 640, "all simulated renewals succeeded", timer next-fires 2026-08-21
-- [ ] App deploy: HTTPS-only Kestrel on 443 (PEM config) · forwarded headers (CF-Connecting-IP, loopback-only proxy) · security headers + CSP · `AllowedHosts` · per-IP cap reviewed/tightened (value set at plan time per D-062's principle)
-- [ ] systemd hardening (D-037 list + `CAP_NET_BIND_SERVICE`). Receipt: `systemd-analyze security` before/after
-- [ ] LAN verify via hosts entry: `https://cardstock.pro` direct — cert-valid, headers present (`curl -sI`)
-- [ ] Postgres lockdown per D-131 · restart between crawler visits. Receipt: `ss -tlnp` → 5432 loopback-only; test suite passes through the `pi-db` forward
+- [x] App deploy: HTTPS-only Kestrel on 443 (PEM config) · forwarded headers (CF-Connecting-IP, loopback-only proxy) · security headers + CSP · `AllowedHosts` · per-IP cap reviewed/tightened ✓ 2026-08-20 deployed; interim cap 120/hr in Production config; `ss` shows 443 only, 5180 gone
+- [x] systemd hardening (D-037 list + `CAP_NET_BIND_SERVICE`). Receipt: `systemd-analyze security` ✓ 8.4 on that scale's brutal rubric (stock services ≈9.6; the D-037 directives all active; deeper syscall-filter sandboxing recorded as future polish — no before-score captured, the old unit differed only by the capability)
+- [x] LAN verify via hosts entry: `https://cardstock.pro` direct — cert-valid, headers present (`curl -sI`) ✓ HTTP/2 200, full header set incl. two computed CSP hashes (theme-init + publish import map), no STS (gated); owner's browser look rides the hosts entry whenever added
+- [x] Postgres lockdown per D-131 · restart between crawler visits. Receipt: `ss -tlnp` → 5432 loopback-only ✓; gated suite 37/37, 0 skipped, through the `pi-db` forward (2026-08-20); crawler wrote through the whole change (sales count advanced mid-receipts)
 
 **C. Omada topology**
 - [ ] Pre-move sweep: `ss -tnp` on the Pi for established LAN-bound flows (record findings)

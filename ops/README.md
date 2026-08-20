@@ -214,3 +214,19 @@ add "cardstock.pro" to /etc/hosts on the dev machine pointing at the Pi
 (192.168.0.56 until the Pi's DMZ move, 192.168.30.56 after — flip it
 alongside deploy.sh's IPs) — the cert genuinely matches, so no warnings.
 HSTS ramps per D-132 §G only.
+
+## Test databases through the tunnel (D-131)
+
+Since the Public exposure phase, Postgres listens on loopback only — `192.168.0.56:5432` no
+longer answers, deliberately (D-131/D-132; the LAN pg_hba grant is gone too). Mac-side DB-gated
+test runs go through the SSH forward instead:
+
+```
+ssh -fN pi-db     # ~/.ssh/config: Host pi-db → LocalForward 5433 127.0.0.1:5432
+CARDSTOCK_TEST_DB="Host=127.0.0.1;Port=5433;Username=cardstock_tester;Password=<ops/credentials.local>;Database=pokemon_test" \
+  dotnet test tests/CardStock.Integration.Tests
+```
+
+Postgres sees a loopback connection and auths it with the existing scram rules; `pokemon_test`
+stays the never-written template. Ad-hoc queries are unchanged: ssh in, `sudo -u postgres psql`.
+The sibling repo's `POKEMON_TEST_DB` takes the same `Host=127.0.0.1;Port=5433` form.
