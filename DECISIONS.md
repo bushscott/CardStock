@@ -420,13 +420,13 @@ the current record.
 **The go-public checklist** — ticked as executed; ordering is load-bearing (HSTS strictly last):
 
 **A. Cloudflare zone** — propagation runs while B–C proceed
-- [ ] Free account · add zone `cardstock.pro` · Namecheap nameservers → Cloudflare pair · delete parking records. Receipt: `dig NS cardstock.pro` shows Cloudflare
-- [ ] Scoped API token (Zone→DNS→Edit, this zone only) → root-only file on the Pi
-- [ ] Standing rule on record: no record in this zone ever points at the home IP
+- [x] Free account · add zone `cardstock.pro` · Namecheap nameservers → Cloudflare pair · delete parking records. Receipt: `dig NS cardstock.pro` shows Cloudflare ✓ 2026-08-20 — `ian`/`rachel.ns.cloudflare.com` via 1.1.1.1; zone API status `active`; imported parking records deleted pre-activation
+- [x] Scoped API token (Zone→DNS→Edit, this zone only) → root-only file on the Pi ✓ `/root/.secrets/certbot/cloudflare.ini`, root:root 600
+- [x] Standing rule on record: no record in this zone ever points at the home IP ✓ zone born empty; rule stated in spec §3 and ADR-0003
 
 **B. Pi prep** — all LAN-side; site not public yet
-- [ ] `certbot` + `python3-certbot-dns-cloudflare` via apt · issue cert for apex+www (DNS-01). Receipt: `/etc/letsencrypt/live/cardstock.pro/`
-- [ ] Deploy-hook → `/etc/cardstock/tls/` + web-unit restart · `certbot renew --dry-run` passes
+- [x] `certbot` + `python3-certbot-dns-cloudflare` via apt · issue cert for apex+www (DNS-01). Receipt: `/etc/letsencrypt/live/cardstock.pro/` ✓ 2026-08-20, certbot 2.1.0; issuance needed `--dns-cloudflare-propagation-seconds 60` (10s raced the fresh zone; recorded in the renewal conf)
+- [x] Deploy-hook → `/etc/cardstock/tls/` + web-unit restart · `certbot renew --dry-run` passes ✓ hook at `renewal-hooks/deploy/cardstock.sh`, PEMs root:cardstock 640, "all simulated renewals succeeded", timer next-fires 2026-08-21
 - [ ] App deploy: HTTPS-only Kestrel on 443 (PEM config) · forwarded headers (CF-Connecting-IP, loopback-only proxy) · security headers + CSP · `AllowedHosts` · per-IP cap reviewed/tightened (value set at plan time per D-062's principle)
 - [ ] systemd hardening (D-037 list + `CAP_NET_BIND_SERVICE`). Receipt: `systemd-analyze security` before/after
 - [ ] LAN verify via hosts entry: `https://cardstock.pro` direct — cert-valid, headers present (`curl -sI`)
