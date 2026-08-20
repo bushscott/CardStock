@@ -44,6 +44,10 @@ public sealed class TestApp : WebApplicationFactory<Program>
     /// exercise the CSP hash computation.</summary>
     public string? WebRoot { get; set; }
 
+    /// <summary>Overrides the host environment (the factory defaults to Development,
+    /// where static web assets shadow a physical WebRoot override).</summary>
+    public string? EnvironmentName { get; set; }
+
     /// <summary>Overrides AllowedHosts — dev/tests default to "*".</summary>
     public string? AllowedHosts { get; set; }
 
@@ -83,6 +87,11 @@ public sealed class TestApp : WebApplicationFactory<Program>
         if (WebRoot is not null)
         {
             builder.UseSetting(WebHostDefaults.WebRootKey, WebRoot);
+        }
+
+        if (EnvironmentName is not null)
+        {
+            builder.UseEnvironment(EnvironmentName);
         }
 
         if (AllowedHosts is not null)

@@ -18,7 +18,17 @@ public class HostFilteringTests
         listed.Headers.Host = "cardstock.pro";
         var served = await client.SendAsync(listed);
 
+        using var local = new HttpRequestMessage(HttpMethod.Get, "/healthz");
+        local.Headers.Host = "localhost";
+        var localServed = await client.SendAsync(local);
+
+        using var loopback = new HttpRequestMessage(HttpMethod.Get, "/healthz");
+        loopback.Headers.Host = "127.0.0.1:443";
+        var loopbackServed = await client.SendAsync(loopback);
+
         Assert.Equal(HttpStatusCode.BadRequest, refused.StatusCode);
         Assert.Equal(HttpStatusCode.OK, served.StatusCode);
+        Assert.Equal(HttpStatusCode.OK, localServed.StatusCode);
+        Assert.Equal(HttpStatusCode.OK, loopbackServed.StatusCode);
     }
 }

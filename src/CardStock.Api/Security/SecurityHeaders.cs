@@ -46,11 +46,17 @@ public static class SecurityHeaders
     private static string BuildCsp(IWebHostEnvironment env)
     {
         // The API project ships no wwwroot of its own; publish overlays the WASM
-        // client's. Absent file (dev, tests) → no hash tokens, gracefully.
-        var indexPath = Path.Combine(env.WebRootPath ?? "", "index.html");
-        IReadOnlyList<string> hashes = File.Exists(indexPath)
-            ? CspScriptHashes.FromHtml(File.ReadAllText(indexPath))
-            : [];
+        // client's. WebRootFileProvider resolves index.html the same way in both
+        // hosting modes -- dev's static web assets composite provider and
+        // publish's overlaid physical wwwroot -- so this reads correctly under
+        // both. Absent file → no hash tokens, gracefully.
+        var index = env.WebRootFileProvider.GetFileInfo("index.html");
+        IReadOnlyList<string> hashes = [];
+        if (index.Exists)
+        {
+            using var reader = new StreamReader(index.CreateReadStream());
+            hashes = CspScriptHashes.FromHtml(reader.ReadToEnd());
+        }
 
         var scriptSrc = string.Join(' ',
             new[] { "'self'", "'wasm-unsafe-eval'" }.Concat(hashes));

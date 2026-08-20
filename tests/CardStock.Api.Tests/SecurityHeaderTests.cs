@@ -42,7 +42,7 @@ public class SecurityHeaderTests
         try
         {
             File.WriteAllText(Path.Combine(webRoot, "index.html"), "<script>var x = 1;</script>");
-            using var app = new TestApp { WebRoot = webRoot };
+            using var app = new TestApp { WebRoot = webRoot, EnvironmentName = "Production" };
             using var client = app.CreateClient();
 
             var response = await client.GetAsync("/healthz");
