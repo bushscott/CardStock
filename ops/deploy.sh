@@ -11,5 +11,5 @@ rsync -az --delete --exclude='appsettings.Production.json*' \
   --rsync-path='sudo rsync' publish/api/ scott@192.168.0.56:/opt/cardstock/api/
 ssh scott@192.168.0.56 'sudo chown -R cardstock:cardstock /opt/cardstock/api && sudo systemctl restart cardstock-api'
 sleep 3
-curl -sf http://192.168.0.56:5180/healthz/data
+curl -sf --resolve cardstock.pro:443:192.168.0.56 https://cardstock.pro/healthz/data
 echo

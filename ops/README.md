@@ -200,3 +200,15 @@ tightens those modes, the image endpoint starts returning 404s (the disk is
 the fact); the fix then is `setfacl -R -m u:cardstock:rX
 /var/lib/pokemon/images` plus a default ACL for files the crawler writes
 afterwards.
+
+## TLS and port 443 (D-132)
+
+Kestrel serves HTTPS-only on 443; endpoints and cert paths live in the Pi-only
+appsettings.Production.json (never deployed — see the rsync exclude). Certs:
+Let's Encrypt via certbot DNS-01 against Cloudflare (token in
+/root/.secrets/certbot/cloudflare.ini, 600). On renew, certbot runs
+/etc/letsencrypt/renewal-hooks/deploy/cardstock.sh (source:
+ops/certbot-deploy-hook.sh) which copies PEMs to /etc/cardstock/tls
+(root:cardstock 640) and restarts the unit. LAN access without Cloudflare:
+add "192.168.30.56 cardstock.pro" to /etc/hosts on the dev machine — the
+cert genuinely matches, so no warnings. HSTS ramps per D-132 §G only.
