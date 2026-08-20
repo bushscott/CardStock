@@ -661,6 +661,22 @@ p75 33 / max 96; Pikachu 21×20 vs Charizard 44×39; 609 of 1,025 would fit the 
 2× — so small species read tiny at 1× and the Gen 9 subset blurs. Sprite-size normalization
 should be designed from this measurement, not by eye.
 
+### D-111 — The Catalog phase closes on floor-faithful receipts
+Built per D-110's spec, 2026-08-17/18, f3dab23..18b46f4. Receipts predicted from SQL, then
+read live, all matched: 789/1,025 walls; era shelves WOTC 16 · EX 17 · DP 16 · BW 12 ·
+XY 15 · SM 16 · SWSH 17 · SV 18 · ME 7; no-era 33; pending 622; set 14 (441=441, SWSH7);
+umbreon 223/80/6 chips; icons 200×4; cold/warm species 3.64s/0.42s. Two build rulings amend
+the design: **R23** — Pop Δ 60d counts only observations on/after the D-033 floor (first
+armings ~2026-10-31; spec §2's "~late Sep" estimate embedded the omission; screen banners
+record it) — and **R9** — About-data ships the D-078-corrected restatement sentence. Pop
+column at close: all `none` — no qualifying post-floor observations exist yet, exactly as
+the floor demands. **Ratified by the owner 2026-08-19**, R23 with a stated tolerance worth
+keeping: *"Anything that can be filled in in the next two or three months with granular
+data, I can wait that long. It's the plus three month things that I don't wanna wait"* —
+the boundary D-126's displacement rule works along. R9 ratified after reading the shipped
+page. The owner-UAT wave that followed the deploy is D-112–D-128. Entry filed 2026-08-19;
+numbering sits out of date order because the draft was held for this ratification.
+
 ### D-110 — The Catalog phase is designed; D-102's vocabulary goes corpus-wide; the ninth era exists
 Approved section-by-section 2026-08-15, the day after D-109 closed. Full contract:
 `docs/superpowers/specs/2026-08-15-catalog-phase-design.md`. Shape: four WASM routes — `/browse`
