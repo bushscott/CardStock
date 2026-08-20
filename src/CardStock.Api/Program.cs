@@ -9,6 +9,7 @@ using CardStock.Infrastructure.Cards;
 using CardStock.Infrastructure.Catalog;
 using CardStock.Infrastructure.Persistence;
 using CardStock.Infrastructure.Prices;
+using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.AspNetCore.RateLimiting;
 using Microsoft.EntityFrameworkCore;
 
@@ -49,8 +50,22 @@ builder.Services.AddHttpClient("worker-intake", client =>
 });
 
 // Per-IP is D-084.1's pre-auth adaptation of D-062's per-account intent: there is
-// no login yet to key on. When a Cloudflare tunnel fronts this someday, forwarded-
-// headers middleware must land with it, or every visitor shares one IP.
+// no login yet to key on. The tunnel delivers every public request from cloudflared on
+// loopback, with the real visitor in CF-Connecting-IP (Cloudflare overwrites client-
+// supplied values at its edge). Trust exactly the loopback proxy and nothing else:
+// direct LAN/VPN connections arrive from non-proxy addresses and keep their own socket
+// IP, and a forged header from one is ignored (D-132 §7).
+builder.Services.Configure<ForwardedHeadersOptions>(options =>
+{
+    options.ForwardedHeaders = ForwardedHeaders.XForwardedFor;
+    options.ForwardedForHeaderName = "CF-Connecting-IP";
+    options.ForwardLimit = 1;
+    options.KnownIPNetworks.Clear();
+    options.KnownProxies.Clear();
+    options.KnownProxies.Add(IPAddress.Loopback);
+    options.KnownProxies.Add(IPAddress.IPv6Loopback);
+});
+
 var expressPerHour = builder.Configuration.GetValue("RateLimits:ExpressPerHour", 300);
 builder.Services.AddRateLimiter(options =>
 {
@@ -69,6 +84,7 @@ builder.Services.AddRateLimiter(options =>
 
 var app = builder.Build();
 
+app.UseForwardedHeaders();
 app.UseRateLimiter();
 
 // No Database.Migrate() here, and none in the Worker either. Migrations are a

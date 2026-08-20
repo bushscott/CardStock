@@ -1,8 +1,10 @@
+using System.Net;
 using CardStock.Application.Cards;
 using CardStock.Application.Catalog;
 using CardStock.Application.Prices;
 using CardStock.Domain.Census;
 using CardStock.Domain.Prices;
+using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.Extensions.DependencyInjection;
@@ -27,6 +29,11 @@ public sealed class TestApp : WebApplicationFactory<Program>
 
     /// <summary>Overrides RateLimits:ExpressPerHour for a single test's host.</summary>
     public int? ExpressPerHour { get; set; }
+
+    /// <summary>Fakes the socket-level client address when set — TestServer
+    /// connections otherwise have none. Runs before the app's own pipeline,
+    /// so forwarded-headers trust checks see it as the connection IP.</summary>
+    public IPAddress? RemoteIp { get; set; }
 
     public SetPageSnapshot? SetSnapshot { get; set; }
 
@@ -67,6 +74,11 @@ public sealed class TestApp : WebApplicationFactory<Program>
             if (UtcNow is not null)
             {
                 services.AddSingleton<TimeProvider>(new FixedTimeProvider(UtcNow.Value));
+            }
+
+            if (RemoteIp is not null)
+            {
+                services.AddSingleton<IStartupFilter>(new RemoteIpStartupFilter(RemoteIp));
             }
 
             var handler = WorkerIntakeHandler;
@@ -151,5 +163,19 @@ public sealed class TestApp : WebApplicationFactory<Program>
 
         public Task<IReadOnlyList<SpeciesTile>> GetSpeciesAsync(CancellationToken ct = default) =>
             Task.FromResult(app.BrowseSpecies);
+    }
+
+    private sealed class RemoteIpStartupFilter(IPAddress ip) : IStartupFilter
+    {
+        public Action<IApplicationBuilder> Configure(Action<IApplicationBuilder> next) =>
+            app =>
+            {
+                app.Use((context, nextMiddleware) =>
+                {
+                    context.Connection.RemoteIpAddress = ip;
+                    return nextMiddleware();
+                });
+                next(app);
+            };
     }
 }
