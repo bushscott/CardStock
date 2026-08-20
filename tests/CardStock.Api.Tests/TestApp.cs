@@ -44,6 +44,9 @@ public sealed class TestApp : WebApplicationFactory<Program>
     /// exercise the CSP hash computation.</summary>
     public string? WebRoot { get; set; }
 
+    /// <summary>Overrides AllowedHosts — dev/tests default to "*".</summary>
+    public string? AllowedHosts { get; set; }
+
     public SetPageSnapshot? SetSnapshot { get; set; }
 
     public CharacterPageSnapshot? CharacterSnapshot { get; set; }
@@ -80,6 +83,11 @@ public sealed class TestApp : WebApplicationFactory<Program>
         if (WebRoot is not null)
         {
             builder.UseSetting(WebHostDefaults.WebRootKey, WebRoot);
+        }
+
+        if (AllowedHosts is not null)
+        {
+            builder.UseSetting("AllowedHosts", AllowedHosts);
         }
 
         builder.ConfigureServices(services =>
