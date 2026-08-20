@@ -35,6 +35,15 @@ public sealed class TestApp : WebApplicationFactory<Program>
     /// so forwarded-headers trust checks see it as the connection IP.</summary>
     public IPAddress? RemoteIp { get; set; }
 
+    /// <summary>Overrides Security:HstsMaxAgeSeconds (0 = HSTS off, the default).</summary>
+    public int? HstsMaxAgeSeconds { get; set; }
+
+    public bool HstsIncludeSubdomains { get; set; }
+
+    /// <summary>When set, becomes the host's webroot — drop an index.html here to
+    /// exercise the CSP hash computation.</summary>
+    public string? WebRoot { get; set; }
+
     public SetPageSnapshot? SetSnapshot { get; set; }
 
     public CharacterPageSnapshot? CharacterSnapshot { get; set; }
@@ -60,6 +69,17 @@ public sealed class TestApp : WebApplicationFactory<Program>
         if (ExpressPerHour is not null)
         {
             builder.UseSetting("RateLimits:ExpressPerHour", ExpressPerHour.Value.ToString());
+        }
+
+        if (HstsMaxAgeSeconds is not null)
+        {
+            builder.UseSetting("Security:HstsMaxAgeSeconds", HstsMaxAgeSeconds.Value.ToString());
+            builder.UseSetting("Security:HstsIncludeSubdomains", HstsIncludeSubdomains.ToString());
+        }
+
+        if (WebRoot is not null)
+        {
+            builder.UseSetting(WebHostDefaults.WebRootKey, WebRoot);
         }
 
         builder.ConfigureServices(services =>

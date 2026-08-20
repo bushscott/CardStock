@@ -2,6 +2,7 @@ using System.Net;
 using System.Threading.RateLimiting;
 using CardStock.Api.Cards;
 using CardStock.Api.Catalog;
+using CardStock.Api.Security;
 using CardStock.Application.Cards;
 using CardStock.Application.Catalog;
 using CardStock.Application.Prices;
@@ -82,9 +83,12 @@ builder.Services.AddRateLimiter(options =>
             }));
 });
 
+builder.Services.Configure<SecurityHeaderOptions>(builder.Configuration.GetSection("Security"));
+
 var app = builder.Build();
 
 app.UseForwardedHeaders();
+app.UseSecurityHeaders();
 app.UseRateLimiter();
 
 // No Database.Migrate() here, and none in the Worker either. Migrations are a
