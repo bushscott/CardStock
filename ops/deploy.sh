@@ -8,8 +8,8 @@ set -euo pipefail
 cd "$(dirname "$0")/.."
 
 rsync -az --delete --exclude='appsettings.Production.json*' \
-  --rsync-path='sudo rsync' publish/api/ scott@192.168.0.56:/opt/cardstock/api/
-ssh scott@192.168.0.56 'sudo chown -R cardstock:cardstock /opt/cardstock/api && sudo systemctl restart cardstock-api'
+  --rsync-path='sudo rsync' publish/api/ scott@192.168.30.56:/opt/cardstock/api/
+ssh scott@192.168.30.56 'sudo chown -R cardstock:cardstock /opt/cardstock/api && sudo systemctl restart cardstock-api'
 sleep 3
-curl -sf --resolve cardstock.pro:443:192.168.0.56 https://cardstock.pro/healthz/data
+curl -sf --resolve cardstock.pro:443:192.168.30.56 https://cardstock.pro/healthz/data
 echo
