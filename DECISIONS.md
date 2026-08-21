@@ -476,9 +476,13 @@ precompute-never-throttle stands).
 - [x] Trackers check ✓ 2026-08-20 — the claim (`Cardstock Legal.dc.html:55–56`): no ads, no third-party trackers, analytics "limited to aggregate, anonymous usage counts", local storage that doesn't follow you. Reality, both halves: client-side, the live CSP pins `default-src 'self'; connect-src 'self'` (+ computed script hashes) — the page structurally cannot call a third party; server-side, the web tier's package closure is EF Core + Npgsql + Blazor components only and the deployed unit injects exactly `ASPNETCORE_ENVIRONMENT=Production` (`ops/cardstock-api.service:13`) — the scraper's New Relic OTLP stack (D-037's stated worry) touches nothing here. Today the app over-delivers on the claim: no analytics exist at all, first-party included. One note for the legal-copy pass riding D-130 #7: Cloudflare's bot defenses set short-lived first-party security cookies (e.g. `__cf_bm`) — protection, not tracking, but the cookie sentence should say so when legal.md is corrected
 
 **G. HSTS ramp — strictly last (the recorded trap: HSTS before trusted cert = lockout)**
-- [ ] Preconditions ticked: cert live · tunnel serving · SSL Labs pass
-- [ ] `UseHsts` max-age **86400** · verify
-- [ ] After ≥7 quiet days: **31536000 + includeSubDomains**, no preload · SSL Labs **A+**
+- [x] Preconditions ticked: cert live · tunnel serving · SSL Labs pass ✓ all three held on 2026-08-20
+- [x] Rung 1: max-age **86400** ✓ 2026-08-20, owner-applied via the Raspberry Pi Connect shell (config `Security:HstsMaxAgeSeconds` 0→86400 + unit restart); verified through the public path: `strict-transport-security: max-age=86400`, site 200
+- [ ] Rung 2 — **not before 2026-08-27**, and only if the week was quiet (no TLS/cert complaints, site serving normally). Any session can execute it; the change is one config edit on the Pi (from the dev machine over ssh, or the owner via Pi Connect):
+  `sudo cp /opt/cardstock/api/appsettings.Production.json /opt/cardstock/api/appsettings.Production.json.bak-hsts2`
+  `sudo sed -i 's/"HstsMaxAgeSeconds": 86400/"HstsMaxAgeSeconds": 31536000, "HstsIncludeSubdomains": true/' /opt/cardstock/api/appsettings.Production.json`
+  `sudo systemctl restart cardstock-api`
+  Verify `curl -sI https://cardstock.pro/healthz` shows `max-age=31536000; includeSubDomains` (never `preload` — deliberate, spec §4) · rescan SSL Labs → **A+** · then run §H below. The middleware already emits `includeSubDomains` when that config flag is true — no deploy needed, config only
 
 **H. Closeout**
 - [ ] D-037 marked largely closed; what remains, named (the `sales.title` XSS test rides its screen's phase)
