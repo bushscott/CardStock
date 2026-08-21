@@ -2,6 +2,10 @@
 
 [![CI](https://github.com/bushscott/CardStock/actions/workflows/ci.yml/badge.svg)](https://github.com/bushscott/CardStock/actions/workflows/ci.yml)
 
+**Live at [cardstock.pro](https://cardstock.pro)** — served from a Raspberry Pi through a
+Cloudflare Tunnel, with the exposure hardening recorded step-by-step in `DECISIONS.md` D-132
+and the architecture in [ADR-0003](docs/adr/0003-public-exposure-through-a-cloudflare-tunnel.md).
+
 A market-data terminal for the Pokémon card aftermarket — price history, a screener, charts with
 backtesting, and a binder that treats a collection as a portfolio. It reads the archive built by
 [PokemonInvestBatch](https://github.com/bushscott/PokemonInvestBatch), a scraper that has collected

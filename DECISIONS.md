@@ -484,11 +484,12 @@ precompute-never-throttle stands).
   `sudo systemctl restart cardstock-api`
   Verify `curl -sI https://cardstock.pro/healthz` shows `max-age=31536000; includeSubDomains` (never `preload` — deliberate, spec §4) · rescan SSL Labs → **A+** · then run §H below. The middleware already emits `includeSubDomains` when that config flag is true — no deploy needed, config only
 
-**H. Closeout**
-- [ ] D-037 marked largely closed; what remains, named (the `sales.title` XSS test rides its screen's phase)
-- [ ] D-129 amendments recorded as executed (443; static-IP unnecessary-unless-direct-443)
-- [ ] Recorded risk, not a re-raise: the public box holds `sales`/`populations` with no backup, by owner ruling D-069 — on the record the day the door opens
-- [ ] `README.md` (root, derived) gains the live `https://cardstock.pro` URL — the front door names the door; every claim in it stays sourced from the spec/ledger per its derived status
+**H. Closeout** — executed 2026-08-21 on owner instruction ("finish out H"), with **rung 2 (§G, 2026-08-27) as the phase's single remaining open box** — date-gated, guarded by the cloud routine, the §G commands, and the roadmap memory; closing H does not close it.
+- [x] D-037 marked largely closed ✓ closure banner on the entry itself; remainders named there (XSS test → its screen's phase; per-account cap → accounts build; backups note superseded by D-069)
+- [x] D-129 amendments recorded as executed ✓ 443 live (§B/§D receipts); the static-IP story ended one step further than "unnecessary-unless-direct-443": the WAN is CGNAT, the ISP call was declined for good, and remote management is Raspberry Pi Connect (§C final amendment)
+- [x] Recorded risk, not a re-raise ✓ standing as written: the public box holds `sales`/`populations` with no backup, by owner ruling D-069 — on the record from the day the door opened (2026-08-20)
+- [x] `README.md` gains the live URL ✓ front-door banner naming cardstock.pro, the tunnel posture, D-132 and ADR-0003 — every claim sourced per its derived status
+- [x] Ops journal preserved: the SDD workspace's `progress.md` (every ruling, receipt, and mid-execution amendment of this phase) is committed as `docs/superpowers/handoffs/2026-08-20-public-exposure-ops-journal.md`; ledger lines citing "the SDD ledger" resolve there. Workspace deleted after the copy
 
 ### D-130 — The Accounts + watchlists design is settled; the rulings live in the spec
 Owner-approved section by section, 2026-08-20. Full design:
@@ -1997,6 +1998,13 @@ Owner, 2026-08-10. Resolves the hosting half of D-016.
 ---
 
 ### D-037 — Security posture for a public, single-box deployment
+> **✅ Largely closed 2026-08-21 by D-132** (the site is live at `https://cardstock.pro` behind the
+> tunnel/DMZ posture this checklist demanded; ADR-0003 records the architecture). What remains,
+> named: the `sales.title` XSS render test rides its screen's phase (D-029 discipline already
+> bans `MarkupString` on that path); the abuse limit moves per-account with the accounts build
+> (D-130, edge slot + leaked-credential notes in the exposure journal); the backups "ordering
+> note" below was superseded by the owner's D-069 ruling. The New Relic verification landed:
+> the web tier sends nothing third-party (D-132 §F trackers check).
 Follows from D-011 (public, open signup) and D-036 (same box). Not yet designed — this is the checklist the design must satisfy.
 
 **Network exposure — two viable routes, owner has the hardware for either.** Updated 2026-08-10: the home network runs a **static IP on business-grade hardware capable of VLANs and firewall rules.** That removes the assumption behind my original "tunnel is non-negotiable" framing.
