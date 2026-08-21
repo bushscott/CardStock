@@ -417,6 +417,20 @@ at Namecheap; only nameservers move to Cloudflare. Schema changes: **none.** The
 recorded as **ADR-0003** (2026-08-20), frozen per the ADR convention; this entry and the spec stay
 the current record.
 
+**Amendments, 2026-08-20 (execution day):** (a) Ruling 2 reversed by owner — the static IP IS
+being ordered after all ("I have no choice if I wanna self host"): the WAN turned out to be
+**CGNAT**, so a static IP is a *hard requirement* for any inbound service (WireGuard included),
+not a convenience — DDNS drops out of §C entirely (it would have published the carrier's shared,
+unreachable address); the WG endpoint becomes the static IP, published nowhere. The
+tunnel-carried site itself never needed it — outbound-only is precisely why it worked all along.
+(b) The edge rate-limit slot is configured for the *finished* site, superseding an earlier
+revisit-at-accounts note: one rule `sensitive-endpoints-guard` — URI wildcard
+`/api/v1/cards/*/refresh` OR `/api/v1/auth/*`, 10 req/10s per IP, block 10s. **Binding on the
+D-130 build: auth endpoints mount under `/api/v1/auth/*`**, born covered. (c) Banked for a future
+phase: `/healthz/data` runs a real `count(*)` (incl. 4.6M `sales`) per public hit — a short-TTL
+app-side cache is the noted fix; the edge slot stays on refresh+auth (D-039's
+precompute-never-throttle stands).
+
 **The go-public checklist** — ticked as executed; ordering is load-bearing (HSTS strictly last):
 
 **A. Cloudflare zone** — propagation runs while B–C proceed
@@ -439,27 +453,27 @@ the current record.
 - [x] Gateway ACLs 1–6 ✓ created in order, screenshot-verified; rule 1 Manual states Established+Related (verified mid-form); spec §5's VPN-as-source uncertainty RESOLVED — v6 accepts a raw-range IP Group (`WG-VPN-Range` 10.9.0.0/24) as source, no VPN-network selector needed
 - [x] Pi's switch port (8) → native/untagged VLAN 30 ✓ via the Edit-LAN port-selection step (the port-edit panel's Allow-All auto-tagging fought manual config; the wizard route was clean — closes the owner's open-item note); stale lease resolved by owner's switch restart (chosen over power-pull to protect disk writes); references updated: `~/.ssh/config` `pi-db`, `known_hosts` (accept-new), `ops/deploy.sh` committed; hosts entry deliberately declined by owner (public path preferred; raw-IP access 400s by design)
 - [x] Survival check ✓ ssh (= rules 1+3 live proof) · app over 443 with live counts · tunnel re-established + gated suite 37/37 at the new address · Pi outbound: pricecharting 200, apt 0, NTP synced · the wall from inside: Pi→LAN ping and TCP both denied · crawler wrote through the entire move (sales 4,651,785 → 4,653,324) · rule 5 (LAN browse) is unverifiable without a hosts entry — future-proofing by design, exercised never in practice (public path via tunnel instead)
-- [ ] WireGuard: interface `10.9.0.1/24` · per-device `/32` peers · No-IP DDNS (uncorrelated name) on the gateway. Receipt: from phone hotspot — VPN up, ssh + `https://cardstock.pro` reach the Pi, nothing else does
+- [ ] WireGuard: interface `10.9.0.1/24` · per-device `/32` peers · endpoint = the ISP **static IP** when it activates (amendment (a): CGNAT makes inbound impossible until then, and the DDNS clause is void). Receipt when live: from phone hotspot — VPN up, ssh + `https://cardstock.pro` reach the Pi, nothing else does; the §F port sweep and `--resolve` probe then run for real against the new address
 
 **D. Tunnel — the site goes public**
 - [x] `cloudflared` via Cloudflare arm64 apt repo (2026.8.2) · remotely-managed tunnel `cardstock-pi` · hostname `cardstock.pro → https://127.0.0.1:443`, Origin Server Name set, No-TLS-Verify off · unit enabled ✓ 2026-08-20, three QUIC connections registered (ord07/15/16)
 - [x] `www` → apex 301 Redirect Rule (wildcard `https://www.*` → `https://${1}`, template) · Always Use HTTPS · SSL/TLS **Full (strict)** (caught at plain "Full" first — strict selected via Configure) ✓ probes: `http://` → 301 https · `https://www` → 301 apex · apex 200, TLS verify 0, ~145 ms · DNS answers only Cloudflare edge IPs
-- [ ] Receipt: site loads on a phone off wifi
+- [ ] Receipt: site loads on a phone off wifi — rides §F's phone-journey receipt
 
 **E. Edge posture + email DNS**
-- [ ] Free Managed Ruleset on · Bot Fight Mode on (watched toggle)
-- [ ] The one free rate-limiting rule on the express-refresh path (IP-keyed)
-- [ ] CAA `0 issue "letsencrypt.org"` · paired same-day check: edge cert still valid (Cloudflare auto-CAA)
-- [ ] Resend: account · add domain · publish issued DKIM/SPF records · apex SPF `v=spf1 -all` stays · DMARC `p=reject` · null MX · test send to gmail passes DKIM+DMARC (receipt: message headers)
+- [x] Free Managed Ruleset on · Bot Fight Mode on (watched toggle) ✓ 2026-08-20 — the new dashboard shows "Cloudflare managed ruleset: **Always active**" (no toggle exists; free protections deploy by platform default, which satisfies the box); Bot Fight Mode switched on by owner in Security → Settings → Bot traffic (chat receipt; it stays the *watched* toggle — if it ever challenges someone real it flips off alone, touching nothing else)
+- [x] The one free rate-limiting rule on the express-refresh path (IP-keyed) ✓ deployed 2026-08-20 as `sensitive-endpoints-guard` per amendment (b) — `/api/v1/cards/*/refresh` OR `/api/v1/auth/*`, 10 req/10s per IP, block 10s; owner confirmed listed 1/1, and the §F burst proved the trip behaviorally
+- [x] CAA `0 issue "letsencrypt.org"` · paired same-day check: edge cert still valid (Cloudflare auto-CAA) ✓ 2026-08-20 — record published by owner; zone audited through the scoped API token: CAA present, apex `v=spf1 -all` + DMARC `p=reject` + null MX intact, every email record grey-cloud. Same-day edge check: SSL Labs' A pass (18:29) plus a live TLS 1.2 handshake serving HTTP/2 200 — the edge cert stayed valid with CAA in place
+- [ ] Resend: account · add domain · publish issued DKIM/SPF records · apex SPF `v=spf1 -all` stays · DMARC `p=reject` · null MX · test send to gmail passes DKIM+DMARC (receipt: message headers) — **everything but the send ✓ 2026-08-20**: Resend's Cloudflare integration published the records (DKIM at `resend._domainkey`; its SPF/MX confined to the `send.` subdomain it uses for envelopes), the zone audit confirmed the apex locks untouched, and Resend's Domains page shows **Verified**. The send waits on a sending-only API key from the owner
 
 **F. Outside-in verification** — from networks that aren't ours
-- [ ] SSL Labs: **A** (pre-HSTS)
-- [ ] securityheaders.com: **A**
-- [ ] External port sweep of home IP: silent (WireGuard unresponsive by design)
-- [ ] `curl --resolve cardstock.pro:443:<home-ip>` from outside: unreachable — origin exists only behind the tunnel
-- [ ] Scripted refresh-endpoint burst from outside: cap trips at the configured threshold; normal browsing untouched
-- [ ] Full journey on the phone: browse, chart, ledger, refresh
-- [ ] Trackers check: read the legal prototype's actual claim; confirm no third-party client calls (CSP enforces) and none server-side (D-037's New Relic note)
+- [x] SSL Labs: **A** (pre-HSTS) ✓ 2026-08-20 — first scan graded **B**: the edge accepted TLS 1.0/1.1, a Cloudflare compatibility default (API `protocols` list was the receipt). Owner set SSL/TLS → Edge Certificates → Minimum TLS Version → **1.2**; rescan (`testTime` 18:29): **A on all four edge endpoints** (2×IPv4 + 2×IPv6), `hasWarnings` false. Independently re-verified the same evening: cached A×4 stands; direct handshakes — TLS 1.0 and 1.1 refused, 1.2 serves HTTP/2 200, 1.3 negotiates (openssl, AES-256-GCM)
+- [ ] securityheaders.com: **A** — pending an in-browser run by the owner: the site 403s every non-browser client tried (curl, bare and with a browser UA). The raw material is live and complete (CSP, XCTO, XFO + frame-ancestors, Referrer-Policy, Permissions-Policy; STS deliberately absent until §G)
+- [x] External port sweep of home IP: silent (WireGuard unresponsive by design) ✓ satisfied structurally, and stronger than a scan: the WAN is CGNAT — no routable home IP exists, and zero WAN forwards are configured; a sweep would probe the carrier's shared address, not ours. Owed for real the day the static IP activates (that address will exist precisely to answer inbound)
+- [x] `curl --resolve cardstock.pro:443:<home-ip>` from outside: unreachable — origin exists only behind the tunnel ✓ the same structural receipt: under CGNAT there is no `<home-ip>` to substitute; the only inbound path to the origin is the tunnel the Pi itself dials out (three QUIC connections, §D). Re-check alongside the port sweep once the static IP lands
+- [x] Scripted refresh-endpoint burst from outside: cap trips at the configured threshold; normal browsing untouched ✓ 2026-08-20 through the public URL: exactly **10×404 then 5×429** (`sensitive-endpoints-guard` at 10 req/10s; a nonexistent card id, so the burst cost zero upstream fetches); browsing stayed normal during the trip
+- [ ] Full journey on the phone: browse, chart, ledger, refresh — owner's receipt; also closes §D's last box
+- [x] Trackers check ✓ 2026-08-20 — the claim (`Cardstock Legal.dc.html:55–56`): no ads, no third-party trackers, analytics "limited to aggregate, anonymous usage counts", local storage that doesn't follow you. Reality, both halves: client-side, the live CSP pins `default-src 'self'; connect-src 'self'` (+ computed script hashes) — the page structurally cannot call a third party; server-side, the web tier's package closure is EF Core + Npgsql + Blazor components only and the deployed unit injects exactly `ASPNETCORE_ENVIRONMENT=Production` (`ops/cardstock-api.service:13`) — the scraper's New Relic OTLP stack (D-037's stated worry) touches nothing here. Today the app over-delivers on the claim: no analytics exist at all, first-party included. One note for the legal-copy pass riding D-130 #7: Cloudflare's bot defenses set short-lived first-party security cookies (e.g. `__cf_bm`) — protection, not tracking, but the cookie sentence should say so when legal.md is corrected
 
 **G. HSTS ramp — strictly last (the recorded trap: HSTS before trusted cert = lockout)**
 - [ ] Preconditions ticked: cert live · tunnel serving · SSL Labs pass
@@ -496,6 +510,12 @@ needs no new ruling** — D-069 already settled it (immediate + permanent while 
 deferred); legal.md's "30 days" copy corrects during the phase. Schema delta: three `users`
 columns (`display_name`, `timezone`, `password_changed_at`), three new tables (`email_tokens`,
 `watchlists`, `watchlist_rows`), one new grant (`REFERENCES ON public.cards TO cardstock_owner`).
+
+**Carried in from D-132 execution (2026-08-20):** auth endpoints MUST mount under
+`/api/v1/auth/*` — the edge rate rule `sensitive-endpoints-guard` already covers that path
+(10 req/10s per IP), so they are born rate-limited (D-132 amendment (b)). Evaluate at build:
+the zone offers a "Rate limit authentication requests" template with Leaked Credential Check,
+found on the Security Settings page during D-132 execution.
 
 ### D-129 — The build order gains "Public exposure" ahead of Accounts + watchlists
 Owner, 2026-08-20, during the accounts brainstorm, generalizing from the HSTS example — a security
