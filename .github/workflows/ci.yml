@@ -35,15 +35,15 @@ jobs:
       CARDSTOCK_TEST_DB: "Host=localhost;Port=5432;Database=postgres;Username=postgres;Password=postgres"
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
 
       - name: Set up .NET
-        uses: actions/setup-dotnet@v4
+        uses: actions/setup-dotnet@67a3573c6ae9c78eb3f44ab331e3e6ccd0934c5b # v4
         with:
           dotnet-version: '10.0.x'
 
       - name: Cache NuGet packages
-        uses: actions/cache@v4
+        uses: actions/cache@5a3ec84eff668545956fd18022155c47e93e2684 # v4
         with:
           path: ~/.nuget/packages
           key: ${{ runner.os }}-nuget-${{ hashFiles('**/*.csproj') }}
